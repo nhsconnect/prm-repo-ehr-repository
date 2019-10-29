@@ -2,9 +2,7 @@ import request from 'supertest'
 import app from './app'
 import upload from './services/upload'
 
-jest.mock('./services/upload', () => {
-    return jest.fn().mockReturnValue(Promise.resolve())
-});
+jest.mock('./services/upload', () => jest.fn().mockReturnValue(Promise.resolve()));
 
 describe('POST /ehr', () => {
     it('should return 201', done => {

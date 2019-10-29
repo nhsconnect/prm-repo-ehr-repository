@@ -5,12 +5,13 @@
   "main": "src/app.js",
   "scripts": {
     "test": "jest",
-    "start": "babel-node src/server.js"
+    "start": "babel-node -r node_modules/dotenv/config src/server.js"
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
     "@babel/preset-env": "^7.6.3",
+    "dotenv": "^8.2.0",
     "jest": "^24.9.0",
     "supertest": "^4.0.2"
   },
