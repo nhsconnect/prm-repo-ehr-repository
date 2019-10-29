@@ -1,6 +1,9 @@
 # IntelliJ
 .idea
 
+# Directory for storing files when running locally
+local-datastore
+
 # Logs
 logs
 *.log
