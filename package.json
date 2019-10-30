@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "test": "jest",
+    "test": "DATABASE_NAME=deductions_test jest",
     "start": "babel-node -r node_modules/dotenv/config src/server.js",
     "migrate": "db-migrate up",
     "migrate-test": "DATABASE_NAME=deductions_test db-migrate up"
@@ -22,6 +22,7 @@
   "dependencies": {
     "aws-sdk": "^2.558.0",
     "express": "^4.17.1",
+    "pg": "^7.12.1",
     "uuid": "^3.3.3"
   }
 }

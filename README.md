@@ -20,6 +20,7 @@ Add a .env file in the root of the repository with the following environment var
 ```
 NODE_ENV=local
 DATABASE_NAME=deductions_db
+DATABASE_USER=deductions_user
 DATABASE_PASSWORD=your-password-here
 ```
 
