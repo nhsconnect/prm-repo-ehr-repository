@@ -6,8 +6,13 @@ const app = express();
 app.use(express.json());
 
 app.post('/ehr', (req, res) => {
-    upload(req.body.data)
-        .then(() => res.sendStatus(201));
+    if(Object.keys(req.body).length ===0){
+        res.sendStatus((400));
+    }
+    else{
+        upload(req.body.ehr, req.body.nhsNumber)
+            .then(() => res.sendStatus(201));
+    }
 });
 
 export default app
