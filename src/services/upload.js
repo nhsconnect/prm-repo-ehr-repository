@@ -1,6 +1,6 @@
 import s3Save from '../storage/s3'
 import fileSystemSave from '../storage/file-system'
-import dbSave from "../storage/db";
+import {save as dbSave} from "../storage/db";
 
 const upload = (data, nhsNumber) => {
     if (process.env.NODE_ENV === 'local') {

@@ -1,11 +1,11 @@
 import s3Save from "../storage/s3";
 import fileSystemSave from "../storage/file-system";
 import upload from "./upload";
-import dbSave from "../storage/db";
+import {save as dbSave} from "../storage/db";
 
 jest.mock('../storage/s3', () => jest.fn().mockReturnValue(Promise.resolve()));
 jest.mock('../storage/file-system', () => jest.fn().mockReturnValue(Promise.resolve()));
-jest.mock('../storage/db', () => jest.fn().mockReturnValue(Promise.resolve()));
+jest.mock('../storage/db', () => ({save: jest.fn().mockReturnValue(Promise.resolve())}));
 
 describe('upload', () => {
     it('should upload to s3 if not running locally', () => {
