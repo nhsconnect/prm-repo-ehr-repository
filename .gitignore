@@ -4,6 +4,9 @@
 # Directory for storing files when running locally
 local-datastore
 
+# Compiled code
+build
+
 # Logs
 logs
 *.log
