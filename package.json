@@ -5,11 +5,14 @@
   "main": "src/app.js",
   "scripts": {
     "test": "DATABASE_NAME=deductions_test jest",
-    "start": "babel-node -r node_modules/dotenv/config src/server.js",
+    "build": "babel src -d dist",
+    "start": "node dist/server.js",
+    "start-local": "npm run migrate && babel-node -r node_modules/dotenv/config src/server.js",
     "migrate": "db-migrate up",
     "migrate-test": "DATABASE_NAME=deductions_test db-migrate up"
   },
   "devDependencies": {
+    "@babel/cli": "^7.7.0",
     "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
     "@babel/preset-env": "^7.6.3",
