@@ -1,0 +1,93 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Service to handle generation of URLs for upload/download from S3",
+    "version": "1.0.0",
+    "title": "EHR Repository"
+  },
+  "tags": [
+  ],
+  "paths": {
+    "/upload-url": {
+      "post": {
+        "tags": [
+        ],
+        "summary": "Generate S3 upload URL",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request Body Data",
+            "description": "Conversation and Registration ID",
+            "schema": {
+              "$ref": "#/definitions/UploadUrlRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Generation of URL"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "UploadUrlRequest": {
+      "type": "object",
+      "properties": {
+        "ConversationID": {
+          "type": "string"
+        },
+        "RegistrationID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ConversationID",
+        "RegistrationID"
+      ]
+    },
+    "ValidationErrors": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "An object with the name of the field in error as the key and the error message as the value",
+            "properties": {
+
+            }
+          }
+        }
+      }
+    }
+  }
+}
