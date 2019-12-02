@@ -19,7 +19,9 @@
     "db-migrate": "^0.11.6",
     "db-migrate-pg": "^1.0.0",
     "dotenv": "^8.2.0",
+    "express-http-context": "^1.2.3",
     "jest": "^24.9.0",
+    "swagger-ui-express": "^4.1.2",
     "supertest": "^4.0.2"
   },
   "dependencies": {
