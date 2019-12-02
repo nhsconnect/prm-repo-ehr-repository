@@ -4,10 +4,10 @@ import upload from './services/upload'
 
 jest.mock('./services/upload', () => jest.fn().mockReturnValue(Promise.resolve()));
 
-describe('POST /ehr', () => {
+describe('POST /url', () => {
     it('should return 201', done => {
         request(app)
-            .post('/ehr')
+            .post('/url')
             .send({nhsNumber: 'nhs-number', ehr: 'some-data'})
             .expect(201)
             .end(done);
@@ -15,7 +15,7 @@ describe('POST /ehr', () => {
 
     it('should call upload service with request body', done => {
         request(app)
-            .post('/ehr')
+            .post('/url')
             .send({nhsNumber: 'nhs-number', ehr: 'some-data'})
             .expect(() => {
                 expect(upload).toHaveBeenCalledWith('some-data', 'nhs-number')
@@ -25,7 +25,7 @@ describe('POST /ehr', () => {
 
     it('should return 400 if the request body is empty', done => {
             request(app)
-                .post('/ehr')
+                .post('/url')
                 .send()
                 .expect(400)
                 .end(done);

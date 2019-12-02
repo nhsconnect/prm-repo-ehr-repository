@@ -14,7 +14,7 @@ const client = new Client({
     database: config.databaseName
 });
 
-describe('POST /ehr', () => {
+describe('POST /url', () => {
     beforeAll(() => client.connect());
     afterAll(() => client.end());
 
@@ -29,7 +29,7 @@ describe('POST /ehr', () => {
             const nhsNumber = uuid();
 
             request(app)
-                .post('/ehr')
+                .post('/url')
                 .send({nhsNumber: nhsNumber, ehr: 'some-data'})
                 .end(() => {
                     fsPromises.readdir(`./local-datastore/${nhsNumber}`)
@@ -58,7 +58,7 @@ describe('POST /ehr', () => {
             const nhsNumber = uuid();
 
             request(app)
-                .post('/ehr')
+                .post('/url')
                 .send({nhsNumber: nhsNumber, ehr: 'some-data'})
                 .end(() => {
                     expect(mockPutObject).toHaveBeenCalled();
@@ -72,7 +72,7 @@ describe('POST /ehr', () => {
             const nhsNumber = uuid();
 
             request(app)
-                .post('/ehr')
+                .post('/url')
                 .send({nhsNumber: nhsNumber, ehr: 'some-data'})
                 .end(() => {
                     client.query('SELECT * FROM ehr')
