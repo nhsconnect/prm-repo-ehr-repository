@@ -21,8 +21,8 @@
     "dotenv": "^8.2.0",
     "express-http-context": "^1.2.3",
     "jest": "^24.9.0",
-    "supertest": "^4.0.2",
-    "swagger-ui-express": "^4.1.2"
+    "swagger-ui-express": "^4.1.2",
+    "supertest": "^4.0.2"
   },
   "dependencies": {
     "aws-sdk": "^2.558.0",

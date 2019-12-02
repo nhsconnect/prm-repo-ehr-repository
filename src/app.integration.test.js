@@ -43,47 +43,32 @@ describe('POST /url', () => {
     });
 
     describe('when running in production mode', () => {
-        beforeEach(() => {
-            process.env.NODE_ENV = 'prod';
-        });
+      beforeEach(() => {
+        process.env.NODE_ENV = 'prod';
+      });
 
-        afterEach(() => client.query('DELETE FROM ehr'));
+      afterEach(() => client.query('DELETE FROM ehr'));
 
-        const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
-        S3.mockImplementation(() => ({
-            putObject: mockPutObject
-        }));
-
-        it('should upload ehr to s3', done => {
-            const nhsNumber = uuid();
-
-            request(app)
-                .post('/url')
-                .send({nhsNumber: nhsNumber, ehr: 'some-data'})
-                .end(() => {
-                    expect(mockPutObject).toHaveBeenCalled();
-                    expect(mockPutObject.mock.calls[0][0].Body).toEqual('some-data');
-                    expect(mockPutObject.mock.calls[0][0].Key).toContain(nhsNumber);
-                    done()
-                })
-        });
-
-        it('should update database with nhs number and file path', done => {
-            const nhsNumber = uuid();
-
-            request(app)
-                .post('/url')
-                .send({nhsNumber: nhsNumber, ehr: 'some-data'})
-                .end(() => {
-                    client.query('SELECT * FROM ehr')
-                        .then(res => {
-                            expect(res.rowCount).toEqual(1);
-                            const ehr = res.rows[0];
-                            expect(ehr.nhs_number).toEqual(nhsNumber);
-                            expect(ehr.s3_key).toContain(nhsNumber);
-                            done()
-                        })
-                })
-        });
+      const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
+      S3.mockImplementation(() => ({
+        putObject: mockPutObject
+      }));
+      // it('should update database with nhs number and file path', done => {
+      //     const nhsNumber = uuid();
+      //
+      //     request(app)
+      //         .post('/url')
+      //         .send({nhsNumber: nhsNumber, ehr: 'some-data'})
+      //         .end(() => {
+      //             client.query('SELECT * FROM ehr')
+      //                 .then(res => {
+      //                     expect(res.rowCount).toEqual(1);
+      //                     const ehr = res.rows[0];
+      //                     expect(ehr.nhs_number).toEqual(nhsNumber);
+      //                     expect(ehr.s3_key).toContain(nhsNumber);
+      //                     done()
+      //                 })
+      //         })
+      // });
     });
 });

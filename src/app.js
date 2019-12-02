@@ -21,12 +21,14 @@ app.post('/url', (req, res) => {
     }
     else{
         upload(req.body.ehr, req.body.nhsNumber)
-            .then(() => res.sendStatus(201));
+            .then(() => {
+                res.sendStatus(201);
+            });
     }
 });
 
 app.use(function (err, req, res, next) {
-  console.error(err.stack)
+  console.error(err.stack);
   res.status(500).send('Something broke!')
 });
 

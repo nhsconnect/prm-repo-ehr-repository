@@ -1,32 +1,27 @@
 import {S3} from "aws-sdk";
-import save from "./s3";
+import getUrl from "./s3";
 import config from "../config";
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('some-uuid'));
 jest.mock('aws-sdk');
 
-describe('save', () => {
+describe('getUrl', () => {
     it('should call s3 putObject with parameters', () => {
-        const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
+        const mockSignedUrl = jest.fn().mockImplementation((operation, parameters, callback) => callback());
         S3.mockImplementation(() => ({
-            putObject: mockPutObject
+          getSignedUrl: mockSignedUrl
         }));
 
-        return save('some-data', 'some-nhs-number')
+        return getUrl('key')
             .then(() => {
                 const parameters = {
                     Bucket: config.awsS3BucketName,
-                    Key: 'some-nhs-number/some-uuid',
-                    Body: 'some-data'
+                    Key: 'key',
+                    Expires: 60,
+                    //ContentType:
+                    ACL: 'public-read'
                 };
-                expect(mockPutObject).toHaveBeenCalledWith(parameters, expect.anything())
-            })
-    });
-
-    it('should return the s3 key', () => {
-        return save('some-data', 'some-nhs-number')
-            .then(key => {
-                expect(key).toEqual('some-nhs-number/some-uuid')
+                expect(mockSignedUrl).toHaveBeenCalledWith("putObject", parameters, expect.anything())
             })
     });
 });

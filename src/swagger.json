@@ -8,7 +8,7 @@
   "tags": [
   ],
   "paths": {
-    "/upload-url": {
+    "/url": {
       "post": {
         "tags": [
         ],

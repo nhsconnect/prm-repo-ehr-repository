@@ -1,20 +1,21 @@
 import {S3} from "aws-sdk";
-import uuid from 'uuid/v4';
 import config from "../config";
 
-const save = (data, nhsNumber) =>
+const getUrl = (key) =>
     new Promise(resolve => {
         const s3 = new S3();
-        const key = `${nhsNumber}/${uuid()}`;
         const parameters = {
             Bucket: config.awsS3BucketName,
             Key: key,
-            Body: data
+            Expires: 60,
+            //ContentType:
+            ACL: 'public-read'
         };
 
-        s3.putObject(parameters, () => {
+        s3.getSignedUrl('putObject', parameters, () => {
             resolve(key)
         });
     });
 
-export default save;
+
+export default getUrl;
