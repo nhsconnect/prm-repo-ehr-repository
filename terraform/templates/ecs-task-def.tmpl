@@ -1,0 +1,26 @@
+[
+    {
+        "name": "${container_name}",
+        "image": "${ecr_url}/${image_name}:${image_tag}",
+        "cpu": ${cpu},
+        "memory": ${memory},
+        "mountPoints": [],
+        "portMappings": [
+            {
+                "protocol": "tcp",
+                "containerPort": ${container_port},
+                "hostPort": ${host_port}
+            }
+        ],
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-region": "${log_region}",
+                "awslogs-stream-prefix": "log",
+                "awslogs-group": "/nhs/deductions/dev-327778747031/ehr-repo"
+            }
+        },
+        "essential": true,
+        "volumesFrom": []
+    }
+]
