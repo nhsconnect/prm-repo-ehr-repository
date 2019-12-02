@@ -13,7 +13,7 @@ app.get('/health', (req, res) => {
     res.sendStatus(200);
 });
 
-app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.post('/url', (req, res) => {
     if(Object.keys(req.body).length ===0){
@@ -23,6 +23,11 @@ app.post('/url', (req, res) => {
         upload(req.body.ehr, req.body.nhsNumber)
             .then(() => res.sendStatus(201));
     }
+});
+
+app.use(function (err, req, res, next) {
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
 });
 
 export default app
