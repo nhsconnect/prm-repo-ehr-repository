@@ -2,7 +2,7 @@ locals {
   ecs_cluster_id    = data.terraform_remote_state.prm-deductions-infra.outputs.deductions_core_ecs_cluster_id
   ecs_tasks_sg_id   = data.terraform_remote_state.prm-deductions-infra.outputs.deductions_core_ecs_tasks_sg_id
   private_subnets   = data.terraform_remote_state.prm-deductions-infra.outputs.deductions_core_private_subnets
-  alb_tg_arn        = data.terraform_remote_state.prm-deductions-infra.outputs.deductions_core_ehr-repo_alb_tg_arn
+  # alb_tg_arn        = data.terraform_remote_state.prm-deductions-infra.outputs.deductions_core_ehr_repo_alb_tg_arn
 }
 
 resource "aws_ecs_service" "ecs-service" {
@@ -17,9 +17,9 @@ resource "aws_ecs_service" "ecs-service" {
     subnets         = local.private_subnets
   }
 
-  load_balancer {
-    target_group_arn = local.alb_tg_arn
-    container_name   = var.service_container_name
-    container_port   = var.service_container_port
-  }
+  # load_balancer {
+  #   target_group_arn = local.alb_tg_arn
+  #   container_name   = var.service_container_name
+  #   container_port   = var.service_container_port
+  # }
 }
