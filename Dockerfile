@@ -6,6 +6,8 @@ RUN npm run build
 
 FROM mhart/alpine-node
 WORKDIR /app
-COPY --from=builder /app/build .
+COPY package*.json ./
+RUN npm install
+COPY --from=builder /app/build /app/build
 EXPOSE 3000
 CMD ["npm", "run", "start"]
