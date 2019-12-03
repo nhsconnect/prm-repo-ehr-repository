@@ -18,7 +18,7 @@ describe('getUrl', () => {
                     Bucket: config.awsS3BucketName,
                     Key: 'key',
                     Expires: 60,
-                    //ContentType:
+                    ContentType: 'text/xml',
                     ACL: 'public-read'
                 };
                 expect(mockSignedUrl).toHaveBeenCalledWith("putObject", parameters, expect.anything())

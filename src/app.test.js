@@ -1,24 +1,24 @@
 import request from 'supertest'
 import app from './app'
-import upload from './services/upload'
+import getSignedUrl from './services/get-signed-url'
 
-jest.mock('./services/upload', () => jest.fn().mockReturnValue(Promise.resolve()));
+jest.mock('./services/get-signed-url', () => jest.fn().mockReturnValue(Promise.resolve()));
 
 describe('POST /url', () => {
-    it('should return 201', done => {
+    it('should return 202', done => {
         request(app)
             .post('/url')
-            .send({nhsNumber: 'nhs-number', ehr: 'some-data'})
-            .expect(201)
+            .send({registrationId: 'registration-id', conversationId: 'conversation-id'})
+            .expect(202)
             .end(done);
     });
 
-    it('should call upload service with request body', done => {
+    it('should call getSignedUrl service with request body', done => {
         request(app)
             .post('/url')
-            .send({nhsNumber: 'nhs-number', ehr: 'some-data'})
+            .send({registrationId: 'registration-id', conversationId: 'conversation-id'})
             .expect(() => {
-                expect(upload).toHaveBeenCalledWith('some-data', 'nhs-number')
+                expect(getSignedUrl).toHaveBeenCalledWith('registration-id', 'conversation-id')
             })
             .end(done);
     });

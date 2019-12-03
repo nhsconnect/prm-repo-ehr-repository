@@ -1,5 +1,5 @@
 import express from 'express';
-import upload from "./services/upload";
+import getSignedUrl from "./services/get-signed-url";
 import httpContext from 'express-http-context';
 //import swaggerUi from 'swagger-ui-express';
 //import swaggerDocument from './swagger.json';
@@ -20,10 +20,9 @@ app.post('/url', (req, res) => {
         res.sendStatus((400));
     }
     else{
-        upload(req.body.ehr, req.body.nhsNumber)
-            .then(() => {
-                res.sendStatus(201);
-            });
+      const url = getSignedUrl(req.body.registrationId, req.body.conversationId);
+      res.status(202).send(url);
+
     }
 });
 

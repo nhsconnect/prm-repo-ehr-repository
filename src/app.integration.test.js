@@ -1,10 +1,10 @@
 import request from "supertest";
-import {promises as fsPromises} from "fs";
 import uuid from 'uuid/v4';
 import {Client} from 'pg';
 import config from "./config";
 import app from "./app";
 import {S3} from "aws-sdk";
+import getSignedUrl from "./services/get-signed-url";
 
 jest.mock('aws-sdk');
 
@@ -15,29 +15,26 @@ const client = new Client({
 });
 
 describe('POST /url', () => {
-    beforeAll(() => client.connect());
-    afterAll(() => client.end());
+    //beforeAll(() => client.connect());
+    //afterAll(() => client.end());
 
     describe('when running locally', () => {
         beforeEach(() => {
             process.env.NODE_ENV = 'local';
         });
 
-        afterEach(() => client.query('DELETE FROM ehr'));
+        //afterEach(() => client.query('DELETE FROM ehr'));
 
-        it('should save ehr from request body to local file storage', done => {
-            const nhsNumber = uuid();
+        it('should return fake url', done => {
+            const registrationId = uuid();
+            const conversationId = uuid();
 
             request(app)
                 .post('/url')
-                .send({nhsNumber: nhsNumber, ehr: 'some-data'})
+                .send({registrationId: registrationId, conversationId: conversationId})
                 .end(() => {
-                    fsPromises.readdir(`./local-datastore/${nhsNumber}`)
-                        .then(fileNames => fsPromises.readFile(`./local-datastore/${nhsNumber}/${fileNames.shift()}`, 'utf8'))
-                        .then(fileContents => {
-                            expect(fileContents).toEqual('some-data');
-                            done()
-                        });
+                  expect(getSignedUrl(registrationId, conversationId)).toEqual('http://example.com')
+                  done();
                 });
         });
     });
