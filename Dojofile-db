@@ -1,0 +1,2 @@
+DOJO_DOCKER_IMAGE="nhsdev/node-dojo:d3f1f82b9b7b3af1a27395c7cf7628430c64e409"
+DOJO_DRIVER=docker-compose

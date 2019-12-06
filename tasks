@@ -66,10 +66,20 @@ case "${command}" in
       ;;
   _test)
       npm install
+      npm run migrate-test
       npm run test
       ;;
   test)
-      dojo "./tasks _test"
+  cat << EOF > .env
+NODE_ENV=local
+DATABASE_NAME=deductions_test
+DATABASE_USER=deductions_user
+DATABASE_PASSWORD=secret
+DATABASE_HOST=db
+EOF
+      set -a
+      source .env
+      dojo -c Dojofile-db "./tasks _test"
       ;;
   build_docker_local)
       REPOSITORY_URI=$IMAGE_REPO_NAME

@@ -11,7 +11,8 @@ jest.mock('aws-sdk');
 const client = new Client({
     user: config.databaseUser,
     password: config.databasePassword,
-    database: config.databaseName
+    database: config.databaseName,
+    host: config.databaseHost
 });
 
 describe('POST /url', () => {
