@@ -1,0 +1,128 @@
+#!/bin/bash
+
+set -Eeo pipefail
+
+AWS_DEFAULT_REGION=eu-west-2
+IMAGE_REPO_NAME=deductions/ehr-repo
+NHS_ENVIRONMENT=dev
+
+function tf_plan {
+  operation=$1
+  cd terraform
+
+  COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
+  IMAGE_TAG=${COMMIT_HASH}
+
+  terraform init
+  terraform get # modules
+  if [[ "${operation}" == "create" ]]; then
+    terraform plan -var task_image_tag=$IMAGE_TAG -var-file=$NHS_ENVIRONMENT.tfvars -out="nhs_deployment.tfplan"
+  elif [[ "${operation}" == "destroy" ]]; then
+    terraform plan -var task_image_tag=$IMAGE_TAG -var-file=$NHS_ENVIRONMENT.tfvars -out="nhs_deployment.tfplan" -destroy
+  else
+    echo "Unknown operation (should be create or destroy), got: ${operation}"
+    exit 1
+  fi
+}
+
+function tf_apply {
+  cd terraform
+  terraform init
+  terraform get # modules
+  terraform apply nhs_deployment.tfplan
+  terraform output -json > tf-out.json
+}
+
+function docker_login {
+  echo Logging in to Amazon ECR...
+  eval $(dojo -c Dojofile-infra "aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION")
+}
+
+function get_aws_secret {
+  secret_id=$1
+  json=$(aws ssm get-parameter --with-decryption --region $AWS_DEFAULT_REGION --name $secret_id)
+  if [ $? != 0 ]; then
+    >&2 echo "Failed to obtain AWS secret: $secret_id"
+    exit 5
+  fi
+  echo $json | jq -r ".Parameter.Value"
+}
+
+command="$1"
+case "${command}" in
+  _dep)
+      echo "Running NPM Audit ..."
+      npm audit
+      ;;
+  dep)
+      dojo "./tasks _dep"
+      ;;
+  _build)
+      npm install
+      npm run build
+      ;;
+  build)
+      dojo "./tasks _build"
+      ;;
+  _test)
+      npm install
+      npm run test
+      ;;
+  test)
+      dojo "./tasks _test"
+      ;;
+  build_docker_local)
+      REPOSITORY_URI=$IMAGE_REPO_NAME
+      COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
+      IMAGE_TAG=${COMMIT_HASH}
+      echo Build started on `date`
+      echo Building the Docker image...
+      docker build -t $REPOSITORY_URI:latest .
+      docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      echo Build completed on `date`
+      ;;
+  build_docker)
+      docker_login
+      AWS_ACCOUNT_ID=$(dojo -c Dojofile-infra "aws sts get-caller-identity | jq -r .Account")
+      REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/$IMAGE_REPO_NAME
+      ./tasks build_docker_local
+      COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
+      IMAGE_TAG=${COMMIT_HASH}
+      docker tag $IMAGE_REPO_NAME $REPOSITORY_URI:$IMAGE_TAG
+      docker tag $IMAGE_REPO_NAME $REPOSITORY_URI:latest
+      echo "Pushing the Docker image...
+      $REPOSITORY_URI:latest
+      $REPOSITORY_URI:$IMAGE_TAG"
+      docker push $REPOSITORY_URI:latest
+      docker push $REPOSITORY_URI:$IMAGE_TAG
+      ;;
+  tf)
+      dojo -c Dojofile-infra "bash"
+      ;;
+  _tf_plan)
+      tf_plan "$2"
+      ;;
+  tf_plan)
+      dojo -c Dojofile-infra "./tasks _tf_plan $2"
+      ;;
+  _tf_apply)
+      tf_apply
+      ;;
+  tf_apply)
+      dojo -c Dojofile-infra "./tasks _tf_apply"
+      ;;
+  _wait_ecs)
+      aws ecs wait services-stable \
+        --region $AWS_DEFAULT_REGION \
+        --cluster $NHS_ENVIRONMENT-deductions-core-ecs-cluster \
+        --services $NHS_ENVIRONMENT-ehr-repo-service
+      ;;
+  wait_ecs)
+      dojo -c Dojofile-infra "./tasks _wait_ecs"
+      ;;
+  *)
+      echo "Invalid command: '${command}'"
+      exit 1
+      ;;
+esac
+set +e
