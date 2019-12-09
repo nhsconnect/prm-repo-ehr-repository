@@ -79,7 +79,7 @@ DATABASE_HOST=db
 EOF
       set -a
       source .env
-      dojo -c Dojofile-db "./tasks _test"
+      dojo -c Dojofile-itest "./tasks _test"
       ;;
   build_docker_local)
       REPOSITORY_URI=$IMAGE_REPO_NAME
@@ -105,6 +105,41 @@ EOF
       $REPOSITORY_URI:$IMAGE_TAG"
       docker push $REPOSITORY_URI:latest
       docker push $REPOSITORY_URI:$IMAGE_TAG
+      ;;
+  _test_docker)
+      echo "Waiting for EHR endpoint to start responding at ${EHR_URL}"
+      count=1
+      set +e
+      while ! node infra-tests/test_health.js; do
+        echo "Waiting for EHR endpoint at ${EHR_URL}"
+        sleep 1
+        ((count++))
+        if [ 30 -le $count ]; then
+          echo "Timed-out waiting for EHR endpoint at ${EHR_URL}"
+          exit 5
+        fi
+      done
+      echo "EHR endpoint at ${EHR_URL} is healthy"
+      ;;
+  test_docker_local)
+      export EHR_URL="http://ehr:3000"
+      export NHS_ENVIRONMENT=test
+      export DATABASE_NAME=deductions_db
+      export DATABASE_USER=deductions_user
+      export DATABASE_PASSWORD=secret
+      export DATABASE_HOST=db
+      export EHR_DOCKER_IMAGE="$IMAGE_REPO_NAME"
+      dojo -c Dojofile-dtest "./tasks _test_docker"
+      ;;
+  test_docker)
+      # Tests that image uses variables for config and runs migration on start
+      docker_login
+      COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
+      IMAGE_TAG=${COMMIT_HASH}
+      AWS_ACCOUNT_ID=$(dojo -c Dojofile-infra "aws sts get-caller-identity | jq -r .Account")
+      REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+      export EHR_DOCKER_IMAGE="${REPOSITORY_URI}/$IMAGE_REPO_NAME:${IMAGE_TAG}"
+      ./tasks test_docker_local
       ;;
   tf)
       dojo -c Dojofile-infra "bash"

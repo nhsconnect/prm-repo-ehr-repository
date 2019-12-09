@@ -112,4 +112,4 @@ dist
 # TernJS port file
 .tern-port
 /terraform/.terraform/
-/docker-compose.yml.dojo
+*.dojo
