@@ -99,3 +99,15 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks wait_ecs
+      - smoke_dev:
+          clean_workspace: true
+          jobs:
+            deploy:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks smoke

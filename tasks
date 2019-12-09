@@ -141,6 +141,9 @@ EOF
       export EHR_DOCKER_IMAGE="${REPOSITORY_URI}/$IMAGE_REPO_NAME:${IMAGE_TAG}"
       ./tasks test_docker_local
       ;;
+  smoke)
+      curl -i http://${NHS_ENVIRONMENT}.ehr-repo.patient-deductions.nhs.uk/health | grep OK
+      ;;
   tf)
       dojo -c Dojofile-infra "bash"
       ;;
