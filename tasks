@@ -124,7 +124,7 @@ EOF
   test_docker_local)
       export EHR_URL="http://ehr:3000"
       export NHS_ENVIRONMENT=test
-      export DATABASE_NAME=deductions_db
+      export DATABASE_NAME=deductions_test
       export DATABASE_USER=deductions_user
       export DATABASE_PASSWORD=secret
       export DATABASE_HOST=db

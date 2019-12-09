@@ -32,11 +32,13 @@ else
     fi
   done
   echo "DB connection at ${DATABASE_HOST}:5432 is available"
+  echo "Trying to create a database, if not exists. 'Already exists' errors are safe to ignore"
+  PGPASSWORD="${DATABASE_PASSWORD}" createdb --host="${DATABASE_HOST}" --username="${DATABASE_USER}" $DATABASE_NAME || true
   set -e
   db-migrate up -e ${NHS_ENVIRONMENT} --config database.json
   echo "DB migration completed."
 fi
 
 echo "Starting node.js server"
-
+set -e
 exec node server.js

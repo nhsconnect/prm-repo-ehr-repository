@@ -25,7 +25,7 @@ ENV EHR_REPO_SKIP_MIGRATION=false \
   DATABASE_HOST=""
 
 EXPOSE 3000
-RUN apk add --no-cache bash tini
+RUN apk add --no-cache bash tini postgresql-client
 # Tini is now available at /sbin/tini
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["/usr/bin/run-ehr-server"]

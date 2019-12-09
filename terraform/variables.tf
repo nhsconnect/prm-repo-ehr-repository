@@ -11,6 +11,14 @@ variable "component_name" {
   type = string
 }
 
+variable "node_env" {
+  type = string
+}
+
+variable "database_name" {
+  type = string
+}
+
 variable "task_family" {}
 variable "task_execution_role" {}
 

@@ -14,3 +14,15 @@ data "terraform_remote_state" "prm-deductions-infra" {
 data "aws_ssm_parameter" "root_zone_id" {
   name = "/NHS/deductions-${data.aws_caller_identity.current.account_id}/root_zone_id"
 }
+
+data "aws_secretsmanager_secret" "db-username" {
+  name = "/nhs/${var.environment}/db/db-username"
+}
+
+data "aws_secretsmanager_secret" "db-password" {
+  name = "/nhs/${var.environment}/db/db-password"
+}
+
+data "aws_ssm_parameter" "rds_endpoint" {
+  name = "/NHS/${var.environment}-${data.aws_caller_identity.current.account_id}/core/rds_endpoint"
+}

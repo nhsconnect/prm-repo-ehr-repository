@@ -6,6 +6,9 @@ pipelines:
     materials:
       git:
         type: configrepo
+      base_infra:
+        pipeline: prm-deductions-infra
+        stage: deploy
     stages:
       - build:
           clean_workspace: true

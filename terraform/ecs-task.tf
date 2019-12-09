@@ -3,10 +3,14 @@ locals {
     task_ecr_url                 = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com"
     task_log_group               = "/nhs/deductions/${var.environment}-${data.aws_caller_identity.current.account_id}/${var.task_family}"
     environment_variables        = [
-      { name = "NODE_ENV", value = data.aws_ssm_parameter.node_env.value },
-      { name = "DATABASE_NAME", value = data.aws_ssm_parameter.database_name.value },
-      { name = "DATABASE_USER", value = data.aws_ssm_parameter.database_user.value },
-      { name = "DATABASE_PASSWORD", value = data.aws_ssm_parameter.database_password.value }
+      { name = "NODE_ENV", value = var.node_env },
+      { name = "NHS_ENVIRONMENT", value = var.environment },
+      { name = "DATABASE_NAME", value = var.database_name },
+      { name = "DATABASE_HOST", value = data.aws_ssm_parameter.rds_endpoint.value }
+    ]
+    secrets                      = [
+      { name = "DATABASE_USER", valueFrom = data.aws_secretsmanager_secret.db-username.arn },
+      { name = "DATABASE_PASSWORD", valueFrom = data.aws_secretsmanager_secret.db-password.arn }
     ]
 }
 
@@ -31,5 +35,6 @@ resource "aws_ecs_task_definition" "task" {
         log_region            = var.region,
         log_group             = local.task_log_group,
         environment_variables = jsonencode(local.environment_variables),
+        secrets               = jsonencode(local.secrets)
     })
 }
