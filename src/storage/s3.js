@@ -2,7 +2,7 @@ import {S3} from "aws-sdk";
 import config from "../config";
 
 const getUrl = (key) =>
-    new Promise(resolve => {
+    new Promise(async resolve => {
         const s3 = new S3();
         const parameters = {
             Bucket: config.awsS3BucketName,
@@ -12,9 +12,16 @@ const getUrl = (key) =>
             ACL: 'public-read'
         };
 
-        s3.getSignedUrl('putObject', parameters, () => {
-            resolve(key)
-        });
+      const url = await new Promise((resolve, reject) => {
+        s3.getSignedUrl('putObject', params, function (err, url) {
+          if (err) {
+            reject(err)
+          }
+          //console.log(url)
+          resolve(url)
+        })
+      });
+      return url
     });
 
 
