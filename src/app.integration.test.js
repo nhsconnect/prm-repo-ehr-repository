@@ -32,9 +32,11 @@ describe('POST /url', () => {
 
             request(app)
                 .post('/url')
-                .send({registrationId: registrationId, conversationId: conversationId})
+                .send({conversationId: conversationId})
                 .end(() => {
-                  expect(getSignedUrl(registrationId, conversationId)).toEqual('http://example.com')
+                  getSignedUrl(conversationId).then(url=>{
+                    expect(url).toBe('http://example.com');
+                  });
                   done();
                 });
         });

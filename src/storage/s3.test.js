@@ -21,7 +21,7 @@ describe('getUrl', () => {
           ContentType: 'text/xml',
           ACL: 'public-read'
         };
-        getUrl('key').then(()=>{
+        getUrl('key').then(url=>{
           expect(mockSignedUrl).toHaveBeenCalledWith("putObject", parameters, callback);
         })
 

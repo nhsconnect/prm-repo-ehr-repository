@@ -32,7 +32,7 @@ describe('POST /url', () => {
         .expect(() => {
           getSignedUrl('conversation-id')
             .then(url=>{
-              expect(url).toBe('some-url')
+              expect(url).toBe('some-url');
               done();
             })
           })

@@ -3,7 +3,7 @@ import uuid from 'uuid/v4';
 
 const getSignedUrl = (conversationId) => {
   if (process.env.NODE_ENV === 'local') {
-    return 'http://example.com';
+    return Promise.resolve('http://example.com');
   }
 
   return getUrl(`${conversationId}/${uuid()}`);

@@ -1,5 +1,5 @@
 const config = {
-    awsS3BucketName: process.env.S3_BUCKET_NAME,
+    awsS3BucketName: 'deductor-dev',
     databaseUser: process.env.DATABASE_USER,
     databasePassword: process.env.DATABASE_PASSWORD,
     databaseName: process.env.DATABASE_NAME,

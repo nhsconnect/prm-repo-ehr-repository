@@ -10,20 +10,20 @@ app.use(express.json());
 app.use(httpContext.middleware);
 
 app.get('/health', (req, res) => {
-    res.sendStatus(200);
+  res.sendStatus(200);
 });
 
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.post('/url', (req, res) => {
-    if(Object.keys(req.body).length ===0){
-        res.sendStatus((400));
-    }
-    else{
-      const url = getSignedUrl(req.body.conversationId);
-      res.status(202).send(url);
-
-    }
+  if (Object.keys(req.body).length === 0) {
+    res.sendStatus((400));
+  } else {
+    getSignedUrl(req.body.conversationId)
+      .then(url => {
+        res.status(202).send(url);
+      });
+  }
 });
 
 app.use(function (err, req, res, next) {
