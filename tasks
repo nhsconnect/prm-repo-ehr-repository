@@ -128,7 +128,7 @@ EOF
       export DATABASE_USER=deductions_user
       export DATABASE_PASSWORD=secret
       export DATABASE_HOST=db
-      export EHR_DOCKER_IMAGE="$IMAGE_REPO_NAME"
+      export EHR_DOCKER_IMAGE="${EHR_DOCKER_IMAGE:-$IMAGE_REPO_NAME}"
       dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
   test_docker)
