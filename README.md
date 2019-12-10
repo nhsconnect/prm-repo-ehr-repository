@@ -46,3 +46,21 @@ Run a development server with `npm run start-local`.
 ## Start the app in production mode
 
 Compile the code with `npm run build`, and then start the server with `npm start`.
+
+# Docker
+
+Docker image can be build locally with
+```
+./tasks build_docker_local
+```
+
+## Environment variables
+
+Image is configurable by environment variables:
+ - `EHR_REPO_SKIP_MIGRATION` - allows to skip database migration when container starts.
+ - `NHS_ENVIRONMENT` - should be set to current environment in which the container is deployed. The name must also exist in the `database.json` file.
+ - `S3_BUCKET_NAME` - the name of S3 bucket to store the EHR fragments in.
+ - `DATABASE_USER` - username for the database
+ - `DATABASE_PASSWORD` - password to the database
+ - `DATABASE_NAME` - name of the database on server.
+ - `DATABASE_HOST` - database server hostname to connect with.
