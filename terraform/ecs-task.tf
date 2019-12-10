@@ -6,7 +6,8 @@ locals {
       { name = "NODE_ENV", value = var.node_env },
       { name = "NHS_ENVIRONMENT", value = var.environment },
       { name = "DATABASE_NAME", value = var.database_name },
-      { name = "DATABASE_HOST", value = data.aws_ssm_parameter.rds_endpoint.value }
+      { name = "DATABASE_HOST", value = data.aws_ssm_parameter.rds_endpoint.value },
+      { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
     ]
     secrets                      = [
       { name = "DATABASE_USER", valueFrom = data.aws_secretsmanager_secret.db-username.arn },

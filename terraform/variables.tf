@@ -19,6 +19,8 @@ variable "database_name" {
   type = string
 }
 
+variable "s3_bucket_name" {}
+
 variable "task_family" {}
 variable "task_execution_role" {}
 

@@ -19,6 +19,7 @@ RUN chmod -c 0755 /app/node_modules/.bin/db-migrate
 
 ENV EHR_REPO_SKIP_MIGRATION=false \
   NHS_ENVIRONMENT="" \
+  S3_BUCKET_NAME="" \
   DATABASE_USER="" \
   DATABASE_PASSWORD="" \
   DATABASE_NAME="" \

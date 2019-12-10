@@ -4,6 +4,8 @@ component_name       = "ehr-repo"
 node_env             = "prod"
 database_name        = "deductions_db"
 
+s3_bucket_name       = "dev-ehr-repo-bucket"
+
 task_execution_role  = "ecsTaskExecutionRole"
 task_family          = "ehr-repo"
 
