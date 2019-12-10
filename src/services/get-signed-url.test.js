@@ -9,8 +9,8 @@ describe('get-signed-url', () => {
     it('should call the s3 to get pre-signed url to put object', () => {
       process.env.NODE_ENV = 'prod';
 
-      return getSignedUrl('registration-id', 'conversation-id').then(() => {
-          expect(getUrl).toHaveBeenCalledWith(`registration-id/conversation-id/some-uuid`)
+      return getSignedUrl('conversation-id').then(() => {
+          expect(getUrl).toHaveBeenCalledWith(`conversation-id/some-uuid`)
         });
     })
   });

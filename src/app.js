@@ -20,7 +20,7 @@ app.post('/url', (req, res) => {
         res.sendStatus((400));
     }
     else{
-      const url = getSignedUrl(req.body.registrationId, req.body.conversationId);
+      const url = getSignedUrl(req.body.conversationId);
       res.status(202).send(url);
 
     }

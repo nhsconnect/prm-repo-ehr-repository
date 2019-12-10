@@ -16,15 +16,15 @@ const client = new Client({
 });
 
 describe('POST /url', () => {
-    //beforeAll(() => client.connect());
-    //afterAll(() => client.end());
+    beforeAll(() => client.connect());
+    afterAll(() => client.end());
 
     describe('when running locally', () => {
         beforeEach(() => {
             process.env.NODE_ENV = 'local';
         });
 
-        //afterEach(() => client.query('DELETE FROM ehr'));
+        afterEach(() => client.query('DELETE FROM ehr'));
 
         it('should return fake url', done => {
             const registrationId = uuid();
@@ -40,33 +40,37 @@ describe('POST /url', () => {
         });
     });
 
-    describe('when running in production mode', () => {
-      beforeEach(() => {
-        process.env.NODE_ENV = 'prod';
-      });
-
-      afterEach(() => client.query('DELETE FROM ehr'));
-
-      const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
-      S3.mockImplementation(() => ({
-        putObject: mockPutObject
-      }));
-      // it('should update database with nhs number and file path', done => {
-      //     const nhsNumber = uuid();
-      //
-      //     request(app)
-      //         .post('/url')
-      //         .send({nhsNumber: nhsNumber, ehr: 'some-data'})
-      //         .end(() => {
-      //             client.query('SELECT * FROM ehr')
-      //                 .then(res => {
-      //                     expect(res.rowCount).toEqual(1);
-      //                     const ehr = res.rows[0];
-      //                     expect(ehr.nhs_number).toEqual(nhsNumber);
-      //                     expect(ehr.s3_key).toContain(nhsNumber);
-      //                     done()
-      //                 })
-      //         })
-      // });
-    });
+    // describe('when running in production mode', () => {
+    //   beforeEach(() => {
+    //     process.env.NODE_ENV = 'prod';
+    //   });
+    //
+    //   afterEach(() => client.query('DELETE FROM ehr'));
+    //
+    //   const mockSignedUrl = jest.fn().mockImplementation(()=>{
+    //     return Promise.resolve('url')
+    //   });
+    //
+    //   S3.mockImplementation(() => ({
+    //     getSignedUrl: mockSignedUrl
+    //   }));
+    //
+    //   it('should update database with nhs number and file path', done => {
+    //       const nhsNumber = uuid();
+    //
+    //       request(app)
+    //           .post('/url')
+    //           .send({nhsNumber: nhsNumber, ehr: 'some-data'})
+    //           .end(() => {
+    //               client.query('SELECT * FROM ehr')
+    //                   .then(res => {
+    //                       expect(res.rowCount).toEqual(1);
+    //                       const ehr = res.rows[0];
+    //                       expect(ehr.nhs_number).toEqual(nhsNumber);
+    //                       expect(ehr.s3_key).toContain(nhsNumber);
+    //                       done()
+    //                   })
+    //           })
+    //     });
+    // });
 });
