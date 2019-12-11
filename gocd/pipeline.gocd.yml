@@ -102,7 +102,7 @@ pipelines:
       - smoke_dev:
           clean_workspace: true
           jobs:
-            deploy:
+            test:
               resources:
                 - docker
               tasks:
