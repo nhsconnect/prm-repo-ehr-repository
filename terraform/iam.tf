@@ -21,6 +21,7 @@ data "aws_iam_policy_document" "ehr-repo-s3" {
   statement {
     actions = [
       "s3:PutObject",
+      "s3:PutObjectAcl",
       "s3:GetObject"
     ]
 
