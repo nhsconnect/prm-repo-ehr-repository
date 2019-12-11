@@ -142,7 +142,12 @@ EOF
       ./tasks test_docker_local
       ;;
   smoke)
-      curl -i http://${NHS_ENVIRONMENT}.ehr-repo.patient-deductions.nhs.uk/health | grep OK
+      export EHR_HOST=${NHS_ENVIRONMENT}.ehr-repo.patient-deductions.nhs.uk
+      curl -i http://${EHR_HOST}/health | grep OK
+      dojo "./tasks _smoke_s3"
+      ;;
+  _smoke_s3)
+      node infra-tests/test_upload.js
       ;;
   tf)
       dojo -c Dojofile-infra "bash"
