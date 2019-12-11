@@ -7,6 +7,7 @@ database_name        = "deductions_db"
 s3_bucket_name       = "dev-ehr-repo-bucket"
 
 task_family          = "ehr-repo"
+task_execution_role  = "ecsTaskExecutionRole"
 
 task_container_name  = "ehr-repo-container"
 task_image_name      = "deductions/ehr-repo"

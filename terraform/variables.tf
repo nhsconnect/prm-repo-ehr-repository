@@ -22,7 +22,7 @@ variable "database_name" {
 variable "s3_bucket_name" {}
 
 variable "task_family" {}
-
+variable "task_execution_role" {}
 variable "task_container_name" {}
 variable "task_image_name" {}
 variable "task_image_tag" {}
