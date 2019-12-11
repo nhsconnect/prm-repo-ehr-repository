@@ -9,7 +9,7 @@ axios.post(process.env.EHR_URL + '/url',{
   if(response.status != 202) {
     process.exit(5);
   }
-  var options = { headers: { 'x-amz-acl': 'public-read' }};
+  var options = {};
   url = response.data
   axios.put(url, 'hello', options)
     .then(res=> {

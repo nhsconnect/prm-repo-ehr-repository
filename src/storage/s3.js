@@ -8,8 +8,7 @@ const getUrl = (key) => {
     Bucket: config.awsS3BucketName,
     Key: key,
     Expires: 60,
-    ContentType: 'text/xml',
-    ACL: 'public-read'
+    ContentType: 'text/xml'
   };
 
   const url= new Promise((resolve, reject) => {
