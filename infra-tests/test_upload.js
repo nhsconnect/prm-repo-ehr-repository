@@ -1,33 +1,28 @@
-const http = require('http')
+const axios = require('axios');
 
-const data = JSON.stringify({
-  "ConversationID": "1234",
-  "RegistrationID": "4321"
+axios.post(process.env.EHR_URL + '/url',{
+    "ConversationID": "1234",
+    "RegistrationID": "4321"
 })
-
-const options = {
-  hostname: process.env.EHR_HOST,
-  port: 80,
-  path: '/url',
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Content-Length': data.length
+.then((response) => {
+  console.log(response);
+  if(response.status != 202) {
+    process.exit(5);
   }
-}
-
-const req = http.request(options, (res) => {
-  console.log(`statusCode: ${res.statusCode}`)
-
-  res.on('data', (d) => {
-    process.stdout.write(d)
-  })
-})
-
-req.on('error', (error) => {
-  console.error(error)
-  process.exit(5);
-})
-
-req.write(data)
-req.end()
+  var options = { headers: { 'x-amz-acl': 'public-read' }};
+  url = response.data
+  axios.put(url, 'hello', options)
+    .then(res=> {
+      console.log(res);
+      if(res.status != 200) {
+        process.exit(6);
+      }
+    })
+    .catch(err=> {
+      console.log(err);
+      process.exit(7);
+    });
+}, (error) => {
+  console.log(error);
+  process.exit(8);
+});
