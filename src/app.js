@@ -1,8 +1,8 @@
 import express from 'express';
 import getSignedUrl from './services/get-signed-url';
 import httpContext from 'express-http-context';
-//import swaggerUi from 'swagger-ui-express';
-//import swaggerDocument from './swagger.json';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json';
 
 const app = express();
 
@@ -13,8 +13,6 @@ app.get('/health', (req, res) => {
   res.sendStatus(200);
 });
 
-//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
 app.post('/url', (req, res) => {
   if (Object.keys(req.body).length === 0) {
     res.sendStatus(400);
@@ -24,6 +22,8 @@ app.post('/url', (req, res) => {
     });
   }
 });
+
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
