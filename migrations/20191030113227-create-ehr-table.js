@@ -19,11 +19,23 @@ exports.up = function(db) {
     id: { type: "int", primaryKey: true, autoIncrement: true },
     nhs_number: "string",
     s3_key: "string"
-  });
+  }).then(
+      function(result) {
+        db.createTable('health', {
+          id: { type: 'int', primaryKey: true, autoIncrement: true },
+          completed_at: 'string'
+        });
+      },
+      function(err) {
+        return err;
+      }
+    );
 };
 
 exports.down = function(db) {
-  return db.dropTable('ehr');
+  return db.dropTable('ehr').then(()=>{
+    db.dropTable('health');
+  });
 };
 
 exports._meta = {

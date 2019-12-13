@@ -12,8 +12,8 @@ const getUrl = key => {
   };
 
   const url = new Promise((resolve, reject) => {
-    s3.getSignedUrl('putObject', parameters, function(err, url) {
-      if (err) {
+    s3.getSignedUrl('putObject', parameters,  (err, url) => {
+      if(err){
         reject(err);
       }
       resolve(url);
@@ -22,4 +22,27 @@ const getUrl = key => {
   return url;
 };
 
-export default getUrl;
+
+const save = (formattedDate) =>{
+  const data = `${formattedDate}`;
+    const res = new Promise((resolve, reject) => {
+
+    const s3 = new S3();
+    const key = 'health-check.txt';
+    const parameters = {
+      Bucket: config.awsS3BucketName,
+      Key: key,
+      Body: data
+    };
+
+    s3.putObject(parameters, (err) => {
+      if(err){
+        reject(err);
+      }
+      resolve(key);
+    });
+  });
+    return res;
+};
+
+export {getUrl, save};

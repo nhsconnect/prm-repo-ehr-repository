@@ -1,8 +1,10 @@
 import request from 'supertest';
 import app from './app';
 import getSignedUrl from './services/get-signed-url';
+import getHealthCheck from './services/get-health-check';
 
-jest.mock('./services/get-signed-url', () => jest.fn().mockResolvedValue('some-url'));
+jest.mock('./services/get-signed-url', () => jest.fn().mockReturnValue(Promise.resolve('some-url')));
+jest.mock('./services/get-health-check', () => jest.fn().mockReturnValue(Promise.resolve('some-url')));
 jest.mock('./config/logging');
 jest.mock('express-winston', () => ({
   errorLogger: () => (req, res, next) => next(),
@@ -49,4 +51,30 @@ describe('POST /url', () => {
       })
       .end(done);
   });
+});
+
+describe('GET/health', ()=>{
+  it('should return 200', done => {
+    request(app)
+      .get('/health')
+      .expect(200)
+      .end(done)
+  });
+
+  it('should call health check service when the endpoint being called ', done => {
+    request(app)
+      .get('/health')
+      .expect(()=>{
+        expect(getHealthCheck).toHaveBeenCalled();
+      })
+      .end(done)
+  });
+
+  it('should return 502 if catch any error', done => {
+    request(app)
+      .get('/health')
+      .expect(502)
+      .end(done)
+  });
+
 });
