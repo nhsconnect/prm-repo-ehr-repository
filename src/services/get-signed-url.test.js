@@ -1,5 +1,5 @@
-import getUrl from "../storage/s3";
-import getSignedUrl from "./get-signed-url";
+import getUrl from '../storage/s3';
+import getSignedUrl from './get-signed-url';
 
 jest.mock('../storage/s3', () => jest.fn().mockReturnValue(Promise.resolve()));
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('some-uuid'));
@@ -10,8 +10,8 @@ describe('get-signed-url', () => {
       process.env.NODE_ENV = 'prod';
 
       return getSignedUrl('conversation-id').then(() => {
-          expect(getUrl).toHaveBeenCalledWith(`conversation-id/some-uuid`)
-        });
-    })
+        expect(getUrl).toHaveBeenCalledWith(`conversation-id/some-uuid`);
+      });
+    });
   });
 });
