@@ -1,34 +1,31 @@
 import express from 'express';
-import getSignedUrl from './services/get-signed-url';
-import httpContext from 'express-http-context';
+import { errorLogger, logger as requestLogger } from 'express-winston';
 import swaggerUi from 'swagger-ui-express';
+import * as correlationInfo from './middleware/correlation';
+import * as logging from './middleware/logging';
+import { options } from './config/logging';
+import url from './api/url';
 import swaggerDocument from './swagger.json';
 
 const app = express();
 
 app.use(express.json());
-app.use(httpContext.middleware);
+app.use(correlationInfo.middleware);
+app.use(requestLogger(options));
 
 app.get('/health', (req, res) => {
   res.sendStatus(200);
 });
 
-app.post('/url', (req, res) => {
-  if (Object.keys(req.body).length === 0) {
-    res.sendStatus(400);
-  } else {
-    getSignedUrl(req.body.conversationId).then(url => {
-      res.status(202).send(url);
-    });
-  }
-});
+app.use('/url', logging.middleware, url);
 
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+app.use(errorLogger(options));
+
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).json({ error: err.message });
 });
 
 export default app;

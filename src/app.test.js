@@ -2,9 +2,12 @@ import request from 'supertest';
 import app from './app';
 import getSignedUrl from './services/get-signed-url';
 
-jest.mock('./services/get-signed-url', () =>
-  jest.fn().mockReturnValue(Promise.resolve('some-url'))
-);
+jest.mock('./services/get-signed-url', () => jest.fn().mockResolvedValue('some-url'));
+jest.mock('./config/logging');
+jest.mock('express-winston', () => ({
+  errorLogger: () => (req, res, next) => next(),
+  logger: () => (req, res, next) => next()
+}));
 
 describe('POST /url', () => {
   it('should return 202', done => {
@@ -29,20 +32,21 @@ describe('POST /url', () => {
     request(app)
       .post('/url')
       .send({ conversationId: 'conversation-id' })
-      .expect(() => {
-        getSignedUrl('conversation-id').then(url => {
-          expect(url).toBe('some-url');
-          done();
-        });
+      .expect(res => {
+        expect(res.text).toEqual('some-url');
       })
       .end(done);
   });
 
-  it('should return 400 if the request body is empty', done => {
+  it('should return 422 if the request body is empty', done => {
     request(app)
       .post('/url')
       .send()
-      .expect(400)
+      .expect(422)
+      .expect('Content-Type', /json/)
+      .expect(res => {
+        expect(res.body).toEqual({ errors: [{ conversationId: 'Invalid value' }] });
+      })
       .end(done);
   });
 });

@@ -6,6 +6,11 @@ import app from './app';
 import getSignedUrl from './services/get-signed-url';
 
 jest.mock('aws-sdk');
+jest.mock('./config/logging');
+jest.mock('express-winston', () => ({
+  errorLogger: () => (req, res, next) => next(),
+  logger: () => (req, res, next) => next()
+}));
 
 const client = new Client({
   user: config.databaseUser,
