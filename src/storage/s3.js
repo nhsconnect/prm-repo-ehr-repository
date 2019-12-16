@@ -1,5 +1,6 @@
 import { S3 } from 'aws-sdk';
 import config from '../config';
+import { updateLogEventWithError, updateLogEvent } from '../middleware/logging';
 
 const getUrl = key => {
   const s3 = new S3();
@@ -14,8 +15,10 @@ const getUrl = key => {
   const url = new Promise((resolve, reject) => {
     s3.getSignedUrl('putObject', parameters, (err, url) => {
       if (err) {
-        reject(err);
+        updateLogEventWithError(err);
+        return reject(err);
       }
+      updateLogEvent({ storage: { url: `${url}}` } });
       resolve(url);
     });
   });
@@ -35,9 +38,11 @@ const save = formattedDate => {
 
     s3.putObject(parameters, err => {
       if (err) {
-        reject(err);
+        updateLogEventWithError(err);
+        return reject(err);
       }
-      resolve(key);
+      updateLogEvent({ storage: { path: `${config.awsS3BucketName}/${key}` } });
+      resolve();
     });
   });
   return res;

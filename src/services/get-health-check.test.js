@@ -1,13 +1,18 @@
 import getHealthCheck from './get-health-check';
 import { Client } from 'pg';
 import { S3 } from 'aws-sdk';
+//import { updateLogEvent } from '../middleware/logging';
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('some-uuid'));
 jest.mock('aws-sdk');
 jest.mock('pg');
 
+beforeEach(() => {
+  Client.mockClear();
+  S3.mockClear();
+});
 describe('getHealthCheck', () => {
-  const mockPutObject = jest.fn().mockImplementation((config, callback) => callback(null));
+  const mockPutObject = jest.fn(); //.mockImplementation((config, callback) => callback(null));
   S3.mockImplementation(() => ({
     putObject: mockPutObject
   }));
@@ -30,4 +35,12 @@ describe('getHealthCheck', () => {
 
     return expect(getHealthCheck()).rejects.toBe('some-error');
   });
+
+  // it('should update log event when the health check start', () => {
+  //   return getHealthCheck().then(() => {
+  //     expect(updateLogEvent).toHaveBeenCalledWith({
+  //       status: 'Starting health check'
+  //     });
+  //   });
+  // });
 });
