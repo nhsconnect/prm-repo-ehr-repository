@@ -18,6 +18,7 @@ COPY run-server.sh /usr/bin/run-ehr-server
 RUN chmod -c 0755 /app/node_modules/.bin/db-migrate
 
 ENV EHR_REPO_SKIP_MIGRATION=false \
+  NODE_ENV="prod" \
   NHS_ENVIRONMENT="" \
   S3_BUCKET_NAME="" \
   DATABASE_USER="" \

@@ -58,6 +58,7 @@ case "${command}" in
       dojo "./tasks _dep"
       ;;
   _build)
+      rm -rf build/
       npm install
       npm run build
       ;;
@@ -119,6 +120,7 @@ EOF
       docker push $REPOSITORY_URI:$IMAGE_TAG
       ;;
   _test_docker)
+      npm install axios
       echo "Waiting for EHR endpoint to start responding at ${EHR_URL}"
       count=1
       set +e
@@ -141,6 +143,7 @@ EOF
       export DATABASE_PASSWORD=secret
       export DATABASE_HOST=db
       export EHR_DOCKER_IMAGE="${EHR_DOCKER_IMAGE:-$IMAGE_REPO_NAME}"
+      export S3_BUCKET_NAME="dev-ehr-repo-bucket"
       dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
   test_docker)

@@ -1,19 +1,13 @@
-const http = require('http');
+const axios = require('axios');
 
-http.get(process.env.EHR_URL + '/health', (resp) => {
-  let data = '';
-
-  // A chunk of data has been recieved.
-  resp.on('data', (chunk) => {
-    data += chunk;
+axios.get(process.env.EHR_URL + '/health')
+  .then(response => {
+    console.log(response);
+    if (response.status !== 200) {
+      process.exit(5);
+    }
+  })
+  .catch(err => {
+    console.log(err);
+    process.exit(8);
   });
-
-  // The whole response has been received. Print out the result.
-  resp.on('end', () => {
-    console.log(data);
-  });
-
-}).on("error", (err) => {
-  console.log("Error: " + err.message);
-  process.exit(5);
-});
