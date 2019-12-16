@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "scripts": {
     "lint": "eslint src/ --fix",
-    "unit": "DATABASE_NAME=deductions_test jest",
+    "unit": "DATABASE_NAME=deductions_test jest --setupFiles dotenv/config",
     "test": "npm run lint && npm run unit",
     "build": "babel src -d build --ignore '**/*.test.js' && cp src/*.json build",
     "start": "node build/server.js",
