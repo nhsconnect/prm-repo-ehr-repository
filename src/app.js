@@ -5,8 +5,8 @@ import * as correlationInfo from './middleware/correlation';
 import * as logging from './middleware/logging';
 import { options } from './config/logging';
 import url from './api/url';
+import health from './api/health';
 import swaggerDocument from './swagger.json';
-import getHealthCheck from './services/get-health-check';
 
 const app = express();
 
@@ -14,15 +14,7 @@ app.use(express.json());
 app.use(correlationInfo.middleware);
 app.use(requestLogger(options));
 
-app.use('/health', (req, res) => {
-  getHealthCheck()
-    .then(() => {
-      res.status(200).send('healthy');
-    })
-    .catch(err => {
-      res.status(502).send(err);
-    });
-});
+app.use('/health', logging.middleware, health);
 
 app.use('/url', logging.middleware, url);
 
