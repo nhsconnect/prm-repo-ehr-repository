@@ -15,15 +15,14 @@ exports.setup = function(options, seedLink) {
 };
 
 exports.up = function(db) {
-  return db.createTable('ehr', {
-    id: { type: "int", primaryKey: true, autoIncrement: true },
-    nhs_number: "string",
-    s3_key: "string"
-  });
+  return db.createTable('health', {
+      id: { type: 'int', primaryKey: true, autoIncrement: true },
+      completed_at: 'string'
+    });
 };
 
 exports.down = function(db) {
-  return db.dropTable('ehr');
+  return db.dropTable('health');
 };
 
 exports._meta = {
