@@ -6,7 +6,7 @@ import * as logging from './middleware/logging';
 import { options } from './config/logging';
 import url from './api/url';
 import swaggerDocument from './swagger.json';
-import getHealthCheck from "./services/get-health-check";
+import getHealthCheck from './services/get-health-check';
 
 const app = express();
 
@@ -14,15 +14,14 @@ app.use(express.json());
 app.use(correlationInfo.middleware);
 app.use(requestLogger(options));
 
-app.get('/health', (req, res) => {
+app.use('/health', (req, res) => {
   getHealthCheck()
-    .then(()=>{
+    .then(() => {
       res.status(200).send('healthy');
     })
-    .catch(err=>{
+    .catch(err => {
       res.status(502).send(err);
-    })
-
+    });
 });
 
 app.use('/url', logging.middleware, url);

@@ -1,4 +1,4 @@
-import getUrl from '../storage/s3';
+import { getUrl } from '../storage/s3';
 import uuid from 'uuid/v4';
 
 const getSignedUrl = conversationId => {

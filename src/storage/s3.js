@@ -12,8 +12,8 @@ const getUrl = key => {
   };
 
   const url = new Promise((resolve, reject) => {
-    s3.getSignedUrl('putObject', parameters,  (err, url) => {
-      if(err){
+    s3.getSignedUrl('putObject', parameters, (err, url) => {
+      if (err) {
         reject(err);
       }
       resolve(url);
@@ -22,11 +22,9 @@ const getUrl = key => {
   return url;
 };
 
-
-const save = (formattedDate) =>{
+const save = formattedDate => {
   const data = `${formattedDate}`;
-    const res = new Promise((resolve, reject) => {
-
+  const res = new Promise((resolve, reject) => {
     const s3 = new S3();
     const key = 'health-check.txt';
     const parameters = {
@@ -35,14 +33,14 @@ const save = (formattedDate) =>{
       Body: data
     };
 
-    s3.putObject(parameters, (err) => {
-      if(err){
+    s3.putObject(parameters, err => {
+      if (err) {
         reject(err);
       }
       resolve(key);
     });
   });
-    return res;
+  return res;
 };
 
-export {getUrl, save};
+export { getUrl, save };
