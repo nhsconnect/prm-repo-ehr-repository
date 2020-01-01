@@ -73,11 +73,4 @@ describe('GET/health', () => {
       })
       .end(done);
   });
-
-  // it('should return 502 if catch any error', done => {
-  //   request(app)
-  //     .get('/health')
-  //     .expect(502)
-  //     .end(done);
-  // });
 });

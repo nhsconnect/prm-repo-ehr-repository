@@ -24,7 +24,7 @@ describe('getUrl', () => {
   });
 });
 
-describe('save', () => {
+describe('saveHeathCheckToS3', () => {
   it('should call s3 putObject with parameters ', () => {
     const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
     S3.mockImplementation(() => ({

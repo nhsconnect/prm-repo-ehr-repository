@@ -27,9 +27,17 @@ const getUrl = key => {
 
 const save = formattedDate => {
   const data = `${formattedDate}`;
-  const res = new Promise((resolve, reject) => {
+  const res = new Promise(resolve => {
     const s3 = new S3();
     const key = 'health-check.txt';
+
+    let resultObject = {
+      type: 's3',
+      bucketName: config.awsS3BucketName,
+      available: true,
+      writable: false
+    };
+
     const parameters = {
       Bucket: config.awsS3BucketName,
       Key: key,
@@ -39,10 +47,12 @@ const save = formattedDate => {
     s3.putObject(parameters, err => {
       if (err) {
         updateLogEventWithError(err);
-        return reject(err);
+        resultObject.error = err;
+        return resolve(resultObject);
       }
       updateLogEvent({ storage: { path: `${config.awsS3BucketName}/${key}` } });
-      resolve();
+      resultObject.writable = true;
+      resolve(resultObject);
     });
   });
   return res;
