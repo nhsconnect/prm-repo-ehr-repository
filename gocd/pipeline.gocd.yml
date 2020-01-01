@@ -34,11 +34,6 @@ pipelines:
             npm_install:
               resources:
                 - docker
-              artifacts:
-                - build:
-                    source: build
-                - build:
-                    source: node_modules
               tasks:
                 - exec:
                     command: /bin/bash
