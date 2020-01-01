@@ -1,7 +1,6 @@
 import getHealthCheck from './get-health-check';
 import { Client } from 'pg';
 import { S3 } from 'aws-sdk';
-import config from '../config';
 //import { updateLogEvent } from '../middleware/logging';
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('some-uuid'));
@@ -30,7 +29,6 @@ describe('getHealthCheck', () => {
 
   describe('prod environment', () => {
     process.env.NODE_ENV = 'prod';
-    config.awsS3BucketName = 'test';
 
     it('should get reject with error from s3 if run in production mode and s3 returns an error', () => {
       S3.mockImplementation(() => ({
@@ -46,7 +44,7 @@ describe('getHealthCheck', () => {
         const s3 = result[0];
         expect(s3).toEqual({
           type: 's3',
-          bucketName: 'test',
+          bucketName: undefined,
           available: true,
           writable: false,
           error: 'some s3 error'
