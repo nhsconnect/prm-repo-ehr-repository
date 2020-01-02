@@ -19,7 +19,7 @@ const client = new Client({
   host: config.databaseHost
 });
 
-describe('POST /url', () => {
+describe('POST /health-record', () => {
   beforeAll(() => client.connect());
   afterAll(() => client.end());
 
@@ -32,12 +32,16 @@ describe('POST /url', () => {
 
     it('should return fake url', done => {
       const conversationId = uuid();
+      const messageId = uuid();
 
       request(app)
-        .post('/url')
-        .send({ conversationId: conversationId })
+        .post('/health-record')
+        .send({
+          conversationId,
+          messageId
+        })
         .end(() => {
-          getSignedUrl(conversationId).then(url => {
+          getSignedUrl(conversationId, messageId).then(url => {
             expect(url).toBe('http://example.com');
           });
           done();

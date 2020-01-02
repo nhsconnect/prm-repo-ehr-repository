@@ -6,10 +6,10 @@ import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
 
 const router = express.Router();
 
-const urlRequestValidationRules = [body('conversationId').notEmpty()];
+const urlRequestValidationRules = [body('conversationId').notEmpty(), body('messageId').notEmpty()];
 
 router.post('/', urlRequestValidationRules, validate, (req, res, next) => {
-  getSignedUrl(req.body.conversationId)
+  getSignedUrl(req.body.conversationId, req.body.messageId)
     .then(url => {
       updateLogEvent({ status: 'Got url sucessfully', url: url });
       res.status(202).send(url);

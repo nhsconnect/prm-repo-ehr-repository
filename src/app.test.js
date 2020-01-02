@@ -15,43 +15,72 @@ jest.mock('express-winston', () => ({
   logger: () => (req, res, next) => next()
 }));
 
-describe('POST /url', () => {
+describe('POST /health-record', () => {
+  const TEST_MESSAGE_ID = 'test-message-id';
+  const TEST_CONVERSATION_ID = 'test-conversation-id';
+  const TEST_ENDPOINT = '/health-record';
+
   it('should return 202', done => {
     request(app)
-      .post('/url')
-      .send({ conversationId: 'conversation-id' })
+      .post(TEST_ENDPOINT)
+      .send({
+        conversationId: TEST_CONVERSATION_ID,
+        messageId: TEST_MESSAGE_ID
+      })
       .expect(202)
       .end(done);
   });
 
   it('should call getSignedUrl service with request body', done => {
     request(app)
-      .post('/url')
-      .send({ conversationId: 'conversation-id' })
+      .post(TEST_ENDPOINT)
+      .send({
+        conversationId: TEST_CONVERSATION_ID,
+        messageId: TEST_MESSAGE_ID
+      })
       .expect(() => {
-        expect(getSignedUrl).toHaveBeenCalledWith('conversation-id');
+        expect(getSignedUrl).toHaveBeenCalledWith(TEST_CONVERSATION_ID, TEST_MESSAGE_ID);
       })
       .end(done);
   });
 
   it('should return url from s3 when the endpoint being called', done => {
     request(app)
-      .post('/url')
-      .send({ conversationId: 'conversation-id' })
+      .post(TEST_ENDPOINT)
+      .send({
+        conversationId: TEST_CONVERSATION_ID,
+        messageId: TEST_MESSAGE_ID
+      })
       .expect(res => {
         expect(res.text).toEqual('some-url');
       })
       .end(done);
   });
 
-  it('should return 422 if the request body is empty', done => {
+  it('should return 422 if no conversationId is provided in request body', done => {
     request(app)
-      .post('/url')
-      .send()
+      .post(TEST_ENDPOINT)
+      .send({
+        messageId: TEST_MESSAGE_ID
+      })
       .expect(422)
       .expect('Content-Type', /json/)
       .expect(res => {
         expect(res.body).toEqual({ errors: [{ conversationId: 'Invalid value' }] });
+      })
+      .end(done);
+  });
+
+  it('should return 422 if no messageId is provided in request body', done => {
+    request(app)
+      .post(TEST_ENDPOINT)
+      .send({
+        conversationId: TEST_CONVERSATION_ID
+      })
+      .expect(422)
+      .expect('Content-Type', /json/)
+      .expect(res => {
+        expect(res.body).toEqual({ errors: [{ messageId: 'Invalid value' }] });
       })
       .end(done);
   });
@@ -73,11 +102,4 @@ describe('GET/health', () => {
       })
       .end(done);
   });
-
-  // it('should return 502 if catch any error', done => {
-  //   request(app)
-  //     .get('/health')
-  //     .expect(502)
-  //     .end(done);
-  // });
 });

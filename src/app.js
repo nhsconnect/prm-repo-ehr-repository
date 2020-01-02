@@ -4,7 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import * as correlationInfo from './middleware/correlation';
 import * as logging from './middleware/logging';
 import { options } from './config/logging';
-import url from './api/url';
+import healthRecord from './api/health-record';
 import health from './api/health';
 import swaggerDocument from './swagger.json';
 
@@ -16,7 +16,7 @@ app.use(requestLogger(options));
 
 app.use('/health', logging.middleware, health);
 
-app.use('/url', logging.middleware, url);
+app.use('/health-record', logging.middleware, healthRecord);
 
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
