@@ -160,11 +160,12 @@ EOF
       export EHR_HOST=${NHS_ENVIRONMENT}.ehr-repo.patient-deductions.nhs.uk
       export EHR_URL=http://${EHR_HOST}
       curl -i http://${EHR_HOST}/health | grep OK
-      dojo "./tasks _smoke_s3"
+      dojo "./tasks _smoke_message_endpoints"
       ;;
-  _smoke_s3)
+  _smoke_message_endpoints)
       npm install axios
-      node infra-tests/test_upload.js
+      node infra-tests/test_message_upload.js
+      node infra-tests/test_message_update.js
       ;;
   tf)
       dojo -c Dojofile-infra "bash"

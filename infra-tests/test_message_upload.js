@@ -1,9 +1,9 @@
 const axios = require('axios');
 
-axios.post(process.env.EHR_URL + '/url', { 'conversationId': '1234' })
+axios.post(process.env.EHR_URL + '/health-record/1234/message', { 'messageId': '4321' })
   .then(response => {
     console.log(response);
-    if (response.status !== 202) {
+    if (response.status !== 201) {
       process.exit(5);
     }
     var options = {};
