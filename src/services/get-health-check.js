@@ -1,5 +1,5 @@
 import { save } from '../storage/s3';
-import formattedDate from './getFormattedDate';
+import formattedDate from './get-formatted-date';
 import { saveHealthCheck } from '../storage/db';
 import { updateLogEvent } from '../middleware/logging';
 
