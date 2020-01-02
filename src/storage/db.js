@@ -24,7 +24,7 @@ const save = (nhsNumber, storageLocation) => {
 };
 
 const saveHealthCheck = formattedDate => {
-  let resultObject = {
+  const resultObject = {
     type: 'postgresql',
     connection: false,
     writable: false
