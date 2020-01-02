@@ -7,9 +7,9 @@ const router = express.Router();
 
 router.get('/', validate, (req, res, next) => {
   getHealthCheck()
-    .then(() => {
-      updateLogEvent({ status: 'Finish health check. The services are healthy', res: res });
-      res.status(200).send('healthy');
+    .then(status => {
+      updateLogEvent({ status: 'Finished health check. Status given by res', res: res });
+      res.status(200).send(status);
     })
     .catch(err => {
       updateLogEventWithError(err);

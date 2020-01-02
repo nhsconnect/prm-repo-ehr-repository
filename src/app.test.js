@@ -9,11 +9,11 @@ jest.mock('./services/get-signed-url', () =>
 jest.mock('./services/get-health-check', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
-jest.mock('./config/logging');
 jest.mock('express-winston', () => ({
   errorLogger: () => (req, res, next) => next(),
   logger: () => (req, res, next) => next()
 }));
+jest.mock('./config/logging');
 
 describe('POST /health-record/{conversationId}/message', () => {
   const conversationId = 'test-conversation-id';
@@ -109,6 +109,18 @@ describe('GET/health', () => {
       .get('/health')
       .expect(() => {
         expect(getHealthCheck).toHaveBeenCalled();
+      })
+      .end(done);
+  });
+});
+
+describe('GET/error', () => {
+  it('should call updateEventWithError when the error endpoint being called  ', done => {
+    request(app)
+      .get('/error')
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toEqual('Added test Error to the log');
       })
       .end(done);
   });

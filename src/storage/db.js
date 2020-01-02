@@ -24,20 +24,38 @@ const save = (nhsNumber, storageLocation) => {
 };
 
 const saveHealthCheck = formattedDate => {
+  const resultObject = {
+    type: 'postgresql',
+    connection: false,
+    writable: false
+  };
   updateLogEvent({ status: 'start database health check...' });
   const client = new Client(params);
-  client.connect();
-  return new Promise((resolve, reject) => {
-    client.query('INSERT INTO health(completed_at) VALUES ($1)', [formattedDate], (err, res) => {
-      if (err) {
-        updateLogEventWithError(err);
-        return reject(err);
-      }
-      updateLogEvent({ status: 'saved timestamp into database', table: 'health' });
-      resolve(res);
-    });
-    //.finally(() => client.end());
-  }).then(() => client.end());
-};
 
+  return client
+    .connect()
+    .then(() => {
+      resultObject.connection = true;
+      return client
+        .query('INSERT INTO health(completed_at) VALUES ($1)', [formattedDate])
+        .then(() => updateLogEvent({ status: 'saved timestamp into database', table: 'health' }))
+        .then(() => {
+          resultObject.writable = true;
+          return resultObject;
+        })
+        .catch(err => {
+          updateLogEventWithError(err);
+          resultObject.error = err;
+          return resultObject;
+        })
+        .finally(() => {
+          client.end();
+        });
+    })
+    .catch(err => {
+      updateLogEventWithError(err);
+      resultObject.error = err;
+      return resultObject;
+    });
+};
 export { save, saveHealthCheck };

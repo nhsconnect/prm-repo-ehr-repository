@@ -1,6 +1,6 @@
 const formattedDate = () => {
   const date = new Date();
-  const formattedDate =
+  return (
     date.getFullYear() +
     '-' +
     (date.getMonth() + 1) +
@@ -11,8 +11,8 @@ const formattedDate = () => {
     ':' +
     date.getMinutes() +
     ':' +
-    date.getSeconds();
-  return formattedDate;
+    date.getSeconds()
+  );
 };
 
 export default formattedDate;

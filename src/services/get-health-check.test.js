@@ -7,40 +7,93 @@ jest.mock('uuid/v4', () => jest.fn().mockReturnValue('some-uuid'));
 jest.mock('aws-sdk');
 jest.mock('pg');
 
+const s3MockPutObjectGood = jest.fn().mockImplementation((config, callback) => callback());
+const s3MockPutObjectBad = jest
+  .fn()
+  .mockImplementation((config, callback) => callback('some s3 error'));
+
+const dbMockConnectGood = jest.fn().mockImplementation(() => Promise.resolve());
+const dbMockConnectBad = jest.fn().mockImplementation(() => Promise.reject('db connection failed'));
+const dbMockQueryGood = jest.fn().mockImplementation(() => Promise.resolve());
+const dbMockQueryBad = jest.fn().mockImplementation(() => Promise.reject('db query failed'));
+const dbMockEnd = jest.fn().mockImplementation(() => Promise.resolve());
+
 beforeEach(() => {
   Client.mockClear();
   S3.mockClear();
 });
 describe('getHealthCheck', () => {
-  const mockPutObject = jest.fn(); //.mockImplementation((config, callback) => callback(null));
-  S3.mockImplementation(() => ({
-    putObject: mockPutObject
-  }));
+  describe('local environment', () => {
+    process.env.NODE_ENV = 'local';
+  });
 
-  it('should get reject with error from s3 if run in production mode and s3 returns an error', () => {
+  describe('prod environment', () => {
     process.env.NODE_ENV = 'prod';
 
-    mockPutObject.mockImplementation((config, callback) => callback('some-error'));
+    it('should get reject with error from s3 if run in production mode and s3 returns an error', () => {
+      S3.mockImplementation(() => ({
+        putObject: s3MockPutObjectBad
+      }));
 
-    return expect(getHealthCheck()).rejects.toBe('some-error');
-  });
-
-  it('should reject the promise if run in production mode and db returns an error', () => {
-    const mockQuery = jest
-      .fn()
-      .mockImplementation((config, callback) => callback('some-error', 'some-respond'));
-    Client.mockImplementation(() => {
-      mockQuery;
+      Client.mockImplementation(() => ({
+        connect: dbMockConnectGood,
+        query: dbMockQueryGood,
+        end: dbMockEnd
+      }));
+      return getHealthCheck().then(result => {
+        const s3 = result.details['file-store'];
+        expect(s3).toEqual({
+          type: 's3',
+          bucketName: undefined,
+          available: true,
+          writable: false,
+          error: 'some s3 error'
+        });
+      });
     });
 
-    return expect(getHealthCheck()).rejects.toBe('some-error');
-  });
+    it('should return true of the db connection if db connection is healthy', () => {
+      S3.mockImplementation(() => ({
+        putObject: s3MockPutObjectGood
+      }));
 
-  // it('should update log event when the health check start', () => {
-  //   return getHealthCheck().then(() => {
-  //     expect(updateLogEvent).toHaveBeenCalledWith({
-  //       status: 'Starting health check'
-  //     });
-  //   });
-  // });
+      Client.mockImplementation(() => ({
+        connect: dbMockConnectGood,
+        query: dbMockQueryBad,
+        end: dbMockEnd
+      }));
+
+      return getHealthCheck().then(result => {
+        const db = result.details['database'];
+        expect(db).toEqual({
+          type: 'postgresql',
+          connection: true,
+          writable: false,
+          error: 'db query failed'
+        });
+      });
+    });
+
+    it('should return true of the db connection if db connection is healthy', () => {
+      S3.mockImplementation(() => ({
+        putObject: s3MockPutObjectGood
+      }));
+
+      Client.mockImplementation(() => ({
+        connect: dbMockConnectBad,
+        query: dbMockQueryGood,
+        end: dbMockEnd
+      }));
+
+      return getHealthCheck().then(result => {
+        const db = result.details['database'];
+        expect(db).toEqual({
+          type: 'postgresql',
+          connection: false,
+          writable: false,
+          error: 'db connection failed'
+        });
+      });
+    });
+  });
 });

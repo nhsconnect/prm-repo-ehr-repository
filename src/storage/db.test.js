@@ -28,7 +28,7 @@ describe('db', () => {
     });
   });
 
-  describe('saveHealthCheck', () => {
+  describe('saveHealthCheckToDB', () => {
     afterEach(() => client.query('DELETE FROM health'));
 
     it('should save the timestamp to the db in health table', done => {
