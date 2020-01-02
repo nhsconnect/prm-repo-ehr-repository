@@ -65,6 +65,23 @@ case "${command}" in
   build)
       dojo "./tasks _build"
       ;;
+  _coverage)
+      npm install
+      npm run migrate-test
+      npm run coverage
+      ;;
+  coverage)
+        cat << EOF > .env
+NODE_ENV=local
+DATABASE_NAME=deductions_test
+DATABASE_USER=deductions_user
+DATABASE_PASSWORD=secret
+DATABASE_HOST=db
+EOF
+      set -a
+      source .env
+      dojo -c Dojofile-itest "./tasks _coverage"
+      ;;
   _test)
       npm install
       npm run migrate-test
