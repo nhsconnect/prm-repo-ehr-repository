@@ -43,7 +43,7 @@ describe('POST /health-record/{conversationId}/message', () => {
       .end(done);
   });
 
-  it('should return url from s3 when the endpoint being called', done => {
+  it('should return URL from s3 service', done => {
     request(app)
       .post(TEST_ENDPOINT)
       .send({
@@ -84,7 +84,7 @@ describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
       .end(done);
   });
 
-  it('should return 422 if transferComplete is not provided', done => {
+  it('should return 422 if transferComplete is not provided in body', done => {
     request(app)
       .put(TEST_ENDPOINT)
       .send()
@@ -96,7 +96,7 @@ describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
   });
 });
 
-describe('GET/health', () => {
+describe('GET /health', () => {
   it('should return 200', done => {
     request(app)
       .get('/health')
@@ -104,7 +104,7 @@ describe('GET/health', () => {
       .end(done);
   });
 
-  it('should call health check service when the endpoint being called ', done => {
+  it('should call health check service', done => {
     request(app)
       .get('/health')
       .expect(() => {
@@ -114,8 +114,8 @@ describe('GET/health', () => {
   });
 });
 
-describe('GET/error', () => {
-  it('should call updateEventWithError when the error endpoint being called  ', done => {
+describe('GET /error', () => {
+  it('should return 200', done => {
     request(app)
       .get('/error')
       .expect(200)
