@@ -35,9 +35,8 @@ describe('POST /health-record', () => {
       const messageId = uuid();
 
       request(app)
-        .post('/health-record')
+        .post(`/health-record/${conversationId}/message`)
         .send({
-          conversationId,
           messageId
         })
         .end(() => {

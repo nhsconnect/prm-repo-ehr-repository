@@ -15,19 +15,19 @@ jest.mock('express-winston', () => ({
   logger: () => (req, res, next) => next()
 }));
 
-describe('POST /health-record', () => {
-  const TEST_MESSAGE_ID = 'test-message-id';
-  const TEST_CONVERSATION_ID = 'test-conversation-id';
-  const TEST_ENDPOINT = '/health-record';
+describe('POST /health-record/{conversationId}/message', () => {
+  const conversationId = 'test-conversation-id';
+  const TEST_ENDPOINT = `/health-record/${conversationId}/message`;
 
-  it('should return 202', done => {
+  const messageId = 'test-message-id';
+
+  it('should return 201', done => {
     request(app)
       .post(TEST_ENDPOINT)
       .send({
-        conversationId: TEST_CONVERSATION_ID,
-        messageId: TEST_MESSAGE_ID
+        messageId
       })
-      .expect(202)
+      .expect(201)
       .end(done);
   });
 
@@ -35,11 +35,10 @@ describe('POST /health-record', () => {
     request(app)
       .post(TEST_ENDPOINT)
       .send({
-        conversationId: TEST_CONVERSATION_ID,
-        messageId: TEST_MESSAGE_ID
+        messageId
       })
       .expect(() => {
-        expect(getSignedUrl).toHaveBeenCalledWith(TEST_CONVERSATION_ID, TEST_MESSAGE_ID);
+        expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId);
       })
       .end(done);
   });
@@ -48,8 +47,7 @@ describe('POST /health-record', () => {
     request(app)
       .post(TEST_ENDPOINT)
       .send({
-        conversationId: TEST_CONVERSATION_ID,
-        messageId: TEST_MESSAGE_ID
+        messageId
       })
       .expect(res => {
         expect(res.text).toEqual('some-url');
@@ -57,30 +55,42 @@ describe('POST /health-record', () => {
       .end(done);
   });
 
-  it('should return 422 if no conversationId is provided in request body', done => {
-    request(app)
-      .post(TEST_ENDPOINT)
-      .send({
-        messageId: TEST_MESSAGE_ID
-      })
-      .expect(422)
-      .expect('Content-Type', /json/)
-      .expect(res => {
-        expect(res.body).toEqual({ errors: [{ conversationId: 'Invalid value' }] });
-      })
-      .end(done);
-  });
-
   it('should return 422 if no messageId is provided in request body', done => {
     request(app)
       .post(TEST_ENDPOINT)
-      .send({
-        conversationId: TEST_CONVERSATION_ID
-      })
+      .send()
       .expect(422)
       .expect('Content-Type', /json/)
       .expect(res => {
         expect(res.body).toEqual({ errors: [{ messageId: 'Invalid value' }] });
+      })
+      .end(done);
+  });
+});
+
+describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
+  const TEST_CONVERSATION_ID = 'test-conversation-id';
+  const TEST_MESSAGE_ID = 'test-message-id';
+
+  const TEST_ENDPOINT = `/health-record/${TEST_CONVERSATION_ID}/message/${TEST_MESSAGE_ID}`;
+
+  it('should return 204', done => {
+    request(app)
+      .put(TEST_ENDPOINT)
+      .send({
+        transferComplete: true
+      })
+      .expect(204)
+      .end(done);
+  });
+
+  it('should return 422 if transferComplete is not provided', done => {
+    request(app)
+      .put(TEST_ENDPOINT)
+      .send()
+      .expect(422)
+      .expect(res => {
+        expect(res.body).toEqual({ errors: [{ transferComplete: 'Invalid value' }] });
       })
       .end(done);
   });
