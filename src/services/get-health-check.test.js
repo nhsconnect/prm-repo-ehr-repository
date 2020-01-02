@@ -41,7 +41,7 @@ describe('getHealthCheck', () => {
         end: dbMockEnd
       }));
       return getHealthCheck().then(result => {
-        const s3 = result[0];
+        const s3 = result.details['file-store'];
         expect(s3).toEqual({
           type: 's3',
           bucketName: undefined,
@@ -64,7 +64,7 @@ describe('getHealthCheck', () => {
       }));
 
       return getHealthCheck().then(result => {
-        const db = result[1];
+        const db = result.details['database'];
         expect(db).toEqual({
           type: 'postgresql',
           connection: true,
@@ -86,7 +86,7 @@ describe('getHealthCheck', () => {
       }));
 
       return getHealthCheck().then(result => {
-        const db = result[1];
+        const db = result.details['database'];
         expect(db).toEqual({
           type: 'postgresql',
           connection: false,
