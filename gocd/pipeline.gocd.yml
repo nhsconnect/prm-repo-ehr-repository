@@ -6,9 +6,6 @@ pipelines:
     materials:
       git:
         type: configrepo
-      base_infra:
-        pipeline: prm-deductions-infra
-        stage: deploy
     stages:
       - build:
           clean_workspace: true
@@ -77,6 +74,22 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test_docker
+
+  "prm-deductions-ehr-repository.dev":
+    group: deductions
+    label_template: "${git[:8]}"
+    materials:
+      git:
+        type: configrepo
+      app:
+        pipeline: prm-deductions-ehr-repository
+        stage: test_docker
+      base_infra:
+        pipeline: prm-deductions-infra
+        stage: deploy_dev
+    environment_variables:
+      NHS_ENVIRONMENT: dev
+    stages:
       - deploy_dev:
           clean_workspace: true
           jobs:
