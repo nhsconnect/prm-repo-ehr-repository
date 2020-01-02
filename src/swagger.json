@@ -8,7 +8,7 @@
   "tags": [
   ],
   "paths": {
-    "/url": {
+    "/health-record/{conversationId}/message": {
       "post": {
         "tags": [
         ],
@@ -18,17 +18,80 @@
         ],
         "parameters": [
           {
+            "in": "path",
+            "name": "conversationId",
+            "description": "The conversation ID from the EHR messages",
+            "required": true,
+            "type": "string"
+          },
+          {
             "in": "body",
-            "name": "Request Body Data",
-            "description": "Conversation and Registration ID",
+            "name": "body",
+            "description": "The message ID from the EHR message fragments",
             "schema": {
               "$ref": "#/definitions/UploadUrlRequest"
             }
           }
         ],
         "responses": {
-          "202": {
+          "201": {
             "description": "Successful Generation of URL"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/health-record/{conversationId}/message/{messageId}": {
+      "put": {
+        "tags": [
+        ],
+        "summary": "Mark message as transfer complete",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversationId",
+            "description": "The conversation ID from the EHR messages",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "messageId",
+            "description": "The message ID from the EHR messages",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Indicates if the transfer has completed successfully",
+            "schema": {
+              "$ref": "#/definitions/UpdateMessageRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful update of message transfer status"
           },
           "401": {
             "description": "Authorization header missing"
@@ -62,16 +125,23 @@
     "UploadUrlRequest": {
       "type": "object",
       "properties": {
-        "ConversationID": {
-          "type": "string"
-        },
-        "RegistrationID": {
+        "messageId": {
           "type": "string"
         }
       },
       "required": [
-        "ConversationID",
-        "RegistrationID"
+        "messageId"
+      ]
+    },
+    "UpdateMessageRequest": {
+      "type": "object",
+      "properties": {
+        "transferComplete": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "transferComplete"
       ]
     },
     "ValidationErrors": {

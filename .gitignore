@@ -1,5 +1,6 @@
 # IntelliJ
 .idea
+*.iml
 
 # Directory for storing files when running locally
 local-datastore

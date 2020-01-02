@@ -15,49 +15,88 @@ jest.mock('express-winston', () => ({
 }));
 jest.mock('./config/logging');
 
-describe('POST /url', () => {
-  it('should return 202', done => {
+describe('POST /health-record/{conversationId}/message', () => {
+  const conversationId = 'test-conversation-id';
+  const TEST_ENDPOINT = `/health-record/${conversationId}/message`;
+
+  const messageId = 'test-message-id';
+
+  it('should return 201', done => {
     request(app)
-      .post('/url')
-      .send({ conversationId: 'conversation-id' })
-      .expect(202)
+      .post(TEST_ENDPOINT)
+      .send({
+        messageId
+      })
+      .expect(201)
       .end(done);
   });
 
   it('should call getSignedUrl service with request body', done => {
     request(app)
-      .post('/url')
-      .send({ conversationId: 'conversation-id' })
+      .post(TEST_ENDPOINT)
+      .send({
+        messageId
+      })
       .expect(() => {
-        expect(getSignedUrl).toHaveBeenCalledWith('conversation-id');
+        expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId);
       })
       .end(done);
   });
 
-  it('should return url from s3 when the endpoint being called', done => {
+  it('should return URL from s3 service', done => {
     request(app)
-      .post('/url')
-      .send({ conversationId: 'conversation-id' })
+      .post(TEST_ENDPOINT)
+      .send({
+        messageId
+      })
       .expect(res => {
         expect(res.text).toEqual('some-url');
       })
       .end(done);
   });
 
-  it('should return 422 if the request body is empty', done => {
+  it('should return 422 if no messageId is provided in request body', done => {
     request(app)
-      .post('/url')
+      .post(TEST_ENDPOINT)
       .send()
       .expect(422)
       .expect('Content-Type', /json/)
       .expect(res => {
-        expect(res.body).toEqual({ errors: [{ conversationId: 'Invalid value' }] });
+        expect(res.body).toEqual({ errors: [{ messageId: 'Invalid value' }] });
       })
       .end(done);
   });
 });
 
-describe('GET/health', () => {
+describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
+  const TEST_CONVERSATION_ID = 'test-conversation-id';
+  const TEST_MESSAGE_ID = 'test-message-id';
+
+  const TEST_ENDPOINT = `/health-record/${TEST_CONVERSATION_ID}/message/${TEST_MESSAGE_ID}`;
+
+  it('should return 204', done => {
+    request(app)
+      .put(TEST_ENDPOINT)
+      .send({
+        transferComplete: true
+      })
+      .expect(204)
+      .end(done);
+  });
+
+  it('should return 422 if transferComplete is not provided in body', done => {
+    request(app)
+      .put(TEST_ENDPOINT)
+      .send()
+      .expect(422)
+      .expect(res => {
+        expect(res.body).toEqual({ errors: [{ transferComplete: 'Invalid value' }] });
+      })
+      .end(done);
+  });
+});
+
+describe('GET /health', () => {
   it('should return 200', done => {
     request(app)
       .get('/health')
@@ -65,7 +104,7 @@ describe('GET/health', () => {
       .end(done);
   });
 
-  it('should call health check service when the endpoint being called ', done => {
+  it('should call health check service', done => {
     request(app)
       .get('/health')
       .expect(() => {
@@ -75,8 +114,8 @@ describe('GET/health', () => {
   });
 });
 
-describe('GET/error', () => {
-  it('should call updateEventWithError when the error endpoint being called  ', done => {
+describe('GET /error', () => {
+  it('should return 200', done => {
     request(app)
       .get('/error')
       .expect(200)

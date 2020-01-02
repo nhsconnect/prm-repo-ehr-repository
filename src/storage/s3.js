@@ -12,7 +12,7 @@ const getUrl = key => {
     ContentType: 'text/xml'
   };
 
-  const url = new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     s3.getSignedUrl('putObject', parameters, (err, url) => {
       if (err) {
         updateLogEventWithError(err);
@@ -22,12 +22,11 @@ const getUrl = key => {
       resolve(url);
     });
   });
-  return url;
 };
 
 const save = formattedDate => {
   const data = `${formattedDate}`;
-  const res = new Promise(resolve => {
+  return new Promise(resolve => {
     const s3 = new S3();
     const key = 'health-check.txt';
 
@@ -55,7 +54,6 @@ const save = formattedDate => {
       resolve(resultObject);
     });
   });
-  return res;
 };
 
 export { getUrl, save };
