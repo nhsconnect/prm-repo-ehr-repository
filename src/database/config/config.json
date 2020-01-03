@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "deductions_user",
+    "password": "secret",
+    "database": "deductions_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "deductions_user",
+    "password": "secret",
+    "database": "deductions_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "admin",
+    "password": "jellyfish",
+    "database": "deductions",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
