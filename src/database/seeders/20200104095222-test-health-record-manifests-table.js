@@ -1,7 +1,7 @@
 "use strict";
 
 const uuid = require("uuid/v4");
-const tableName = "health_records";
+const tableName = "health_record_manifests";
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -9,21 +9,18 @@ module.exports = {
     return queryInterface.bulkInsert(tableName,
       [{
         slug: uuid(),
-        patient_id: 1,
         conversation_id: uuid(),
         created_at: new Date(),
         updated_at: new Date()
       },
         {
           slug: uuid(),
-          patient_id: 2,
           conversation_id: uuid(),
           created_at: new Date(),
           updated_at: new Date()
         },
         {
           slug: uuid(),
-          patient_id: 3,
           conversation_id: uuid(),
           created_at: new Date(),
           updated_at: new Date(),

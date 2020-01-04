@@ -2,7 +2,7 @@
 
 const modelName = "Patient";
 
-const modelParameters = require("./parameters")(modelName);
+const modelParameters = require("./parameters")("patients");
 
 const model = (dataType) => {
     return {
@@ -44,10 +44,6 @@ module.exports = (sequelize, DataTypes) => {
 
     // ONE to ONE -> Health Record
   };
-
-  Patient.getModel = (dataType) => model(dataType);
-
-  Patient.getModelName = () => modelName;
 
   return Patient;
 };

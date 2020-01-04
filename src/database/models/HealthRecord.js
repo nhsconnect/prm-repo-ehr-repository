@@ -2,7 +2,7 @@
 
 const modelName = "HealthRecord";
 
-const modelParameters = require("./parameters")(modelName);
+const modelParameters = require("./parameters")("health_records");
 
 const model = (dataType) => ({
   id: {
@@ -52,10 +52,6 @@ module.exports = (sequelize, DataTypes) => {
       completed_at: new Date()
     }, options);
   };
-
-  HealthRecord.getModel = (dataType) => model(dataType);
-
-  HealthRecord.getModelName = () => modelName;
 
   return HealthRecord;
 };

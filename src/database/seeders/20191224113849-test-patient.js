@@ -1,7 +1,7 @@
 "use strict";
 
 const uuid = require("uuid/v4");
-const tableName = "Patients";
+const tableName = "patients";
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

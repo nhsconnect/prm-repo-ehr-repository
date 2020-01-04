@@ -1,0 +1,17 @@
+version: "3.4"
+
+services:
+  # POSTGRESQL SERVICE
+  # Uses:
+    # POSTGRES_USER
+    # POSTGRES_PASSWORD
+    # POSTGRES_DB
+  postgresql:
+    image: postgres
+    container_name: "test_postegres"
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    ports:
+      - "5432:5432"
