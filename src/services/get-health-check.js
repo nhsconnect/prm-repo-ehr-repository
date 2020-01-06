@@ -8,6 +8,7 @@ const getHealthCheck = () => {
     status: 'Starting health check'
   });
 
+  // TODO query this required if localstack is implemented
   if (process.env.NODE_ENV === 'local') {
     return Promise.resolve('check locally');
   }
