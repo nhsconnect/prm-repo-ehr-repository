@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "ecs-assume-role-policy" {
 
 resource "aws_iam_role" "ehr-repo" {
   name               = "${var.environment}-ehr-repo-EcsTaskRole"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs-assume-role-policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.ecs-assume-role-policy.json
   description        = "Role assumed by ehr-repo ECS task"
 }
 
