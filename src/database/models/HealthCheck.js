@@ -31,7 +31,6 @@ const model = dataType => ({
 });
 
 module.exports = (sequelize, DataTypes) => {
-
   return sequelize.define(modelName, model(DataTypes), {
     ...getParameters(tableName)
   });

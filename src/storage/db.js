@@ -1,19 +1,18 @@
 import { updateLogEventWithError, updateLogEvent } from '../middleware/logging';
-import models from "../database/models";
-import uuid from "uuid/v4";
-
+import ModelFactory from '../database/models';
+import uuid from 'uuid/v4';
+import { ERROR_CODES } from './pg-error-codes';
 
 const save = (nhsNumber, storageLocation) => {
-
-  const HealthRecord = models.HealthRecord;
+  const HealthRecord = ModelFactory.getByName('HealthRecord');
 
   updateLogEvent({ status: 'start saving ehr into database...' });
 
   return HealthRecord.create({
-      conversation_id: uuid(),
-      patient_id: nhsNumber,
-      slug: storageLocation
-    })
+    conversation_id: uuid(),
+    patient_id: nhsNumber,
+    slug: storageLocation
+  })
     .then(result => {
       updateLogEvent({
         status: `Created new record: ${result}`
@@ -26,25 +25,66 @@ const save = (nhsNumber, storageLocation) => {
 };
 
 const saveHealthCheck = () => {
+  const HealthCheck = ModelFactory.getByName('HealthCheck');
 
-  const HealthCheck = models.HealthCheck;
   const slug = uuid();
 
   updateLogEvent({ status: 'start database health check...' });
 
   return HealthCheck.create({
-      slug: slug
-    })
+    slug: slug
+  })
     .then(result => {
       updateLogEvent({
         status: `Created HealthCheck record: ${result}`
       });
-      return slug;
+
+      return {
+        type: 'postgresql',
+        connection: true,
+        writable: true
+      };
     })
     .catch(err => {
+      console.log(err);
       updateLogEventWithError(err);
-      throw err;
+
+      if (err.parent === undefined || err.parent.code === undefined) {
+        return {
+          type: 'postgresql',
+          connection: false,
+          writable: false,
+          error: `Sequelize error (Message: ${err.errors[0].message})`
+        };
+      }
+
+      return parseHealthCheckError(err.parent.code);
     });
+};
+
+const parseHealthCheckError = code => {
+  if (code === ERROR_CODES.INVALID_USER_PASSWORD) {
+    return {
+      type: 'postgresql',
+      connection: false,
+      writable: true,
+      error: `Authorization error (Error Code: ${code})`
+    };
+  } else if (code === ERROR_CODES.CONNECTION_REFUSED || code === ERROR_CODES.INVALID_DATABASE) {
+    return {
+      type: 'postgresql',
+      connection: false,
+      writable: false,
+      error: `Connection error (Error Code: ${code})`
+    };
+  } else {
+    return {
+      type: 'postgresql',
+      connection: false,
+      writable: false,
+      error: `Unknown error (Error Code: ${code})`
+    };
+  }
 };
 
 export { save, saveHealthCheck };

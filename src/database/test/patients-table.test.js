@@ -1,13 +1,14 @@
-import models from '../models';
+import ModelFactory from '../models';
 import uuid from 'uuid/v4';
 
-describe('models.Patient', () => {
-  const Patient = models.Patient;
+describe('Patient', () => {
+  const Patient = ModelFactory.getByName('Patient');
+
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const nhsNumberPattern = /^[0-9]{6}$/;
 
   afterAll(() => {
-    return models.sequelize.close();
+    return ModelFactory.sequelize.close();
   });
 
   it('should return id as an INTEGER type', () => {

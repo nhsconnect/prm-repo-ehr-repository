@@ -1,14 +1,14 @@
-import models from '../models';
+import ModelFactory from '../models';
 import uuid from 'uuid/v4';
 
-describe('models.MessageFragment', () => {
-  const MessageFragment = models.MessageFragment;
+describe('MessageFragment', () => {
+  const MessageFragment = ModelFactory.getByName('MessageFragment');
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const convoIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
   afterAll(() => {
-    return models.sequelize.close();
+    return ModelFactory.sequelize.close();
   });
 
   it('should return id as an Integer type', () => {

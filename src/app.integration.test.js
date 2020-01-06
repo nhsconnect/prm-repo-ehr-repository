@@ -1,7 +1,5 @@
 import request from 'supertest';
 import uuid from 'uuid/v4';
-import { Client } from 'pg';
-import config from './config';
 import app from './app';
 import getSignedUrl from './services/get-signed-url';
 
@@ -12,23 +10,11 @@ jest.mock('express-winston', () => ({
   logger: () => (req, res, next) => next()
 }));
 
-const client = new Client({
-  user: config.databaseUser,
-  password: config.databasePassword,
-  database: config.databaseName,
-  host: config.databaseHost
-});
-
 describe('POST /health-record', () => {
-  beforeAll(() => client.connect());
-  afterAll(() => client.end());
-
   describe('when running locally', () => {
     beforeEach(() => {
       process.env.NODE_ENV = 'local';
     });
-
-    afterEach(() => client.query('DELETE FROM ehr'));
 
     it('should return fake url', done => {
       const conversationId = uuid();

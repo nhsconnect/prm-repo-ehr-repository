@@ -1,48 +1,37 @@
 import getHealthCheck from './get-health-check';
-import { Client } from 'pg';
 import { S3 } from 'aws-sdk';
-//import { updateLogEvent } from '../middleware/logging';
+import ModelFactory from '../database/models';
 
-jest.mock('uuid/v4', () => jest.fn().mockReturnValue('some-uuid'));
 jest.mock('aws-sdk');
-jest.mock('pg');
 
 const s3MockPutObjectGood = jest.fn().mockImplementation((config, callback) => callback());
 const s3MockPutObjectBad = jest
   .fn()
   .mockImplementation((config, callback) => callback('some s3 error'));
 
-const dbMockConnectGood = jest.fn().mockImplementation(() => Promise.resolve());
-const dbMockConnectBad = jest.fn().mockImplementation(() => Promise.reject('db connection failed'));
-const dbMockQueryGood = jest.fn().mockImplementation(() => Promise.resolve());
-const dbMockQueryBad = jest.fn().mockImplementation(() => Promise.reject('db query failed'));
-const dbMockEnd = jest.fn().mockImplementation(() => Promise.resolve());
-
-beforeEach(() => {
-  Client.mockClear();
-  S3.mockClear();
-});
 describe('getHealthCheck', () => {
-  describe('local environment', () => {
-    process.env.NODE_ENV = 'local';
+  beforeEach(() => {
+    ModelFactory._resetConfig();
+    S3.mockClear();
+  });
+
+  afterAll(() => {
+    ModelFactory.sequelize.close();
   });
 
   describe('prod environment', () => {
     process.env.NODE_ENV = 'prod';
 
     it('should get reject with error from s3 if run in production mode and s3 returns an error', () => {
+
       S3.mockImplementation(() => ({
         putObject: s3MockPutObjectBad
       }));
 
-      Client.mockImplementation(() => ({
-        connect: dbMockConnectGood,
-        query: dbMockQueryGood,
-        end: dbMockEnd
-      }));
       return getHealthCheck().then(result => {
         const s3 = result.details['file-store'];
-        expect(s3).toEqual({
+
+        return expect(s3).toEqual({
           type: 's3',
           bucketName: undefined,
           available: true,
@@ -57,41 +46,37 @@ describe('getHealthCheck', () => {
         putObject: s3MockPutObjectGood
       }));
 
-      Client.mockImplementation(() => ({
-        connect: dbMockConnectGood,
-        query: dbMockQueryBad,
-        end: dbMockEnd
-      }));
+      ModelFactory._overrideConfig('database', 'something');
 
       return getHealthCheck().then(result => {
         const db = result.details['database'];
-        expect(db).toEqual({
+
+        return expect(db).toEqual({
           type: 'postgresql',
-          connection: true,
+          connection: false,
           writable: false,
-          error: 'db query failed'
+          error: 'Connection error (Error Code: 3D000)'
         });
       });
     });
 
-    it('should return true of the db connection if db connection is healthy', () => {
+    it('should return connection false if user is wrong', () => {
+
       S3.mockImplementation(() => ({
         putObject: s3MockPutObjectGood
       }));
 
-      Client.mockImplementation(() => ({
-        connect: dbMockConnectBad,
-        query: dbMockQueryGood,
-        end: dbMockEnd
-      }));
+      ModelFactory._overrideConfig('username', 'hello');
 
       return getHealthCheck().then(result => {
+
         const db = result.details['database'];
-        expect(db).toEqual({
+
+        return expect(db).toEqual({
           type: 'postgresql',
           connection: false,
-          writable: false,
-          error: 'db connection failed'
+          writable: true,
+          error: 'Authorization error (Error Code: 28P01)'
         });
       });
     });
