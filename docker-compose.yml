@@ -1,11 +1,5 @@
 version: "3.4"
-
 services:
-  # POSTGRESQL SERVICE
-  # Uses:
-    # POSTGRES_USER
-    # POSTGRES_PASSWORD
-    # POSTGRES_DB
   postgresql:
     image: postgres
     container_name: "test_postegres"

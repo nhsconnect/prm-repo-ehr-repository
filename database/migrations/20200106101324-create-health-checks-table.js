@@ -1,9 +1,8 @@
-import getParameters from './parameters';
+"use strict";
 
-const modelName = 'Patient';
-const tableName = 'patients';
+const tableName = "health_checks";
 
-const model = dataType => {
+const model = (dataType) => {
   return {
     id: {
       type: dataType.INTEGER,
@@ -15,13 +14,10 @@ const model = dataType => {
       unique: true,
       allowNull: false
     },
-    nhs_number: {
-      type: dataType.STRING(100),
-      unique: true,
+    deleted_at: dataType.DATE,
+    completed_at: {
+      type: dataType.DATE,
       allowNull: false
-    },
-    deleted_at: {
-      type: dataType.DATE
     },
     created_at: {
       type: dataType.DATE,
@@ -33,7 +29,12 @@ const model = dataType => {
     }
   };
 };
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.createTable(tableName, model(Sequelize));
+  },
 
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(modelName, model(DataTypes), getParameters(tableName));
+  down: (queryInterface, Sequelize) => {
+    return queryInterface.dropTable(tableName);
+  }
 };

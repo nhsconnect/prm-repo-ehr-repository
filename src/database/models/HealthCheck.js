@@ -1,7 +1,7 @@
 import getParameters from './parameters';
 
-const modelName = 'MessageFragment';
-const tableName = 'message_fragments';
+const modelName = 'HealthCheck';
+const tableName = 'health_checks';
 
 const model = dataType => ({
   id: {
@@ -14,12 +14,11 @@ const model = dataType => ({
     unique: true,
     allowNull: false
   },
-  conversation_id: {
-    type: dataType.STRING(100),
-    unique: true,
+  completed_at: {
+    defaultValue: new Date(),
+    type: dataType.DATE,
     allowNull: false
   },
-  transfer_completed_at: dataType.DATE,
   deleted_at: dataType.DATE,
   created_at: {
     type: dataType.DATE,
@@ -32,16 +31,8 @@ const model = dataType => ({
 });
 
 module.exports = (sequelize, DataTypes) => {
-  const MessageFragment = sequelize.define(modelName, model(DataTypes), getParameters(tableName));
 
-  MessageFragment.complete = options => {
-    return MessageFragment.update(
-      {
-        transfer_completed_at: new Date()
-      },
-      options
-    );
-  };
-
-  return MessageFragment;
+  return sequelize.define(modelName, model(DataTypes), {
+    ...getParameters(tableName)
+  });
 };

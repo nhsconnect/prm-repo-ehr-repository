@@ -1,10 +1,9 @@
-"use strict";
+import getParameters from './parameters';
 
-const modelName = "HealthRecord";
+const modelName = 'HealthRecord';
+const tableName = 'health_records';
 
-const modelParameters = require("./parameters")("health_records");
-
-const model = (dataType) => ({
+const model = dataType => ({
   id: {
     type: dataType.INTEGER,
     primaryKey: true,
@@ -24,8 +23,7 @@ const model = (dataType) => ({
     unique: true,
     allowNull: false
   },
-  completed_at: dataType.DATE
-  ,
+  completed_at: dataType.DATE,
   deleted_at: dataType.DATE,
   created_at: {
     type: dataType.DATE,
@@ -38,19 +36,15 @@ const model = (dataType) => ({
 });
 
 module.exports = (sequelize, DataTypes) => {
+  const HealthRecord = sequelize.define(modelName, model(DataTypes), getParameters(tableName));
 
-  const HealthRecord = sequelize.define(modelName, model(DataTypes), modelParameters);
-
-  HealthRecord.associate = function(models) {
-    // associations can be defined here
-
-    // ONE to ONE -> Patient
-  };
-
-  HealthRecord.complete = (options) => {
-    return HealthRecord.update({
-      completed_at: new Date()
-    }, options);
+  HealthRecord.complete = options => {
+    return HealthRecord.update(
+      {
+        completed_at: new Date()
+      },
+      options
+    );
   };
 
   return HealthRecord;
