@@ -23,6 +23,10 @@ class ModelFactory {
   }
 
   configure() {
+    if (this.sequelize instanceof Sequelize) {
+      this.sequelize.close();
+    }
+
     this.sequelize = new Sequelize(
       this.base_config.database,
       this.base_config.username,

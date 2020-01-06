@@ -46,7 +46,6 @@ const saveHealthCheck = () => {
       };
     })
     .catch(err => {
-      console.log(err);
       updateLogEventWithError(err);
 
       if (err.parent === undefined || err.parent.code === undefined) {

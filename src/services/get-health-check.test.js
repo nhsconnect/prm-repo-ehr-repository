@@ -23,7 +23,6 @@ describe('getHealthCheck', () => {
     process.env.NODE_ENV = 'prod';
 
     it('should get reject with error from s3 if run in production mode and s3 returns an error', () => {
-
       S3.mockImplementation(() => ({
         putObject: s3MockPutObjectBad
       }));
@@ -61,7 +60,6 @@ describe('getHealthCheck', () => {
     });
 
     it('should return connection false if user is wrong', () => {
-
       S3.mockImplementation(() => ({
         putObject: s3MockPutObjectGood
       }));
@@ -69,7 +67,6 @@ describe('getHealthCheck', () => {
       ModelFactory._overrideConfig('username', 'hello');
 
       return getHealthCheck().then(result => {
-
         const db = result.details['database'];
 
         return expect(db).toEqual({
