@@ -6,7 +6,14 @@
     "database": {"ENV": "DATABASE_NAME"},
     "host": {"ENV": "DATABASE_HOST"}
   },
-  "test" : {
+  "test": {
+    "driver": "pg",
+    "user": {"ENV": "DATABASE_USER"},
+    "password": {"ENV": "DATABASE_PASSWORD"},
+    "database": {"ENV": "DATABASE_NAME"},
+    "host": {"ENV": "DATABASE_HOST"}
+  },
+  "docker" : {
     "driver": "pg",
     "user": "deductions_user",
     "password": "secret",

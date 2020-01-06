@@ -1,4 +1,25 @@
 format_version: 4
+common:
+  deploy_job: &deploy_job
+    resources:
+      - docker
+    tasks:
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_plan create
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_apply
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks wait_ecs
+
 pipelines:
   "prm-deductions-ehr-repository":
     group: deductions
@@ -104,10 +125,14 @@ pipelines:
     environment_variables:
       NHS_ENVIRONMENT: dev
     stages:
-      - deploy_dev:
+      - deploy:
           clean_workspace: true
           jobs:
-            deploy:
+            deploy: *deploy_job
+      - smoke:
+          clean_workspace: true
+          jobs:
+            test:
               resources:
                 - docker
               tasks:
@@ -115,18 +140,28 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks tf_plan create
-                - exec:
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks tf_apply
-                - exec:
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks wait_ecs
-      - smoke_dev:
+                      - ./tasks smoke
+
+  "prm-deductions-ehr-repository.test":
+    group: deductions
+    label_template: "${git[:8]}"
+    materials:
+      git:
+        type: configrepo
+      base_infra:
+        pipeline: prm-deductions-infra
+        stage: deploy_test
+      dev_env:
+        pipeline: prm-deductions-ehr-repository.dev
+        stage: smoke
+    environment_variables:
+      NHS_ENVIRONMENT: test
+    stages:
+      - deploy:
+          clean_workspace: true
+          jobs:
+            deploy: *deploy_job
+      - smoke:
           clean_workspace: true
           jobs:
             test:
