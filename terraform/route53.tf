@@ -1,5 +1,5 @@
 locals {
-  deductions_private_alb_dns = data.terraform_remote_state.prm-deductions-infra.outputs.deductions_core_alb_dns
+  deductions_private_alb_dns = data.aws_ssm_parameter.deductions_core_alb_dns.value
 }
 resource "aws_route53_record" "ehr-r53-record" {
   zone_id = data.aws_ssm_parameter.root_zone_id.value

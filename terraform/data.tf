@@ -1,16 +1,5 @@
 data "aws_caller_identity" "current" {}
 
-data "terraform_remote_state" "prm-deductions-infra" {
-  backend = "s3"
-
-  config = {
-        bucket  = "prm-327778747031-terraform-states"
-        key     = "gpportal/terraform.tfstate"
-        region  = "eu-west-2"
-        encrypt = true
-  }
-}
-
 data "aws_ssm_parameter" "root_zone_id" {
   name = "/NHS/deductions-${data.aws_caller_identity.current.account_id}/root_zone_id"
 }
@@ -25,4 +14,24 @@ data "aws_ssm_parameter" "db-password" {
 
 data "aws_ssm_parameter" "rds_endpoint" {
   name = "/NHS/${var.environment}-${data.aws_caller_identity.current.account_id}/core/rds_endpoint"
+}
+
+data "aws_ssm_parameter" "deductions_core_ecs_cluster_id" {
+  name = "/nhs/${var.environment}/deductions_core_ecs_cluster_id"
+}
+
+data "aws_ssm_parameter" "deductions_core_ecs_tasks_sg_id" {
+  name = "/nhs/${var.environment}/deductions_core_ecs_tasks_sg_id"
+}
+
+data "aws_ssm_parameter" "deductions_core_private_subnets" {
+  name = "/nhs/${var.environment}/deductions_core_private_subnets"
+}
+
+data "aws_ssm_parameter" "deductions_core_ehr_repo_alb_tg_arn" {
+  name = "/nhs/${var.environment}/deductions_core_ehr_repo_alb_tg_arn"
+}
+
+data "aws_ssm_parameter" "deductions_core_alb_dns" {
+  name = "/nhs/${var.environment}/deductions_core_alb_dns"
 }
