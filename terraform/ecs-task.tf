@@ -11,8 +11,8 @@ locals {
       { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
     ]
     secrets                      = [
-      { name = "DATABASE_USER", valueFrom = data.aws_secretsmanager_secret.db-username.arn },
-      { name = "DATABASE_PASSWORD", valueFrom = data.aws_secretsmanager_secret.db-password.arn }
+      { name = "DATABASE_USER", valueFrom = data.aws_ssm_parameter.db-username.arn },
+      { name = "DATABASE_PASSWORD", valueFrom = data.aws_ssm_parameter.db-password.arn }
     ]
 }
 

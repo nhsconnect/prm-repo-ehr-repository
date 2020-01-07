@@ -4,16 +4,24 @@ set -Eeo pipefail
 
 AWS_DEFAULT_REGION=eu-west-2
 IMAGE_REPO_NAME=deductions/ehr-repo
-NHS_ENVIRONMENT=dev
+NHS_SERVICE=ehr-repo
+
+function check_env {
+  if [[ -z "${NHS_ENVIRONMENT}" ]]; then
+    echo "Must set NHS_ENVIRONMENT"
+    exit 1
+  fi
+}
 
 function tf_plan {
+  check_env
   operation=$1
   cd terraform
 
   COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
   IMAGE_TAG=${COMMIT_HASH}
 
-  terraform init
+  terraform init -backend-config key=${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate
   terraform get # modules
   if [[ "${operation}" == "create" ]]; then
     terraform plan -var task_image_tag=$IMAGE_TAG -var-file=$NHS_ENVIRONMENT.tfvars -out="nhs_deployment.tfplan"
@@ -27,7 +35,7 @@ function tf_plan {
 
 function tf_apply {
   cd terraform
-  terraform init
+  terraform init -backend-config key=${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate
   terraform get # modules
   terraform apply nhs_deployment.tfplan
   terraform output -json > tf-out.json
@@ -161,7 +169,7 @@ EOF
       ;;
   test_docker_local)
       export EHR_URL="http://ehr:3000"
-      export NHS_ENVIRONMENT=test
+      export NHS_ENVIRONMENT=docker
       export DATABASE_NAME=deductions_test
       export DATABASE_USER=deductions_user
       export DATABASE_PASSWORD=secret
@@ -182,6 +190,7 @@ EOF
       ./tasks test_docker_local
       ;;
   smoke)
+      check_env
       export EHR_HOST=${NHS_ENVIRONMENT}.ehr-repo.patient-deductions.nhs.uk
       export EHR_URL=http://${EHR_HOST}
       curl -i http://${EHR_HOST}/health | grep OK
@@ -193,18 +202,21 @@ EOF
       node infra-tests/test_message_update.js
       ;;
   tf)
+      check_env
       dojo -c Dojofile-infra "bash"
       ;;
   _tf_plan)
       tf_plan "$2"
       ;;
   tf_plan)
+      check_env
       dojo -c Dojofile-infra "./tasks _tf_plan $2"
       ;;
   _tf_apply)
       tf_apply
       ;;
   tf_apply)
+      check_env
       dojo -c Dojofile-infra "./tasks _tf_apply"
       ;;
   _wait_ecs)
@@ -214,6 +226,7 @@ EOF
         --services $NHS_ENVIRONMENT-ehr-repo-service
       ;;
   wait_ecs)
+      check_env
       dojo -c Dojofile-infra "./tasks _wait_ecs"
       ;;
   *)

@@ -25,8 +25,7 @@ export const options = {
     addCorrelationInfo(),
     format.timestamp(),
     format.json(),
-    obfuscateSecrets(),
-    format.prettyPrint()
+    obfuscateSecrets()
   ),
   transports: [new transports.Console({ handleExceptions: true })]
 };
