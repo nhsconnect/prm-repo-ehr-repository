@@ -62,7 +62,7 @@ describe('HealthRecord', () => {
   it('should return 1 for items deleted and deleted_at should have been updated', () => {
     const destroyOptions = {
       where: {
-        id: 2
+        slug: '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4'
       }
     };
 
@@ -81,7 +81,7 @@ describe('HealthRecord', () => {
   it('should return 1 for items restored and deleted_at should have been removed', () => {
     const restoreOptions = {
       where: {
-        id: 3
+        slug: '0879b920-7174-4ef1-92f7-12383114b052'
       }
     };
 
@@ -100,7 +100,7 @@ describe('HealthRecord', () => {
   it('should not return anything if record has been destroyed (soft)', () => {
     const destroyedOptions = {
       where: {
-        id: 3
+        slug: '0879b920-7174-4ef1-92f7-12383114b052'
       }
     };
 
@@ -142,7 +142,7 @@ describe('HealthRecord', () => {
   it('should update the updated_at with a record update', () => {
     const updateOptions = {
       where: {
-        id: 1
+        slug: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
       }
     };
 
@@ -165,7 +165,7 @@ describe('HealthRecord', () => {
   it('should update the completed_at with Date when complete is called', () => {
     const completeOptions = {
       where: {
-        id: 1
+        slug: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
       }
     };
 

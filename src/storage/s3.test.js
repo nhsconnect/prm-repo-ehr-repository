@@ -1,5 +1,5 @@
 import { S3 } from 'aws-sdk';
-import { getUrl, save } from './s3';
+import S3Service from './s3';
 import config from '../config';
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('some-uuid'));
@@ -8,6 +8,7 @@ jest.mock('aws-sdk');
 describe('getUrl', () => {
   it('should call s3 getSignedUrl with parameters', () => {
     const mockSignedUrl = jest.fn().mockImplementation((operation, params, callback) => callback());
+
     S3.mockImplementation(() => ({
       getSignedUrl: mockSignedUrl
     }));
@@ -18,7 +19,8 @@ describe('getUrl', () => {
       Expires: 60,
       ContentType: 'text/xml'
     };
-    return getUrl('key').then(() => {
+
+    return new S3Service('key').getPutSignedUrl().then(() => {
       expect(mockSignedUrl).toHaveBeenCalledWith('putObject', parameters, expect.anything());
     });
   });
@@ -27,6 +29,7 @@ describe('getUrl', () => {
 describe('saveHeathCheckToS3', () => {
   it('should call s3 putObject with parameters ', () => {
     const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
+
     S3.mockImplementation(() => ({
       putObject: mockPutObject
     }));
@@ -36,7 +39,7 @@ describe('saveHeathCheckToS3', () => {
       Key: 'health-check.txt',
       Body: 'some-date'
     };
-    return save('some-date').then(() => {
+    return new S3Service('health-check.txt').save('some-date').then(() => {
       expect(mockPutObject).toHaveBeenCalledWith(parameters, expect.anything());
     });
   });

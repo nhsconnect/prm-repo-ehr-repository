@@ -3,15 +3,15 @@ import ModelFactory from '../database/models';
 import uuid from 'uuid/v4';
 import { ERROR_CODES } from './pg-error-codes';
 
-const save = (nhsNumber, storageLocation) => {
+const save = (nhsNumber, conversationId) => {
   const HealthRecord = ModelFactory.getByName('HealthRecord');
 
   updateLogEvent({ status: 'start saving ehr into database...' });
 
   return HealthRecord.create({
-    conversation_id: uuid(),
-    patient_id: nhsNumber,
-    slug: storageLocation
+    slug: uuid(),
+    conversation_id: conversationId,
+    patient_id: nhsNumber
   })
     .then(result => {
       updateLogEvent({

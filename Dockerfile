@@ -16,14 +16,14 @@ ENV EHR_REPO_SKIP_MIGRATION=false \
   DATABASE_USER="" \
   DATABASE_PASSWORD="" \
   DATABASE_NAME="" \
-  DATABASE_HOST=""
+  DATABASE_HOST="" \
+  LOCALSTACK_URL=""
 
 WORKDIR /app
 
 COPY package*.json  /app/
 COPY build/         /app/build
 COPY database/      /app/database
-COPY .sequelizerc   /app/.sequelizerc
 
 # Migration script
 COPY scripts/migrate-db.sh /usr/bin/run-ehr-server
@@ -31,6 +31,7 @@ COPY scripts/migrate-db.sh /usr/bin/run-ehr-server
 # This should be done to avoid any platform dependent packages
 RUN npm install && npm audit --fix
 
+RUN npm install -g sequelize-cli
 
 EXPOSE 3000
 

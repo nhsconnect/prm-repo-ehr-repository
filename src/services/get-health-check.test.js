@@ -32,7 +32,7 @@ describe('getHealthCheck', () => {
 
         return expect(s3).toEqual({
           type: 's3',
-          bucketName: undefined,
+          bucketName: process.env.S3_BUCKET_NAME,
           available: true,
           writable: false,
           error: 'some s3 error'

@@ -1,4 +1,4 @@
-import { save } from '../storage/s3';
+import S3Service from '../storage/s3';
 import formattedDate from './get-formatted-date';
 import { saveHealthCheck } from '../storage/db';
 import { updateLogEvent } from '../middleware/logging';
@@ -7,11 +7,6 @@ const getHealthCheck = () => {
   updateLogEvent({
     status: 'Starting health check'
   });
-
-  // TODO query this required if localstack is implemented
-  if (process.env.NODE_ENV === 'local') {
-    return Promise.resolve('check locally');
-  }
 
   let apiResponse = {
     version: '1',
@@ -22,7 +17,9 @@ const getHealthCheck = () => {
     }
   };
 
-  return Promise.all([save(formattedDate()), saveHealthCheck()]).then(values => {
+  const s3Service = new S3Service(formattedDate());
+
+  return Promise.all([s3Service.saveHealthInfo(), saveHealthCheck()]).then(values => {
     let [s3, db] = values;
 
     apiResponse.details['file-store'] = s3;

@@ -50,7 +50,7 @@ describe('Patient', () => {
   it('should return 1 for items deleted and deleted_at should have been updated', () => {
     const destroyOptions = {
       where: {
-        id: 2
+        slug: 'd126ee7f-035e-4938-8996-09a28c2ba61c'
       }
     };
 
@@ -69,7 +69,7 @@ describe('Patient', () => {
   it('should return 1 for items restored and deleted_at should have been removed', () => {
     const restoreOptions = {
       where: {
-        id: 3
+        slug: '944513e3-9f12-4284-b23c-8c319dbd3599'
       }
     };
 
@@ -88,7 +88,7 @@ describe('Patient', () => {
   it('should not return anything if record has been destroyed (soft)', () => {
     const destroyedOptions = {
       where: {
-        id: 3
+        slug: '944513e3-9f12-4284-b23c-8c319dbd3599'
       }
     };
 
@@ -126,7 +126,7 @@ describe('Patient', () => {
   it('should update the updated_at with a record update', () => {
     const updateOptions = {
       where: {
-        id: 1
+        slug: 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1'
       }
     };
 

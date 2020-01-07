@@ -1,8 +1,8 @@
 import express from 'express';
 import { body } from 'express-validator';
-import getSignedUrl from '../services/get-signed-url';
 import { validate } from '../middleware/validation';
 import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
+import getSignedUrl from '../services/get-signed-url';
 
 const router = express.Router();
 

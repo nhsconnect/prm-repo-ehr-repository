@@ -1,3 +1,4 @@
+require('dotenv').config();
 const config = {
   awsS3BucketName: process.env.S3_BUCKET_NAME,
   databaseUser: process.env.DATABASE_USER,

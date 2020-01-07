@@ -56,7 +56,7 @@ describe('HealthRecordManfiest', () => {
   it('should return 1 for items deleted and deleted_at should have been updated', () => {
     const destroyOptions = {
       where: {
-        id: 2
+        slug: '953b1757-163d-48dd-997b-5dc79c8f60a9'
       }
     };
 
@@ -75,7 +75,7 @@ describe('HealthRecordManfiest', () => {
   it('should return 1 for items restored and deleted_at should have been removed', () => {
     const restoreOptions = {
       where: {
-        id: 3
+        slug: '5592523d-0443-4fc6-a31b-b8e712fd262c'
       }
     };
 
@@ -94,7 +94,7 @@ describe('HealthRecordManfiest', () => {
   it('should not return anything if record has been destroyed (soft)', () => {
     const destroyedOptions = {
       where: {
-        id: 3
+        slug: '5592523d-0443-4fc6-a31b-b8e712fd262c'
       }
     };
 
@@ -134,7 +134,7 @@ describe('HealthRecordManfiest', () => {
   it('should update the updated_at with a record update', () => {
     const updateOptions = {
       where: {
-        id: 1
+        slug: 'f16ba9e9-1d28-42eb-acbb-f163ce0b632a'
       }
     };
 
@@ -157,7 +157,7 @@ describe('HealthRecordManfiest', () => {
   it('should update the transfer_completed_at with Date when complete is called', () => {
     const completeOptions = {
       where: {
-        id: 1
+        slug: 'f16ba9e9-1d28-42eb-acbb-f163ce0b632a'
       }
     };
 

@@ -56,7 +56,7 @@ describe('MessageFragment', () => {
   it('should return 1 for items deleted and deleted_at should have been updated', () => {
     const destroyOptions = {
       where: {
-        id: 2
+        slug: 'a1ff815c-6452-4020-ab13-9200d27a06ed'
       }
     };
 
@@ -75,7 +75,7 @@ describe('MessageFragment', () => {
   it('should return 1 for items restored and deleted_at should have been removed', () => {
     const restoreOptions = {
       where: {
-        id: 3
+        slug: 'c47134d3-6ef7-4852-8e86-a5fd1a3c81ce'
       }
     };
 
@@ -94,7 +94,7 @@ describe('MessageFragment', () => {
   it('should not return anything if record has been destroyed (soft)', () => {
     const destroyedOptions = {
       where: {
-        id: 3
+        slug: 'c47134d3-6ef7-4852-8e86-a5fd1a3c81ce'
       }
     };
 
@@ -134,7 +134,7 @@ describe('MessageFragment', () => {
   it('should update the updated_at with a record update', () => {
     const updateOptions = {
       where: {
-        id: 1
+        slug: '74c6230b-36d9-4940-bdd6-495ba87ed634'
       }
     };
 
@@ -157,7 +157,7 @@ describe('MessageFragment', () => {
   it('should update the transfer_completed_at with Date when complete is called', () => {
     const completeOptions = {
       where: {
-        id: 1
+        slug: '74c6230b-36d9-4940-bdd6-495ba87ed634'
       }
     };
 
