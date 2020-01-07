@@ -1,59 +1,87 @@
-import { S3 } from 'aws-sdk';
-import config from '../config';
 import { updateLogEventWithError, updateLogEvent } from '../middleware/logging';
+import { Endpoint, S3 } from 'aws-sdk';
+import config from '../config';
 
-const getUrl = key => {
-  const s3 = new S3();
+const URL_EXPIRY_TIME = 60;
+const CONTENT_TYPE = 'text/xml';
 
-  const parameters = {
-    Bucket: config.awsS3BucketName,
-    Key: key,
-    Expires: 60,
-    ContentType: 'text/xml'
-  };
+export default class S3Service {
+  constructor(filename) {
+    this.s3 = new S3(this._get_config());
 
-  return new Promise((resolve, reject) => {
-    s3.getSignedUrl('putObject', parameters, (err, url) => {
-      if (err) {
-        updateLogEventWithError(err);
-        return reject(err);
-      }
-      updateLogEvent({ storage: { url: `${url}}` } });
-      resolve(url);
-    });
-  });
-};
+    this.parameters = {
+      Bucket: config.awsS3BucketName,
+      Key: filename
+    };
+  }
 
-const save = formattedDate => {
-  const data = `${formattedDate}`;
-  return new Promise(resolve => {
-    const s3 = new S3();
-    const key = 'health-check.txt';
-
-    let resultObject = {
+  saveHealthInfo() {
+    const inputParams = {
       type: 's3',
       bucketName: config.awsS3BucketName,
       available: true,
       writable: false
     };
 
-    const parameters = {
-      Bucket: config.awsS3BucketName,
-      Key: key,
-      Body: data
-    };
+    return this.save()
+      .then(() => {
+        inputParams.writable = true;
+        return inputParams;
+      })
+      .catch(err => {
+        inputParams.error = err;
+        return inputParams;
+      });
+  }
 
-    s3.putObject(parameters, err => {
-      if (err) {
-        updateLogEventWithError(err);
-        resultObject.error = err;
-        return resolve(resultObject);
-      }
-      updateLogEvent({ storage: { path: `${config.awsS3BucketName}/${key}` } });
-      resultObject.writable = true;
-      resolve(resultObject);
+  save(data) {
+    return new Promise((resolve, reject) => {
+      this.s3.putObject({ ...this.parameters, Body: data }, err => {
+        if (err) return reject(err);
+        updateLogEvent({ storage: { path: `${this.parameters.Bucket}/${this.parameters.Key}` } });
+        resolve(`${this.parameters.Key}`);
+      });
     });
-  });
-};
+  }
 
-export { getUrl, save };
+  remove() {
+    return new Promise((resolve, reject) => {
+      this.s3.deleteObject(this.parameters, err => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  }
+
+  getPutSignedUrl() {
+    return new Promise((resolve, reject) => {
+      this.s3.getSignedUrl(
+        'putObject',
+        {
+          ...this.parameters,
+          Expires: URL_EXPIRY_TIME,
+          ContentType: CONTENT_TYPE
+        },
+        (err, url) => {
+          if (err) {
+            updateLogEventWithError(err);
+            return reject(err);
+          }
+          updateLogEvent({ storage: { url: `${url}}` } });
+          resolve(url);
+        }
+      );
+    });
+  }
+
+  _get_config() {
+    if (!process.env.NODE_ENV === 'test') return {};
+
+    return {
+      accessKeyId: 'test-access-key',
+      secretAccessKey: 'test-secret-key',
+      endpoint: new Endpoint(process.env.LOCALSTACK_URL),
+      s3ForcePathStyle: true
+    };
+  }
+}

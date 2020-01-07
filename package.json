@@ -5,20 +5,23 @@
   "main": "src/app.js",
   "scripts": {
     "lint": "eslint src/ --fix",
-    "unit": "DATABASE_NAME=deductions_test jest --setupFiles dotenv/config",
-    "test": "npm run lint && npm run unit",
-    "coverage": "DATABASE_NAME=deductions_test jest --collectCoverage --setupFiles dotenv/config",
+    "test": "jest --setupFiles dotenv/config",
+    "coverage": "jest --collectCoverage --setupFiles dotenv/config",
+    "coverage-local": "npm run migrate-test && jest --collectCoverage --setupFiles dotenv/config",
     "build": "babel src -d build --ignore '**/*.test.js' && cp src/*.json build",
     "start": "node build/server.js",
-    "start-local": "npm run migrate && babel-node -r node_modules/dotenv/config src/server.js",
-    "migrate": "db-migrate up",
-    "migrate-test": "DATABASE_NAME=deductions_test db-migrate up"
+    "start-local": "npm run migrate-test ; babel-node -r node_modules/dotenv/config src/server.js ; npm run remove-test-data",
+    "wait-db": "babel-node scripts/wait_for_postgres.js",
+    "migrate": "npm run wait-db && npx sequelize-cli db:migrate",
+    "seed-test-data": "npx sequelize-cli db:seed:all",
+    "remove-test-data": "npx sequelize-cli db:seed:undo:all"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
     "@babel/preset-env": "^7.6.3",
+    "axios": "^0.19.0",
     "db-migrate": "^0.11.6",
     "dotenv": "^8.2.0",
     "eslint": "^6.6.0",
@@ -28,7 +31,8 @@
     "jest": "^24.9.0",
     "prettier": "^1.19.1",
     "supertest": "^4.0.2",
-    "swagger-ui-express": "^4.1.2"
+    "swagger-ui-express": "^4.1.2",
+    "wait-on": "^3.3.0"
   },
   "dependencies": {
     "async-local-storage": "^2.3.1",
@@ -39,7 +43,9 @@
     "express-winston": "^4.0.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "pg": "^7.12.1",
+    "pg": "^7.15.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.21.3",
     "traverse": "^0.6.6",
     "uuid": "^3.3.3",
     "winston": "^3.2.1"

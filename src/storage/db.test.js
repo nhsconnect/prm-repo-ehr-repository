@@ -1,46 +1,41 @@
-import { Client } from 'pg';
-import config from '../config';
 import { save, saveHealthCheck } from './db';
+import ModelFactory from '../database/models';
+import uuid from 'uuid/v4';
 
 describe('db', () => {
-  const client = new Client({
-    user: config.databaseUser,
-    password: config.databasePassword,
-    database: config.databaseName,
-    host: config.databaseHost
+  let HealthRecord;
+
+  const storageFile = uuid();
+  const nhsNumber = '198765';
+
+  beforeEach(() => {
+    process.env.DATABASE_USER = 'deductions_user';
+    process.env.DATABASE_PASSWORD = 'secret';
+    process.env.DATABASE_NAME = 'deductions_test';
+    process.env.DATABASE_HOST = '127.0.0.1';
+
+    HealthRecord = ModelFactory.getByName('HealthRecord');
   });
 
-  beforeAll(() => client.connect());
-  afterAll(() => client.end());
-
   describe('save', () => {
-    afterEach(() => client.query('DELETE FROM ehr'));
     it('should save the nhs number and storage location to the db', () => {
-      return save('some-nhs-number', 'some-storage-location')
-        .then(() => client.query('SELECT * FROM ehr'))
-        .then(res => {
-          expect(res.rowCount).toEqual(1);
-
-          const ehr = res.rows[0];
-          expect(ehr.nhs_number).toEqual('some-nhs-number');
-          expect(ehr.s3_key).toEqual('some-storage-location');
-        });
+      return save(nhsNumber, storageFile).then(() => {
+        return expect(
+          HealthRecord.findOne({ where: { patient_id: nhsNumber } }).then(result => {
+            return expect(result.dataValues.slug).toBe(storageFile);
+          })
+        );
+      });
     });
   });
 
   describe('saveHealthCheckToDB', () => {
-    afterEach(() => client.query('DELETE FROM health'));
-
-    it('should save the timestamp to the db in health table', done => {
-      return saveHealthCheck('some-timestamp')
-        .then(() => client.query('SELECT * FROM health'))
-        .then(res => {
-          expect(res.rowCount).toEqual(1);
-
-          const health = res.rows[0];
-          expect(health.completed_at).toEqual('some-timestamp');
-          done();
-        });
+    it('should save the timestamp to the db in health table', () => {
+      return saveHealthCheck().then(value => {
+        expect(value.connection).toBe(true);
+        expect(value.writable).toBe(true);
+        return expect(value.type).toBe('postgresql');
+      });
     });
   });
 });

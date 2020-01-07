@@ -9,7 +9,12 @@ router.get('/', validate, (req, res, next) => {
   getHealthCheck()
     .then(status => {
       updateLogEvent({ status: 'Finished health check. Status given by res', res: res });
-      res.status(200).send(status);
+
+      if(status.details.filestore.writable && status.details.database.writable) {
+        res.status(200).send(status);
+      } else {
+        res.status(503).send(status);
+      }
     })
     .catch(err => {
       updateLogEventWithError(err);

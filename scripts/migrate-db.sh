@@ -5,13 +5,6 @@
 
 DB_CONNECTION_TIMEOUT=30
 
-if [ ! -d "${PWD}/node_modules/.bin/" ]; then
-  echo "${PWD}/node_modules/.bin/ not does not exist. It is required to run DB migrations."
-  exit 3
-fi
-
-export PATH="${PATH}:${PWD}/node_modules/.bin/"
-
 if [ -z "${NHS_ENVIRONMENT}" ]; then
   echo "NHS_ENVIRONMENT must be set."
   exit 4
@@ -22,7 +15,7 @@ if [ "${EHR_REPO_SKIP_MIGRATION}" == "true" ]; then
 else
   echo "Waiting for DB port to become open 5432"
   count=0
-  while ! nc -z ${DATABASE_HOST} 5432; do
+  while ! pg_isready -h ${DATABASE_HOST}; do
     echo "Waiting for ${DATABASE_HOST}:5432"
     sleep 1
     ((count++))
@@ -33,12 +26,14 @@ else
   done
   echo "DB connection at ${DATABASE_HOST}:5432 is available"
   echo "Trying to create a database, if not exists. 'Already exists' errors are safe to ignore"
-  PGPASSWORD="${DATABASE_PASSWORD}" createdb --host="${DATABASE_HOST}" --username="${DATABASE_USER}" $DATABASE_NAME || true
+  PGPASSWORD="${DATABASE_PASSWORD}" createdb --host="${DATABASE_HOST}" \
+    --username="${DATABASE_USER}" $DATABASE_NAME >> /dev/null || true
   set -e
-  db-migrate up -e ${NHS_ENVIRONMENT} --config database.json
+  echo "Migrating DB, will not migrate parts that have already been migrated (meta)" && \
+  sequelize-cli db:migrate
   echo "DB migration completed."
 fi
 
 echo "Starting node.js server"
 set -e
-exec node server.js
+exec node build/server.js
