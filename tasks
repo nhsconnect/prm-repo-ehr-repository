@@ -85,6 +85,8 @@ DATABASE_NAME=deductions_test
 DATABASE_USER=deductions_user
 DATABASE_PASSWORD=secret
 DATABASE_HOST=db
+S3_BUCKET_NAME=test-bucket
+LOCALSTACK_URL=http://localstack:4572
 EOF
       set -a
       source .env

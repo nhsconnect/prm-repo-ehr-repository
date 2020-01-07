@@ -27,7 +27,7 @@ else
   echo "DB connection at ${DATABASE_HOST}:5432 is available"
   echo "Trying to create a database, if not exists. 'Already exists' errors are safe to ignore"
   PGPASSWORD="${DATABASE_PASSWORD}" createdb --host="${DATABASE_HOST}" \
-    --username="${DATABASE_USER}" $DATABASE_NAME >> /dev/null || true
+    --username="${DATABASE_USER}" $DATABASE_NAME || true
   set -e
   echo "Migrating DB, will not migrate parts that have already been migrated (meta)" && \
   sequelize-cli db:migrate
