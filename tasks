@@ -75,7 +75,8 @@ case "${command}" in
       ;;
   _coverage)
       npm install
-      npm run migrate-test
+      npm run migrate
+      npm run seed-test-data
       npm run coverage
       ;;
   coverage)

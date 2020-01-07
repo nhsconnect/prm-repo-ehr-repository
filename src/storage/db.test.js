@@ -17,6 +17,10 @@ describe('db', () => {
     HealthRecord = ModelFactory.getByName('HealthRecord');
   });
 
+  afterAll(() => {
+    ModelFactory.sequelize.close();
+  });
+
   describe('save', () => {
     it('should save the nhs number and storage location to the db', () => {
       return save(nhsNumber, storageFile).then(() => {
