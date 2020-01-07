@@ -28,7 +28,7 @@ describe('getHealthCheck', () => {
       }));
 
       return getHealthCheck().then(result => {
-        const s3 = result.details['file-store'];
+        const s3 = result.details.filestore;
 
         return expect(s3).toEqual({
           type: 's3',

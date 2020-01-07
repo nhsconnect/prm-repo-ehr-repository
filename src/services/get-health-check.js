@@ -4,6 +4,7 @@ import { saveHealthCheck } from '../storage/db';
 import { updateLogEvent } from '../middleware/logging';
 
 const getHealthCheck = () => {
+
   updateLogEvent({
     status: 'Starting health check'
   });
@@ -12,7 +13,7 @@ const getHealthCheck = () => {
     version: '1',
     description: 'Health of Electronic Health Record Repository service',
     details: {
-      'file-store': {},
+      filestore: {},
       database: {}
     }
   };
@@ -22,9 +23,8 @@ const getHealthCheck = () => {
   return Promise.all([s3Service.saveHealthInfo(), saveHealthCheck()]).then(values => {
     let [s3, db] = values;
 
-    apiResponse.details['file-store'] = s3;
-    apiResponse.details['database'] = db;
-    apiResponse.status = s3.writeable && db.writeable ? 'Pass' : 'Fail';
+    apiResponse.details.filestore= s3;
+    apiResponse.details.database = db;
 
     return Promise.resolve(apiResponse);
   });

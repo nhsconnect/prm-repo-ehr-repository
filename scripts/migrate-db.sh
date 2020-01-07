@@ -30,7 +30,7 @@ else
     --username="${DATABASE_USER}" $DATABASE_NAME >> /dev/null || true
   set -e
   echo "Migrating DB, will not migrate parts that have already been migrated (meta)" && \
-  npx sequelize-cli db:migrate
+  sequelize-cli db:migrate
   echo "DB migration completed."
 fi
 

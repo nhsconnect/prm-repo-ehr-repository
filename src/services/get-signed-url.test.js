@@ -24,12 +24,12 @@ describe('get-signed-url', () => {
       process.env.NODE_ENV = node_env;
     });
 
-    it('should return promise with fake respond if run locally', () => {
+    it('should return promise with 200 OK response if run locally', () => {
       return getSignedUrl(conversationId, messageId).then(() => {
         return expect(mockSignedUrl).toBeCalledWith(
           'putObject',
           {
-            Bucket: 'test-bucket',
+            Bucket: process.env.S3_BUCKET_NAME,
             Key: `${conversationId}/${messageId}`,
             Expires: 60,
             ContentType: 'text/xml'

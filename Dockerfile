@@ -24,6 +24,7 @@ WORKDIR /app
 COPY package*.json  /app/
 COPY build/         /app/build
 COPY database/      /app/database
+COPY .sequelizerc   /app/
 
 # Migration script
 COPY scripts/migrate-db.sh /usr/bin/run-ehr-server

@@ -5,16 +5,15 @@
   "main": "src/app.js",
   "scripts": {
     "lint": "eslint src/ --fix",
-    "test-only": "jest --setupFiles dotenv/config",
-    "test": "npm run lint && npm run migrate-test && npm run test-only ; npm run remove-test-data",
+    "test": "jest --setupFiles dotenv/config",
     "coverage": "jest --collectCoverage --setupFiles dotenv/config",
-    "coverage-local": "npm run migrate-test && jest --collectCoverage --setupFiles dotenv/config ; npm run remove-test-data",
+    "coverage-local": "npm run migrate-test && jest --collectCoverage --setupFiles dotenv/config",
     "build": "babel src -d build --ignore '**/*.test.js' && cp src/*.json build",
     "start": "node build/server.js",
     "start-local": "npm run migrate-test ; babel-node -r node_modules/dotenv/config src/server.js ; npm run remove-test-data",
     "wait-db": "babel-node scripts/wait_for_postgres.js",
     "migrate": "npm run wait-db && npx sequelize-cli db:migrate",
-    "migrate-test": "npm run migrate && npx sequelize-cli db:seed:all",
+    "seed-test-data": "npx sequelize-cli db:seed:all",
     "remove-test-data": "npx sequelize-cli db:seed:undo:all"
   },
   "devDependencies": {

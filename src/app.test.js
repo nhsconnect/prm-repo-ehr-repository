@@ -3,12 +3,24 @@ import app from './app';
 import getSignedUrl from './services/get-signed-url';
 import getHealthCheck from './services/get-health-check';
 import ModelFactory from './database/models';
+
 jest.mock('./services/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 
 jest.mock('./services/get-health-check', () =>
-  jest.fn().mockReturnValue(Promise.resolve('some-url'))
+  jest.fn().mockReturnValue(Promise.resolve({
+    version: '1',
+    description: 'Health of Electronic Health Record Repository service',
+    details: {
+      filestore: {
+        writable: true
+      },
+      database: {
+        writable: true
+      }
+    }
+  }))
 );
 
 jest.mock('express-winston', () => ({
