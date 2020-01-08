@@ -12,7 +12,7 @@ router.get('/', (req, res, next) => {
       if (status.details.filestore.writable && status.details.database.writable) {
         res.status(200).send(status);
       } else {
-        updateLogEvent({status: "response: " + status});
+        updateLogEventWithError(new Error( JSON.stringify(status) ));
         res.status(503).send(status);
       }
     })
