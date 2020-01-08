@@ -24,7 +24,7 @@
     "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
     "@babel/preset-env": "^7.6.3",
-    "axios": "^0.19.0",
+    "axios": "^0.19.1",
     "db-migrate": "^0.11.6",
     "dotenv": "^8.2.0",
     "eslint": "^6.6.0",

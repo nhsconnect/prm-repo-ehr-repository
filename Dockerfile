@@ -24,6 +24,7 @@ WORKDIR /app
 COPY package*.json  /app/
 COPY build/         /app/build
 COPY database/      /app/database
+COPY build/config/database.js /app/src/config/
 COPY .sequelizerc   /app/
 
 # Migration script
@@ -31,8 +32,8 @@ COPY scripts/migrate-db.sh /usr/bin/run-ehr-server
 
 # This should be done to avoid any platform dependent packages
 RUN npm install && npm audit --fix
-
 RUN npm install -g sequelize-cli
+
 
 EXPOSE 3000
 

@@ -8,6 +8,8 @@ services:
     links:
       - db:db
       - localstack:localstack
+    ports:
+    - 3000:3000
   db:
     image: postgres:12.1
     environment:
@@ -17,8 +19,6 @@ services:
       LC_ALL: C
   localstack:
     image: localstack/localstack
-    ports:
-      - 4572:4572
     environment:
       - SERVICES=s3:4572
       - DEBUG=true
