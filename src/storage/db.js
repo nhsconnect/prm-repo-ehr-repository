@@ -1,4 +1,3 @@
-import { updateLogEvent } from '../middleware/logging';
 import ModelFactory from '../database/models';
 import uuid from 'uuid/v4';
 import { ERROR_CODES } from './pg-error-codes';
@@ -7,7 +6,6 @@ export const checkDbHealth = () => {
   const HealthCheck = ModelFactory.getByName('HealthCheck');
 
   return HealthCheck.create({ slug: uuid() })
-    .then(() => updateLogEvent({ db: { connection: true, writable: true } }))
     .then(() => ({
       type: 'postgresql',
       connection: true,

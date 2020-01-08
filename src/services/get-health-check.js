@@ -6,24 +6,18 @@ import { updateLogEvent } from '../middleware/logging';
 const getHealthCheck = () => {
   updateLogEvent({ status: 'Starting health check' });
 
-  let apiResponse = {
-    version: '1',
-    description: 'Health of Electronic Health Record Repository service',
-    details: {
-      filestore: {},
-      database: {}
-    }
-  };
-
   const s3Service = new S3Service(formattedDate());
 
-  return Promise.all([s3Service.saveHealthInfo(), checkDbHealth()]).then(values => {
-    let [s3, db] = values;
-
-    apiResponse.details.filestore = s3;
-    apiResponse.details.database = db;
-
-    return Promise.resolve(apiResponse);
+  return Promise.all([s3Service.saveHealthInfo(), checkDbHealth()]).then(([s3, db]) => {
+    updateLogEvent({ db, s3 });
+    return {
+      version: '1',
+      description: 'Health of Electronic Health Record Repository service',
+      details: {
+        filestore: s3,
+        database: db
+      }
+    };
   });
 };
 

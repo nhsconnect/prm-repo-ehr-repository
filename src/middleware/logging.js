@@ -2,8 +2,6 @@ import httpContext from 'async-local-storage';
 import merge from 'lodash.merge';
 import logger from '../config/logging';
 
-httpContext.enable();
-
 const LOG_EVENT_KEY = 'logEvent';
 
 export const updateLogEvent = event =>

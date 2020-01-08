@@ -24,7 +24,6 @@ export default class S3Service {
     };
 
     return this.save()
-      .then(() => updateLogEvent({ s3: { available: true, writable: true } }))
       .then(() => {
         inputParams.writable = true;
         return inputParams;

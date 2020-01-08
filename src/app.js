@@ -1,6 +1,7 @@
 import express from 'express';
 import { errorLogger, logger as requestLogger } from 'express-winston';
 import swaggerUi from 'swagger-ui-express';
+import httpContext from 'async-local-storage';
 import * as correlationInfo from './middleware/correlation';
 import * as logging from './middleware/logging';
 import { options } from './config/logging';
@@ -9,6 +10,8 @@ import health from './api/health';
 import errorEndpoint from './api/errorEndpoint';
 import exception from './api/exception';
 import swaggerDocument from './swagger.json';
+
+httpContext.enable();
 
 const app = express();
 
