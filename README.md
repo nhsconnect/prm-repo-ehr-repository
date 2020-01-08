@@ -6,38 +6,46 @@
 
 ## Set up
 
-Create the development and test databases. This script will use your default postgreSQL login credentials. You will
-need to provide a password for the deductions database user.
-
-```
-./db-setup.sh your-password-here
-```
-
-Run `npm install` to install all node dependencies.
+Run `npm install` to install all node dependencies and `npm install -g sequelize-cli` if you want
+to speed up the migrations.
 
 Add a .env file in the root of the repository with the following environment variables:
 
 ```
 NODE_ENV=local
-DATABASE_NAME=deductions_db
+DATABASE_NAME=deductions_test
 DATABASE_USER=deductions_user
-DATABASE_PASSWORD=your-password-here
-DATABASE_HOST=localhost
-```
-
-Set the `DATABASE_PASSWORD` to the value provided when running the db setup script. Setting the `NODE_ENV` variable to
-local will store any uploaded files in your local file system instead of S3.
-
-Migrate the development and test databases:
-
-```
-npm run migrate
-npm run migrate-test
+DATABASE_PASSWORD=secret
+DATABASE_HOST=127.0.0.1
+S3_BUCKET_NAME=test-bucket
+LOCALSTACK_URL=http://localhost:4572
 ```
 
 ## Running the tests
 
-Run the tests with `npm test`.
+To run the tests locally, you can use the following.
+```bash
+# Brings up the local test environment
+docker-compose up &
+
+# Alternative with node-dojo (interactive)
+dojo -c Dojofile-itest`
+
+npm run test-local
+
+# This is equivilent of:
+npx sequelize-cli db:migrate # Runs the migration
+npx sequelize-cli db:seed:all # Seeds test data
+
+npm test
+
+npx sequelize-cli db:migrate:undo:all # Undoes the migration to leave clean env
+```
+
+To run them before commit in dojo.
+```bash
+./tasks test
+```
 
 ## Start the app locally
 
@@ -45,11 +53,23 @@ Run a development server with `npm run start-local`.
 
 ## Start the app in production mode
 
-Compile the code with `npm run build`, and then start the server with `npm start`.
+```bash
+# Dojo - same as what is run in pipeline
+
+# Builds the docker container with the app in
+./tasks build_docker_local
+
+# Runs the tests against the app in the docker container
+./tasks test_docker_local
+
+# Runs the ehr with db and localstack locally in interactive mode
+dojo -c Dojofile-dtest
+```
 
 # Docker
 
 Docker image can be build locally with
+
 ```
 ./tasks build_docker_local
 ```
@@ -64,3 +84,4 @@ Image is configurable by environment variables:
  - `DATABASE_PASSWORD` - password to the database
  - `DATABASE_NAME` - name of the database on server.
  - `DATABASE_HOST` - database server hostname to connect with.
+ - `LOCALSTACK_URL` - (Test) the location of localstack, only used for tests
