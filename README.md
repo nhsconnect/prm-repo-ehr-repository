@@ -25,6 +25,12 @@ LOCALSTACK_URL=http://localhost:4572
 
 To run the tests locally, you can use the following.
 ```bash
+# Brings up the local test environment
+docker-compose up &
+
+# Alternative with node-dojo (interactive)
+dojo -c Dojofile-itest`
+
 npm run test-local
 
 # This is equivilent of:
