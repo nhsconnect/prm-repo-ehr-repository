@@ -16,9 +16,9 @@ describe('db', () => {
   describe('saveHealthCheckToDB', () => {
     it('should save the timestamp to the db in health table', () => {
       return saveHealthCheck().then(value => {
-        expect(value.connection).toBe(true);
-        expect(value.writable).toBe(true);
-        return expect(value.type).toBe('postgresql');
+        expect(value.connection).toEqual(true);
+        expect(value.writable).toEqual(true);
+        expect(value.type).toEqual('postgresql');
       });
     });
   });

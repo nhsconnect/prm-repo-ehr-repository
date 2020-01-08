@@ -24,6 +24,7 @@ export default class S3Service {
     };
 
     return this.save()
+      .then(() => updateLogEvent({ s3: { available: true, writable: true } }))
       .then(() => {
         inputParams.writable = true;
         return inputParams;
@@ -38,8 +39,7 @@ export default class S3Service {
     return new Promise((resolve, reject) => {
       this.s3.putObject({ ...this.parameters, Body: data }, err => {
         if (err) return reject(err);
-        updateLogEvent({ storage: { path: `${this.parameters.Bucket}/${this.parameters.Key}` } });
-        resolve(`${this.parameters.Key}`);
+        resolve();
       });
     });
   }
