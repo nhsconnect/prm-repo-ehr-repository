@@ -19,7 +19,6 @@ class ModelFactory {
   }
 
   _resetConfig() {
-    console.log(this.config);
     this.base_config = this.config;
     this.configure();
   }

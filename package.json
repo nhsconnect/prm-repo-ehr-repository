@@ -12,12 +12,12 @@
     "start": "node build/server.js",
     "start-local": "npm run migrate ; babel-node -r node_modules/dotenv/config src/server.js",
     "wait-db": "babel-node scripts/wait_for_postgres.js",
-    "migrate": "npm run wait-db && npx sequelize-cli db:migrate",
-    "tear-down": "npx sequelize-cli db:migrate:undo:all",
-    "set-up": "npm run migrate && npm run seed-test-data",
+    "migrate": "npm run wait-db && sequelize-cli db:migrate",
+    "tear-down": "sequelize-cli db:migrate:undo:all",
+    "set-up": "sequelize-cli db:migrate && npm run seed-test-data",
     "test-local": "npm run set-up && npm run test ; npm run tear-down",
-    "seed-test-data": "npx sequelize-cli db:seed:all",
-    "remove-test-data": "npx sequelize-cli db:seed:undo:all"
+    "seed-test-data": "sequelize-cli db:seed:all",
+    "remove-test-data": "sequelize-cli db:seed:undo:all"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -33,6 +33,7 @@
     "eslint-plugin-prettier": "^3.1.1",
     "jest": "^24.9.0",
     "prettier": "^1.19.1",
+    "sequelize-cli": "^5.5.1",
     "supertest": "^4.0.2",
     "swagger-ui-express": "^4.1.2"
   },
