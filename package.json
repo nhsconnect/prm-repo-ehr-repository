@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "scripts": {
     "lint": "eslint src/ --fix",
-    "test": "jest --detectOpenHandles --setupFiles dotenv/config",
+    "test": "npm run lint && jest --setupFiles dotenv/config",
     "coverage": "jest --collectCoverage --setupFiles dotenv/config",
     "coverage-local": "npm run migrate-test && jest --collectCoverage --setupFiles dotenv/config",
     "build": "babel src -d build --ignore '**/*.test.js' && cp src/*.json build",
@@ -13,6 +13,9 @@
     "start-local": "npm run migrate-test ; babel-node -r node_modules/dotenv/config src/server.js ; npm run remove-test-data",
     "wait-db": "babel-node scripts/wait_for_postgres.js",
     "migrate": "npm run wait-db && npx sequelize-cli db:migrate",
+    "tear-down": "npx sequelize-cli db:migrate:undo:all",
+    "set-up": "npm run migrate && npm run seed-test-data",
+    "test-local": "npm run set-up && npm run test ; npm run tear-down",
     "seed-test-data": "npx sequelize-cli db:seed:all",
     "remove-test-data": "npx sequelize-cli db:seed:undo:all"
   },
