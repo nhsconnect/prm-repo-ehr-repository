@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "scripts": {
     "lint": "eslint src/ --fix",
-    "test": "jest --setupFiles dotenv/config",
+    "test": "jest --detectOpenHandles --setupFiles dotenv/config",
     "coverage": "jest --collectCoverage --setupFiles dotenv/config",
     "coverage-local": "npm run migrate-test && jest --collectCoverage --setupFiles dotenv/config",
     "build": "babel src -d build --ignore '**/*.test.js' && cp src/*.json build",
