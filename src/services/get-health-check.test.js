@@ -1,6 +1,7 @@
 import getHealthCheck from './get-health-check';
 import { S3 } from 'aws-sdk';
 import ModelFactory from '../database/models';
+import config from '../config';
 
 jest.mock('aws-sdk');
 
@@ -21,7 +22,7 @@ describe('getHealthCheck', () => {
       const s3 = result.details.filestore;
       expect(s3).toEqual({
         type: 's3',
-        bucketName: process.env.S3_BUCKET_NAME,
+        bucketName: config.awsS3BucketName,
         available: true,
         writable: true
       });
@@ -38,7 +39,7 @@ describe('getHealthCheck', () => {
 
       return expect(s3).toEqual({
         type: 's3',
-        bucketName: process.env.S3_BUCKET_NAME,
+        bucketName: config.awsS3BucketName,
         available: true,
         writable: false,
         error: 'some s3 error'
@@ -58,7 +59,7 @@ describe('getHealthCheck', () => {
   });
 
   it('should return failed db health check if username is incorrect', () => {
-    ModelFactory._overrideConfig('username', 'hello');
+    ModelFactory._overrideConfig('username', 'wrong-username');
 
     return getHealthCheck().then(result => {
       const db = result.details['database'];

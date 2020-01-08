@@ -70,7 +70,7 @@ export default class S3Service {
     return {
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
-      endpoint: new Endpoint(process.env.LOCALSTACK_URL),
+      endpoint: new Endpoint(config.localstackUrl),
       s3ForcePathStyle: true
     };
   }
