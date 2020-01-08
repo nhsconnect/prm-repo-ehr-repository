@@ -1,12 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
+import config from '../../config';
+import fs from 'fs';
+import path from 'path';
+import Sequelize from 'sequelize';
+
 const basename = path.basename(__filename);
 
 class ModelFactory {
   constructor() {
     this.db = {};
     this.sequelize = {};
+    this.config = config.sequelize;
     this._resetConfig();
   }
 
@@ -16,9 +19,8 @@ class ModelFactory {
   }
 
   _resetConfig() {
-    this.base_config = require(__dirname + '/../../../database/config/config.js')[
-      process.env.NODE_ENV || 'development'
-    ];
+    console.log(this.config);
+    this.base_config = this.config;
     this.configure();
   }
 
