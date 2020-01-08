@@ -1,4 +1,4 @@
-import { saveHealthCheck } from './db';
+import { checkDbHealth } from './db';
 import ModelFactory from '../database/models';
 
 describe('db', () => {
@@ -13,12 +13,12 @@ describe('db', () => {
     ModelFactory.sequelize.close();
   });
 
-  describe('saveHealthCheckToDB', () => {
-    it('should save the timestamp to the db in health table', () => {
-      return saveHealthCheck().then(value => {
+  describe('checkDbHealth', () => {
+    it('should return the db health', () => {
+      return checkDbHealth().then(value => {
+        expect(value.type).toEqual('postgresql');
         expect(value.connection).toEqual(true);
         expect(value.writable).toEqual(true);
-        expect(value.type).toEqual('postgresql');
       });
     });
   });

@@ -3,7 +3,7 @@ import ModelFactory from '../database/models';
 import uuid from 'uuid/v4';
 import { ERROR_CODES } from './pg-error-codes';
 
-export const saveHealthCheck = () => {
+export const checkDbHealth = () => {
   const HealthCheck = ModelFactory.getByName('HealthCheck');
 
   return HealthCheck.create({ slug: uuid() })
@@ -28,26 +28,28 @@ export const saveHealthCheck = () => {
 };
 
 const parseHealthCheckError = code => {
-  if (code === ERROR_CODES.INVALID_USER_PASSWORD) {
-    return {
-      type: 'postgresql',
-      connection: false,
-      writable: true,
-      error: `Authorization error (Error Code: ${code})`
-    };
-  } else if (code === ERROR_CODES.CONNECTION_REFUSED || code === ERROR_CODES.INVALID_DATABASE) {
-    return {
-      type: 'postgresql',
-      connection: false,
-      writable: false,
-      error: `Connection error (Error Code: ${code})`
-    };
-  } else {
-    return {
-      type: 'postgresql',
-      connection: false,
-      writable: false,
-      error: `Unknown error (Error Code: ${code})`
-    };
+  switch (code) {
+    case ERROR_CODES.INVALID_USER_PASSWORD:
+      return {
+        type: 'postgresql',
+        connection: true,
+        writable: false,
+        error: `Authorization error (Error Code: ${code})`
+      };
+    case ERROR_CODES.CONNECTION_REFUSED:
+    case ERROR_CODES.INVALID_DATABASE:
+      return {
+        type: 'postgresql',
+        connection: false,
+        writable: false,
+        error: `Connection error (Error Code: ${code})`
+      };
+    default:
+      return {
+        type: 'postgresql',
+        connection: false,
+        writable: false,
+        error: `Unknown error (Error Code: ${code})`
+      };
   }
 };

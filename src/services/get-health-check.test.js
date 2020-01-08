@@ -4,77 +4,85 @@ import ModelFactory from '../database/models';
 
 jest.mock('aws-sdk');
 
-const s3MockPutObjectGood = jest.fn().mockImplementation((config, callback) => callback());
-const s3MockPutObjectBad = jest
-  .fn()
-  .mockImplementation((config, callback) => callback('some s3 error'));
-
 describe('getHealthCheck', () => {
   beforeEach(() => {
     ModelFactory._resetConfig();
-    S3.mockClear();
+    S3.mockImplementation(() => ({
+      putObject: jest.fn().mockImplementation((config, callback) => callback())
+    }));
   });
 
   afterAll(() => {
     ModelFactory.sequelize.close();
   });
 
-  describe('prod environment', () => {
-    process.env.NODE_ENV = 'prod';
-
-    it('should get reject with error from s3 if run in production mode and s3 returns an error', () => {
-      S3.mockImplementation(() => ({
-        putObject: s3MockPutObjectBad
-      }));
-
-      return getHealthCheck().then(result => {
-        const s3 = result.details.filestore;
-
-        return expect(s3).toEqual({
-          type: 's3',
-          bucketName: process.env.S3_BUCKET_NAME,
-          available: true,
-          writable: false,
-          error: 'some s3 error'
-        });
+  it('should return successful s3 health check if s3 succeeds', () => {
+    return getHealthCheck().then(result => {
+      const s3 = result.details.filestore;
+      expect(s3).toEqual({
+        type: 's3',
+        bucketName: process.env.S3_BUCKET_NAME,
+        available: true,
+        writable: true
       });
     });
+  });
 
-    it('should return true of the db connection if db connection is healthy', () => {
-      S3.mockImplementation(() => ({
-        putObject: s3MockPutObjectGood
-      }));
+  it('should return failed s3 health check if s3 returns an error', () => {
+    S3.mockImplementation(() => ({
+      putObject: jest.fn().mockImplementation((config, callback) => callback('some s3 error'))
+    }));
 
-      ModelFactory._overrideConfig('database', 'something');
+    return getHealthCheck().then(result => {
+      const s3 = result.details.filestore;
 
-      return getHealthCheck().then(result => {
-        const db = result.details['database'];
-
-        return expect(db).toEqual({
-          type: 'postgresql',
-          connection: false,
-          writable: false,
-          error: 'Connection error (Error Code: 3D000)'
-        });
+      return expect(s3).toEqual({
+        type: 's3',
+        bucketName: process.env.S3_BUCKET_NAME,
+        available: true,
+        writable: false,
+        error: 'some s3 error'
       });
     });
+  });
 
-    it('should return connection false if user is wrong', () => {
-      S3.mockImplementation(() => ({
-        putObject: s3MockPutObjectGood
-      }));
+  it('should return successful db health check if db connection is healthy', () => {
+    return getHealthCheck().then(result => {
+      const db = result.details['database'];
+      return expect(db).toEqual({
+        type: 'postgresql',
+        connection: true,
+        writable: true
+      });
+    });
+  });
 
-      ModelFactory._overrideConfig('username', 'hello');
+  it('should return failed db health check if username is incorrect', () => {
+    ModelFactory._overrideConfig('username', 'hello');
 
-      return getHealthCheck().then(result => {
-        const db = result.details['database'];
+    return getHealthCheck().then(result => {
+      const db = result.details['database'];
 
-        return expect(db).toEqual({
-          type: 'postgresql',
-          connection: false,
-          writable: true,
-          error: 'Authorization error (Error Code: 28P01)'
-        });
+      return expect(db).toEqual({
+        type: 'postgresql',
+        connection: true,
+        writable: false,
+        error: 'Authorization error (Error Code: 28P01)'
+      });
+    });
+  });
+
+  it('should return failed db health check if there is an unknown error', () => {
+    ModelFactory._overrideConfig('host', 'something');
+
+    return getHealthCheck().then(result => {
+      const db = result.details['database'];
+
+      return expect(db).toEqual({
+        type: 'postgresql',
+        connection: false,
+        writable: false,
+        error: 'Unknown error (Error Code: ENOTFOUND)'
       });
     });
   });
