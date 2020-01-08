@@ -3,28 +3,7 @@ import ModelFactory from '../database/models';
 import uuid from 'uuid/v4';
 import { ERROR_CODES } from './pg-error-codes';
 
-const save = (nhsNumber, conversationId) => {
-  const HealthRecord = ModelFactory.getByName('HealthRecord');
-
-  updateLogEvent({ status: 'start saving ehr into database...' });
-
-  return HealthRecord.create({
-    slug: uuid(),
-    conversation_id: conversationId,
-    patient_id: nhsNumber
-  })
-    .then(result => {
-      updateLogEvent({
-        status: `Created new record: ${result}`
-      });
-    })
-    .catch(err => {
-      updateLogEventWithError(err);
-      throw err;
-    });
-};
-
-const saveHealthCheck = () => {
+export const saveHealthCheck = () => {
   const HealthCheck = ModelFactory.getByName('HealthCheck');
 
   const slug = uuid();
@@ -85,5 +64,3 @@ const parseHealthCheckError = code => {
     };
   }
 };
-
-export { save, saveHealthCheck };

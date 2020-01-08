@@ -44,15 +44,6 @@ export default class S3Service {
     });
   }
 
-  remove() {
-    return new Promise((resolve, reject) => {
-      this.s3.deleteObject(this.parameters, err => {
-        if (err) return reject(err);
-        resolve();
-      });
-    });
-  }
-
   getPutSignedUrl() {
     return new Promise((resolve, reject) => {
       this.s3.getSignedUrl(
