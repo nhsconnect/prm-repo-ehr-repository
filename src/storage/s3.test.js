@@ -6,25 +6,23 @@ jest.mock('moment', () => () => ({ format: () => 'some-date' }));
 jest.mock('aws-sdk');
 
 describe('S3Service', () => {
-  describe('getUrl', () => {
+  describe('getPresignedUrl', () => {
     it('should call s3 getSignedUrl with parameters', () => {
-      const mockSignedUrl = jest
-        .fn()
-        .mockImplementation((operation, params, callback) => callback());
-
+      const mockSignedUrl = jest.fn().mockResolvedValue('some-presigned-url');
       S3.mockImplementation(() => ({
-        getSignedUrl: mockSignedUrl
+        getSignedUrlPromise: mockSignedUrl
       }));
 
       const parameters = {
         Bucket: config.awsS3BucketName,
-        Key: 'key',
+        Key: 'some-filename',
         Expires: 60,
         ContentType: 'text/xml'
       };
 
-      return new S3Service('key').getPutSignedUrl().then(() => {
-        expect(mockSignedUrl).toHaveBeenCalledWith('putObject', parameters, expect.anything());
+      return new S3Service('some-filename').getPresignedUrl().then(url => {
+        expect(url).toEqual('some-presigned-url');
+        expect(mockSignedUrl).toHaveBeenCalledWith('putObject', parameters);
       });
     });
   });

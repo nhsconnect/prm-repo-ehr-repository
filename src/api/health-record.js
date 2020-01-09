@@ -16,7 +16,7 @@ router.post(
   (req, res, next) => {
     getSignedUrl(req.params.conversationId, req.body.messageId)
       .then(url => {
-        updateLogEvent({ status: 'Got url sucessfully', url: url });
+        updateLogEvent({ status: 'Retrieved presigned url successfully' });
         res.status(201).send(url);
       })
       .catch(err => {

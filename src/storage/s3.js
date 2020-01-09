@@ -1,6 +1,5 @@
 import moment from 'moment';
 import { Endpoint, S3 } from 'aws-sdk';
-import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
 import config from '../config';
 
 const URL_EXPIRY_TIME = 60;
@@ -39,24 +38,11 @@ export default class S3Service {
     });
   }
 
-  getPutSignedUrl() {
-    return new Promise((resolve, reject) => {
-      this.s3.getSignedUrl(
-        'putObject',
-        {
-          ...this.parameters,
-          Expires: URL_EXPIRY_TIME,
-          ContentType: CONTENT_TYPE
-        },
-        (err, url) => {
-          if (err) {
-            updateLogEventWithError(err);
-            return reject(err);
-          }
-          updateLogEvent({ storage: { url: `${url}}` } });
-          resolve(url);
-        }
-      );
+  getPresignedUrl() {
+    return this.s3.getSignedUrlPromise('putObject', {
+      ...this.parameters,
+      Expires: URL_EXPIRY_TIME,
+      ContentType: CONTENT_TYPE
     });
   }
 
