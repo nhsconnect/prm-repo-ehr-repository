@@ -29,7 +29,7 @@ describe('POST /health-record', () => {
         })
         .then(() => {
           return getSignedUrl(conversationId, messageId).then(url => {
-            expect(url).toContain('http://');
+            expect(url).toContain('https://');
             expect(url).toContain(process.env.S3_BUCKET_NAME);
             expect(url).toContain(messageId);
             return expect(url).toContain(conversationId);
