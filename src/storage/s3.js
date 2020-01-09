@@ -1,5 +1,6 @@
-import { updateLogEventWithError, updateLogEvent } from '../middleware/logging';
+import moment from 'moment';
 import { Endpoint, S3 } from 'aws-sdk';
+import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
 import config from '../config';
 
 const URL_EXPIRY_TIME = 60;
@@ -15,23 +16,18 @@ export default class S3Service {
     };
   }
 
-  saveHealthInfo() {
-    const inputParams = {
+  checkS3Health() {
+    const result = {
       type: 's3',
       bucketName: config.awsS3BucketName,
       available: true,
       writable: false
     };
 
-    return this.save()
-      .then(() => {
-        inputParams.writable = true;
-        return inputParams;
-      })
-      .catch(err => {
-        inputParams.error = err;
-        return inputParams;
-      });
+    const date = moment().format('YYYY-MM-DD HH:mm:ss');
+    return this.save(date)
+      .then(() => ({ ...result, writable: true }))
+      .catch(err => ({ ...result, error: err }));
   }
 
   save(data) {

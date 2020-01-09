@@ -2,6 +2,7 @@ import { S3 } from 'aws-sdk';
 import S3Service from './s3';
 import config from '../config';
 
+jest.mock('moment', () => () => ({ format: () => 'some-date' }));
 jest.mock('aws-sdk');
 
 describe('S3Service', () => {
@@ -28,7 +29,7 @@ describe('S3Service', () => {
     });
   });
 
-  describe('saveHeathCheckToS3', () => {
+  describe('checkS3Health', () => {
     it('should call s3 putObject with parameters ', () => {
       const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
 
@@ -38,10 +39,17 @@ describe('S3Service', () => {
 
       const parameters = {
         Bucket: config.awsS3BucketName,
-        Key: 'health-check.txt',
+        Key: 'some-filename',
         Body: 'some-date'
       };
-      return new S3Service('health-check.txt').save('some-date').then(() => {
+
+      return new S3Service('some-filename').checkS3Health().then(result => {
+        expect(result).toEqual({
+          type: 's3',
+          bucketName: config.awsS3BucketName,
+          available: true,
+          writable: true
+        });
         expect(mockPutObject).toHaveBeenCalledWith(parameters, expect.anything());
       });
     });
