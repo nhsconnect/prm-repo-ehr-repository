@@ -28,6 +28,7 @@ export const checkDbHealth = () => {
 const parseHealthCheckError = code => {
   switch (code) {
     case ERROR_CODES.INVALID_USER_PASSWORD:
+    case ERROR_CODES.INVALID_CREDENTIALS:
       return {
         type: 'postgresql',
         connection: true,
