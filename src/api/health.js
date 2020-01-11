@@ -1,6 +1,6 @@
 import express from 'express';
 import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
-import getHealthCheck from '../services/get-health-check';
+import { getHealthCheck } from '../services/get-health-check';
 
 const router = express.Router();
 
@@ -8,11 +8,10 @@ router.get('/', (req, res, next) => {
   getHealthCheck()
     .then(status => {
       updateLogEvent({ status: 'Health check completed' });
-
       if (status.details.filestore.writable && status.details.database.writable) {
         res.status(200).send(status);
       } else {
-        updateLogEventWithError(new Error( JSON.stringify(status) ));
+        updateLogEventWithError(new Error(JSON.stringify(status)));
         res.status(503).send(status);
       }
     })
@@ -21,4 +20,5 @@ router.get('/', (req, res, next) => {
       next(err);
     });
 });
+
 export default router;

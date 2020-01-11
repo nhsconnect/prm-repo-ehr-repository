@@ -1,4 +1,4 @@
-import getHealthCheck from './get-health-check';
+import { getHealthCheck } from './get-health-check';
 import { S3 } from 'aws-sdk';
 import ModelFactory from '../database/models';
 import config from '../config';

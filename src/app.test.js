@@ -1,9 +1,11 @@
 import request from 'supertest';
 import app from './app';
 import getSignedUrl from './services/get-signed-url';
-import getHealthCheck from './services/get-health-check';
 import ModelFactory from './database/models';
 import logger from './config/logging';
+import { getHealthCheck } from './services/get-health-check';
+
+jest.requireActual('./middleware/logging');
 
 jest.mock('express-winston', () => ({
   errorLogger: () => (req, res, next) => next(),
@@ -15,20 +17,7 @@ jest.mock('./services/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 
-jest.mock('./services/get-health-check', () =>
-  jest.fn().mockReturnValue(Promise.resolve({
-    version: '1',
-    description: 'Health of Electronic Health Record Repository service',
-    details: {
-      filestore: {
-        writable: true
-      },
-      database: {
-        writable: true
-      }
-    }
-  }))
-);
+jest.mock('./services/get-health-check');
 
 describe('POST /health-record/{conversationId}/message', () => {
   afterAll(() => {
@@ -118,6 +107,19 @@ describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
 describe('GET /health', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    getHealthCheck.mockReturnValue(
+      Promise.resolve({
+        details: {
+          filestore: {
+            writable: true
+          },
+          database: {
+            writable: true
+          }
+        }
+      })
+    );
   });
 
   it('should return 200', done => {
@@ -138,13 +140,13 @@ describe('GET /health', () => {
   it('should update the log event for any unexpected error', done => {
     request(app)
       .get('/health')
-      .expect(() =>
+      .expect(() => {
         expect(logger.info).toHaveBeenCalledWith('Event finished', {
           event: {
             status: 'Health check completed'
           }
-        })
-      )
+        });
+      })
       .end(done);
   });
 });

@@ -171,6 +171,7 @@ EOF
       node infra-tests/test_message_upload.js
       ;;
   test_docker_local)
+      export NODE_ENV=local
       export EHR_URL="http://ehr:3000"
       export NHS_ENVIRONMENT=docker
       export DATABASE_NAME=deductions_test
