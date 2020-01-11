@@ -36,18 +36,64 @@ describe('GET /health', () => {
       .end(done);
   });
 
+  it('should return 503 status if s3 writable is false', done => {
+    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse(false)));
+
+    request(app)
+      .get('/health')
+      .expect(503)
+      .expect(() => {
+        expect(updateLogEvent).toHaveBeenCalledWith(getHealthCheckResponse(false));
+      })
+      .end(done);
+  });
+
+  it('should return 503 status if db writable is false', done => {
+    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse(true, false)));
+
+    request(app)
+      .get('/health')
+      .expect(503)
+      .expect(() => {
+        expect(updateLogEvent).toHaveBeenCalledWith(getHealthCheckResponse(true, false));
+      })
+      .end(done);
+  });
+
+  it('should return 503 if both s3 and db are not writable', done => {
+    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse(false, false)));
+
+    request(app)
+      .get('/health')
+      .expect(503)
+      .expect(() => {
+        expect(updateLogEvent).toHaveBeenCalledWith(getHealthCheckResponse(false, false));
+      })
+      .end(done);
+  });
+
+  it('should return 500 if getHealthCheck if it cannot provide a healthcheck', done => {
+    getHealthCheck.mockReturnValue(Promise.resolve(new Error('')));
+
+    request(app)
+      .get('/health')
+      .expect(500)
+      .expect(() => {
+        expect(updateLogEvent).toHaveBeenCalledTimes(1);
+        expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
+      })
+      .end(done);
+  });
+
   it('should update the log event for any unexpected error', done => {
     getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse(false)));
 
     request(app)
       .get('/health')
       .expect(() => {
-        expect(updateLogEvent).toHaveBeenCalledTimes(1);
+        expect(updateLogEvent).toHaveBeenCalledTimes(2);
         expect(updateLogEvent).toHaveBeenCalledWith({ status: 'Health check completed' });
-        expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
-        expect(updateLogEventWithError).toHaveBeenCalledWith(
-          new Error(JSON.stringify(getHealthCheckResponse(false)))
-        );
+        expect(updateLogEvent).toHaveBeenCalledWith(getHealthCheckResponse(false));
       })
       .end(done);
   });
