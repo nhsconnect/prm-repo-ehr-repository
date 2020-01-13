@@ -137,18 +137,6 @@ describe('GET /health', () => {
       })
       .end(done);
   });
-  it('should update the log event for any unexpected error', done => {
-    request(app)
-      .get('/health')
-      .expect(() => {
-        expect(logger.info).toHaveBeenCalledWith('Event finished', {
-          event: {
-            status: 'Health check completed'
-          }
-        });
-      })
-      .end(done);
-  });
 });
 
 describe('GET /error', () => {
