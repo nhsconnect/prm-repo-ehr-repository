@@ -2,7 +2,6 @@ import request from 'supertest';
 import app from './app';
 import getSignedUrl from './services/get-signed-url';
 import ModelFactory from './database/models';
-import logger from './config/logging';
 import { getHealthCheck } from './services/get-health-check';
 
 jest.requireActual('./middleware/logging');
