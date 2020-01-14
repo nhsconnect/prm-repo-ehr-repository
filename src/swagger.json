@@ -5,13 +5,51 @@
     "version": "1.0.0",
     "title": "EHR Repository"
   },
-  "tags": [
-  ],
+  "tags": [],
   "paths": {
+    "/health": {
+      "get": {
+        "tags": [],
+        "summary": "Check filestore and database is available",
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully return health check report"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          },
+          "500": {
+            "description": "Unexpected error, couldn't retrieve health status"
+          },
+          "503": {
+            "description": "Filestore or Database is currently unavailable",
+            "schema": {
+              "$ref": "#/definitions/HealthStatus"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
     "/health-record/{conversationId}/message": {
       "post": {
-        "tags": [
-        ],
+        "tags": [],
         "summary": "Generate S3 upload URL",
         "consumes": [
           "application/json"
@@ -59,8 +97,7 @@
     },
     "/health-record/{conversationId}/message/{messageId}": {
       "put": {
-        "tags": [
-        ],
+        "tags": [],
         "summary": "Mark message as transfer complete",
         "consumes": [
           "application/json"
@@ -152,8 +189,62 @@
           "items": {
             "type": "object",
             "description": "An object with the name of the field in error as the key and the error message as the value",
-            "properties": {
-
+            "properties": {}
+          }
+        }
+      }
+    },
+    "HealthStatus": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "node_env": {
+          "type": "string"
+        },
+        "details": {
+          "type": "object",
+          "properties": {
+            "filestore": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "bucketName": {
+                  "type": "string"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "writable": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "object"
+                }
+              }
+            },
+            "database": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "connection": {
+                  "type": "boolean"
+                },
+                "writable": {
+                  "type": "boolean"
+                },
+                "error": {
+                  "type": "object"
+                }
+              }
             }
           }
         }
