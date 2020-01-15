@@ -39,3 +39,25 @@ resource "aws_iam_role_policy_attachment" "ehr-repo-s3-attach" {
   role       = "${aws_iam_role.ehr-repo.name}"
   policy_arn = aws_iam_policy.ehr-repo-s3.arn
 }
+
+data "aws_iam_policy_document" "ehr-repo-s3-bucket" {
+  statement {
+    actions = [
+      "s3:ListBucket"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.s3_bucket_name}"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ehr-repo-s3-bucket" {
+  name   = "${var.environment}-ehr-repo-s3-bucket"
+  policy = "${data.aws_iam_policy_document.ehr-repo-s3-bucket.json}"
+}
+
+resource "aws_iam_role_policy_attachment" "ehr-repo-s3-bucket-attach" {
+  role       = "${aws_iam_role.ehr-repo.name}"
+  policy_arn = aws_iam_policy.ehr-repo-s3-bucket.arn
+}
