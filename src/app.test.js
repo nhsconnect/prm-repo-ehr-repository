@@ -111,7 +111,8 @@ describe('GET /health', () => {
       Promise.resolve({
         details: {
           filestore: {
-            writable: true
+            writable: true,
+            available: true
           },
           database: {
             writable: true

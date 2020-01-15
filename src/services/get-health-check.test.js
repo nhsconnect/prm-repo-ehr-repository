@@ -6,7 +6,6 @@ import config from '../config';
 jest.mock('aws-sdk');
 
 describe('getHealthCheck', () => {
-
   const mockHeadBucket = jest.fn().mockImplementation((config, callback) => callback());
   const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
   const error = 'some-error';

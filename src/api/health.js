@@ -8,7 +8,11 @@ router.get('/', (req, res, next) => {
   getHealthCheck()
     .then(status => {
       updateLogEvent({ status: 'Health check completed' });
-      if (status.details.filestore.writable && status.details.database.writable) {
+      if (
+        status.details.filestore.writable &&
+        status.details.database.writable &&
+        status.details.filestore.available
+      ) {
         res.status(200).send(status);
       } else {
         updateLogEvent(status);
