@@ -138,15 +138,3 @@ describe('GET /health', () => {
       .end(done);
   });
 });
-
-describe('GET /error', () => {
-  it('should return 200', done => {
-    request(app)
-      .get('/error')
-      .expect(200)
-      .expect(res => {
-        expect(res.text).toEqual('Added test Error to the log');
-      })
-      .end(done);
-  });
-});
