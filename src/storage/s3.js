@@ -24,9 +24,13 @@ export default class S3Service {
     };
 
     const date = moment().format('YYYY-MM-DD HH:mm:ss');
-    return this.save(date)
-      .then(() => ({ ...result, writable: true }))
-      .catch(err => ({ ...result, error: err }));
+    return this._isConnected()
+      .then(() =>
+        this.save(date)
+          .then(() => ({ ...result, writable: true }))
+          .catch(err => ({ ...result, error: err }))
+      )
+      .catch(err => ({ ...result, error: err, available: false }));
   }
 
   save(data) {
@@ -43,6 +47,20 @@ export default class S3Service {
       ...this.parameters,
       Expires: URL_EXPIRY_TIME,
       ContentType: CONTENT_TYPE
+    });
+  }
+
+  _isConnected() {
+    return new Promise((resolve, reject) => {
+      this.s3.headBucket(
+        {
+          Bucket: config.awsS3BucketName
+        },
+        err => {
+          if (err) reject(err);
+          resolve(true);
+        }
+      );
     });
   }
 

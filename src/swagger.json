@@ -18,20 +18,11 @@
           "200": {
             "description": "Successfully return health check report"
           },
-          "401": {
-            "description": "Authorization header missing"
-          },
-          "403": {
-            "description": "Authorization key invalid"
-          },
-          "422": {
-            "description": "Validation failed",
+          "500": {
+            "description": "Unexpected error, couldn't retrieve health status",
             "schema": {
               "$ref": "#/definitions/ValidationErrors"
             }
-          },
-          "500": {
-            "description": "Unexpected error, couldn't retrieve health status"
           },
           "503": {
             "description": "Filestore or Database is currently unavailable",

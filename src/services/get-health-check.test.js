@@ -6,10 +6,17 @@ import config from '../config';
 jest.mock('aws-sdk');
 
 describe('getHealthCheck', () => {
+
+  const mockHeadBucket = jest.fn().mockImplementation((config, callback) => callback());
+  const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
+  const error = 'some-error';
+
   beforeEach(() => {
     ModelFactory._resetConfig();
+
     S3.mockImplementation(() => ({
-      putObject: jest.fn().mockImplementation((config, callback) => callback())
+      putObject: mockPutObject,
+      headBucket: mockHeadBucket
     }));
   });
 
@@ -30,10 +37,7 @@ describe('getHealthCheck', () => {
   });
 
   it('should return failed s3 health check if s3 returns an error', () => {
-    S3.mockImplementation(() => ({
-      putObject: jest.fn().mockImplementation((config, callback) => callback('some s3 error'))
-    }));
-
+    mockPutObject.mockImplementation((config, callback) => callback(error));
     return getHealthCheck().then(result => {
       const s3 = result.details.filestore;
 
@@ -42,7 +46,23 @@ describe('getHealthCheck', () => {
         bucketName: config.awsS3BucketName,
         available: true,
         writable: false,
-        error: 'some s3 error'
+        error: error
+      });
+    });
+  });
+
+  it('should return available false if s3 can be connected ', () => {
+    mockHeadBucket.mockImplementation((config, callback) => callback(error));
+
+    return getHealthCheck().then(result => {
+      const s3 = result.details.filestore;
+
+      return expect(s3).toEqual({
+        type: 's3',
+        bucketName: config.awsS3BucketName,
+        available: false,
+        writable: false,
+        error: error
       });
     });
   });

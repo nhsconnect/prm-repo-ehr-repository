@@ -8,25 +8,27 @@ jest.mock('../services/get-health-check');
 jest.mock('../middleware/logging', () => mockLoggingMiddleware());
 jest.mock('express-winston', () => mockExpressWinston());
 
+const mockErrorResponse = "some-error";
+
 describe('GET /health', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return 200 and the response from getHealthCheck', done => {
-    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse()));
+    getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase()));
 
     request(app)
       .get('/health')
       .expect(200)
       .expect(res => {
-        expect(res.body).toEqual(getHealthCheckResponse());
+        expect(res.body).toEqual(expectedHealthCheckBase());
       })
       .end(done);
   });
 
   it('should call health check service with no parameters', done => {
-    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse()));
+    getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase()));
 
     request(app)
       .get('/health')
@@ -37,37 +39,41 @@ describe('GET /health', () => {
   });
 
   it('should return 503 status if s3 writable is false', done => {
-    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse(false)));
+    getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(false)));
 
     request(app)
       .get('/health')
       .expect(503)
       .expect(() => {
-        expect(updateLogEvent).toHaveBeenCalledWith(getHealthCheckResponse(false));
+        expect(updateLogEvent).toHaveBeenCalledWith(expectedHealthCheckBase(false));
       })
       .end(done);
   });
 
   it('should return 503 status if db writable is false', done => {
-    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse(true, false)));
+    getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(true, true, false)));
 
     request(app)
       .get('/health')
       .expect(503)
       .expect(() => {
-        expect(updateLogEvent).toHaveBeenCalledWith(getHealthCheckResponse(true, false));
+        expect(updateLogEvent).toHaveBeenCalledWith(expectedHealthCheckBase(true, true, false));
       })
       .end(done);
   });
 
   it('should return 503 if both s3 and db are not writable', done => {
-    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse(false, false)));
+    getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(false, false, false, false)));
 
     request(app)
       .get('/health')
       .expect(503)
       .expect(() => {
-        expect(updateLogEvent).toHaveBeenCalledWith(getHealthCheckResponse(false, false));
+        expect(updateLogEvent).toHaveBeenCalledWith(expectedHealthCheckBase(
+          false,
+          false,
+          false,
+          false));
       })
       .end(done);
   });
@@ -86,45 +92,18 @@ describe('GET /health', () => {
   });
 
   it('should update the log event for any unexpected error', done => {
-    getHealthCheck.mockReturnValue(Promise.resolve(getHealthCheckResponse(false)));
+    getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(false)));
 
     request(app)
       .get('/health')
       .expect(() => {
         expect(updateLogEvent).toHaveBeenCalledTimes(2);
         expect(updateLogEvent).toHaveBeenCalledWith({ status: 'Health check completed' });
-        expect(updateLogEvent).toHaveBeenCalledWith(getHealthCheckResponse(false));
+        expect(updateLogEvent).toHaveBeenCalledWith(expectedHealthCheckBase(false));
       })
       .end(done);
   });
 });
-
-function getHealthCheckResponse(s3_writable = true, db_writable = true) {
-  const getWritableResponse = writable => {
-    let retObj = {
-      type: 'postgresql',
-      connection: true,
-      writable: writable
-    };
-
-    if (!writable)
-      retObj = {
-        ...retObj,
-        error: 'This is an error message'
-      };
-
-    return retObj;
-  };
-
-  return {
-    version: '1',
-    description: 'Health of Electronic Health Record Repository service',
-    details: {
-      filestore: getWritableResponse(s3_writable),
-      database: getWritableResponse(db_writable)
-    }
-  };
-}
 
 function mockExpressWinston() {
   return {
@@ -132,6 +111,41 @@ function mockExpressWinston() {
     logger: () => (req, res, next) => next()
   };
 }
+
+const expectedS3Base = (isWritable, isConnected) => {
+  const s3Base = {
+    available: isConnected,
+    writable: isWritable
+  };
+  return !isWritable
+    ? {
+      ...s3Base,
+      error: mockErrorResponse
+    }
+    : s3Base;
+};
+
+const expectedHealthCheckBase = (s3_writable = true, s3_connected = true, db_writable = true, db_connected = true) => ({
+  details: {
+    filestore: expectedS3Base(s3_writable, s3_connected),
+    database: getExpectedDatabase(db_writable, db_connected)
+  }
+});
+
+const getExpectedDatabase = (isWritable, isConnected) => {
+
+  const baseConf = {
+    connection: isConnected,
+    writable: isWritable
+  };
+
+  return !isWritable
+    ? {
+      ...baseConf,
+      error: mockErrorResponse
+    }
+    : baseConf;
+};
 
 function mockLoggingMiddleware() {
   const original = jest.requireActual('../middleware/logging');
