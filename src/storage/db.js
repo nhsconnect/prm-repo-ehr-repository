@@ -1,11 +1,10 @@
 import ModelFactory from '../database/models';
-import uuid from 'uuid/v4';
 import { ERROR_CODES } from './pg-error-codes';
 
 export const checkDbHealth = () => {
   const HealthCheck = ModelFactory.getByName('HealthCheck');
 
-  return HealthCheck.create({ slug: uuid() })
+  return HealthCheck.create()
     .then(() => ({
       type: 'postgresql',
       connection: true,

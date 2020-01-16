@@ -8,10 +8,6 @@ const model = dataType => {
       type: dataType.UUID,
       primaryKey: true
     },
-    completed_at: {
-      type: dataType.DATE,
-      allowNull: false
-    },
     created_at: {
       type: dataType.DATE,
       allowNull: false
