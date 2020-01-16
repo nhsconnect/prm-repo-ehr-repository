@@ -9,15 +9,9 @@ describe('models.HealthCheck', () => {
     return ModelFactory.sequelize.close();
   });
 
-  it('should return id as an Integer type', () => {
+  it('should return id as a valid uuid', () => {
     return HealthCheck.findAll({}).then(value => {
-      return expect(typeof value[0].dataValues.id).toBe(typeof 0);
-    });
-  });
-
-  it('should return slug as a valid uuid', () => {
-    return HealthCheck.findAll({}).then(value => {
-      return expect(value[0].dataValues.slug).toMatch(uuidPattern);
+      return expect(value[0].dataValues.id).toMatch(uuidPattern);
     });
   });
 

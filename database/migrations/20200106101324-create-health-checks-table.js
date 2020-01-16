@@ -5,16 +5,9 @@ const tableName = 'health_checks';
 const model = dataType => {
   return {
     id: {
-      type: dataType.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    slug: {
       type: dataType.UUID,
-      unique: true,
-      allowNull: false
+      primaryKey: true
     },
-    deleted_at: dataType.DATE,
     completed_at: {
       type: dataType.DATE,
       allowNull: false
@@ -26,7 +19,8 @@ const model = dataType => {
     updated_at: {
       type: dataType.DATE,
       allowNull: false
-    }
+    },
+    deleted_at: dataType.DATE
   };
 };
 module.exports = {

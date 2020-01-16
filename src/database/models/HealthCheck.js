@@ -1,25 +1,20 @@
 import getParameters from './parameters';
+import uuid from 'uuid/v4';
 
 const modelName = 'HealthCheck';
 const tableName = 'health_checks';
 
 const model = dataType => ({
   id: {
-    type: dataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  slug: {
     type: dataType.UUID,
-    unique: true,
-    allowNull: false
+    primaryKey: true,
+    defaultValue: uuid()
   },
   completed_at: {
     defaultValue: new Date(),
     type: dataType.DATE,
     allowNull: false
   },
-  deleted_at: dataType.DATE,
   created_at: {
     type: dataType.DATE,
     allowNull: false
@@ -27,7 +22,8 @@ const model = dataType => ({
   updated_at: {
     type: dataType.DATE,
     allowNull: false
-  }
+  },
+  deleted_at: dataType.DATE
 });
 
 module.exports = (sequelize, DataTypes) => {
