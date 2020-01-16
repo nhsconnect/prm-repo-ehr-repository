@@ -1,19 +1,25 @@
 import ModelFactory from '../models';
 import uuid from 'uuid/v4';
 
+jest.mock('uuid/v4');
+
 describe('Patient', () => {
+
+  const testUUID = '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54';
+
   const Patient = ModelFactory.getByName('Patient');
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const nhsNumberPattern = /^[0-9]{10}$/;
-  let testId;
+
 
   beforeEach(() => {
-    testId = uuid();
+    uuid.mockImplementation(() => testUUID);
   });
 
   afterAll(() => {
-    return ModelFactory.sequelize.close();
+    jest.clearAllMocks();
+    ModelFactory.sequelize.close();
   });
 
   it('should return id as a valid uuid', () => {
@@ -98,8 +104,7 @@ describe('Patient', () => {
 
   it('should create new entry using model', () => {
     const new_entry_params = {
-      nhs_number: '4444444444',
-      id: testId
+      nhs_number: '4444444444'
     };
 
     return Patient.create(new_entry_params)
@@ -108,7 +113,7 @@ describe('Patient', () => {
         expect(value.dataValues.updated_at).not.toBeNull();
         expect(value.dataValues.deleted_at).toBeNull();
         expect(value.dataValues.nhs_number).toMatch(new_entry_params.nhs_number);
-        expect(value.dataValues.id).toMatch(new_entry_params.id);
+        expect(value.dataValues.id).toMatch(testUUID);
       })
       .finally(() => {
         return Patient.destroy({
@@ -145,11 +150,11 @@ describe('Patient', () => {
 
   it('should reject with error if not all required parameters are provided', () => {
     const new_entry_params = {
-      nhs_number: '5555555555'
+      nhs_number: null
     };
 
     return expect(Patient.create(new_entry_params)).rejects.toThrowError(
-      /null value in column "id" violates not-null constraint/i
+      /notNull Violation: Patient.nhs_number cannot be null/i
     ); //
   });
 });

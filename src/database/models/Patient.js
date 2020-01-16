@@ -7,7 +7,8 @@ const model = dataType => {
   return {
     id: {
       type: dataType.UUID,
-      primaryKey: true
+      primaryKey: true,
+      defaultValue: dataType.UUIDV4
     },
     nhs_number: {
       type: dataType.CHAR(10),
