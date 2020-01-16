@@ -6,6 +6,16 @@ AWS_DEFAULT_REGION=eu-west-2
 IMAGE_REPO_NAME=deductions/ehr-repo
 NHS_SERVICE=ehr-repo
 
+function set_test_environment_variables {
+  export NODE_ENV=local
+  export DATABASE_NAME=deductions_test
+  export DATABASE_USER=deductions_user
+  export DATABASE_PASSWORD=secret
+  export DATABASE_HOST=db
+  export S3_BUCKET_NAME=test-bucket
+  export LOCALSTACK_URL=http://localstack:4572
+}
+
 function check_env {
   if [[ -z "${NHS_ENVIRONMENT}" ]]; then
     echo "Must set NHS_ENVIRONMENT"
@@ -74,55 +84,24 @@ case "${command}" in
       dojo "./tasks _build"
       ;;
   _coverage)
+      set_test_environment_variables
       npm install
-      npm run migrate
-      npm run seed-test-data
+      npm run set-up # Migrates and Seeds data in DB
       npm run coverage
       ;;
   coverage)
-        cat << EOF > .env
-NODE_ENV=local
-DATABASE_NAME=deductions_test
-DATABASE_USER=deductions_user
-DATABASE_PASSWORD=secret
-DATABASE_HOST=db
-S3_BUCKET_NAME=test-bucket
-LOCALSTACK_URL=http://localstack:4572
-EOF
-      set -a
-      source .env
       dojo -c Dojofile-itest "./tasks _coverage"
       ;;
   _test)
+      set_test_environment_variables
       npm install
-      npm run migrate
-      npm run seed-test-data
+      npm run set-up # Migrates and Seeds data in DB
       npm run test
       ;;
   test)
-  cat << EOF > .env
-NODE_ENV=local
-DATABASE_NAME=deductions_test
-DATABASE_USER=deductions_user
-DATABASE_PASSWORD=secret
-DATABASE_HOST=db
-S3_BUCKET_NAME=test-bucket
-LOCALSTACK_URL=http://localstack:4572
-EOF
-      set -a
-      source .env
       dojo -c Dojofile-itest "./tasks _test"
       ;;
   interactive)
-  cat << EOF > .env
-NODE_ENV=local
-DATABASE_NAME=deductions_test
-DATABASE_USER=deductions_user
-DATABASE_PASSWORD=secret
-DATABASE_HOST=db
-EOF
-      set -a
-      source .env
       dojo -c Dojofile-itest
       ;;
   build_docker_local)
@@ -171,16 +150,10 @@ EOF
       node infra-tests/test_message_upload.js
       ;;
   test_docker_local)
-      export NODE_ENV=local
+      set_test_environment_variables
       export EHR_URL="http://ehr:3000"
-      export NHS_ENVIRONMENT=docker
-      export DATABASE_NAME=deductions_test
-      export DATABASE_USER=deductions_user
-      export DATABASE_PASSWORD=secret
-      export DATABASE_HOST=db
       export EHR_DOCKER_IMAGE="${EHR_DOCKER_IMAGE:-$IMAGE_REPO_NAME}"
-      export S3_BUCKET_NAME="dev-ehr-repo-bucket"
-      export LOCALSTACK_URL="http://localstack:4572"
+      export NHS_ENVIRONMENT=docker
       dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
   test_docker)
