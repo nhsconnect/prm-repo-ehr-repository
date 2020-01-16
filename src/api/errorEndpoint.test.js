@@ -14,7 +14,7 @@ describe('GET /error', () => {
   it('should return 200', done => {
     request(app)
       .get('/error')
-      .expect(200)
+      .expect(201)
       .expect(res => {
         expect(res.text).toEqual('Added test Error to the log');
       })
@@ -24,7 +24,7 @@ describe('GET /error', () => {
   it('should log event with error', done => {
     request(app)
       .get('/error')
-      .expect(200)
+      .expect(201)
       .expect(() => {
         expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
         expect(updateLogEventWithError).toHaveBeenCalledWith(

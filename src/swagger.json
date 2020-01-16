@@ -30,12 +30,21 @@
               "$ref": "#/definitions/HealthStatus"
             }
           }
-        },
-        "security": [
-          {
-            "api_key": []
+        }
+      }
+    },
+    "/error": {
+      "get": {
+        "tags": [],
+        "summary": "Check filestore and database is available",
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Successfully create error log"
           }
-        ]
+        }
       }
     },
     "/health-record/{conversationId}/message": {

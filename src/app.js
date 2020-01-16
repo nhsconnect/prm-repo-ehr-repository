@@ -8,7 +8,6 @@ import { options } from './config/logging';
 import healthRecord from './api/health-record';
 import health from './api/health';
 import errorEndpoint from './api/errorEndpoint';
-import exception from './api/exception';
 import swaggerDocument from './swagger.json';
 
 httpContext.enable();
@@ -24,8 +23,6 @@ app.use('/health', logging.middleware, health);
 app.use('/health-record', logging.middleware, healthRecord);
 
 app.use('/error', logging.middleware, errorEndpoint);
-
-app.use('/exception', logging.middleware, exception);
 
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
