@@ -8,8 +8,8 @@ const model = dataType => ({
     type: dataType.UUID,
     primaryKey: true
   },
-  conversation_id: {
-    type: dataType.STRING(100),
+  message_id: {
+    type: dataType.UUID,
     unique: true,
     allowNull: false
   },

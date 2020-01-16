@@ -5,7 +5,7 @@ describe('MessageFragment', () => {
   const MessageFragment = ModelFactory.getByName('MessageFragment');
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-  const convoIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
+  const messageIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
   afterAll(() => {
     return ModelFactory.sequelize.close();
@@ -17,9 +17,9 @@ describe('MessageFragment', () => {
     });
   });
 
-  it('should return a valid conversation_id', () => {
+  it('should return a valid message_id', () => {
     return MessageFragment.findAll({}).then(value => {
-      return expect(value[0].dataValues.conversation_id).toMatch(convoIdPattern);
+      return expect(value[0].dataValues.message_id).toMatch(messageIdPattern);
     });
   });
 
@@ -100,7 +100,7 @@ describe('MessageFragment', () => {
   it('should create new entry using model', () => {
     const new_entry_params = {
       id: uuid(),
-      conversation_id: uuid()
+      message_id: uuid()
     };
 
     return MessageFragment.create(new_entry_params)
@@ -109,7 +109,7 @@ describe('MessageFragment', () => {
         expect(value.dataValues.updated_at).not.toBeNull();
         expect(value.dataValues.deleted_at).toBeNull();
         expect(value.dataValues.completed_at).toBeNull();
-        expect(value.dataValues.conversation_id).toMatch(new_entry_params.conversation_id);
+        expect(value.dataValues.message_id).toMatch(new_entry_params.message_id);
         expect(value.dataValues.id).toMatch(new_entry_params.id);
       })
       .finally(() => {
@@ -133,7 +133,7 @@ describe('MessageFragment', () => {
 
     return MessageFragment.update(
       {
-        conversation_id: uuid()
+        message_id: uuid()
       },
       updateOptions
     ).then(value => {
