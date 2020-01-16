@@ -105,13 +105,12 @@ describe('MessageFragment', () => {
 
     return MessageFragment.create(new_entry_params)
       .then(value => {
-        expect(value.dataValues.id).not.toBeNull();
         expect(value.dataValues.created_at).not.toBeNull();
         expect(value.dataValues.updated_at).not.toBeNull();
         expect(value.dataValues.deleted_at).toBeNull();
         expect(value.dataValues.completed_at).toBeNull();
         expect(value.dataValues.conversation_id).toMatch(new_entry_params.conversation_id);
-        return expect(value.dataValues.id).toMatch(new_entry_params.id);
+        expect(value.dataValues.id).toMatch(new_entry_params.id);
       })
       .finally(() => {
         // force = true -> Hard Delete

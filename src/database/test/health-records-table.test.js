@@ -124,7 +124,7 @@ describe('HealthRecord', () => {
         expect(value.dataValues.completed_at).toBeNull();
         expect(value.dataValues.patient_id).toBe(new_entry_params.patient_id);
         expect(value.dataValues.conversation_id).toMatch(new_entry_params.conversation_id);
-        return expect(value.dataValues.id).toMatch(new_entry_params.id);
+        expect(value.dataValues.id).toMatch(new_entry_params.id);
       })
       .finally(() => {
         // force = true -> Hard Delete

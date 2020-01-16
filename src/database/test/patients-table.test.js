@@ -6,6 +6,11 @@ describe('Patient', () => {
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const nhsNumberPattern = /^[0-9]{10}$/;
+  let testId;
+
+  beforeEach(() => {
+    testId = uuid();
+  });
 
   afterAll(() => {
     return ModelFactory.sequelize.close();
@@ -94,7 +99,7 @@ describe('Patient', () => {
   it('should create new entry using model', () => {
     const new_entry_params = {
       nhs_number: '4444444444',
-      id: uuid()
+      id: testId
     };
 
     return Patient.create(new_entry_params)
@@ -103,7 +108,7 @@ describe('Patient', () => {
         expect(value.dataValues.updated_at).not.toBeNull();
         expect(value.dataValues.deleted_at).toBeNull();
         expect(value.dataValues.nhs_number).toMatch(new_entry_params.nhs_number);
-        return expect(value.dataValues.id).toMatch(new_entry_params.id);
+        expect(value.dataValues.id).toMatch(new_entry_params.id);
       })
       .finally(() => {
         return Patient.destroy({
