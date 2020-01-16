@@ -11,58 +11,58 @@ describe('HealthRecord', () => {
     return ModelFactory.sequelize.close();
   });
 
-  it('should return id as an Integer type', () => {
-    return HealthRecord.findAll({ where: {} }).then(value => {
-      return expect(typeof value[0].dataValues.id).toBe(typeof 0);
-    });
-  });
-
-  it('should return slug as a valid uuid', () => {
-    return HealthRecord.findAll({ where: {} }).then(value => {
-      return expect(value[0].dataValues.slug).toMatch(uuidPattern);
+  it('should return id as a valid uuid', () => {
+    return HealthRecord.findAll({}).then(value => {
+      return expect(value[0].dataValues.id).toMatch(uuidPattern);
     });
   });
 
   it('should return the valid patient_id as an Integer', () => {
-    return HealthRecord.findAll({ where: {} }).then(value => {
+    return HealthRecord.findAll({}).then(value => {
       return expect(typeof value[0].dataValues.patient_id).toBe(typeof 0);
     });
   });
 
   it('should return a valid conversation_id', () => {
-    return HealthRecord.findAll({ where: {} }).then(value => {
+    return HealthRecord.findAll({}).then(value => {
       return expect(value[0].dataValues.conversation_id).toMatch(convoIdPattern);
     });
   });
 
   it('should return null object for completed_at', () => {
-    return HealthRecord.findAll({ where: {} }).then(value => {
+    return HealthRecord.findAll({}).then(value => {
       return expect(value[0].dataValues.completed_at).toBeNull();
     });
   });
 
   it('should return Date object for created_at', () => {
-    return HealthRecord.findAll({ where: {} }).then(value => {
+    return HealthRecord.findAll({}).then(value => {
       return expect(typeof value[0].dataValues.created_at).toBe(typeof new Date());
     });
   });
 
   it('should return Date object for updated_at', () => {
-    return HealthRecord.findAll({ where: {} }).then(value => {
+    return HealthRecord.findAll({}).then(value => {
       return expect(typeof value[0].dataValues.updated_at).toBe(typeof new Date());
     });
   });
 
   it('should return null for deleted_at', () => {
-    return HealthRecord.findAll({ where: {} }).then(value => {
+    return HealthRecord.findAll({}).then(value => {
       return expect(value[0].dataValues.deleted_at).toBe(null);
+    });
+  });
+
+  it('should return is_completed as a boolean', () => {
+    return HealthRecord.findAll({}).then(value => {
+      return expect(value[0].dataValues.is_completed).toBe(false);
     });
   });
 
   it('should return 1 for items deleted and deleted_at should have been updated', () => {
     const destroyOptions = {
       where: {
-        slug: '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4'
+        id: '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4'
       }
     };
 
@@ -81,7 +81,7 @@ describe('HealthRecord', () => {
   it('should return 1 for items restored and deleted_at should have been removed', () => {
     const restoreOptions = {
       where: {
-        slug: '0879b920-7174-4ef1-92f7-12383114b052'
+        id: '0879b920-7174-4ef1-92f7-12383114b052'
       }
     };
 
@@ -100,7 +100,7 @@ describe('HealthRecord', () => {
   it('should not return anything if record has been destroyed (soft)', () => {
     const destroyedOptions = {
       where: {
-        slug: '0879b920-7174-4ef1-92f7-12383114b052'
+        id: '0879b920-7174-4ef1-92f7-12383114b052'
       }
     };
 
@@ -111,7 +111,7 @@ describe('HealthRecord', () => {
 
   it('should create new entry using model', () => {
     const new_entry_params = {
-      slug: uuid(),
+      id: uuid(),
       patient_id: 1,
       conversation_id: uuid()
     };
@@ -125,12 +125,12 @@ describe('HealthRecord', () => {
         expect(value.dataValues.completed_at).toBeNull();
         expect(value.dataValues.patient_id).toBe(new_entry_params.patient_id);
         expect(value.dataValues.conversation_id).toMatch(new_entry_params.conversation_id);
-        return expect(value.dataValues.slug).toMatch(new_entry_params.slug);
+        return expect(value.dataValues.id).toMatch(new_entry_params.id);
       })
       .finally(() => {
         // force = true -> Hard Delete
         return HealthRecord.destroy({
-          where: { slug: new_entry_params.slug },
+          where: { id: new_entry_params.id },
           paranoid: false,
           force: true
         }).then(value => {
@@ -142,7 +142,7 @@ describe('HealthRecord', () => {
   it('should update the updated_at with a record update', () => {
     const updateOptions = {
       where: {
-        slug: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
+        id: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
       }
     };
 
@@ -165,7 +165,7 @@ describe('HealthRecord', () => {
   it('should update the completed_at with Date when complete is called', () => {
     const completeOptions = {
       where: {
-        slug: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
+        id: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
       }
     };
 

@@ -1,17 +1,11 @@
 'use strict';
 
-const tableName = "health_records";
+const tableName = 'health_records';
 
-const model = (dataType) => ({
+const model = dataType => ({
   id: {
-    type: dataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  slug: {
     type: dataType.UUID,
-    unique: true,
-    allowNull: false
+    primaryKey: true
   },
   patient_id: {
     type: dataType.INTEGER,
@@ -31,6 +25,11 @@ const model = (dataType) => ({
   updated_at: {
     type: dataType.DATE,
     allowNull: false
+  },
+  is_completed: {
+    type: dataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
   }
 });
 
