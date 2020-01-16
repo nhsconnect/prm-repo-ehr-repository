@@ -15,7 +15,8 @@ describe('models.HealthCheck', () => {
   });
 
   afterAll(() => {
-    return ModelFactory.sequelize.close();
+    jest.clearAllMocks();
+    ModelFactory.sequelize.close();
   });
 
   it('should return id as a valid uuid', () => {

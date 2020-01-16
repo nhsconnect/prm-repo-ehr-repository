@@ -6,7 +6,8 @@ const tableName = 'health_records';
 const model = dataType => ({
   id: {
     type: dataType.UUID,
-    primaryKey: true
+    primaryKey: true,
+    defaultValue: dataType.UUIDV4
   },
   patient_id: {
     type: dataType.INTEGER,
@@ -26,11 +27,6 @@ const model = dataType => ({
   updated_at: {
     type: dataType.DATE,
     allowNull: false
-  },
-  is_completed: {
-    type: dataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
   }
 });
 

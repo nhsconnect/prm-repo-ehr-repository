@@ -1,14 +1,23 @@
 import ModelFactory from '../models';
 import uuid from 'uuid/v4';
 
+const testUUID = '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54';
+
+jest.mock('uuid/v4');
+
 describe('HealthRecord', () => {
   const HealthRecord = ModelFactory.getByName('HealthRecord');
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const convoIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
+  beforeEach(() => {
+    uuid.mockImplementation(() => testUUID);
+  });
+
   afterAll(() => {
-    return ModelFactory.sequelize.close();
+    jest.clearAllMocks();
+    ModelFactory.sequelize.close();
   });
 
   it('should return id as a valid uuid', () => {
@@ -50,12 +59,6 @@ describe('HealthRecord', () => {
   it('should return null for deleted_at', () => {
     return HealthRecord.findAll({}).then(value => {
       return expect(value[0].dataValues.deleted_at).toBe(null);
-    });
-  });
-
-  it('should return is_completed as a boolean', () => {
-    return HealthRecord.findAll({}).then(value => {
-      return expect(value[0].dataValues.is_completed).toBe(false);
     });
   });
 
@@ -110,8 +113,8 @@ describe('HealthRecord', () => {
   });
 
   it('should create new entry using model', () => {
+
     const new_entry_params = {
-      id: uuid(),
       patient_id: 1,
       conversation_id: uuid()
     };
@@ -124,12 +127,12 @@ describe('HealthRecord', () => {
         expect(value.dataValues.completed_at).toBeNull();
         expect(value.dataValues.patient_id).toBe(new_entry_params.patient_id);
         expect(value.dataValues.conversation_id).toMatch(new_entry_params.conversation_id);
-        expect(value.dataValues.id).toMatch(new_entry_params.id);
+        expect(value.dataValues.id).toMatch(testUUID);
       })
       .finally(() => {
         // force = true -> Hard Delete
         return HealthRecord.destroy({
-          where: { id: new_entry_params.id },
+          where: { id: testUUID },
           paranoid: false,
           force: true
         }).then(value => {
