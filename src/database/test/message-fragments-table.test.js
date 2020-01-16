@@ -12,37 +12,37 @@ describe('MessageFragment', () => {
   });
 
   it('should return id as a valid uuid', () => {
-    return MessageFragment.findAll({ where: {} }).then(value => {
+    return MessageFragment.findAll({}).then(value => {
       return expect(value[0].dataValues.id).toMatch(uuidPattern);
     });
   });
 
   it('should return a valid conversation_id', () => {
-    return MessageFragment.findAll({ where: {} }).then(value => {
+    return MessageFragment.findAll({}).then(value => {
       return expect(value[0].dataValues.conversation_id).toMatch(convoIdPattern);
     });
   });
 
   it('should return null object for completed_at', () => {
-    return MessageFragment.findAll({ where: {} }).then(value => {
+    return MessageFragment.findAll({}).then(value => {
       return expect(value[0].dataValues.completed_at).toBeNull();
     });
   });
 
   it('should return Date object for created_at', () => {
-    return MessageFragment.findAll({ where: {} }).then(value => {
+    return MessageFragment.findAll({}).then(value => {
       return expect(typeof value[0].dataValues.created_at).toBe(typeof new Date());
     });
   });
 
   it('should return Date object for updated_at', () => {
-    return MessageFragment.findAll({ where: {} }).then(value => {
+    return MessageFragment.findAll({}).then(value => {
       return expect(typeof value[0].dataValues.updated_at).toBe(typeof new Date());
     });
   });
 
   it('should return null for deleted_at', () => {
-    return MessageFragment.findAll({ where: {} }).then(value => {
+    return MessageFragment.findAll({}).then(value => {
       return expect(value[0].dataValues.deleted_at).toBe(null);
     });
   });

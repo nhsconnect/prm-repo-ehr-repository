@@ -18,19 +18,19 @@ describe('Patient', () => {
   });
 
   it('should return a valid nhs_number made of 10 numbers', () => {
-    return Patient.findAll({ where: {} }).then(value => {
+    return Patient.findAll({}).then(value => {
       return expect(value[0].dataValues.nhs_number).toMatch(nhsNumberPattern);
     });
   });
 
   it('should return Date object for created_at', () => {
-    return Patient.findAll({ where: {} }).then(value => {
+    return Patient.findAll({}).then(value => {
       return expect(typeof value[0].dataValues.created_at).toBe(typeof new Date());
     });
   });
 
   it('should return Date object for updated_at', () => {
-    return Patient.findAll({ where: {} }).then(value => {
+    return Patient.findAll({}).then(value => {
       return expect(typeof value[0].dataValues.updated_at).toBe(typeof new Date());
     });
   });
