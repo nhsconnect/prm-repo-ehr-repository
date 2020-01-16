@@ -1,24 +1,18 @@
 'use strict';
 
-const tableName = "message_fragments";
+const tableName = 'message_fragments';
 
-const model = (dataType) => ({
+const model = dataType => ({
   id: {
-    type: dataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  slug: {
     type: dataType.UUID,
-    unique: true,
-    allowNull: false
+    primaryKey: true
   },
   conversation_id: {
     type: dataType.STRING(100),
     unique: true,
     allowNull: false
   },
-  transfer_completed_at: dataType.DATE,
+  completed_at: dataType.DATE,
   deleted_at: dataType.DATE,
   created_at: {
     type: dataType.DATE,

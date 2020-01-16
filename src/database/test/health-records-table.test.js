@@ -118,7 +118,6 @@ describe('HealthRecord', () => {
 
     return HealthRecord.create(new_entry_params)
       .then(value => {
-        expect(value.dataValues.id).not.toBeNull();
         expect(value.dataValues.created_at).not.toBeNull();
         expect(value.dataValues.updated_at).not.toBeNull();
         expect(value.dataValues.deleted_at).toBeNull();

@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-const tableName = "health_checks";
+const tableName = 'health_checks';
 
-const model = (dataType) => {
+const model = dataType => {
   return {
     id: {
       type: dataType.INTEGER,

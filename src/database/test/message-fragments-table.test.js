@@ -11,15 +11,9 @@ describe('MessageFragment', () => {
     return ModelFactory.sequelize.close();
   });
 
-  it('should return id as an Integer type', () => {
+  it('should return id as a valid uuid', () => {
     return MessageFragment.findAll({ where: {} }).then(value => {
-      return expect(typeof value[0].dataValues.id).toBe(typeof 0);
-    });
-  });
-
-  it('should return slug as a valid uuid', () => {
-    return MessageFragment.findAll({ where: {} }).then(value => {
-      return expect(value[0].dataValues.slug).toMatch(uuidPattern);
+      return expect(value[0].dataValues.id).toMatch(uuidPattern);
     });
   });
 
@@ -29,9 +23,9 @@ describe('MessageFragment', () => {
     });
   });
 
-  it('should return null object for transfer_completed_at', () => {
+  it('should return null object for completed_at', () => {
     return MessageFragment.findAll({ where: {} }).then(value => {
-      return expect(value[0].dataValues.transfer_completed_at).toBeNull();
+      return expect(value[0].dataValues.completed_at).toBeNull();
     });
   });
 
@@ -56,7 +50,7 @@ describe('MessageFragment', () => {
   it('should return 1 for items deleted and deleted_at should have been updated', () => {
     const destroyOptions = {
       where: {
-        slug: 'a1ff815c-6452-4020-ab13-9200d27a06ed'
+        id: 'a1ff815c-6452-4020-ab13-9200d27a06ed'
       }
     };
 
@@ -75,7 +69,7 @@ describe('MessageFragment', () => {
   it('should return 1 for items restored and deleted_at should have been removed', () => {
     const restoreOptions = {
       where: {
-        slug: 'c47134d3-6ef7-4852-8e86-a5fd1a3c81ce'
+        id: 'c47134d3-6ef7-4852-8e86-a5fd1a3c81ce'
       }
     };
 
@@ -94,7 +88,7 @@ describe('MessageFragment', () => {
   it('should not return anything if record has been destroyed (soft)', () => {
     const destroyedOptions = {
       where: {
-        slug: 'c47134d3-6ef7-4852-8e86-a5fd1a3c81ce'
+        id: 'c47134d3-6ef7-4852-8e86-a5fd1a3c81ce'
       }
     };
 
@@ -105,7 +99,7 @@ describe('MessageFragment', () => {
 
   it('should create new entry using model', () => {
     const new_entry_params = {
-      slug: uuid(),
+      id: uuid(),
       conversation_id: uuid()
     };
 
@@ -115,14 +109,14 @@ describe('MessageFragment', () => {
         expect(value.dataValues.created_at).not.toBeNull();
         expect(value.dataValues.updated_at).not.toBeNull();
         expect(value.dataValues.deleted_at).toBeNull();
-        expect(value.dataValues.transfer_completed_at).toBeNull();
+        expect(value.dataValues.completed_at).toBeNull();
         expect(value.dataValues.conversation_id).toMatch(new_entry_params.conversation_id);
-        return expect(value.dataValues.slug).toMatch(new_entry_params.slug);
+        return expect(value.dataValues.id).toMatch(new_entry_params.id);
       })
       .finally(() => {
         // force = true -> Hard Delete
         return MessageFragment.destroy({
-          where: { slug: new_entry_params.slug },
+          where: { id: new_entry_params.id },
           paranoid: false,
           force: true
         }).then(value => {
@@ -134,7 +128,7 @@ describe('MessageFragment', () => {
   it('should update the updated_at with a record update', () => {
     const updateOptions = {
       where: {
-        slug: '74c6230b-36d9-4940-bdd6-495ba87ed634'
+        id: '74c6230b-36d9-4940-bdd6-495ba87ed634'
       }
     };
 
@@ -154,10 +148,10 @@ describe('MessageFragment', () => {
     });
   });
 
-  it('should update the transfer_completed_at with Date when complete is called', () => {
+  it('should update the completed_at with Date when complete is called', () => {
     const completeOptions = {
       where: {
-        slug: '74c6230b-36d9-4940-bdd6-495ba87ed634'
+        id: '74c6230b-36d9-4940-bdd6-495ba87ed634'
       }
     };
 
