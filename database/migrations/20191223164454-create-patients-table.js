@@ -1,21 +1,15 @@
 'use strict';
 
-const tableName = "patients";
+const tableName = 'patients';
 
-const model = (dataType) => {
+const model = dataType => {
   return {
     id: {
-      type: dataType.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    slug: {
       type: dataType.UUID,
-      unique: true,
-      allowNull: false
+      primaryKey: true
     },
     nhs_number: {
-      type: dataType.STRING(100),
+      type: dataType.CHAR(10),
       unique: true,
       allowNull: false
     },
