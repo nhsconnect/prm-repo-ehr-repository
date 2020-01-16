@@ -1,14 +1,24 @@
 import ModelFactory from '../models';
 import uuid from 'uuid/v4';
 
+jest.mock('uuid/v4');
+
 describe('MessageFragment', () => {
+
+  const testUUID = '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54';
+
   const MessageFragment = ModelFactory.getByName('MessageFragment');
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const messageIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
+  beforeEach(() => {
+    uuid.mockImplementation(() => testUUID);
+  });
+
   afterAll(() => {
-    return ModelFactory.sequelize.close();
+    jest.clearAllMocks();
+    ModelFactory.sequelize.close();
   });
 
   it('should return id as a valid uuid', () => {
@@ -98,8 +108,8 @@ describe('MessageFragment', () => {
   });
 
   it('should create new entry using model', () => {
+
     const new_entry_params = {
-      id: uuid(),
       message_id: uuid()
     };
 
@@ -110,12 +120,12 @@ describe('MessageFragment', () => {
         expect(value.dataValues.deleted_at).toBeNull();
         expect(value.dataValues.completed_at).toBeNull();
         expect(value.dataValues.message_id).toMatch(new_entry_params.message_id);
-        expect(value.dataValues.id).toMatch(new_entry_params.id);
+        expect(value.dataValues.id).toMatch(testUUID);
       })
       .finally(() => {
         // force = true -> Hard Delete
         return MessageFragment.destroy({
-          where: { id: new_entry_params.id },
+          where: { id: testUUID },
           paranoid: false,
           force: true
         }).then(value => {

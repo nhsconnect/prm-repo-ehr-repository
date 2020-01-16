@@ -6,7 +6,8 @@ const tableName = 'message_fragments';
 const model = dataType => ({
   id: {
     type: dataType.UUID,
-    primaryKey: true
+    primaryKey: true,
+    defaultValue: dataType.UUIDV4
   },
   message_id: {
     type: dataType.UUID,
