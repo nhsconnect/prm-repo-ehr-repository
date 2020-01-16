@@ -86,7 +86,8 @@ case "${command}" in
   _coverage)
       set_test_environment_variables
       npm install
-      npm run set-up # Migrates and Seeds data in DB
+      npm run migrate
+      npm run seed-test-data
       npm run coverage
       ;;
   coverage)
@@ -95,7 +96,8 @@ case "${command}" in
   _test)
       set_test_environment_variables
       npm install
-      npm run set-up # Migrates and Seeds data in DB
+      npm run migrate
+      npm run seed-test-data
       npm run test
       ;;
   test)
