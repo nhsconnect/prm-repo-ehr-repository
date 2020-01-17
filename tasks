@@ -153,6 +153,7 @@ case "${command}" in
       ;;
   test_docker_local)
       set_test_environment_variables
+      export S3_BUCKET_NAME=dev-ehr-repo-bucket
       export EHR_URL="http://ehr:3000"
       export EHR_DOCKER_IMAGE="${EHR_DOCKER_IMAGE:-$IMAGE_REPO_NAME}"
       export NHS_ENVIRONMENT=docker
