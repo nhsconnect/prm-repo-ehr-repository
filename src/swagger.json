@@ -36,7 +36,7 @@
     "/error": {
       "get": {
         "tags": [],
-        "summary": "Check filestore and database is available",
+        "summary": "Generate error log",
         "consumes": [
           "application/json"
         ],
