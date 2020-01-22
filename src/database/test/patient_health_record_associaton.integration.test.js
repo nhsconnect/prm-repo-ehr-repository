@@ -12,7 +12,7 @@ describe('MessageFragment associations', () => {
 
   const HealthRecord = ModelFactory.getByName('HealthRecord');
   const Patient = ModelFactory.getByName('Patient');
-  const sequelize = ModelFactory.getByName('sequelize');
+  const sequelize = ModelFactory.sequelize;
 
   const firstPatientUUID = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
   const firstPatientNHSNumber = '1111111111';
@@ -32,7 +32,7 @@ describe('MessageFragment associations', () => {
   });
 
   afterAll(() => {
-    ModelFactory.sequelize.close();
+    sequelize.close();
   });
 
   it('should get the patient from the health record (single)', () => {
@@ -41,7 +41,7 @@ describe('MessageFragment associations', () => {
     return sequelize.transaction().then(t =>
       HealthRecord.findOne({ ...where(healthRecordConversationId), transaction: t })
         .then(healthRecord =>
-          healthRecord.getPatient().then(patient => {
+          healthRecord.getPatient({ transaction: t }).then(patient => {
             expect(patient.get().id).toBe(firstPatientUUID);
             return expect(patient.get().nhs_number).toBe(firstPatientNHSNumber);
           })
@@ -57,7 +57,7 @@ describe('MessageFragment associations', () => {
       Patient.findOne({ ...where(patientNhsNumber), transaction: t })
         .then(patient => {
           expect(patient.get().id).toBe(secondPatientUUID);
-          return patient.getHealthRecords().then(healthRecords => {
+          return patient.getHealthRecords({ transaction: t }).then(healthRecords => {
             expect(healthRecords.length).toBe(2);
             expect(healthRecords[0].get().conversation_id).toBe(secondHealthRecordConvoId1);
             return expect(healthRecords[1].get().conversation_id).toBe(secondHealthRecordConvoId2);
@@ -75,7 +75,7 @@ describe('MessageFragment associations', () => {
       Patient.findOrCreate({ ...where(patientNhsNumber), transaction: t })
         .then(patient =>
           HealthRecord.create(newHealthRecord, { transaction: t }).then(healthRecord => {
-            healthRecord.setPatient(patient[0].id);
+            healthRecord.setPatient(patient[0].id, { transaction: t });
             return expect(healthRecord.get().patient_id).toBe(testUUID);
           })
         )
@@ -91,7 +91,7 @@ describe('MessageFragment associations', () => {
       Patient.findOrCreate({ ...where(patientNhsNumber), transaction: t })
         .then(patient =>
           HealthRecord.create(newHealthRecord, { transaction: t }).then(health => {
-            health.setPatient(patient[0].id);
+            health.setPatient(patient[0].id, { transaction: t });
             return expect(health.get().patient_id).toBe(existingPatientUUID);
           })
         )

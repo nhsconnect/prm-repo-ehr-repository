@@ -7,7 +7,7 @@ describe('Patient', () => {
   const testUUID = '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54';
 
   const Patient = ModelFactory.getByName('Patient');
-  const sequelize = ModelFactory.getByName('sequelize');
+  const sequelize = ModelFactory.sequelize;
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const nhsNumberPattern = /^[0-9]{10}$/;
@@ -21,7 +21,7 @@ describe('Patient', () => {
   });
 
   afterAll(() => {
-    ModelFactory.sequelize.close();
+    sequelize.close();
   });
 
   it('should return id as a valid uuid', () => {

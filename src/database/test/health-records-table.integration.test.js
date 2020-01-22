@@ -7,7 +7,7 @@ jest.mock('uuid/v4');
 
 describe('HealthRecord', () => {
   const HealthRecord = ModelFactory.getByName('HealthRecord');
-  const sequelize = ModelFactory.getByName('sequelize');
+  const sequelize = ModelFactory.sequelize;
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const convoIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
@@ -21,7 +21,7 @@ describe('HealthRecord', () => {
   });
 
   afterAll(() => {
-    ModelFactory.sequelize.close();
+    sequelize.close();
   });
 
   it('should return id as a valid uuid', () => {
