@@ -88,7 +88,7 @@ describe('MessageFragment', () => {
         .then(restored => expect(restored).toBe(1))
         .then(() => MessageFragment.findOne({ ...where(messageFragmentId), transaction: t }))
         .then(messageFragment =>
-          expect(typeof messageFragment.dataValues.deleted_at).toBe(typeof new Date())
+          expect(typeof messageFragment.get().deleted_at).toBe(typeof new Date())
         )
         .finally(() => t.rollback())
     );
