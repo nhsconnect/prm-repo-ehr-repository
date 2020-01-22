@@ -115,18 +115,18 @@ describe('HealthRecordManifest', () => {
   });
 
   it('should create new entry using model', () => {
-    const newMessageFragment = {
+    const newHealthRecordManifest = {
       message_id: uuid()
     };
 
     return sequelize.transaction().then(t =>
-      HealthRecordManifest.create(newMessageFragment, { transaction: t })
+      HealthRecordManifest.create(newHealthRecordManifest, { transaction: t })
         .then(healthRecordManifest => {
           expect(healthRecordManifest.get().created_at).not.toBeNull();
           expect(healthRecordManifest.get().updated_at).not.toBeNull();
           expect(healthRecordManifest.get().deleted_at).toBeNull();
           expect(healthRecordManifest.get().completed_at).toBeNull();
-          expect(healthRecordManifest.get().message_id).toMatch(newMessageFragment.message_id);
+          expect(healthRecordManifest.get().message_id).toMatch(newHealthRecordManifest.message_id);
           return expect(healthRecordManifest.get().id).toMatch(testUUID);
         })
         .finally(() => t.rollback())

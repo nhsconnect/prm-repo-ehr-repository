@@ -8,7 +8,7 @@ module.exports = {
       {
         id: 'f0a906ef-49b6-49a8-89f1-cb063d31c4dc',
         message_id: '93b699fc-03fb-438f-b5a1-ce936e0f9d4e',
-        health_record_id: '7d5712f2-d203-4f11-8527-1175db0d2a4a',
+        health_record_id: '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4',
         created_at: new Date(),
         updated_at: new Date()
       },

@@ -47,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
   HealthRecord.associate = models => {
     HealthRecord.belongsTo(models.Patient, { foreignKey: 'patient_id' });
     HealthRecord.hasMany(models.MessageFragment, { foreignKey: 'health_record_id' });
+    HealthRecord.hasMany(models.HealthRecordManifest, { foreignKey: 'health_record_id' });
   };
 
   return HealthRecord;
