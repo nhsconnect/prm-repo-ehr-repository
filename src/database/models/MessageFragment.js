@@ -9,6 +9,13 @@ const model = dataType => ({
     primaryKey: true,
     defaultValue: dataType.UUIDV4
   },
+  health_record_id: {
+    type: dataType.UUID,
+    references: {
+      model: 'health_records', // 'persons' refers to table name
+      key: 'id' // 'id' refers to column name in persons table
+    }
+  },
   message_id: {
     type: dataType.UUID,
     unique: true,
@@ -36,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       options
     );
+  };
+
+  MessageFragment.associate = models => {
+    MessageFragment.belongsTo(models.HealthRecord, { foreignKey: 'health_record_id' });
   };
 
   return MessageFragment;
