@@ -20,7 +20,7 @@ DATABASE_NAME=deductions_test
 DATABASE_USER=deductions_user
 DATABASE_PASSWORD=secret
 DATABASE_HOST=127.0.0.1
-S3_ BUCKET_NAME=test-bucket
+S3_BUCKET_NAME=test-bucket
 LOCALSTACK_URL=http://localhost:4572
 ```
 
@@ -32,7 +32,7 @@ To run the tests locally, you can use the following.
 docker-compose up &
 
 # Alternative with node-dojo (interactive)
-dojo -c Dojofile-itest`
+dojo -c Dojofile-itest
 
 npm run test-local
 
