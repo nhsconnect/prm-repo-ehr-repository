@@ -9,10 +9,10 @@ This is a component of the solution to validate that the GP2GP process can be us
 
 ## Set up
 
-Run `npm install` to install all node dependencies and `npm install -g sequelize-cli` if you want
-to speed up the migrations.
+Run `npm install` to install all node dependencies.
 
-Add a .env file in the root of the repository with the following environment variables:
+Add a .env file in the project root directory with the following environment variables 
+(such as [.env.example](./.env.example)):
 
 ```
 NODE_ENV=local
@@ -37,12 +37,12 @@ dojo -c Dojofile-itest`
 npm run test-local
 
 # This is equivilent of:
-npx sequelize-cli db:migrate # Runs the migration
-npx sequelize-cli db:seed:all # Seeds test data
+sequelize-cli db:migrate    # Runs the migration
+sequelize-cli db:seed:all   # Seeds test data
 
 npm test
 
-npx sequelize-cli db:migrate:undo:all # Undoes the migration to leave clean env
+sequelize-cli db:migrate:undo:all # Undoes the migration to leave clean env
 ```
 
 To run them before commit in dojo.
@@ -80,7 +80,6 @@ Docker image can be build locally with
 ## Environment variables
 
 Image is configurable by environment variables:
- - `EHR_REPO_SKIP_MIGRATION` - allows to skip database migration when container starts.
  - `NHS_ENVIRONMENT` - should be set to current environment in which the container is deployed. The name must also exist in the `database.json` file.
  - `S3_BUCKET_NAME` - the name of S3 bucket to store the EHR fragments in.
  - `DATABASE_USER` - username for the database
