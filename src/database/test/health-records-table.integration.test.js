@@ -7,6 +7,7 @@ jest.mock('uuid/v4');
 
 describe('HealthRecord', () => {
   const HealthRecord = ModelFactory.getByName('HealthRecord');
+  const sequelize = ModelFactory.getByName('sequelize');
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const convoIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
@@ -15,170 +16,151 @@ describe('HealthRecord', () => {
     uuid.mockImplementation(() => testUUID);
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
     ModelFactory.sequelize.close();
   });
 
   it('should return id as a valid uuid', () => {
-    return HealthRecord.findAll({}).then(value => {
-      return expect(value[0].dataValues.id).toMatch(uuidPattern);
-    });
+    return HealthRecord.findOne().then(healthRecord =>
+      expect(healthRecord.get().id).toMatch(uuidPattern)
+    );
   });
 
   it('should return the valid patient_id as an Integer', () => {
-    return HealthRecord.findAll({}).then(value => {
-      return expect(typeof value[0].dataValues.patient_id).toBe(typeof 0);
-    });
+    return HealthRecord.findOne().then(healthRecord =>
+      expect(healthRecord.get().patient_id).toMatch(uuidPattern)
+    );
   });
 
   it('should return a valid conversation_id', () => {
-    return HealthRecord.findAll({}).then(value => {
-      return expect(value[0].dataValues.conversation_id).toMatch(convoIdPattern);
-    });
+    return HealthRecord.findOne().then(healthRecord =>
+      expect(healthRecord.get().conversation_id).toMatch(convoIdPattern)
+    );
   });
 
   it('should return null object for completed_at', () => {
-    return HealthRecord.findAll({}).then(value => {
-      return expect(value[0].dataValues.completed_at).toBeNull();
-    });
+    return HealthRecord.findOne().then(healthRecord =>
+      expect(healthRecord.get().completed_at).toBeNull()
+    );
   });
 
   it('should return Date object for created_at', () => {
-    return HealthRecord.findAll({}).then(value => {
-      return expect(typeof value[0].dataValues.created_at).toBe(typeof new Date());
-    });
+    return HealthRecord.findOne().then(healthRecord =>
+      expect(typeof healthRecord.get().created_at).toBe(typeof new Date())
+    );
   });
 
   it('should return Date object for updated_at', () => {
-    return HealthRecord.findAll({}).then(value => {
-      return expect(typeof value[0].dataValues.updated_at).toBe(typeof new Date());
-    });
+    return HealthRecord.findOne().then(healthRecord =>
+      expect(typeof healthRecord.get().updated_at).toBe(typeof new Date())
+    );
   });
 
   it('should return null for deleted_at', () => {
-    return HealthRecord.findAll({}).then(value => {
-      return expect(value[0].dataValues.deleted_at).toBe(null);
-    });
+    return HealthRecord.findOne().then(value => expect(value.get().deleted_at).toBe(null));
   });
 
   it('should return 1 for items deleted and deleted_at should have been updated', () => {
-    const destroyOptions = {
-      where: {
-        id: '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4'
-      }
+    const healthRecordId = {
+      id: '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4'
     };
 
-    return HealthRecord.destroy(destroyOptions)
-      .then(value => {
-        expect(value).toBe(1);
-        return HealthRecord.findOne({ ...destroyOptions, paranoid: false }).then(value => {
-          return expect(typeof value.dataValues.deleted_at).toBe(typeof new Date());
-        });
-      })
-      .finally(() => {
-        return HealthRecord.restore({ ...destroyOptions, paranoid: false });
-      });
+    return sequelize.transaction().then(t =>
+      HealthRecord.destroy({ ...where(healthRecordId), transaction: t })
+        .then(destroyed => expect(destroyed).toBe(1))
+        .then(() =>
+          HealthRecord.findOne({ ...where(healthRecordId), paranoid: false, transaction: t })
+        )
+        .then(healthRecord => {
+          expect(healthRecord.get().deleted_at).not.toBeNull();
+          return expect(typeof healthRecord.get().deleted_at).toBe(typeof new Date());
+        })
+        .finally(() => t.rollback())
+    );
   });
 
   it('should return 1 for items restored and deleted_at should have been removed', () => {
-    const restoreOptions = {
-      where: {
-        id: '0879b920-7174-4ef1-92f7-12383114b052'
-      }
+    const healthRecordId = {
+      id: '0879b920-7174-4ef1-92f7-12383114b052'
     };
 
-    return HealthRecord.restore({ ...restoreOptions, paranoid: false })
-      .then(value => {
-        expect(value).toBe(1);
-        return HealthRecord.findOne(restoreOptions).then(value => {
-          return expect(typeof value.dataValues.deleted_at).toBe(typeof new Date());
-        });
-      })
-      .finally(() => {
-        return HealthRecord.destroy(restoreOptions);
-      });
+    return sequelize.transaction().then(t =>
+      HealthRecord.restore({ ...where(healthRecordId), paranoid: false, transaction: t })
+        .then(restored => expect(restored).toBe(1))
+        .then(() => HealthRecord.findOne({ ...where(healthRecordId), transaction: t }))
+        .then(healthRecord => expect(healthRecord.get().deleted_at).toBeNull())
+        .finally(() => t.rollback())
+    );
   });
 
   it('should not return anything if record has been destroyed (soft)', () => {
-    const destroyedOptions = {
-      where: {
-        id: '0879b920-7174-4ef1-92f7-12383114b052'
-      }
+    const healthRecordId = {
+      id: '0879b920-7174-4ef1-92f7-12383114b052'
     };
 
-    return HealthRecord.findOne(destroyedOptions).then(value => {
-      return expect(value).toBeNull();
-    });
+    return HealthRecord.findOne(where(healthRecordId)).then(healthRecord =>
+      expect(healthRecord).toBeNull()
+    );
   });
 
   it('should create new entry using model', () => {
-
     const new_entry_params = {
-      patient_id: 1,
       conversation_id: uuid()
     };
 
-    return HealthRecord.create(new_entry_params)
-      .then(value => {
-        expect(value.dataValues.created_at).not.toBeNull();
-        expect(value.dataValues.updated_at).not.toBeNull();
-        expect(value.dataValues.deleted_at).toBeNull();
-        expect(value.dataValues.completed_at).toBeNull();
-        expect(value.dataValues.patient_id).toBe(new_entry_params.patient_id);
-        expect(value.dataValues.conversation_id).toMatch(new_entry_params.conversation_id);
-        expect(value.dataValues.id).toMatch(testUUID);
-      })
-      .finally(() => {
-        // force = true -> Hard Delete
-        return HealthRecord.destroy({
-          where: { id: testUUID },
-          paranoid: false,
-          force: true
-        }).then(value => {
-          return expect(value).toBe(1);
-        });
-      });
+    return sequelize.transaction().then(t =>
+      HealthRecord.create(new_entry_params, { transaction: t })
+        .then(healthRecord => {
+          expect(healthRecord.get().created_at).not.toBeNull();
+          expect(healthRecord.get().updated_at).not.toBeNull();
+          expect(healthRecord.get().deleted_at).toBeNull();
+          expect(healthRecord.get().completed_at).toBeNull();
+          expect(healthRecord.get().patient_id).toBeNull();
+          expect(healthRecord.get().conversation_id).toMatch(new_entry_params.conversation_id);
+          return expect(healthRecord.get().id).toMatch(testUUID);
+        })
+        .finally(() => t.rollback())
+    );
   });
 
   it('should update the updated_at with a record update', () => {
-    const updateOptions = {
-      where: {
-        id: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
-      }
+    const healthRecordId = {
+      id: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
     };
 
-    return HealthRecord.update(
-      {
-        patient_id: 2
-      },
-      updateOptions
-    ).then(value => {
-      expect(value[0]).toBe(1);
-
-      return HealthRecord.findOne(updateOptions).then(value => {
-        return expect(value.dataValues.updated_at.toISOString()).not.toBe(
-          value.dataValues.created_at.toISOString()
-        );
-      });
-    });
+    return sequelize.transaction().then(t =>
+      HealthRecord.update(
+        { completed_at: new Date() },
+        { ...where(healthRecordId), transaction: t }
+      )
+        .then(updated => expect(updated[0]).toBe(1))
+        .then(() => HealthRecord.findOne({ ...where(healthRecordId), transaction: t }))
+        .then(healthRecord =>
+          expect(healthRecord.get().updated_at.toISOString()).not.toBe(
+            healthRecord.get().created_at.toISOString()
+          )
+        )
+        .finally(() => t.rollback())
+    );
   });
 
   it('should update the completed_at with Date when complete is called', () => {
-    const completeOptions = {
-      where: {
-        id: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
-      }
+    const healthRecordId = {
+      id: '7d5712f2-d203-4f11-8527-1175db0d2a4a'
     };
 
-    return HealthRecord.complete(completeOptions)
-      .then(value => {
-        return expect(value).toContain(1);
-      })
-      .finally(() => {
-        return HealthRecord.findOne(completeOptions).then(value => {
-          return expect(value.dataValues.completed_at).not.toBeNull();
-        });
-      });
+    return sequelize.transaction().then(t =>
+      HealthRecord.complete({ ...where(healthRecordId), transaction: t })
+        .then(completed => expect(completed).toContain(1))
+        .then(() => HealthRecord.findOne({ ...where(healthRecordId), transaction: t }))
+        .then(healthRecord => expect(healthRecord.get().completed_at).not.toBeNull())
+        .finally(() => t.rollback())
+    );
   });
 });
+
+const where = body => ({ where: body });

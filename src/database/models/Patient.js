@@ -30,5 +30,11 @@ const model = dataType => {
 };
 
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(modelName, model(DataTypes), getParameters(tableName));
+  const Patient = sequelize.define(modelName, model(DataTypes), getParameters(tableName));
+
+  Patient.associate = models => {
+    Patient.hasMany(models.HealthRecord, { foreignKey: 'patient_id' });
+  };
+
+  return Patient;
 };

@@ -1,5 +1,4 @@
 import getParameters from './parameters';
-
 const modelName = 'HealthRecord';
 const tableName = 'health_records';
 
@@ -10,8 +9,11 @@ const model = dataType => ({
     defaultValue: dataType.UUIDV4
   },
   patient_id: {
-    type: dataType.INTEGER,
-    allowNull: false
+    type: dataType.UUID,
+    references: {
+      model: 'patients', // 'persons' refers to table name
+      key: 'id' // 'id' refers to column name in persons table
+    }
   },
   conversation_id: {
     type: dataType.STRING(100),
@@ -40,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       options
     );
+  };
+
+  HealthRecord.associate = models => {
+    HealthRecord.belongsTo(models.Patient, { foreignKey: 'patient_id' });
   };
 
   return HealthRecord;
