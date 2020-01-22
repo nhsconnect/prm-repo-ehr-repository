@@ -2,7 +2,8 @@ locals {
   ecs_cluster_id    = data.aws_ssm_parameter.deductions_core_ecs_cluster_id.value
   ecs_tasks_sg_id   = data.aws_ssm_parameter.deductions_core_ecs_tasks_sg_id.value
   private_subnets   = split(",", data.aws_ssm_parameter.deductions_core_private_subnets.value)
-  alb_tg_arn        = data.aws_ssm_parameter.deductions_core_ehr_repo_alb_tg_arn.value
+  public_alb_tg_arn = data.aws_ssm_parameter.deductions_core_ehr_repo_public_alb_tg_arn.value
+  internal_alb_tg_arn = data.aws_ssm_parameter.deductions_core_ehr_repo_internal_alb_tg_arn.value
 }
 
 resource "aws_ecs_service" "ecs-service" {
@@ -18,7 +19,13 @@ resource "aws_ecs_service" "ecs-service" {
   }
 
   load_balancer {
-    target_group_arn = local.alb_tg_arn
+    target_group_arn = local.public_alb_tg_arn
+    container_name   = var.service_container_name
+    container_port   = var.service_container_port
+  }
+
+  load_balancer {
+    target_group_arn = local.internal_alb_tg_arn
     container_name   = var.service_container_name
     container_port   = var.service_container_port
   }
