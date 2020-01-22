@@ -118,7 +118,7 @@ describe('Patient', () => {
     return sequelize.transaction().then(t =>
       Patient.update({ nhs_number: 1111121111 }, { ...where(patientId), transaction: t })
         .then(updated => expect(updated[0]).toBe(1))
-        .then(() => Patient.findOne(where(patientId)))
+        .then(() => Patient.findOne({ ...where(patientId), transaction: t }))
         .then(patient =>
           expect(patient.get().updated_at.toISOString()).not.toBe(
             patient.get().created_at.toISOString()
