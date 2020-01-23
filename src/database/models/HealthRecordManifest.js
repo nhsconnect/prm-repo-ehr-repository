@@ -57,5 +57,13 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
+  HealthRecordManfiest.findOrCreateOne = (messageId, transaction) =>
+    HealthRecordManfiest.findOrCreate({
+      where: {
+        message_id: messageId
+      },
+      transaction: transaction
+    }).then(manifests => manifests[0]);
+
   return HealthRecordManfiest;
 };
