@@ -1,7 +1,6 @@
 import ModelFactory from '../models';
 
 describe('Patient - MessageFragment navigation', () => {
-
   const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
   const MessageFragment = ModelFactory.getByName('MessageFragment');
   const sequelize = ModelFactory.sequelize;
@@ -11,7 +10,6 @@ describe('Patient - MessageFragment navigation', () => {
   });
 
   it('should link a message fragment with a manifest', () => {
-
     const manifestId = {
       message_id: '03ba2531-42e3-4a70-82e6-df6fff52b226'
     };
@@ -24,7 +22,9 @@ describe('Patient - MessageFragment navigation', () => {
       HealthRecordManifest.findOne({ where: manifestId, transaction: t })
         .then(manifest =>
           MessageFragment.findOne({ where: fragmentId, transaction: t })
-            .then(messageFragment => messageFragment.addHealthRecordManifest(manifest.get().id, { transaction: t }))
+            .then(messageFragment =>
+              messageFragment.addHealthRecordManifest(manifest.get().id, { transaction: t })
+            )
             .then(() => manifest.getMessageFragments({ transaction: t }))
         )
         .then(messageFragments => {
@@ -64,8 +64,7 @@ describe('Patient - MessageFragment navigation', () => {
         expect(manifests.length).toBe(2);
         expect(manifests[0].get().message_id).toBe(manifestMessageId1);
         return expect(manifests[1].get().message_id).toBe(manifestMessageId2);
-      })
-
+      });
   });
 });
 

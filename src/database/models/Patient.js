@@ -36,5 +36,11 @@ module.exports = (sequelize, DataTypes) => {
     Patient.hasMany(models.HealthRecord, { foreignKey: 'patient_id' });
   };
 
+  Patient.findOrCreateOne = (nhsNumber, transaction) => {
+    return Patient.findOrCreate({ where: nhsNumber, transaction: transaction }).then(patients => {
+      return Promise.resolve(patients[0]);
+    });
+  };
+
   return Patient;
 };
