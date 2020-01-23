@@ -53,7 +53,6 @@ describe('MessageFragment integration', () => {
     });
   });
 
-
   describe('withHealthRecord', () => {
     it('should associate the message fragment with the health record by conversation_id', () => {
       return sequelize.transaction().then(t =>
@@ -77,9 +76,7 @@ describe('MessageFragment integration', () => {
           })
           .catch(error => {
             expect(error).not.toBeNull();
-            return expect(error.message).toBe(
-              'invalid input syntax for type uuid: "invalid"'
-            );
+            return expect(error.message).toBe('invalid input syntax for type uuid: "invalid"');
           })
           .finally(() => t.rollback())
       );
