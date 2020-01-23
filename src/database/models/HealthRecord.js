@@ -58,5 +58,12 @@ module.exports = (sequelize, DataTypes) => {
       transaction: transaction
     }).then(healthRecords => healthRecords[0]);
 
+  // Requires dynamic 'this' bindings - Cam not be an arrow function
+  HealthRecord.prototype.withPatient = function(nhsNumber, transaction) {
+    return sequelize.models.Patient.findOrCreateOne(nhsNumber, transaction).then(patient => {
+      return this.setPatient(patient.get().id);
+    });
+  };
+
   return HealthRecord;
 };

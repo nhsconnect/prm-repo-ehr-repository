@@ -52,4 +52,36 @@ describe('HealthRecord integration', () => {
       );
     });
   });
+
+  describe('withPatient', () => {
+    it('should associate the health record with the patient by nhs_number', () => {
+      return sequelize.transaction().then(t =>
+        HealthRecord.findOrCreateOne(testUUID, t)
+          .then(healthRecord => {
+            return healthRecord.withPatient('1111111111', t);
+          })
+          .then(healthRecord => {
+            expect(healthRecord).not.toBeNull();
+            return expect(healthRecord.get().patient_id).toBe(expectedPatientId);
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should reject with error if nhs_number is invalid', () => {
+      return sequelize.transaction().then(t =>
+        HealthRecord.findOrCreateOne(testUUID, t)
+          .then(healthRecord => {
+            return healthRecord.withPatient('111111', t);
+          })
+          .catch(error => {
+            expect(error).not.toBeNull();
+            return expect(error.message).toBe(
+              'Validation error: Validation len on nhs_number failed'
+            );
+          })
+          .finally(() => t.rollback())
+      );
+    });
+  });
 });
