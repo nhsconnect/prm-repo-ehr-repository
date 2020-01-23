@@ -52,4 +52,37 @@ describe('MessageFragment integration', () => {
       );
     });
   });
+
+
+  describe('withHealthRecord', () => {
+    it('should associate the message fragment with the health record by conversation_id', () => {
+      return sequelize.transaction().then(t =>
+        MessageFragment.findOrCreateOne(testUUID, t)
+          .then(fragment => {
+            return fragment.withHealthRecord('3244a7bb-555e-433b-b2cc-1aa8178da99e', t);
+          })
+          .then(fragment => {
+            expect(fragment).not.toBeNull();
+            return expect(fragment.get().health_record_id).toBe(expectedHealthRecordId);
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should reject with error if conversation_id is invalid', () => {
+      return sequelize.transaction().then(t =>
+        MessageFragment.findOrCreateOne(testUUID, t)
+          .then(fragment => {
+            return fragment.withHealthRecord('invalid', t);
+          })
+          .catch(error => {
+            expect(error).not.toBeNull();
+            return expect(error.message).toBe(
+              'invalid input syntax for type uuid: "invalid"'
+            );
+          })
+          .finally(() => t.rollback())
+      );
+    });
+  });
 });

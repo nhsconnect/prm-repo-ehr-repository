@@ -61,5 +61,13 @@ module.exports = (sequelize, DataTypes) => {
       transaction: transaction
     }).then(fragments => fragments[0]);
 
+  // Requires dynamic 'this' bindings - Cam not be an arrow function
+  MessageFragment.prototype.withHealthRecord = function(conversationId, transaction) {
+    return sequelize.models.HealthRecord.findOrCreateOne(conversationId, transaction)
+      .then(healthRecord => {
+        return this.setHealthRecord(healthRecord.get().id);
+      });
+  };
+
   return MessageFragment;
 };
