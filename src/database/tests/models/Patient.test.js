@@ -16,12 +16,15 @@ describe('Patient', () => {
 
   const nhsNumber = '1234567890';
 
-  Patient.findOrCreate = jest.fn().mockImplementation(() =>
-    Promise.resolve([
-      {
-        get: jest.fn().mockReturnValue(mockReturnPatient)
-      }
-    ])
+  beforeEach(
+    () =>
+      (Patient.findOrCreate = jest.fn().mockImplementation(() =>
+        Promise.resolve([
+          {
+            get: jest.fn().mockReturnValue(mockReturnPatient)
+          }
+        ])
+      ))
   );
 
   afterEach(() => {
@@ -46,7 +49,9 @@ describe('Patient', () => {
           .then(() => {
             expect(Patient.findOrCreate).toHaveBeenCalledTimes(1);
             return expect(Patient.findOrCreate).toHaveBeenCalledWith({
-              where: nhsNumber,
+              where: {
+                nhs_number: nhsNumber
+              },
               transaction: t
             });
           })

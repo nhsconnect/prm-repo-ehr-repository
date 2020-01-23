@@ -12,6 +12,10 @@ const model = dataType => {
     },
     nhs_number: {
       type: dataType.CHAR(10),
+      validate: {
+        isNumeric: true,
+        len: 10
+      },
       unique: true,
       allowNull: false
     },
@@ -37,7 +41,12 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   Patient.findOrCreateOne = (nhsNumber, transaction) => {
-    return Patient.findOrCreate({ where: nhsNumber, transaction: transaction }).then(patients => {
+    return Patient.findOrCreate({
+      where: {
+        nhs_number: nhsNumber
+      },
+      transaction: transaction
+    }).then(patients => {
       return Promise.resolve(patients[0]);
     });
   };
