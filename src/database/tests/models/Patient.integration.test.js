@@ -17,7 +17,6 @@ describe('Patient integration', () => {
   });
 
   describe('findOrCreateOne', () => {
-
     it('should reject with error if nhs_number contains alpha characters', () => {
       return sequelize.transaction().then(t =>
         Patient.findOrCreateOne('abcdefghij', t)
@@ -36,7 +35,9 @@ describe('Patient integration', () => {
         Patient.findOrCreateOne('123456789', t)
           .catch(error => {
             expect(error).not.toBeNull();
-            return expect(error.message).toBe('Validation error: Validation len on nhs_number failed');
+            return expect(error.message).toBe(
+              'Validation error: Validation len on nhs_number failed'
+            );
           })
           .finally(() => t.rollback())
       );

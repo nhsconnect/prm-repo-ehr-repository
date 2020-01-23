@@ -40,8 +40,8 @@ module.exports = (sequelize, DataTypes) => {
     Patient.hasMany(models.HealthRecord, { foreignKey: 'patient_id' });
   };
 
-  Patient.findOrCreateOne = (nhsNumber, transaction) => {
-    return Patient.findOrCreate({
+  Patient.findOrCreateOne = (nhsNumber, transaction) =>
+    Patient.findOrCreate({
       where: {
         nhs_number: nhsNumber
       },
@@ -49,7 +49,6 @@ module.exports = (sequelize, DataTypes) => {
     }).then(patients => {
       return Promise.resolve(patients[0]);
     });
-  };
 
   return Patient;
 };

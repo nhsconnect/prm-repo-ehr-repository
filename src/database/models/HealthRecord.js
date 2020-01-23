@@ -16,7 +16,7 @@ const model = dataType => ({
     }
   },
   conversation_id: {
-    type: dataType.STRING(100),
+    type: dataType.UUID,
     unique: true,
     allowNull: false
   },
@@ -49,6 +49,16 @@ module.exports = (sequelize, DataTypes) => {
     HealthRecord.hasMany(models.MessageFragment, { foreignKey: 'health_record_id' });
     HealthRecord.hasMany(models.HealthRecordManifest, { foreignKey: 'health_record_id' });
   };
+
+  HealthRecord.findOrCreateOne = (conversationId, transaction) =>
+    HealthRecord.findOrCreate({
+      where: {
+        conversation_id: conversationId
+      },
+      transaction: transaction
+    }).then(healthRecords => {
+      return Promise.resolve(healthRecords[0]);
+    });
 
   return HealthRecord;
 };
