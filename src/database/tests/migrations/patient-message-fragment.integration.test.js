@@ -1,4 +1,4 @@
-import ModelFactory from '../models';
+import ModelFactory from '../../models';
 
 describe('Patient - MessageFragment navigation', () => {
   const MessageFragment = ModelFactory.getByName('MessageFragment');

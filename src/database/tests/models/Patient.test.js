@@ -1,4 +1,4 @@
-import ModelFactory from '../models';
+import ModelFactory from '../../models';
 
 jest.mock('uuid/v4');
 

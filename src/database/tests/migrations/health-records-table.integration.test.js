@@ -1,4 +1,4 @@
-import ModelFactory from '../models';
+import ModelFactory from '../../models';
 import uuid from 'uuid/v4';
 
 const testUUID = '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54';
