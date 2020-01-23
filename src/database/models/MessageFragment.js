@@ -53,5 +53,13 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
+  MessageFragment.findOrCreateOne = (messageId, transaction) =>
+    MessageFragment.findOrCreate({
+      where: {
+        message_id: messageId
+      },
+      transaction: transaction
+    }).then(fragments => fragments[0]);
+
   return MessageFragment;
 };

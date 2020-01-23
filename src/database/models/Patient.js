@@ -46,9 +46,7 @@ module.exports = (sequelize, DataTypes) => {
         nhs_number: nhsNumber
       },
       transaction: transaction
-    }).then(patients => {
-      return Promise.resolve(patients[0]);
-    });
+    }).then(patients => patients[0]);
 
   return Patient;
 };

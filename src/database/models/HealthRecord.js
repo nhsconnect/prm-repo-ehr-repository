@@ -56,9 +56,7 @@ module.exports = (sequelize, DataTypes) => {
         conversation_id: conversationId
       },
       transaction: transaction
-    }).then(healthRecords => {
-      return Promise.resolve(healthRecords[0]);
-    });
+    }).then(healthRecords => healthRecords[0]);
 
   return HealthRecord;
 };

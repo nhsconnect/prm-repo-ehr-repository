@@ -1,14 +1,14 @@
 import ModelFactory from '../../models';
 
-describe('HealthRecord integration', () => {
+describe('MessageFragment integration', () => {
   const sequelize = ModelFactory.sequelize;
-  const HealthRecord = ModelFactory.getByName('HealthRecord');
+  const MessageFragment = ModelFactory.getByName('MessageFragment');
 
   const testUUID = 'f72b6225-1cac-43d7-85dd-a0b5b4211cd9';
 
-  const expectedUuid = '7d5712f2-d203-4f11-8527-1175db0d2a4a';
-  const expectedConvoId = '8ab7f61f-0e6b-4378-8cac-dcb4f9e3ec54';
-  const expectedPatientId = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
+  const expectedUUID = '74c6230b-36d9-4940-bdd6-495ba87ed634';
+  const expectedMessageId = '8c0f741e-82fa-46f1-9686-23a1c08657f1';
+  const expectedHealthRecordId = '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4';
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -19,9 +19,9 @@ describe('HealthRecord integration', () => {
   });
 
   describe('findOrCreateOne', () => {
-    it('should reject with error if conversation_id is not a valid UUID', () => {
+    it('should reject with error if message_id is not a valid UUID', () => {
       return sequelize.transaction().then(t =>
-        HealthRecord.findOrCreateOne('not-valid', t)
+        MessageFragment.findOrCreateOne('not-valid', t)
           .catch(error => {
             expect(error).not.toBeNull();
             return expect(error.message).toBe('invalid input syntax for type uuid: "not-valid"');
@@ -32,10 +32,10 @@ describe('HealthRecord integration', () => {
 
     it('should return if record exists', () => {
       return sequelize.transaction().then(t =>
-        HealthRecord.findOrCreateOne(expectedConvoId, t)
-          .then(healthRecord => {
-            expect(healthRecord.get().id).toBe(expectedUuid);
-            return expect(healthRecord.get().patient_id).toBe(expectedPatientId);
+        MessageFragment.findOrCreateOne(expectedMessageId, t)
+          .then(fragment => {
+            expect(fragment.get().id).toBe(expectedUUID);
+            return expect(fragment.get().health_record_id).toBe(expectedHealthRecordId);
           })
           .finally(() => t.rollback())
       );
@@ -43,10 +43,10 @@ describe('HealthRecord integration', () => {
 
     it('should create and return a new record if it does not exist', () => {
       return sequelize.transaction().then(t =>
-        HealthRecord.findOrCreateOne(testUUID, t)
-          .then(healthRecord => {
-            expect(healthRecord.get().id).not.toBeNull();
-            return expect(healthRecord.get().conversation_id).toBe(testUUID);
+        MessageFragment.findOrCreateOne(testUUID, t)
+          .then(fragment => {
+            expect(fragment.get().id).not.toBeNull();
+            return expect(fragment.get().message_id).toBe(testUUID);
           })
           .finally(() => t.rollback())
       );
