@@ -69,8 +69,6 @@ pipelines:
               artifacts:
                 - build:
                     source: build
-                - build:
-                    source: node_modules
               tasks:
                 - exec:
                     command: /bin/bash
@@ -88,10 +86,6 @@ pipelines:
                     stage: build
                     job: npm_install
                     source: build
-                - fetch:
-                    stage: build
-                    job: npm_install
-                    source: node_modules
                 - exec:
                     command: /bin/bash
                     arguments:
