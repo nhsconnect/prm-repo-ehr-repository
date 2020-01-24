@@ -2,7 +2,7 @@ import request from 'supertest';
 import uuid from 'uuid/v4';
 import app from './app';
 import config from './config';
-import ModelFactory from './database/models';
+import ModelFactory from './models';
 
 jest.mock('./config/logging');
 jest.mock('express-winston', () => ({

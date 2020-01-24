@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from './app';
-import getSignedUrl from './services/get-signed-url';
-import ModelFactory from './database/models';
+import { getSignedUrl } from './services/storage';
+import ModelFactory from './models';
 import { getHealthCheck } from './services/get-health-check';
 
 jest.requireActual('./middleware/logging');
@@ -12,7 +12,7 @@ jest.mock('express-winston', () => ({
 }));
 jest.mock('./config/logging');
 
-jest.mock('./services/get-signed-url', () =>
+jest.mock('./services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 

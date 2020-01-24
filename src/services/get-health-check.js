@@ -1,5 +1,5 @@
-import S3Service from '../storage/s3';
-import { checkDbHealth } from '../storage/db';
+import { S3Service } from './storage';
+import { checkDbHealth } from './database';
 import { updateLogEvent } from '../middleware/logging';
 
 export function getHealthCheck() {

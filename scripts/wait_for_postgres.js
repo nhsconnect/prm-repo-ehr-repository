@@ -1,4 +1,4 @@
-import ModelFactory from "../src/database/models";
+import ModelFactory from "../src/models";
 
 const INTERVAL = 1000;
 let ATTEMPTS = 10;
