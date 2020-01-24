@@ -65,5 +65,14 @@ module.exports = (sequelize, DataTypes) => {
       transaction: transaction
     }).then(manifests => manifests[0]);
 
+  HealthRecordManfiest.prototype.includeMessageFragment = function(messageId, transaction) {
+    return sequelize.models.MessageFragment.findOrCreateOne(messageId, transaction).then(
+      healthRecord =>
+        this.addMessageFragment(healthRecord.get().id, {
+          transaction: transaction
+        })
+    );
+  };
+
   return HealthRecordManfiest;
 };

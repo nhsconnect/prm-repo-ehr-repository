@@ -104,7 +104,8 @@ describe('HealthRecordManifest integration', () => {
         HealthRecordManifest.findOrCreateOne(testMessageId, t)
           .then(manifest => {
             expect(manifest.get().message_id).toBe(testMessageId);
-            return manifest.includeMessageFragment(existingFragmentMessageId, t)
+            return manifest
+              .includeMessageFragment(existingFragmentMessageId, t)
               .then(() => manifest);
           })
           .then(manifest => {
