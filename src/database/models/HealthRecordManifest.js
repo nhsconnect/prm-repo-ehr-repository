@@ -66,12 +66,19 @@ module.exports = (sequelize, DataTypes) => {
     }).then(manifests => manifests[0]);
 
   HealthRecordManfiest.prototype.includeMessageFragment = function(messageId, transaction) {
-    return sequelize.models.MessageFragment.findOrCreateOne(messageId, transaction).then(
-      healthRecord =>
+    return sequelize.models.MessageFragment.findOrCreateOne(messageId, transaction)
+      .then(healthRecord =>
         this.addMessageFragment(healthRecord.get().id, {
           transaction: transaction
         })
-    );
+      )
+      .then(() => this);
+  };
+
+  HealthRecordManfiest.prototype.includesMessageFragments = function(messageIds, transaction) {
+    return Promise.all(
+      messageIds.map(messageId => this.includeMessageFragment(messageId, transaction))
+    ).then(() => this);
   };
 
   HealthRecordManfiest.prototype.withHealthRecord = function(conversationId, transaction) {

@@ -138,6 +138,51 @@ describe('HealthRecordManifest integration', () => {
     });
   });
 
+  describe('includeMessageFragments', () => {
+    it('should reject if one message fragment id is invalid', () => {
+      const testMessageId1 = '720a0b70-a336-4095-8e02-248ec665b95c';
+
+      return sequelize.transaction().then(t =>
+        HealthRecordManifest.findOrCreateOne(testUUID, t)
+          .then(manifest => {
+            expect(manifest.get().message_id).toBe(testUUID);
+            return manifest
+              .includesMessageFragments([testMessageId1, 'invalid'], t)
+              .then(() => manifest);
+          })
+          .catch(error => {
+            expect(error).not.toBeNull();
+            return expect(error.message).toBe('invalid input syntax for type uuid: "invalid"');
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should associate multiple new message fragment with one new manifest', () => {
+      const testMessageId1 = '720a0b70-a336-4095-8e02-248ec665b95c';
+      const testMessageId2 = '720a0b70-a336-4095-8e02-248ec665b95d';
+
+      return sequelize.transaction().then(t =>
+        HealthRecordManifest.findOrCreateOne(testUUID, t)
+          .then(manifest => {
+            expect(manifest.get().message_id).toBe(testUUID);
+            return manifest
+              .includesMessageFragments([testMessageId1, testMessageId2], t)
+              .then(() => manifest);
+          })
+          .then(manifest => {
+            return manifest.getMessageFragments({ transaction: t });
+          })
+          .then(fragments => {
+            expect(fragments).not.toBeNull();
+            expect(fragments[0].get().message_id).toBe(testMessageId1);
+            return expect(fragments[1].get().message_id).toBe(testMessageId2);
+          })
+          .finally(() => t.rollback())
+      );
+    });
+  });
+
   describe('withHealthRecord', () => {
     it('should associate the health record manifest with the health record by conversation_id', () => {
       return sequelize.transaction().then(t =>
