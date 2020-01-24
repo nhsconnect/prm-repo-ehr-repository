@@ -32,6 +32,9 @@ To run the tests locally, you can use the following.
 docker-compose up &
 
 # Alternative with node-dojo (interactive)
+# Requires changes to Environment Variables:
+#   DATABASE_HOST=db
+#   LOCALSTACK_URL=http://localstack:4572
 dojo -c Dojofile-itest
 
 npm run test-local
