@@ -52,4 +52,88 @@ describe('HealthRecordManifest integration', () => {
       );
     });
   });
+
+  describe('includeMessageFragment', () => {
+    it('should associate one new message fragment with one new manifest', () => {
+      const testMessageId = '720a0b70-a336-4095-8e02-248ec665b95c';
+
+      return sequelize.transaction().then(t =>
+        HealthRecordManifest.findOrCreateOne(testUUID, t)
+          .then(manifest => {
+            expect(manifest.get().message_id).toBe(testUUID);
+            return manifest.includeMessageFragment(testMessageId, t).then(() => manifest);
+          })
+          .then(manifest => {
+            return manifest.getMessageFragments({ transaction: t });
+          })
+          .then(fragment => {
+            expect(fragment).not.toBeNull();
+            return expect(fragment[0].get().message_id).toBe(testMessageId);
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should associate one new message fragment with an existing manifest', () => {
+      const testMessageId = '720a0b70-a336-4095-8e02-248ec665b95c';
+
+      return sequelize.transaction().then(t =>
+        HealthRecordManifest.findOrCreateOne(expectedMessageId, t)
+          .then(manifest => {
+            expect(manifest.get().id).toBe(expectedUUID);
+            return manifest.includeMessageFragment(testMessageId, t).then(() => manifest);
+          })
+          .then(manifest => {
+            return manifest.getMessageFragments({ transaction: t });
+          })
+          .then(fragment => {
+            expect(fragment).not.toBeNull();
+            return expect(fragment[2].get().message_id).toBe(testMessageId);
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should associate one existing message fragment with a new manifest', () => {
+      const existingFragmentMessageId = '8c0f741e-82fa-46f1-9686-23a1c08657f1';
+      const existingFragmentUUID = '74c6230b-36d9-4940-bdd6-495ba87ed634';
+
+      const testMessageId = '720a0b70-a336-4095-8e02-248ec665b95c';
+
+      return sequelize.transaction().then(t =>
+        HealthRecordManifest.findOrCreateOne(testMessageId, t)
+          .then(manifest => {
+            expect(manifest.get().message_id).toBe(testMessageId);
+            return manifest.includeMessageFragment(existingFragmentMessageId, t)
+              .then(() => manifest);
+          })
+          .then(manifest => {
+            return manifest.getMessageFragments({ transaction: t });
+          })
+          .then(fragment => {
+            expect(fragment).not.toBeNull();
+            expect(fragment[0].get().id).toBe(existingFragmentUUID);
+            return expect(fragment[0].get().message_id).toBe(existingFragmentMessageId);
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should throw error if message id of message fragment is invalid', () => {
+      const testMessageId = 'invalid_uuid';
+
+      return sequelize.transaction().then(t =>
+        HealthRecordManifest.findOrCreateOne(expectedMessageId, t)
+          .then(manifest => {
+            expect(manifest.get().id).toBe(expectedUUID);
+            return manifest.includeMessageFragment(testMessageId, t).then(() => manifest);
+          })
+          .catch(error => {
+            expect(error).not.toBeNull();
+            return expect(error.message).toBe('invalid input syntax for type uuid: "invalid_uuid"');
+          })
+          .finally(() => t.rollback())
+      );
+    });
+  });
 });
