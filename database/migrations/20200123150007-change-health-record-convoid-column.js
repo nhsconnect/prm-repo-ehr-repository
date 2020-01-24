@@ -23,8 +23,7 @@ module.exports = {
         'conversation_id',
         {
           type: Sequelize.STRING(100),
-          unique: true,
-          allowNull: false
+          unique: true
         })
       );
   }

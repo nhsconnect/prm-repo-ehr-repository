@@ -82,10 +82,9 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   HealthRecordManfiest.prototype.withHealthRecord = function(conversationId, transaction) {
-    return sequelize.models.HealthRecord.findOrCreateOne(
-      conversationId,
-      transaction
-    ).then(healthRecord => this.setHealthRecord(healthRecord.get().id));
+    return sequelize.models.HealthRecord.findOrCreateOne(conversationId, transaction)
+      .then(healthRecord => this.setHealthRecord(healthRecord.get().id))
+      .then(() => this);
   };
 
   return HealthRecordManfiest;
