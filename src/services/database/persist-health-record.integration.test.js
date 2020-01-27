@@ -1,9 +1,7 @@
 import { createAndLinkEntries } from './persist-health-record';
 import { updateLogEvent, updateLogEventWithError } from '../../middleware/logging';
 import ModelFactory from '../../models';
-import uuid from 'uuid/v4';
 
-jest.mock('uuid/v4');
 jest.mock('../../middleware/logging', () => mockLoggingMiddleware());
 jest.mock('express-winston', () => mockExpressWinston());
 
@@ -14,14 +12,11 @@ describe('persistHealthRecord', () => {
   const HealthRecord = ModelFactory.getByName('HealthRecord');
   const Patient = ModelFactory.getByName('Patient');
 
-  const testUUID = 'da057d2f-3fcb-4e3b-a837-03d015daf5a5';
-
   const nhsNumber = '1234567890';
   const conversationId = '099cd501-034f-4e17-a461-cf4fd93ae0cf';
   const messageId = 'df13fc7b-89f7-4f80-b31c-b9720ac40296';
   const manifest = ['df13fc7b-89f7-4f80-b31c-b9720ac40296', '636c1aae-0fe5-4f46-9e99-a7d46ec55ef9'];
 
-  beforeEach(() => uuid.mockImplementation(() => testUUID));
   afterEach(() => jest.clearAllMocks());
   afterAll(() => sequelize.close());
 
@@ -149,6 +144,51 @@ describe('persistHealthRecord', () => {
         .then(healthRecord => {
           expect(healthRecord).not.toBeNull();
           return expect(healthRecord.get().conversation_id).toBe(conversationId);
+        })
+        .finally(() => t.rollback())
+    );
+  });
+
+  it('should still associate with health record if no manifest is given', () => {
+    return sequelize.transaction().then(t =>
+      createAndLinkEntries(nhsNumber, conversationId, messageId, [], t)
+        .then(() =>
+          MessageFragment.findOne({
+            where: {
+              message_id: messageId
+            },
+            transaction: t
+          })
+        )
+        .then(fragment => {
+          expect(fragment).not.toBeNull();
+          return fragment.getHealthRecord({ transaction: t });
+        })
+        .then(healthRecord => {
+          expect(healthRecord).not.toBeNull();
+          return expect(healthRecord.get().conversation_id).toBe(conversationId);
+        })
+        .finally(() => t.rollback())
+    );
+  });
+
+  it('should not create or associate with manifest if no manifest is given', () => {
+    return sequelize.transaction().then(t =>
+      createAndLinkEntries(nhsNumber, conversationId, messageId, [], t)
+        .then(() =>
+          MessageFragment.findOne({
+            where: {
+              message_id: messageId
+            },
+            transaction: t
+          })
+        )
+        .then(fragment => {
+          expect(fragment).not.toBeNull();
+          return fragment.getHealthRecordManifests({ transaction: t });
+        })
+        .then(manifests => {
+          return expect(manifests.length).toBe(0);
         })
         .finally(() => t.rollback())
     );

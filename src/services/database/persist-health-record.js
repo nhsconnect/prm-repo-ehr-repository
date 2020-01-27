@@ -6,7 +6,11 @@ const MessageFragment = ModelFactory.getByName('MessageFragment');
 
 export const createAndLinkEntries = (nhsNumber, conversationId, messageId, manifest, transaction) =>
   MessageFragment.findOrCreateOne(messageId, transaction)
-    // TODO: .then(fragment => fragment.containsManifest(messageId, manifest, transaction))
+    .then(fragment => {
+      return Array.isArray(manifest) && manifest.length
+        ? fragment.containsManifest(messageId, manifest, transaction)
+        : fragment;
+    })
     .then(fragment => fragment.withHealthRecord(conversationId, transaction))
     .then(fragment => fragment.getHealthRecord({ transaction: transaction }))
     .then(healthRecord => healthRecord.withPatient(nhsNumber, transaction))

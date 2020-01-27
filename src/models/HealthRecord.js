@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
 
   HealthRecord.prototype.withPatient = function(nhsNumber, transaction) {
     return sequelize.models.Patient.findOrCreateOne(nhsNumber, transaction).then(patient => {
-      return this.setPatient(patient.get().id);
+      return this.setPatient(patient.get().id, { transaction: transaction });
     });
   };
 
