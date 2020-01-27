@@ -140,7 +140,7 @@ describe('HealthRecordManifest integration', () => {
     });
   });
 
-  describe('includeMessageFragments', () => {
+  describe('includesMessageFragments', () => {
     it('should reject if one message fragment id is invalid', () => {
       const testMessageId1 = '720a0b70-a336-4095-8e02-248ec665b95c';
 

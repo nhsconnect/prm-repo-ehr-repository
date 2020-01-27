@@ -65,7 +65,15 @@ module.exports = (sequelize, DataTypes) => {
     return sequelize.models.HealthRecord.findOrCreateOne(
       conversationId,
       transaction
-    ).then(healthRecord => this.setHealthRecord(healthRecord.get().id));
+    ).then(healthRecord =>
+      this.setHealthRecord(healthRecord.get().id, { transaction: transaction })
+    );
+  };
+
+  MessageFragment.prototype.containsManifest = function(messageId, manifestArr, transaction) {
+    return sequelize.models.HealthRecordManifest.findOrCreateOne(messageId, transaction)
+      .then(manifest => manifest.includesMessageFragments(manifestArr, transaction))
+      .then(() => this);
   };
 
   return MessageFragment;

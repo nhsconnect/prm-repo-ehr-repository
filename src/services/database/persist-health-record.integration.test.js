@@ -142,12 +142,15 @@ describe('persistHealthRecord', () => {
             transaction: t
           })
         )
-        .then(fragment => fragment.getHealthRecord({ transaction: t }))
+        .then(fragment => {
+          expect(fragment).not.toBeNull();
+          return fragment.getHealthRecord({ transaction: t });
+        })
         .then(healthRecord => {
           expect(healthRecord).not.toBeNull();
           return expect(healthRecord.get().conversation_id).toBe(conversationId);
         })
-        .finally(() => t.commit())
+        .finally(() => t.rollback())
     );
   });
 });

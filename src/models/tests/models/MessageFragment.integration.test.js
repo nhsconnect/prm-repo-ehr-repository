@@ -82,4 +82,58 @@ describe('MessageFragment integration', () => {
       );
     });
   });
+
+  describe('containsManifest', () => {
+    const manifestId = '67089574-5ea3-42de-8b36-8d0540914e59';
+
+    const messageId1 = 'b11a8c9c-8664-4875-a7fb-83209f1d610d';
+    const messageId2 = '80d7d86d-bc06-453c-b4ce-c28897f501df';
+
+    const manifestArr = [manifestId, messageId1, messageId2];
+
+    it('should create and link health record manifest to its message fragment', () => {
+      return sequelize.transaction().then(t => {
+        return MessageFragment.findOrCreateOne(manifestId, t)
+          .then(fragment => {
+            expect(fragment.get().message_id).toBe(manifestId);
+            return fragment.containsManifest(manifestId, manifestArr, t);
+          })
+          .then(fragment => {
+            expect(fragment.get().message_id).toBe(manifestId);
+            return fragment.getHealthRecordManifests({ transaction: t });
+          })
+          .then(manifests => {
+            expect(manifests).not.toBeNull();
+            expect(manifests.length).toBe(1);
+            return expect(manifests[0].get().message_id).toBe(manifestId);
+          })
+          .finally(() => t.rollback());
+      });
+    });
+
+    it('should create and link health record manifest to message fragments', () => {
+      return sequelize.transaction().then(t => {
+        return MessageFragment.findOrCreateOne(manifestId, t)
+          .then(fragment => {
+            expect(fragment.get().message_id).toBe(manifestId);
+            return fragment.containsManifest(manifestId, manifestArr, t);
+          })
+          .then(fragment => {
+            expect(fragment.get().message_id).toBe(manifestId);
+            return fragment.getHealthRecordManifests({ transaction: t });
+          })
+          .then(manifests => {
+            expect(manifests[0].get().message_id).toBe(manifestId);
+            return manifests[0].getMessageFragments({ transaction: t });
+          })
+          .then(fragments => {
+            expect(fragments[0].get().message_id).toBe(manifestId);
+            expect(fragments[1].get().message_id).toBe(messageId1);
+            expect(fragments[2].get().message_id).toBe(messageId2);
+            return expect(fragments.length).toBe(3);
+          })
+          .finally(() => t.rollback());
+      });
+    });
+  });
 });
