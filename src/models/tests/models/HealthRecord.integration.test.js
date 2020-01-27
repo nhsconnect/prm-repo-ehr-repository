@@ -84,4 +84,40 @@ describe('HealthRecord integration', () => {
       );
     });
   });
+
+  describe('withHealthRecord', () => {
+    const conversationId = '3244a7bb-555e-433b-b2cc-1aa8178da99e';
+    const expectedHealthRecordId = '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4';
+
+    it('should associate the health record manifest with the health record by conversation_id', () => {
+      return sequelize.transaction().then(t =>
+        HealthRecord.findOrCreateOne(conversationId, t)
+          .then(healthRecord => {
+            return healthRecord.hasManifest('b6d2073d-2381-4d5c-bd10-0d016161588e', t);
+          })
+          .then(healthRecord => {
+            expect(healthRecord).not.toBeNull();
+            return healthRecord.getHealthRecordManifests({ transaction: t });
+          })
+          .then(manifests =>
+            expect(manifests[0].get().health_record_id).toBe(expectedHealthRecordId)
+          )
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should reject with error if the conversation_id is invalid', () => {
+      return sequelize.transaction().then(t =>
+        HealthRecord.findOrCreateOne(testUUID, t)
+          .then(healthRecord => {
+            return healthRecord.hasManifest('invalid', t);
+          })
+          .catch(error => {
+            expect(error).not.toBeNull();
+            return expect(error.message).toBe('invalid input syntax for type uuid: "invalid"');
+          })
+          .finally(() => t.rollback())
+      );
+    });
+  });
 });

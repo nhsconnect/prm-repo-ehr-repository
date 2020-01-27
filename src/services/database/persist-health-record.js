@@ -14,7 +14,11 @@ export const createAndLinkEntries = (nhsNumber, conversationId, messageId, manif
     .then(fragment => fragment.withHealthRecord(conversationId, transaction))
     .then(fragment => fragment.getHealthRecord({ transaction: transaction }))
     .then(healthRecord => healthRecord.withPatient(nhsNumber, transaction))
-    // TODO: .then(healthRecord => healthRecord.hasManifest(messageId, transaction))
+    .then(healthRecord => {
+      return Array.isArray(manifest) && manifest.length
+        ? healthRecord.hasManifest(messageId, transaction)
+        : healthRecord;
+    })
     .then(() => updateLogEvent({ status: 'Meta-data has been persisted' }))
     .catch(error => {
       updateLogEventWithError(error);

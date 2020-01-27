@@ -184,34 +184,4 @@ describe('HealthRecordManifest integration', () => {
       );
     });
   });
-
-  describe('withHealthRecord', () => {
-    it('should associate the health record manifest with the health record by conversation_id', () => {
-      return sequelize.transaction().then(t =>
-        HealthRecordManifest.findOrCreateOne(testUUID, t)
-          .then(manifest => {
-            return manifest.withHealthRecord('3244a7bb-555e-433b-b2cc-1aa8178da99e', t);
-          })
-          .then(manifest => {
-            expect(manifest).not.toBeNull();
-            return expect(manifest.get().health_record_id).toBe(expectedHealthRecordId);
-          })
-          .finally(() => t.rollback())
-      );
-    });
-
-    it('should reject with error if the conversation_id is invalid', () => {
-      return sequelize.transaction().then(t =>
-        HealthRecordManifest.findOrCreateOne(testUUID, t)
-          .then(manifest => {
-            return manifest.withHealthRecord('invalid', t);
-          })
-          .catch(error => {
-            expect(error).not.toBeNull();
-            return expect(error.message).toBe('invalid input syntax for type uuid: "invalid"');
-          })
-          .finally(() => t.rollback())
-      );
-    });
-  });
 });

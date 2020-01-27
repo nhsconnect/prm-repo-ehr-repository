@@ -149,7 +149,7 @@ describe('persistHealthRecord', () => {
     );
   });
 
-  it('should still associate with health record if no manifest is given', () => {
+  it('should still associate fragment with health record if no manifest is given', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries(nhsNumber, conversationId, messageId, [], t)
         .then(() =>
@@ -167,6 +167,52 @@ describe('persistHealthRecord', () => {
         .then(healthRecord => {
           expect(healthRecord).not.toBeNull();
           return expect(healthRecord.get().conversation_id).toBe(conversationId);
+        })
+        .finally(() => t.rollback())
+    );
+  });
+
+  it('should create association between health record and manfiest', () => {
+    return sequelize.transaction().then(t =>
+      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+        .then(() =>
+          HealthRecord.findOne({
+            where: {
+              conversation_id: conversationId
+            },
+            transaction: t
+          })
+        )
+        .then(healthRecord => {
+          expect(healthRecord).not.toBeNull();
+          return healthRecord.getHealthRecordManifests({ transaction: t });
+        })
+        .then(manifests => {
+          expect(manifests).not.toBeNull();
+          return expect(manifests[0].get().message_id).toBe(messageId);
+        })
+        .finally(() => t.rollback())
+    );
+  });
+
+  it('should not associate manifest with health record if no manifest is given', () => {
+    return sequelize.transaction().then(t =>
+      createAndLinkEntries(nhsNumber, conversationId, messageId, [], t)
+        .then(() =>
+          HealthRecord.findOne({
+            where: {
+              conversation_id: conversationId
+            },
+            transaction: t
+          })
+        )
+        .then(healthRecord => {
+          expect(healthRecord).not.toBeNull();
+          expect(healthRecord.get().conversation_id).toBe(conversationId);
+          return healthRecord.getHealthRecordManifests({ transaction: t });
+        })
+        .then(manifests => {
+          return expect(manifests.length).toBe(0);
         })
         .finally(() => t.rollback())
     );

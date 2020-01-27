@@ -64,5 +64,13 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
+  HealthRecord.prototype.hasManifest = function(messageId, transaction) {
+    return sequelize.models.HealthRecordManifest.findOrCreateOne(messageId, transaction)
+      .then(manifest =>
+        this.addHealthRecordManifests([manifest.get().id], { transaction: transaction })
+      )
+      .then(() => this);
+  };
+
   return HealthRecord;
 };
