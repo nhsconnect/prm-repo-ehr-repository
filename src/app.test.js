@@ -1,6 +1,5 @@
 import request from 'supertest';
 import app from './app';
-import { getSignedUrl } from './services/storage';
 import ModelFactory from './models';
 import { getHealthCheck } from './services/get-health-check';
 
@@ -18,123 +17,96 @@ jest.mock('./services/storage/get-signed-url', () =>
 
 jest.mock('./services/get-health-check');
 
-describe('POST /health-record/{conversationId}/message', () => {
+describe('app', () => {
+
+  const conversationId = 'test-conversation-id';
+  const messageId = 'test-message-id';
+
   afterAll(() => {
     ModelFactory.sequelize.close();
   });
 
-  const conversationId = 'test-conversation-id';
-  const TEST_ENDPOINT = `/health-record/${conversationId}/message`;
+  afterEach(() => jest.clearAllMocks());
 
-  const messageId = 'test-message-id';
+  describe('POST /health-record/{conversationId}/message', () => {
 
-  it('should return 201', done => {
-    request(app)
-      .post(TEST_ENDPOINT)
-      .send({
-        messageId
-      })
-      .expect(201)
-      .end(done);
+    const TEST_ENDPOINT = `/health-record/${conversationId}/message`;
+
+    it('should return 201', done => {
+      request(app)
+        .post(TEST_ENDPOINT)
+        .send({
+          messageId
+        })
+        .expect(201)
+        .end(done);
+    });
   });
 
-  it('should call getSignedUrl service with request body', done => {
-    request(app)
-      .post(TEST_ENDPOINT)
-      .send({
-        messageId
-      })
-      .expect(() => {
-        expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId);
-      })
-      .end(done);
+  describe('POST /health-record/{conversationId}/new/message', () => {
+
+    const TEST_ENDPOINT = `/health-record/${conversationId}/new/message`;
+    const nhsNumber = '123567890';
+
+    it('should return 201', done => {
+      request(app)
+        .post(TEST_ENDPOINT)
+        .send({
+          nhsNumber,
+          messageId
+        })
+        .expect(201)
+        .end(done);
+    });
   });
 
-  it('should return URL from s3 service', done => {
-    request(app)
-      .post(TEST_ENDPOINT)
-      .send({
-        messageId
-      })
-      .expect(res => {
-        expect(res.text).toEqual('some-url');
-      })
-      .end(done);
+  describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
+
+    const TEST_ENDPOINT = `/health-record/${conversationId}/message/${messageId}`;
+
+    it('should return 204', done => {
+      request(app)
+        .put(TEST_ENDPOINT)
+        .send({
+          transferComplete: true
+        })
+        .expect(204)
+        .end(done);
+    });
   });
 
-  it('should return 422 if no messageId is provided in request body', done => {
-    request(app)
-      .post(TEST_ENDPOINT)
-      .send()
-      .expect(422)
-      .expect('Content-Type', /json/)
-      .expect(res => {
-        expect(res.body).toEqual({ errors: [{ messageId: 'Invalid value' }] });
-      })
-      .end(done);
-  });
-});
+  describe('GET /health', () => {
 
-describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
-  const TEST_CONVERSATION_ID = 'test-conversation-id';
-  const TEST_MESSAGE_ID = 'test-message-id';
-
-  const TEST_ENDPOINT = `/health-record/${TEST_CONVERSATION_ID}/message/${TEST_MESSAGE_ID}`;
-
-  it('should return 204', done => {
-    request(app)
-      .put(TEST_ENDPOINT)
-      .send({
-        transferComplete: true
-      })
-      .expect(204)
-      .end(done);
-  });
-
-  it('should return 422 if transferComplete is not provided in body', done => {
-    request(app)
-      .put(TEST_ENDPOINT)
-      .send()
-      .expect(422)
-      .expect(res => {
-        expect(res.body).toEqual({ errors: [{ transferComplete: 'Invalid value' }] });
-      })
-      .end(done);
-  });
-});
-
-describe('GET /health', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    getHealthCheck.mockReturnValue(
-      Promise.resolve({
-        details: {
-          filestore: {
-            writable: true,
-            available: true
-          },
-          database: {
-            writable: true
+    beforeEach(() => {
+      getHealthCheck.mockReturnValue(
+        Promise.resolve({
+          details: {
+            filestore: {
+              writable: true,
+              available: true
+            },
+            database: {
+              writable: true
+            }
           }
-        }
-      })
-    );
-  });
+        })
+      );
+    });
 
-  it('should return 200', done => {
-    request(app)
-      .get('/health')
-      .expect(200)
-      .end(done);
-  });
+    it('should return 200', done => {
+      request(app)
+        .get('/health')
+        .expect(200)
+        .end(done);
+    });
 
-  it('should call health check service', done => {
-    request(app)
-      .get('/health')
-      .expect(() => {
-        expect(getHealthCheck).toHaveBeenCalled();
-      })
-      .end(done);
+    it('should call health check service', done => {
+      request(app)
+        .get('/health')
+        .expect(() => {
+          expect(getHealthCheck).toHaveBeenCalled();
+        })
+        .end(done);
+    });
   });
 });
