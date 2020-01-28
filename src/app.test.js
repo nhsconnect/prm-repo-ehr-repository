@@ -18,7 +18,6 @@ jest.mock('./services/storage/get-signed-url', () =>
 jest.mock('./services/get-health-check');
 
 describe('app', () => {
-
   const conversationId = 'test-conversation-id';
   const messageId = 'test-message-id';
 
@@ -29,7 +28,6 @@ describe('app', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('POST /health-record/{conversationId}/message', () => {
-
     const TEST_ENDPOINT = `/health-record/${conversationId}/message`;
 
     it('should return 201', done => {
@@ -44,16 +42,16 @@ describe('app', () => {
   });
 
   describe('POST /health-record/{conversationId}/new/message', () => {
-
-    const TEST_ENDPOINT = `/health-record/${conversationId}/new/message`;
-    const nhsNumber = '123567890';
+    const testUUID = '04d71080-e9da-4b3d-8f6f-0bfea8786187';
+    const TEST_ENDPOINT = `/health-record/${testUUID}/new/message`;
+    const nhsNumber = '1234567890';
 
     it('should return 201', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
           nhsNumber,
-          messageId
+          messageId: testUUID
         })
         .expect(201)
         .end(done);
@@ -61,7 +59,6 @@ describe('app', () => {
   });
 
   describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
-
     const TEST_ENDPOINT = `/health-record/${conversationId}/message/${messageId}`;
 
     it('should return 204', done => {
@@ -76,7 +73,6 @@ describe('app', () => {
   });
 
   describe('GET /health', () => {
-
     beforeEach(() => {
       getHealthCheck.mockReturnValue(
         Promise.resolve({

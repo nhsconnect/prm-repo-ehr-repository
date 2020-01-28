@@ -21,9 +21,10 @@ jest.mock('../services/storage/get-signed-url', () =>
 );
 
 describe('health-record', () => {
-  const nhsNumber = 'test-nhs-number';
-  const conversationId = 'test-conversation-id';
-  const messageId = 'test-message-id';
+  const nhsNumber = '0123456789';
+  const conversationId = 'db4b773d-f171-4a5f-a23b-6a387f8792b7';
+  const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
+  const manifest = ['0809570a-3ae2-409c-a924-60766b39550f', '88148835-2708-4914-a1d2-39c84560a937'];
 
   afterAll(() => {
     ModelFactory.sequelize.close();
@@ -115,7 +116,6 @@ describe('health-record', () => {
     });
 
     it('should call persistHealthRecord with information provided including manifest', done => {
-      const manifest = ['item-1', 'item-2'];
       request(app)
         .post(TEST_ENDPOINT)
         .send({
@@ -169,7 +169,82 @@ describe('health-record', () => {
         .expect('Content-Type', /json/)
         .expect(res => {
           expect(res.body).toEqual({
-            errors: [{ nhsNumber: 'Invalid value' }, { messageId: 'Invalid value' }]
+            errors: [
+              { messageId: "'messageId' provided is not of type UUIDv4" },
+              { messageId: "'messageId' is a required field" }
+            ]
+          });
+        })
+        .end(done);
+    });
+
+    it('should throw error when nhsNumber is not numeric', done => {
+      request(app)
+        .post(TEST_ENDPOINT)
+        .send({
+          nhsNumber: 'abcdefghij',
+          messageId,
+          manifest
+        })
+        .expect(422)
+        .expect('Content-Type', /json/)
+        .expect(res => {
+          expect(res.body).toEqual({
+            errors: [{ nhsNumber: "'nhsNumber' provided is not numeric" }]
+          });
+        })
+        .end(done);
+    });
+
+    it('should throw error when nhsNumber is not 10 characters', done => {
+      request(app)
+        .post(TEST_ENDPOINT)
+        .send({
+          nhsNumber: '123456789',
+          messageId,
+          manifest
+        })
+        .expect(422)
+        .expect('Content-Type', /json/)
+        .expect(res => {
+          expect(res.body).toEqual({
+            errors: [{ nhsNumber: "'nhsNumber' provided is not 10 characters" }]
+          });
+        })
+        .end(done);
+    });
+
+    it('should throw an error when the conversationId is not UUID', done => {
+      request(app)
+        .post(`/health-record/123/new/message`)
+        .send({
+          nhsNumber,
+          messageId,
+          manifest
+        })
+        .expect(422)
+        .expect('Content-Type', /json/)
+        .expect(res => {
+          expect(res.body).toEqual({
+            errors: [{ conversationId: "'conversationId' provided is not of type UUIDv4" }]
+          });
+        })
+        .end(done);
+    });
+
+    it('should throw an error when the manifest is not an array', done => {
+      request(app)
+        .post(TEST_ENDPOINT)
+        .send({
+          nhsNumber,
+          messageId,
+          manifest: 'manifest'
+        })
+        .expect(422)
+        .expect('Content-Type', /json/)
+        .expect(res => {
+          expect(res.body).toEqual({
+            errors: [{ manifest: "'manifest' provided is not of type Array" }]
           });
         })
         .end(done);

@@ -29,5 +29,8 @@ export const persistHealthRecord = (nhsNumber, conversationId, messageId, manife
   sequelize.transaction().then(transaction =>
     createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, transaction)
       .then(() => transaction.commit())
-      .catch(() => transaction.rollback())
+      .catch(error => {
+        transaction.rollback();
+        throw error;
+      })
   );

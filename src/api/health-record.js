@@ -1,5 +1,5 @@
 import express from 'express';
-import { body } from 'express-validator';
+import { body, param } from 'express-validator';
 import { validate } from '../middleware/validation';
 import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
 import { getSignedUrl } from '../services/storage';
@@ -8,10 +8,31 @@ import { persistHealthRecord } from '../services/database';
 const router = express.Router();
 
 const createMessageValidationRules = [body('messageId').notEmpty()];
+
 const createNewMessageValidationRules = [
-  body('nhsNumber').notEmpty(),
-  body('messageId').notEmpty()
+  param('conversationId')
+    .isUUID('4')
+    .withMessage("'conversationId' provided is not of type UUIDv4"),
+  body('nhsNumber')
+    .optional()
+    .isNumeric()
+    .withMessage("'nhsNumber' provided is not numeric"),
+  body('nhsNumber')
+    .optional()
+    .isLength({ min: 10, max: 10 })
+    .withMessage("'nhsNumber' provided is not 10 characters"),
+  body('messageId')
+    .isUUID('4')
+    .withMessage("'messageId' provided is not of type UUIDv4"),
+  body('messageId')
+    .notEmpty()
+    .withMessage("'messageId' is a required field"),
+  body('manifest')
+    .optional()
+    .isArray()
+    .withMessage("'manifest' provided is not of type Array")
 ];
+
 const updateMessageValidationRules = [body('transferComplete').notEmpty()];
 
 // TODO: Remove after changes made to GP2GP Adapter
@@ -49,6 +70,7 @@ router.post(
         res.status(201).send(url);
       })
       .catch(err => {
+        console.log(err);
         updateLogEventWithError(err);
         next(err);
       });
