@@ -5,7 +5,7 @@ data "aws_ssm_parameter" "root_zone_id" {
 }
 
 data "aws_ssm_parameter" "private_zone_id" {
-  name = "/NHS/deductions-${data.aws_caller_identity.current.account_id}/private_root_zone_id"
+  name = "/NHS/deductions-${data.aws_caller_identity.current.account_id}/${var.environment}/private_root_zone_id"
 }
 
 data "aws_ssm_parameter" "db-username" {
