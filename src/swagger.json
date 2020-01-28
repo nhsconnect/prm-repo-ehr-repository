@@ -47,7 +47,7 @@
         }
       }
     },
-    "/health-record/{conversationId}/message": {
+    "/health-record/{conversationId}/new/message": {
       "post": {
         "tags": [],
         "summary": "Generate S3 upload URL",
@@ -162,11 +162,18 @@
     "UploadUrlRequest": {
       "type": "object",
       "properties": {
+        "nhsNumber": {
+          "type": "string"
+        },
         "messageId": {
           "type": "string"
+        },
+        "manifest": {
+          "type": "array"
         }
       },
       "required": [
+        "nhsNumber",
         "messageId"
       ]
     },

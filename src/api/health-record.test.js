@@ -1,30 +1,29 @@
-import request from "supertest";
-import app from "../app";
-import { persistHealthRecord } from "../services/database";
-import { getSignedUrl } from "../services/storage";
-import ModelFactory from "../models";
+import request from 'supertest';
+import app from '../app';
+import { persistHealthRecord } from '../services/database';
+import { getSignedUrl } from '../services/storage';
+import ModelFactory from '../models';
 
-jest.requireActual("../middleware/logging");
+jest.requireActual('../middleware/logging');
 
-jest.mock("express-winston", () => ({
+jest.mock('express-winston', () => ({
   errorLogger: () => (req, res, next) => next(),
   logger: () => (req, res, next) => next()
 }));
-jest.mock("../config/logging");
+jest.mock('../config/logging');
 
-jest.mock("../services/database/persist-health-record", () => ({
-  persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve("Persisted"))
+jest.mock('../services/database/persist-health-record', () => ({
+  persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
 }));
 
-jest.mock("../services/storage/get-signed-url", () =>
-  jest.fn().mockReturnValue(Promise.resolve("some-url"))
+jest.mock('../services/storage/get-signed-url', () =>
+  jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 
-describe("health-record", () => {
-
-  const nhsNumber = "test-nhs-number";
-  const conversationId = "test-conversation-id";
-  const messageId = "test-message-id";
+describe('health-record', () => {
+  const nhsNumber = 'test-nhs-number';
+  const conversationId = 'test-conversation-id';
+  const messageId = 'test-message-id';
 
   afterAll(() => {
     ModelFactory.sequelize.close();
@@ -32,11 +31,10 @@ describe("health-record", () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  describe("POST /health-record/{conversationId}/message", () => {
-
+  describe('POST /health-record/{conversationId}/message', () => {
     const TEST_ENDPOINT = `/health-record/${conversationId}/message`;
 
-    it("should return 201", done => {
+    it('should return 201', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
@@ -46,7 +44,7 @@ describe("health-record", () => {
         .end(done);
     });
 
-    it("should call getSignedUrl service with request body", done => {
+    it('should call getSignedUrl service with request body', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
@@ -58,36 +56,35 @@ describe("health-record", () => {
         .end(done);
     });
 
-    it("should return URL from s3 service", done => {
+    it('should return URL from s3 service', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
           messageId
         })
         .expect(res => {
-          expect(res.text).toEqual("some-url");
+          expect(res.text).toEqual('some-url');
         })
         .end(done);
     });
 
-    it("should return 422 if no messageId is provided in request body", done => {
+    it('should return 422 if no messageId is provided in request body', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send()
         .expect(422)
-        .expect("Content-Type", /json/)
+        .expect('Content-Type', /json/)
         .expect(res => {
-          expect(res.body).toEqual({ errors: [{ messageId: "Invalid value" }] });
+          expect(res.body).toEqual({ errors: [{ messageId: 'Invalid value' }] });
         })
         .end(done);
     });
   });
 
-  describe("POST /health-record/{conversationId}/new/message", () => {
-
+  describe('POST /health-record/{conversationId}/new/message', () => {
     const TEST_ENDPOINT = `/health-record/${conversationId}/new/message`;
 
-    it("should return 201", done => {
+    it('should return 201', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
@@ -98,7 +95,7 @@ describe("health-record", () => {
         .end(done);
     });
 
-    it("should call persistHealthRecord with information provided", done => {
+    it('should call persistHealthRecord with information provided', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
@@ -107,12 +104,17 @@ describe("health-record", () => {
         })
         .expect(() => {
           expect(persistHealthRecord).toHaveBeenCalledTimes(1);
-          expect(persistHealthRecord).toHaveBeenCalledWith(nhsNumber, conversationId, messageId, null);
+          expect(persistHealthRecord).toHaveBeenCalledWith(
+            nhsNumber,
+            conversationId,
+            messageId,
+            null
+          );
         })
         .end(done);
     });
 
-    it("should call persistHealthRecord with information provided including manifest", done => {
+    it('should call persistHealthRecord with information provided including manifest', done => {
       const manifest = ['item-1', 'item-2'];
       request(app)
         .post(TEST_ENDPOINT)
@@ -123,12 +125,17 @@ describe("health-record", () => {
         })
         .expect(() => {
           expect(persistHealthRecord).toHaveBeenCalledTimes(1);
-          expect(persistHealthRecord).toHaveBeenCalledWith(nhsNumber, conversationId, messageId, manifest);
+          expect(persistHealthRecord).toHaveBeenCalledWith(
+            nhsNumber,
+            conversationId,
+            messageId,
+            manifest
+          );
         })
         .end(done);
     });
 
-    it("should call getSignedUrl service with request body", done => {
+    it('should call getSignedUrl service with request body', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
@@ -141,7 +148,7 @@ describe("health-record", () => {
         .end(done);
     });
 
-    it("should return URL from s3 service", done => {
+    it('should return URL from s3 service', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
@@ -149,29 +156,30 @@ describe("health-record", () => {
           messageId
         })
         .expect(res => {
-          expect(res.text).toEqual("some-url");
+          expect(res.text).toEqual('some-url');
         })
         .end(done);
     });
 
-    it("should return 422 if no messageId is provided in request body", done => {
+    it('should return 422 if no messageId is provided in request body', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send()
         .expect(422)
-        .expect("Content-Type", /json/)
+        .expect('Content-Type', /json/)
         .expect(res => {
-          expect(res.body).toEqual({ errors: [{ nhsNumber: "Invalid value" }, { messageId: "Invalid value" }] });
+          expect(res.body).toEqual({
+            errors: [{ nhsNumber: 'Invalid value' }, { messageId: 'Invalid value' }]
+          });
         })
         .end(done);
     });
   });
 
-  describe("PUT /health-record/{conversationId}/message/{messageId}", () => {
-
+  describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
     const TEST_ENDPOINT = `/health-record/${conversationId}/message/${messageId}`;
 
-    it("should return 204", done => {
+    it('should return 204', done => {
       request(app)
         .put(TEST_ENDPOINT)
         .send({
@@ -181,13 +189,13 @@ describe("health-record", () => {
         .end(done);
     });
 
-    it("should return 422 if transferComplete is not provided in body", done => {
+    it('should return 422 if transferComplete is not provided in body', done => {
       request(app)
         .put(TEST_ENDPOINT)
         .send()
         .expect(422)
         .expect(res => {
-          expect(res.body).toEqual({ errors: [{ transferComplete: "Invalid value" }] });
+          expect(res.body).toEqual({ errors: [{ transferComplete: 'Invalid value' }] });
         })
         .end(done);
     });

@@ -3,7 +3,7 @@ import { body } from 'express-validator';
 import { validate } from '../middleware/validation';
 import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
 import { getSignedUrl } from '../services/storage';
-import { persistHealthRecord } from "../services/database";
+import { persistHealthRecord } from '../services/database';
 
 const router = express.Router();
 
@@ -41,8 +41,8 @@ router.post(
       req.body.nhsNumber,
       req.params.conversationId,
       req.body.messageId,
-      (req.body.manifest) ? req.body.manifest : null
-      )
+      req.body.manifest ? req.body.manifest : null
+    )
       .then(() => getSignedUrl(req.params.conversationId, req.body.messageId))
       .then(url => {
         updateLogEvent({ status: 'Retrieved presigned url successfully' });

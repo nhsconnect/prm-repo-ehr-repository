@@ -280,7 +280,7 @@ describe('persistHealthRecord', () => {
         .then(manifests => {
           expect(manifests.length).toBe(1);
           expect(manifests[0].get().message_id).toBe(messageId);
-          return manifests[0].getMessageFragments({ transaction: t })
+          return manifests[0].getMessageFragments({ transaction: t });
         })
         .then(fragments => {
           return expect(fragments.length).toBe(2);
