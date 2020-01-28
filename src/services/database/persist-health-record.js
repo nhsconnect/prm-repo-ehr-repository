@@ -25,16 +25,6 @@ export const createAndLinkEntries = (nhsNumber, conversationId, messageId, manif
       throw error;
     });
 
-// Tests
-// Existing patient
-// Existing health record (patient)
-// Existing manifest (health record and patient)
-// Existing message fragment (manifest, health-record, patient)
-// Null manifest
-// Empty manifest
-// Manifest self
-// Test valid navigation with manifest
-// Test valid navigation without manifest (already exists)
 export const persistHealthRecord = (nhsNumber, conversationId, messageId, manifest) =>
   sequelize.transaction().then(transaction =>
     createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, transaction)

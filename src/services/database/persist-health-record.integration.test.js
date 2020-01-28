@@ -239,6 +239,55 @@ describe('persistHealthRecord', () => {
         .finally(() => t.rollback())
     );
   });
+
+  it('should not create or associate with manifest if manifest is null', () => {
+    return sequelize.transaction().then(t =>
+      createAndLinkEntries(nhsNumber, conversationId, messageId, null, t)
+        .then(() =>
+          MessageFragment.findOne({
+            where: {
+              message_id: messageId
+            },
+            transaction: t
+          })
+        )
+        .then(fragment => {
+          expect(fragment).not.toBeNull();
+          return fragment.getHealthRecordManifests({ transaction: t });
+        })
+        .then(manifests => {
+          return expect(manifests.length).toBe(0);
+        })
+        .finally(() => t.rollback())
+    );
+  });
+
+  it('should get all message fragments from health record via manifest', () => {
+    return sequelize.transaction().then(t =>
+      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+        .then(() =>
+          HealthRecord.findOne({
+            where: {
+              conversation_id: conversationId
+            },
+            transaction: t
+          })
+        )
+        .then(healthRecord => {
+          expect(healthRecord.get().conversation_id).toBe(conversationId);
+          return healthRecord.getHealthRecordManifests({ transaction: t });
+        })
+        .then(manifests => {
+          expect(manifests.length).toBe(1);
+          expect(manifests[0].get().message_id).toBe(messageId);
+          return manifests[0].getMessageFragments({ transaction: t })
+        })
+        .then(fragments => {
+          return expect(fragments.length).toBe(2);
+        })
+        .finally(() => t.rollback())
+    );
+  });
 });
 
 function mockLoggingMiddleware() {
