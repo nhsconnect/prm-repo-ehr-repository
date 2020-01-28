@@ -169,7 +169,10 @@
           "type": "string"
         },
         "manifest": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
