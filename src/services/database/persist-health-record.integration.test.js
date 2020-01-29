@@ -94,16 +94,19 @@ describe('persistHealthRecord', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries(null, conversationId, messageId, manifest, t)
         .then(() =>
-          Patient.findOne({
+          HealthRecord.findOne({
             where: {
-              nhs_number: nhsNumber
+              conversation_id: conversationId
             },
             transaction: t
           })
         )
+        .then(healthRecord => {
+          expect(healthRecord).not.toBeNull();
+          return healthRecord.getPatient({ transaction: t });
+        })
         .then(patient => {
-          expect(patient).not.toBeNull();
-          return expect(patient.get().nhs_number).toBe(nhsNumber);
+          return expect(patient).toBeNull();
         })
         .finally(() => t.rollback())
     );
