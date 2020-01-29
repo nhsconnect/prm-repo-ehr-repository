@@ -90,6 +90,25 @@ describe('persistHealthRecord', () => {
     );
   });
 
+  it('should not make patient when no nhs number given', () => {
+    return sequelize.transaction().then(t =>
+      createAndLinkEntries(null, conversationId, messageId, manifest, t)
+        .then(() =>
+          Patient.findOne({
+            where: {
+              nhs_number: nhsNumber
+            },
+            transaction: t
+          })
+        )
+        .then(patient => {
+          expect(patient).not.toBeNull();
+          return expect(patient.get().nhs_number).toBe(nhsNumber);
+        })
+        .finally(() => t.rollback())
+    );
+  });
+
   it('should propagate and log errors from invalid nhs number', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries('1234', conversationId, messageId, manifest, t)
@@ -172,7 +191,7 @@ describe('persistHealthRecord', () => {
     );
   });
 
-  it('should create association between health record and manfiest', () => {
+  it('should create association between health record and manifest', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
         .then(() =>

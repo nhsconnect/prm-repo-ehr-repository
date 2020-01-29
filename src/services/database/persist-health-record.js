@@ -6,19 +6,20 @@ const MessageFragment = ModelFactory.getByName('MessageFragment');
 
 export const createAndLinkEntries = (nhsNumber, conversationId, messageId, manifest, transaction) =>
   MessageFragment.findOrCreateOne(messageId, transaction)
-    .then(fragment => {
-      return Array.isArray(manifest) && manifest.length
+    .then(fragment =>
+      Array.isArray(manifest) && manifest.length
         ? fragment.containsManifest(messageId, manifest, transaction)
-        : fragment;
-    })
+        : fragment)
     .then(fragment => fragment.withHealthRecord(conversationId, transaction))
     .then(fragment => fragment.getHealthRecord({ transaction: transaction }))
-    .then(healthRecord => healthRecord.withPatient(nhsNumber, transaction))
-    .then(healthRecord => {
-      return Array.isArray(manifest) && manifest.length
+    .then(healthRecord =>
+      (nhsNumber === undefined || nhsNumber === null)
+        ? healthRecord
+        : healthRecord.withPatient(nhsNumber, transaction))
+    .then(healthRecord =>
+      Array.isArray(manifest) && manifest.length
         ? healthRecord.hasManifest(messageId, transaction)
-        : healthRecord;
-    })
+        : healthRecord)
     .then(() => updateLogEvent({ status: 'Meta-data has been persisted' }))
     .catch(error => {
       updateLogEventWithError(error);
