@@ -24,7 +24,7 @@ app.use('/health-record', logging.middleware, healthRecord);
 
 app.use('/error', logging.middleware, errorEndpoint);
 
-app.get('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(errorLogger(options));
 
