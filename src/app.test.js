@@ -72,6 +72,34 @@ describe('app', () => {
     });
   });
 
+  describe('GET /', () => {
+    it('should return a 404 status code', done => {
+      request(app)
+        .get('/')
+        .expect(404)
+        .end(done);
+    });
+  });
+
+  describe('GET /any-text - an unspecified endpoint', () => {
+    it('should return a 404 status code', done => {
+      request(app)
+        .get('/any-text')
+        .expect(404)
+        .end(done);
+    });
+  });
+
+  describe('/swagger', () => {
+    it('GET - should return a 200 status code and text/html content type response', done => {
+      request(app)
+        .get('/swagger')
+        .expect(200)
+        .expect('Content-Type', 'text/html; charset=utf-8')
+        .end(done);
+    });
+  });
+
   describe('GET /health', () => {
     beforeEach(() => {
       getHealthCheck.mockReturnValue(
