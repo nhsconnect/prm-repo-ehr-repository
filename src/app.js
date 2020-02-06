@@ -1,13 +1,13 @@
+import httpContext from 'async-local-storage';
 import express from 'express';
 import { errorLogger, logger as requestLogger } from 'express-winston';
 import swaggerUi from 'swagger-ui-express';
-import httpContext from 'async-local-storage';
+import errorEndpoint from './api/errorEndpoint';
+import health from './api/health';
+import healthRecord from './api/health-record';
+import { options } from './config/logging';
 import * as correlationInfo from './middleware/correlation';
 import * as logging from './middleware/logging';
-import { options } from './config/logging';
-import healthRecord from './api/health-record';
-import health from './api/health';
-import errorEndpoint from './api/errorEndpoint';
 import swaggerDocument from './swagger.json';
 
 httpContext.enable();
@@ -24,7 +24,7 @@ app.use('/health-record', logging.middleware, healthRecord);
 
 app.use('/error', logging.middleware, errorEndpoint);
 
-app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(errorLogger(options));
 

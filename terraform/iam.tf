@@ -32,11 +32,11 @@ data "aws_iam_policy_document" "ehr-repo-s3" {
 
 resource "aws_iam_policy" "ehr-repo-s3" {
   name   = "${var.environment}-ehr-repo-s3"
-  policy = "${data.aws_iam_policy_document.ehr-repo-s3.json}"
+  policy = data.aws_iam_policy_document.ehr-repo-s3.json
 }
 
 resource "aws_iam_role_policy_attachment" "ehr-repo-s3-attach" {
-  role       = "${aws_iam_role.ehr-repo.name}"
+  role       = aws_iam_role.ehr-repo.name
   policy_arn = aws_iam_policy.ehr-repo-s3.arn
 }
 
@@ -54,10 +54,10 @@ data "aws_iam_policy_document" "ehr-repo-s3-bucket" {
 
 resource "aws_iam_policy" "ehr-repo-s3-bucket" {
   name   = "${var.environment}-ehr-repo-s3-bucket"
-  policy = "${data.aws_iam_policy_document.ehr-repo-s3-bucket.json}"
+  policy = data.aws_iam_policy_document.ehr-repo-s3-bucket.json
 }
 
 resource "aws_iam_role_policy_attachment" "ehr-repo-s3-bucket-attach" {
-  role       = "${aws_iam_role.ehr-repo.name}"
+  role       = aws_iam_role.ehr-repo.name
   policy_arn = aws_iam_policy.ehr-repo-s3-bucket.arn
 }
