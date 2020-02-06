@@ -1,0 +1,50 @@
+Table patients {
+  id uuid [pk]
+  nhs_number varchar [not null, unique]
+  created_at datetime [not null]
+  updated_at datetime [not null]
+  deleted_at datetime [null]
+}
+
+Table health_records {
+  id uuid [pk]
+  conversation_id uuid [not null, unique]
+  message_id uuid [not null, unique]
+  patient_id varchar(6) [not null, ref: > patients.id]
+  is_complete boolean [not null]
+  completed_at datetime [null]
+  created_at datetime [not null]
+  updated_at datetime [not null]
+  deleted_at datetime [null]
+}
+
+Table message_fragments {
+  id uuid [pk]
+  health_record_id uuid [not null, ref: > health_records.id]
+  message_id uuid [not null, unique]
+  completed_at datetime [null]
+  created_at datetime [not null]
+  updated_at datetime [not null]
+  deleted_at datetime [null]
+}
+
+Table health_record_manifests {
+  id uuid [pk]
+  health_record_id uuid [not null, ref: > health_records.id]
+  message_id uuid [not null]
+  is_complete boolean [not null]
+  completed_at datetime [null]
+  created_at datetime [not null]
+  updated_at datetime [not null]
+  deleted_at datetime [null]
+}
+
+Table health_record_manifests_message_fragments {
+    id uuid [pk]
+    health_record_manifest_id uuid [not null, ref: > health_record_manifests.id]
+    message_fragments uuid [not null, unique, ref: - message_fragments.id]
+    is_complete boolean [not null]
+    created_at datetime [not null]
+    updated_at datetime [not null]
+    deleted_at datetime [null]
+}

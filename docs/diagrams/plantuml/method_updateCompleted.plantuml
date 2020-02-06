@@ -1,0 +1,61 @@
+@startuml
+
+!include https://gist.githubusercontent.com/fishey2/c9d9d7c7426d3701959789c10e96fdb0/raw/2afa46ecf5e126ad563693a8dccfa3e7ee46a50c/nhs_stylesheet.iuml
+
+title EHR Update if Complete
+
+participant "eHR Database Service" as eHR
+database "eHR Database" as db
+
+autonumber "<b>[100]"
+group Update health record complete
+
+    eHR -> db   : HealthRecord.find(conversationId)
+    else 4XX  no health record
+
+    activate eHR
+    activate db
+    db  -> eHR  : healthRecord
+    deactivate db
+
+    eHR -> db   : HealthRecordManifest.findAll(for: healthRecord)
+    note left: There should be at least one manifest \nfor a health record
+    else 4XX no manifests
+
+    activate db
+    db  -> eHR  : List<HealthRecordManifest>
+    deactivate db
+
+    loop for each manfiest
+
+        eHR -> db   : MessageFragment.findAll(for: manifest)
+        note left: There should be at least one fragment \nfor each manifest
+        else 4XX no fragments
+
+        activate db
+        db  -> eHR  : List<MessageFragment>
+        deactivate db
+
+        alt if all fragments are complete
+            eHR -> db   : manifest.complete()
+
+            activate db
+            db  -> eHR  : 1 Updated
+            deactivate db
+
+            else 200 OK
+        end
+
+        alt if all manifests are complete
+            eHR -> db   : healthRecord.complete()
+
+            activate db
+            db  -> eHR  : 1 Updated
+            deactivate eHR
+            deactivate db
+
+            else 200 OK
+        end
+    end
+end
+@enduml

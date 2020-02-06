@@ -1,0 +1,145 @@
+@startuml
+
+!include https://gist.githubusercontent.com/fishey2/c9d9d7c7426d3701959789c10e96fdb0/raw/2afa46ecf5e126ad563693a8dccfa3e7ee46a50c/nhs_stylesheet.iuml
+
+box gp2gp-adapter
+    participant "GP2GP Adapter" as GP2GP
+end box
+
+box ehr-repository
+    database "eHR AWS S3" as s3
+    participant "eHR Service" as eHR
+    database "eHR Database" as db
+end box
+
+autonumber "<b>[000]"
+
+loop for each message
+
+  GP2GP -> eHR    : PUT /health-record/{conversationId}/message
+     note left: {\n\    "nhsNumber": "123456",\n\    "messageId": "UUID_1234", \n\    "manifest:": ["messageId_file1", "messageId_file2"]\n\ }
+     activate GP2GP
+
+     activate eHR
+
+     else 500 Server error (service not running/mis-config)
+         eHR -[NHS_ERROR]-> GP2GP
+     else
+
+  group Store message fragment
+
+
+        eHR   -> db     : Patient.findOrCreate(nhsNumber)
+
+        activate db
+
+        else 4xx Could not create patient (nhsNumber invalid)
+            db   -[NHS_ERROR]-> eHR    :
+            eHR  -[NHS_ERROR]-> GP2GP  :
+        else
+
+        db    -> eHR    : patient
+
+        deactivate db
+
+        eHR   -> db     : HealthRecord.findOrCreate(conversationId)
+
+        activate db
+
+        else 4xx Could not create health record (conversationId invalid)
+            db   -[NHS_ERROR]-> eHR    :
+            eHR  -[NHS_ERROR]-> GP2GP  :
+        else
+
+        db    -> eHR    : healthRecord
+
+        deactivate db
+
+        eHR   -> db     : healthRecord.join(patient)
+
+        activate db
+            db    -> eHR    : 1 Joined
+        deactivate db
+
+    alt if message is manifest
+
+        eHR -> db   : MessageFragmentManifest.create(healthRecord)
+            note left: Health record already created the ID is used
+        activate db
+        db  -> eHR  : messageFragmentManifest
+        deactivate db
+
+        loop each message ID in manifest
+            eHR -> db   : MessageFragment.findOrCreate(messageId)
+            activate db
+
+            else 4xx Could not create message fragment (messageId invalid)
+                db   -[NHS_ERROR]-> eHR    :
+                eHR  -[NHS_ERROR]-> GP2GP  :
+            else
+
+            db  -> eHR  : messageFragment
+
+            deactivate db
+            eHR -> db   : messageFragment.join(messageFragmentManifest)
+
+            activate db
+            db  -> eHR  : 1 Joined
+            deactivate db
+        end
+    end
+
+    eHR   -> db     : MessageFragment.findOrCreate(healthRecord.id, messageId)
+
+    activate db
+
+    else 4xx Could not create message fragment (messageId invalid)
+        db   -[NHS_ERROR]-> eHR    :
+        eHR  -[NHS_ERROR]-> GP2GP  :
+    else
+
+    db    -> eHR    : messageFragment
+
+    deactivate db
+  end
+  eHR   -> GP2GP  : Returns presigned URL for S3
+  deactivate eHR
+
+  GP2GP -> s3     : Uploads artifact
+
+  activate s3
+  s3    -> GP2GP  : 200 OK - MessageFragment identify created
+  deactivate s3
+
+  GP2GP -> eHR    : POST /health-record/{conversationId}/message/{messageId}
+    note left: {\n\    "transferComplete": true\n\ }
+  activate eHR
+
+  group Confirm message fragment transfer
+
+    eHR   -> db     : MessageFragment.find(messageId)
+
+    activate db
+
+    else 4xx Message fragment not found
+        db    -[NHS_ERROR]-> eHR :
+        eHR   -[NHS_ERROR]-> GP2GP :
+    else
+
+    db    -> eHR    : messageFragment
+
+    deactivate db
+
+    eHR   -> db     : MessageFragment.complete()
+
+    activate db
+    db    -> eHR    : 1 Updated
+    deactivate db
+
+  end
+  eHR   -> GP2GP  : 200 OK - MessageFragment updated as completed
+  deactivate GP2GP
+  eHR   -> eHR    : updateHealthRecordComplete(conversationId)
+  deactivate eHR
+end
+@enduml

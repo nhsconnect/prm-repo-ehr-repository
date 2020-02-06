@@ -27,6 +27,8 @@ pipelines:
     materials:
       git:
         type: configrepo
+        whitelist:
+          - docs/**/*.*
     stages:
       - build:
           clean_workspace: true
@@ -110,6 +112,8 @@ pipelines:
     materials:
       git:
         type: configrepo
+        whitelist:
+          - docs/**/*.*
       app:
         pipeline: prm-deductions-ehr-repository
         stage: test_docker
@@ -142,6 +146,8 @@ pipelines:
     materials:
       git:
         type: configrepo
+        whitelist:
+          - docs/**/*.*
       base_infra:
         pipeline: prm-deductions-infra
         stage: check_test
