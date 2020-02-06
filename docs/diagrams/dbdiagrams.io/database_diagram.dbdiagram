@@ -9,9 +9,7 @@ Table patients {
 Table health_records {
   id uuid [pk]
   conversation_id uuid [not null, unique]
-  message_id uuid [not null, unique]
-  patient_id varchar(6) [not null, ref: > patients.id]
-  is_complete boolean [not null]
+  patient_id varchar(6) [ref: > patients.id]
   completed_at datetime [null]
   created_at datetime [not null]
   updated_at datetime [not null]
@@ -20,7 +18,7 @@ Table health_records {
 
 Table message_fragments {
   id uuid [pk]
-  health_record_id uuid [not null, ref: > health_records.id]
+  health_record_id uuid [ref: > health_records.id]
   message_id uuid [not null, unique]
   completed_at datetime [null]
   created_at datetime [not null]
@@ -30,9 +28,8 @@ Table message_fragments {
 
 Table health_record_manifests {
   id uuid [pk]
-  health_record_id uuid [not null, ref: > health_records.id]
+  health_record_id uuid [ref: > health_records.id]
   message_id uuid [not null]
-  is_complete boolean [not null]
   completed_at datetime [null]
   created_at datetime [not null]
   updated_at datetime [not null]
@@ -43,7 +40,7 @@ Table health_record_manifests_message_fragments {
     id uuid [pk]
     health_record_manifest_id uuid [not null, ref: > health_record_manifests.id]
     message_fragments uuid [not null, unique, ref: - message_fragments.id]
-    is_complete boolean [not null]
+    completed_at datetime [null]
     created_at datetime [not null]
     updated_at datetime [not null]
     deleted_at datetime [null]
