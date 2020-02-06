@@ -58,12 +58,12 @@ describe('app', () => {
     });
   });
 
-  describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
+  describe('PATCH /health-record/{conversationId}/message/{messageId}', () => {
     const TEST_ENDPOINT = `/health-record/${conversationId}/message/${messageId}`;
 
     it('should return 204', done => {
       request(app)
-        .put(TEST_ENDPOINT)
+        .patch(TEST_ENDPOINT)
         .send({
           transferComplete: true
         })

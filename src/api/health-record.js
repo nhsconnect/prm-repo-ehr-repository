@@ -1,9 +1,9 @@
 import express from 'express';
 import { body, param } from 'express-validator';
-import { validate } from '../middleware/validation';
 import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
-import { getSignedUrl } from '../services/storage';
+import { validate } from '../middleware/validation';
 import { persistHealthRecord } from '../services/database';
+import { getSignedUrl } from '../services/storage';
 
 const router = express.Router();
 
@@ -77,7 +77,7 @@ router.post(
   }
 );
 
-router.put(
+router.patch(
   '/:conversationId/message/:messageId',
   updateMessageValidationRules,
   validate,

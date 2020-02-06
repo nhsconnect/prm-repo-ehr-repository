@@ -1,8 +1,8 @@
 import request from 'supertest';
 import app from '../app';
+import ModelFactory from '../models';
 import { persistHealthRecord } from '../services/database';
 import { getSignedUrl } from '../services/storage';
-import ModelFactory from '../models';
 
 jest.requireActual('../middleware/logging');
 
@@ -251,12 +251,12 @@ describe('health-record', () => {
     });
   });
 
-  describe('PUT /health-record/{conversationId}/message/{messageId}', () => {
+  describe('PATCH /health-record/{conversationId}/message/{messageId}', () => {
     const TEST_ENDPOINT = `/health-record/${conversationId}/message/${messageId}`;
 
     it('should return 204', done => {
       request(app)
-        .put(TEST_ENDPOINT)
+        .patch(TEST_ENDPOINT)
         .send({
           transferComplete: true
         })
@@ -266,7 +266,7 @@ describe('health-record', () => {
 
     it('should return 422 if transferComplete is not provided in body', done => {
       request(app)
-        .put(TEST_ENDPOINT)
+        .patch(TEST_ENDPOINT)
         .send()
         .expect(422)
         .expect(res => {
