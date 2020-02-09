@@ -27,7 +27,7 @@ pipelines:
     materials:
       git:
         type: configrepo
-        whitelist:
+        blacklist:
           - docs/**/*.*
     stages:
       - build:
@@ -112,7 +112,7 @@ pipelines:
     materials:
       git:
         type: configrepo
-        whitelist:
+        blacklist:
           - docs/**/*.*
       app:
         pipeline: prm-deductions-ehr-repository
@@ -147,7 +147,7 @@ pipelines:
     materials:
       git:
         type: configrepo
-        whitelist:
+        blacklist:
           - docs/**/*.*
       base_infra:
         pipeline: prm-deductions-infra
