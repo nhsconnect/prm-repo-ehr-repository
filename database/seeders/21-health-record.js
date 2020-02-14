@@ -45,7 +45,7 @@ module.exports = {
       {
         id: '5dc9d99c-c018-46d3-bba2-49bc4489e529',
         patient_id: '3779fb0c-4142-43a4-a9b8-c5f5f3f632cc',
-        conversation_id: 'e6e6daa9-a15d-4d0f-9f7b-a71be71949e8',
+        conversation_id: 'e6e6daa9-a15d-4d0f-9f7b-a71bf71949e8',
         created_at: new Date(),
         updated_at: new Date()
       },
