@@ -2,6 +2,9 @@
 .idea
 *.iml
 
+# VSCode
+.vscode
+
 # Directory for storing files when running locally
 local-datastore
 
