@@ -135,6 +135,20 @@ module.exports = {
         updated_at: new Date(),
         completed_at: new Date(),
         health_record_id: '4aa3f0fa-197d-4af3-b64f-4a125cbefeb0'
+      },
+      {
+        id: '29297c90-2260-4f10-9f04-40caae4e3d43',
+        message_id: '21b92234-5e64-468b-957c-9d0b2b4cc310',
+        created_at: new Date(),
+        updated_at: new Date(),
+        health_record_id: '08850511-50c8-436e-b12c-5c452758c4ec'
+      },
+      {
+        id: 'ac7ae2cb-c49d-49eb-8af7-809de45bec18',
+        message_id: 'e3581075-d891-44b7-95b7-52ed40098d8c',
+        created_at: new Date(),
+        updated_at: new Date(),
+        health_record_id: 'cb3d2ad3-3cdb-45fa-94bd-0e5779166c8b'
       }
     ]);
   },
