@@ -11,8 +11,8 @@ const model = dataType => ({
   patient_id: {
     type: dataType.UUID,
     references: {
-      model: 'patients', // 'persons' refers to table name
-      key: 'id' // 'id' refers to column name in persons table
+      model: 'patients', // 'patients' refers to table name
+      key: 'id' // 'id' refers to column name in patients table
     }
   },
   conversation_id: {

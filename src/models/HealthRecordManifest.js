@@ -12,8 +12,8 @@ const model = dataType => ({
   health_record_id: {
     type: dataType.UUID,
     references: {
-      model: 'health_records', // 'persons' refers to table name
-      key: 'id' // 'id' refers to column name in persons table
+      model: 'health_records', // 'heath_records' refers to table name
+      key: 'id' // 'id' refers to column name in heath_records table
     }
   },
   message_id: {
