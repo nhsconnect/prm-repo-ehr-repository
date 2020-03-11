@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Endpoint, S3 } from 'aws-sdk';
 import config from '../../config';
 
@@ -23,7 +23,7 @@ export default class S3Service {
       writable: false
     };
 
-    const date = moment().format('YYYY-MM-DD HH:mm:ss');
+    const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
     return this._isConnected()
       .then(() =>
         this.save(date)
