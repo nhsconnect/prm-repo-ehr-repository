@@ -24,6 +24,7 @@
     "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
     "@babel/preset-env": "^7.6.3",
+    "acorn": "^7.1.1",
     "axios": "^0.19.1",
     "db-migrate": "^0.11.6",
     "dotenv": "^8.2.0",
@@ -35,7 +36,8 @@
     "prettier": "^1.19.1",
     "sequelize-cli": "^5.5.1",
     "supertest": "^4.0.2",
-    "swagger-ui-express": "^4.1.2"
+    "swagger-ui-express": "^4.1.2",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "async-local-storage": "^2.3.1",
