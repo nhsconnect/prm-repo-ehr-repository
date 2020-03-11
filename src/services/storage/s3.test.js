@@ -1,8 +1,8 @@
 import { S3 } from 'aws-sdk';
-import S3Service from './s3';
 import config from '../../config';
+import S3Service from './s3';
 
-jest.mock('moment', () => () => ({ format: () => 'some-date' }));
+jest.mock('dayjs', () => () => ({ format: () => '2020-03-11 10:50:56' }));
 jest.mock('aws-sdk');
 
 describe('S3Service', () => {
