@@ -1,21 +1,15 @@
 import request from 'supertest';
-import app from './app';
-import ModelFactory from './models';
-import { getHealthCheck } from './services/get-health-check';
+import app from '../app';
+import ModelFactory from '../models';
+import { getHealthCheck } from '../services/get-health-check';
 
-jest.requireActual('./middleware/logging');
+jest.mock('../middleware/logging');
 
-jest.mock('express-winston', () => ({
-  errorLogger: () => (req, res, next) => next(),
-  logger: () => (req, res, next) => next()
-}));
-jest.mock('./config/logging');
-
-jest.mock('./services/storage/get-signed-url', () =>
+jest.mock('../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 
-jest.mock('./services/get-health-check');
+jest.mock('../services/get-health-check');
 
 describe('app', () => {
   const conversationId = 'test-conversation-id';
@@ -35,23 +29,6 @@ describe('app', () => {
         .post(TEST_ENDPOINT)
         .send({
           messageId
-        })
-        .expect(201)
-        .end(done);
-    });
-  });
-
-  describe('POST /health-record/{conversationId}/new/message', () => {
-    const testUUID = '04d71080-e9da-4b3d-8f6f-0bfea8786187';
-    const TEST_ENDPOINT = `/health-record/${testUUID}/new/message`;
-    const nhsNumber = '1234567890';
-
-    it('should return 201', done => {
-      request(app)
-        .post(TEST_ENDPOINT)
-        .send({
-          nhsNumber,
-          messageId: testUUID
         })
         .expect(201)
         .end(done);

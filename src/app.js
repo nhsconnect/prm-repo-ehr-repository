@@ -2,7 +2,7 @@ import httpContext from 'async-local-storage';
 import express from 'express';
 import { errorLogger, logger as requestLogger } from 'express-winston';
 import swaggerUi from 'swagger-ui-express';
-import errorEndpoint from './api/errorEndpoint';
+import errorEndpoint from './api/error';
 import health from './api/health';
 import healthRecord from './api/health-record';
 import { options } from './config/logging';

@@ -1,7 +1,7 @@
-import { getHealthCheck } from './get-health-check';
+import { getHealthCheck } from '../get-health-check';
 import { S3 } from 'aws-sdk';
-import ModelFactory from '../models';
-import config from '../config';
+import ModelFactory from '../../models';
+import config from '../../config';
 
 jest.mock('aws-sdk');
 
@@ -62,32 +62,6 @@ describe('getHealthCheck', () => {
         available: false,
         writable: false,
         error: error
-      });
-    });
-  });
-
-  it('should return successful db health check if db connection is healthy', () => {
-    return getHealthCheck().then(result => {
-      const db = result.details['database'];
-      return expect(db).toEqual({
-        type: 'postgresql',
-        connection: true,
-        writable: true
-      });
-    });
-  });
-
-  it('should return failed db health check if username is incorrect', () => {
-    ModelFactory._overrideConfig('username', 'wrong-username');
-
-    return getHealthCheck().then(result => {
-      const db = result.details['database'];
-
-      return expect(db).toEqual({
-        type: 'postgresql',
-        connection: true,
-        writable: false,
-        error: 'Authorization error (Error Code: 28P01)'
       });
     });
   });

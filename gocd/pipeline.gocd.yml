@@ -51,6 +51,15 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test
+            integration:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_integration
             coverage:
               artifacts:
                 - build:
@@ -64,8 +73,8 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks coverage
-            npm_install:
+                      - ./tasks test_coverage
+            build_artifacts:
               resources:
                 - docker
               artifacts:
@@ -86,7 +95,7 @@ pipelines:
               tasks:
                 - fetch:
                     stage: build
-                    job: npm_install
+                    job: build_artifacts
                     source: build
                 - exec:
                     command: /bin/bash
@@ -127,7 +136,7 @@ pipelines:
           clean_workspace: true
           jobs:
             deploy: *deploy_job
-      - smoke:
+      - functional:
           clean_workspace: true
           jobs:
             test:
@@ -139,7 +148,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks smoke
+                      - ./tasks test_functional
 
   "prm-deductions-ehr-repository.test":
     group: deductions
@@ -154,7 +163,7 @@ pipelines:
         stage: check_test
       dev_env:
         pipeline: prm-deductions-ehr-repository.dev
-        stage: smoke
+        stage: functional
     environment_variables:
       NHS_ENVIRONMENT: test
     stages:
@@ -162,7 +171,7 @@ pipelines:
           clean_workspace: true
           jobs:
             deploy: *deploy_job
-      - smoke:
+      - functional:
           clean_workspace: true
           jobs:
             test:
@@ -174,4 +183,4 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks smoke
+                      - ./tasks test_functional

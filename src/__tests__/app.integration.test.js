@@ -1,14 +1,10 @@
 import request from 'supertest';
 import uuid from 'uuid/v4';
-import app from './app';
-import config from './config';
-import ModelFactory from './models';
+import app from '../app';
+import config from '../config';
+import ModelFactory from '../models';
 
-jest.mock('./config/logging');
-jest.mock('express-winston', () => ({
-  errorLogger: () => (req, res, next) => next(),
-  logger: () => (req, res, next) => next()
-}));
+jest.mock('../middleware/logging');
 
 describe('POST /health-record/:conversationId/message', () => {
   afterAll(() => {
@@ -28,5 +24,22 @@ describe('POST /health-record/:conversationId/message', () => {
         );
       })
       .end(done);
+  });
+
+  describe('POST /health-record/{conversationId}/new/message', () => {
+    const testUUID = '04d71080-e9da-4b3d-8f6f-0bfea8786187';
+    const TEST_ENDPOINT = `/health-record/${testUUID}/new/message`;
+    const nhsNumber = '1234567890';
+
+    it('should return 201', done => {
+      request(app)
+        .post(TEST_ENDPOINT)
+        .send({
+          nhsNumber,
+          messageId: testUUID
+        })
+        .expect(201)
+        .end(done);
+    });
   });
 });

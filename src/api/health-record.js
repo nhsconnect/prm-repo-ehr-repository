@@ -70,7 +70,6 @@ router.post(
         res.status(201).send(url);
       })
       .catch(err => {
-        console.log(err);
         updateLogEventWithError(err);
         next(err);
       });

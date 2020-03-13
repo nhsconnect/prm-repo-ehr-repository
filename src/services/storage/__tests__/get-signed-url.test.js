@@ -1,5 +1,5 @@
 import { S3 } from 'aws-sdk';
-import getSignedUrl from './get-signed-url';
+import getSignedUrl from '../get-signed-url';
 
 jest.mock('aws-sdk');
 

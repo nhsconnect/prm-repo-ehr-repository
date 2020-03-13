@@ -1,9 +1,8 @@
-import { createAndLinkEntries } from './persist-health-record';
-import { updateLogEvent, updateLogEventWithError } from '../../middleware/logging';
-import ModelFactory from '../../models';
+import { createAndLinkEntries } from '../persist-health-record';
+import { updateLogEvent, updateLogEventWithError } from '../../../middleware/logging';
+import ModelFactory from '../../../models';
 
-jest.mock('../../middleware/logging', () => mockLoggingMiddleware());
-jest.mock('express-winston', () => mockExpressWinston());
+jest.mock('../../../middleware/logging');
 
 describe('persistHealthRecord', () => {
   const sequelize = ModelFactory.sequelize;
@@ -311,19 +310,3 @@ describe('persistHealthRecord', () => {
     );
   });
 });
-
-function mockLoggingMiddleware() {
-  const original = jest.requireActual('../../middleware/logging');
-  return {
-    ...original,
-    updateLogEvent: jest.fn(),
-    updateLogEventWithError: jest.fn()
-  };
-}
-
-function mockExpressWinston() {
-  return {
-    errorLogger: () => (req, res, next) => next(),
-    logger: () => (req, res, next) => next()
-  };
-}

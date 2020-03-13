@@ -5,24 +5,30 @@
   "main": "src/app.js",
   "scripts": {
     "lint": "eslint src/ --fix",
-    "test": "npm run lint && jest --setupFiles dotenv/config",
-    "coverage": "jest --collectCoverage --setupFiles dotenv/config",
-    "coverage-local": "npm run set-up && jest --collectCoverage --setupFiles dotenv/config ; npm run tear-down",
-    "build": "babel src -d build --ignore '**/*.test.js' && cp src/*.json build",
+    "test": "npm run lint && npm run test:unit",
+    "test:unit": "jest \"src/(?!(.*\\integration.test\\.js))\" --setupFiles dotenv/config",
+    "test:integration": "jest \"src/.*\\integration.test\\.js\" --detectOpenHandles --forceExit --setupFiles dotenv/config",
+    "test:integration:local": "npm run db:setup && npm run test:integration ; npm run db:teardown",
+    "test:functional": "jest test/functional/*",
+    "test:docker": "jest test/docker/*",
+    "test:watch": "jest \"src/(?!(.*\\integration.test\\.js))\" --setupFiles dotenv/config --watch",
+    "test:coverage": "jest src/ --maxWorkers=1 --coverage --detectOpenHandles --forceExit --setupFiles dotenv/config",
+    "test:coverage:local": "npm run db:setup && npm run test:coverage ; npm run db:teardown",
+    "build": "babel src -d build --ignore '**/*.test.js' --ignore '**/__mocks__/*' && cp src/*.json build",
     "start": "node build/server.js",
-    "start-local": "npm run migrate ; babel-node -r node_modules/dotenv/config src/server.js",
-    "wait-db": "babel-node scripts/wait_for_postgres.js",
-    "migrate": "npm run wait-db && sequelize-cli db:migrate",
-    "tear-down": "sequelize-cli db:migrate:undo:all",
-    "set-up": "sequelize-cli db:migrate && npm run seed-test-data",
-    "test-local": "npm run set-up && npm run test ; npm run tear-down",
-    "seed-test-data": "sequelize-cli db:seed:all",
-    "remove-test-data": "sequelize-cli db:seed:undo:all"
+    "start:local": "npm run db:migrate ; babel-node -r node_modules/dotenv/config src/server.js",
+    "db:wait": "babel-node scripts/wait_for_postgres.js",
+    "db:migrate": "npm run db:wait && sequelize-cli db:migrate",
+    "db:teardown": "sequelize-cli db:migrate:undo:all",
+    "db:setup": "sequelize-cli db:migrate && npm run db:data:seed",
+    "db:data:seed": "sequelize-cli db:seed:all",
+    "db:data:remove": "sequelize-cli db:seed:undo:all"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
+    "@babel/plugin-transform-runtime": "^7.8.3",
     "@babel/preset-env": "^7.6.3",
     "acorn": "^7.1.1",
     "axios": "^0.19.1",
@@ -40,6 +46,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@babel/runtime": "^7.8.7",
     "async-local-storage": "^2.3.1",
     "aws-sdk": "^2.558.0",
     "dayjs": "^1.8.22",
@@ -57,13 +64,8 @@
     "winston": "^3.2.1"
   },
   "jest": {
-    "coverageThreshold": {
-      "global": {
-        "branches": 0,
-        "functions": 0,
-        "lines": 0,
-        "statements": 0
-      }
-    }
+    "resetModules": true,
+    "clearMocks": true,
+    "automock": false
   }
 }
