@@ -32,7 +32,7 @@ function configure_service_url {
   if [[ -z "${NHS_ENVIRONMENT}" ]]; then
     export SERVICE_URL=http://${NHS_SERVICE}:3000
   else
-    export SERVICE_URL=https://${NHS_ENVIRONMENT}.${NHS_SERVICE}.patient-deductions.nhs.uk
+    export SERVICE_URL=http://${NHS_ENVIRONMENT}.${NHS_SERVICE}.patient-deductions.nhs.uk
   fi
 }
 
@@ -205,7 +205,6 @@ case "${command}" in
       npm run test:functional
       ;;
   test_functional)
-      configure_aws_service_auth_keys
       configure_service_url
       dojo "./tasks _test_functional"
       ;;
