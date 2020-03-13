@@ -65,7 +65,7 @@ export default class S3Service {
   }
 
   _get_config() {
-    if (!config.isLocal) return {};
+    if (process.env.NHS_ENVIRONMENT) return {};
 
     return {
       accessKeyId: 'test-access-key',
