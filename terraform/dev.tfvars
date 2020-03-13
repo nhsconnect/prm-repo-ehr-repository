@@ -18,4 +18,4 @@ task_host_port       = 3000
 
 service_container_port  = "3000"
 service_container_name  = "ehr-repo-container"
-service_desired_count   = "2"
+service_desired_count   = "1"
