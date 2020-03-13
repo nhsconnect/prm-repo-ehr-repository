@@ -1,4 +1,3 @@
 DOJO_DOCKER_IMAGE="nhsdev/node-dojo:b7293e755a8f243181df595c1f7198ac9a85faca"
 DOJO_DRIVER=docker-compose
 DOJO_DOCKER_COMPOSE_FILE=docker-compose-dtest.yml
-DOJO_DOCKER_COMPOSE_OPTIONS="--service-ports"

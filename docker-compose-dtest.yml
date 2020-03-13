@@ -10,7 +10,6 @@ services:
       - localstack:localstack
     environment:
       - EHR_REPO_SKIP_MIGRATION=false
-      - NODE_ENV=local
       - S3_BUCKET_NAME=test-bucket
       - DATABASE_USER=deductions_user
       - DATABASE_PASSWORD=secret
