@@ -117,3 +117,32 @@ Alternatively you can either use a VSCode database plugin or IntelliJ database v
   "username": "deductions_user"
 }
 ```
+
+# Access to AWS
+
+In order to get sufficient access to work with terraform or AWS CLI:
+
+Export your AWS credentials in shell (if you have credentials in ~/.aws/credentials that will work too):
+
+```
+export AWS_ACCESS_KEY_ID=***********
+export AWS_SECRET_ACCESS_KEY=**************************
+unset AWS_SESSION_TOKEN
+```
+
+Enter docker container with terraform and AWS CLI by typing `dojo` at the root of the project.
+
+Assume role with elevated permissions (role-arn needs to be the full ARN):
+
+```
+dojo -c Dojofile-infra "aws-cli-assumerole -rmfa <role-arn> <mfa-otp-code>"
+```
+
+Work with terraform as usual:
+
+```
+terraform init
+terraform apply
+```
+
+If your session expires, exit the container to drop the temporary credentials and run dojo again.

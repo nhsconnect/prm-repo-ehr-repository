@@ -266,7 +266,7 @@ case "${command}" in
   _wait_ecs)
       aws ecs wait services-stable \
         --region $AWS_DEFAULT_REGION \
-        --cluster $NHS_ENVIRONMENT-core-ecs-cluster \
+        --cluster $NHS_ENVIRONMENT-deductions-core-ecs-cluster \
         --service $NHS_ENVIRONMENT-${NHS_SERVICE}-service
       ;;
   wait_ecs)
