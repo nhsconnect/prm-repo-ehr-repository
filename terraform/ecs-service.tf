@@ -29,4 +29,11 @@ resource "aws_ecs_service" "ecs-service" {
     container_name   = var.service_container_name
     container_port   = var.service_container_port
   }
+
+  tags = {
+    Terraform = "true"
+    Environment = var.environment
+    Deductions-Component = var.component_name
+    TurnOffAtNight = "True"
+  }
 }
