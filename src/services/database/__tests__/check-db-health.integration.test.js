@@ -1,5 +1,5 @@
-import { checkDbHealth } from './check-db-health';
-import ModelFactory from '../../models';
+import { checkDbHealth } from '../check-db-health';
+import ModelFactory from '../../../models';
 
 describe('db', () => {
   afterAll(() => {

@@ -16,10 +16,6 @@ describe('models.HealthCheck', () => {
     uuid.mockImplementation(() => testUUID);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     sequelize.close();
   });

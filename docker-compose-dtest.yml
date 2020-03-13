@@ -2,12 +2,21 @@ version: '2'
 services:
   default:
     links:
-      - ehr:ehr
-  ehr:
-    image: ${EHR_DOCKER_IMAGE}
+      - ehr-repo:ehr-repo
+  ehr-repo:
+    image: ${REPOSITORY_URI}:${COMMIT_HASH}
     links:
       - db:db
       - localstack:localstack
+    environment:
+      - EHR_REPO_SKIP_MIGRATION=false
+      - NODE_ENV=local
+      - S3_BUCKET_NAME=test-bucket
+      - DATABASE_USER=deductions_user
+      - DATABASE_PASSWORD=secret
+      - DATABASE_NAME=deductions_test
+      - DATABASE_HOST=db
+      - LOCALSTACK_URL=http://localstack:4572
     ports:
     - 3000:3000
   db:
@@ -22,11 +31,12 @@ services:
     environment:
       - SERVICES=s3:4572
       - DEBUG=true
-      - DATA_DIR=/tmp/localstack/data
       - PORT_WEB_UI=5555
       - LAMBDA_EXECUTOR=local
+      - DATA_DIR=/tmp/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - S3_BUCKET_NAME=dev-ehr-repo-bucket
+      - S3_BUCKET_NAME=test-bucket
+      - LOCALSTACK_URL=http://localstack:4572
     volumes:
       - ./scripts/create-bucket.sh:/docker-entrypoint-initaws.d/create-bucket.sh
       - /var/run/docker.sock:/var/run/docker.sock

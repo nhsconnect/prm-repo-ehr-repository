@@ -10,10 +10,6 @@ describe('HealthRecord integration', () => {
   const expectedConvoId = '8ab7f61f-0e6b-4378-8cac-dcb4f9e3ec54';
   const expectedPatientId = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     sequelize.close();
   });

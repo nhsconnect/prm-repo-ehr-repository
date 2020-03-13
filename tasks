@@ -2,19 +2,17 @@
 
 set -Eeo pipefail
 
+###########################
+# Local Config Parameters #
+###########################
+
 AWS_DEFAULT_REGION=eu-west-2
 IMAGE_REPO_NAME=deductions/ehr-repo
-NHS_SERVICE=ehr-repo
+export NHS_SERVICE=ehr-repo
 
-function set_test_environment_variables {
-  export NODE_ENV=local
-  export DATABASE_NAME=deductions_test
-  export DATABASE_USER=deductions_user
-  export DATABASE_PASSWORD=secret
-  export DATABASE_HOST=db
-  export S3_BUCKET_NAME=test-bucket
-  export LOCALSTACK_URL=http://localstack:4572
-}
+####################################
+# Instance (Environment) Variables #
+####################################
 
 function check_env {
   if [[ -z "${NHS_ENVIRONMENT}" ]]; then
@@ -23,8 +21,60 @@ function check_env {
   fi
 }
 
+function check_nhs_service {
+  if [[ -z "${NHS_SERVICE}" ]]; then
+    echo "Must set NHS_SERVICE"
+    exit 1
+  fi
+}
+
+function configure_service_url {
+  if [[ -z "${NHS_ENVIRONMENT}" ]]; then
+    export SERVICE_URL=http://${NHS_SERVICE}:3000
+  else
+    export SERVICE_URL=https://${NHS_ENVIRONMENT}.${NHS_SERVICE}.patient-deductions.nhs.uk
+  fi
+}
+
+function configure_local_envs {
+  export DATABASE_NAME=deductions_test
+  export DATABASE_USER=deductions_user
+  export DATABASE_PASSWORD=secret
+  export DATABASE_HOST=db
+  export S3_BUCKET_NAME=test-bucket
+  export LOCALSTACK_URL=http://localstack:4572
+  export REPOSITORY_URI=$IMAGE_REPO_NAME
+  export NODE_ENV=local
+  configure_service_url
+}
+
+function get_aws_account_id {
+     AWS_ACCOUNT_ID=$(dojo -c Dojofile-infra "aws sts get-caller-identity | jq -r .Account")
+ }
+
+function configure_aws_service_auth_keys {
+    check_env
+    get_aws_account_id
+    parameter_name="/NHS/${NHS_ENVIRONMENT}-${AWS_ACCOUNT_ID}/${NHS_SERVICE}/authorization_keys"
+    echo "${parameter_name}"
+    export AUTHORIZATION_KEYS=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${parameter_name} | jq -r .Parameter.Value")
+}
+
+function get_aws_ssm_secret {
+  secret_id=$1
+  json=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region $AWS_DEFAULT_REGION --name $secret_id")
+  if [ $? != 0 ]; then
+    >&2 echo "Failed to obtain AWS secret from SSM: $secret_id"
+    exit 5
+  fi
+  echo $json | jq -r ".Parameter.Value"
+}
+
+#######################
+# Terraform Functions #
+#######################
+
 function tf_plan {
-  check_env
   operation=$1
   cd terraform
 
@@ -51,29 +101,79 @@ function tf_apply {
   terraform output -json > tf-out.json
 }
 
+####################
+# Script Functions #
+####################
+
+function send_canary_update_message {
+  check_nhs_service
+  node scripts/send-canary-update.js $(npm outdated --parseable)
+}
+
+function configure_hangout_webhook {
+  export GOOGLE_CHAT_CANARY_WEBHOOK=$(get_aws_ssm_secret "/NHS/GoCD/prod/google-chat-canary-webhook")
+  if [ -z "${GOOGLE_CHAT_CANARY_WEBHOOK}" ]; then
+    echo "Unable to obtain GOOGLE_CHAT_CANARY_WEBHOOK from AWS"
+    exit 5
+  fi
+}
+
+############################
+# Docker Related Functions #
+############################
+
 function docker_login {
   echo Logging in to Amazon ECR...
   eval $(dojo -c Dojofile-infra "aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION")
 }
 
-function get_aws_secret {
-  secret_id=$1
-  json=$(aws ssm get-parameter --with-decryption --region $AWS_DEFAULT_REGION --name $secret_id)
-  if [ $? != 0 ]; then
-    >&2 echo "Failed to obtain AWS secret: $secret_id"
-    exit 5
-  fi
-  echo $json | jq -r ".Parameter.Value"
+function configure_docker_repository_uri {
+  docker_login
+  get_aws_account_id
+  export REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/$IMAGE_REPO_NAME
 }
+
+function get_latest_commit_hash {
+  export COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
+}
+
+function build_docker_image {
+  echo Build started on `date`
+  get_latest_commit_hash
+  IMAGE_TAG=${COMMIT_HASH}
+  echo Building the Docker image...
+  docker build -t $REPOSITORY_URI:latest -t $REPOSITORY_URI:$IMAGE_TAG .
+  echo Build completed on `date`
+}
+
+###########
+## TASKS ##
+###########
 
 command="$1"
 case "${command}" in
   _dep)
-      echo "Running NPM Audit ..."
+      npm install
       npm audit
       ;;
   dep)
       dojo "./tasks _dep"
+      ;;
+  _list_outdated)
+      npm install
+      npm outdated > outdated-dependencies.txt || send_canary_update_message
+      ;;
+  list_outdated)
+      configure_hangout_webhook
+      dojo "./tasks _list_outdated"
+      ;;
+  update_package_json)
+      dojo "npx npm-check-updates -u"
+      ;;
+  send_dead_canary_message)
+      check_nhs_service
+      configure_hangout_webhook
+      dojo "node scripts/send-canary-error.js"
       ;;
   _build)
       rm -rf build/
@@ -83,103 +183,66 @@ case "${command}" in
   build)
       dojo "./tasks _build"
       ;;
-  _coverage)
-      set_test_environment_variables
-      npm install
-      npm run migrate
-      npm run seed-test-data
-      npm run coverage
-      ;;
-  coverage)
-      dojo -c Dojofile-itest "./tasks _coverage"
-      ;;
   _test)
-      set_test_environment_variables
       npm install
-      npm run migrate
-      npm run seed-test-data
       npm run test
       ;;
   test)
-      dojo -c Dojofile-itest "./tasks _test"
+      dojo "./tasks _test"
       ;;
-  interactive)
-      dojo -c Dojofile-itest
+  _test_integration)
+      npm install
+      npm run db:migrate
+      npm run db:data:seed
+      npm run test:integration
+      ;;
+  test_integration)
+      configure_local_envs
+      dojo -c Dojofile-itest "./tasks _test_integration"
+      ;;
+  _test_functional)
+      npm install
+      npm run test:functional
+      ;;
+  test_functional)
+      configure_aws_service_auth_keys
+      configure_service_url
+      dojo "./tasks _test_functional"
+      ;;
+  _test_coverage)
+      npm install
+      npm run db:migrate
+      npm run db:data:seed
+      npm run test:coverage
+      ;;
+  test_coverage)
+      configure_local_envs
+      dojo -c Dojofile-itest "./tasks _test_coverage"
       ;;
   build_docker_local)
-      REPOSITORY_URI=$IMAGE_REPO_NAME
-      COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
-      IMAGE_TAG=${COMMIT_HASH}
-      echo Build started on `date`
-      echo Building the Docker image...
-      docker build -t $REPOSITORY_URI:latest .
-      docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
-      echo Build completed on `date`
+      configure_local_envs
+      build_docker_image
       ;;
   build_docker)
-      docker_login
-      AWS_ACCOUNT_ID=$(dojo -c Dojofile-infra "aws sts get-caller-identity | jq -r .Account")
-      REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/$IMAGE_REPO_NAME
-      ./tasks build_docker_local
-      COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
-      IMAGE_TAG=${COMMIT_HASH}
-      docker tag $IMAGE_REPO_NAME $REPOSITORY_URI:$IMAGE_TAG
-      docker tag $IMAGE_REPO_NAME $REPOSITORY_URI:latest
-      echo "Pushing the Docker image...
-      $REPOSITORY_URI:latest
-      $REPOSITORY_URI:$IMAGE_TAG"
-      docker push $REPOSITORY_URI:latest
-      docker push $REPOSITORY_URI:$IMAGE_TAG
+      configure_docker_repository_uri
+      build_docker_image
+      echo "Pushing the Docker image... $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG"
+      docker push $REPOSITORY_URI
       ;;
   _test_docker)
-      npm install axios
-      echo "Waiting for EHR endpoint to start responding at ${EHR_URL}"
-      count=1
-      set +e
-      while ! node infra-tests/test_health.js; do
-        echo "Waiting for EHR endpoint at ${EHR_URL}"
-        sleep 1
-        ((count++))
-        if [ 30 -le $count ]; then
-          echo "Timed-out waiting for EHR endpoint at ${EHR_URL}"
-          exit 5
-        fi
-      done
-      echo "EHR endpoint at ${EHR_URL} is healthy"
-      echo "Running POST /{conversationId}/message"
-      node infra-tests/test_message_update.js
-      echo "Running PUT /{conversationId}/message/{messageId}"
-      node infra-tests/test_message_upload.js
-      ;;
-  test_docker_local)
-      set_test_environment_variables
-      export S3_BUCKET_NAME=dev-ehr-repo-bucket
-      export EHR_URL="http://ehr:3000"
-      export EHR_DOCKER_IMAGE="${EHR_DOCKER_IMAGE:-$IMAGE_REPO_NAME}"
-      export NHS_ENVIRONMENT=docker
-      dojo -c Dojofile-dtest "./tasks _test_docker"
+      npm install
+      npm run test:docker
       ;;
   test_docker)
-      # Tests that image uses variables for config and runs migration on start
-      docker_login
-      COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
-      IMAGE_TAG=${COMMIT_HASH}
-      AWS_ACCOUNT_ID=$(dojo -c Dojofile-infra "aws sts get-caller-identity | jq -r .Account")
-      REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-      export EHR_DOCKER_IMAGE="${REPOSITORY_URI}/$IMAGE_REPO_NAME:${IMAGE_TAG}"
-      ./tasks test_docker_local
+      configure_local_envs
+      configure_docker_repository_uri
+      get_latest_commit_hash
+      dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
-  smoke)
-      check_env
-      export EHR_HOST=${NHS_ENVIRONMENT}.ehr-repo.patient-deductions.nhs.uk
-      export EHR_URL=http://${EHR_HOST}
-      curl -i http://${EHR_HOST}/health | grep OK
-      dojo "./tasks _smoke_message_endpoints"
-      ;;
-  _smoke_message_endpoints)
-      npm install axios
-      node infra-tests/test_message_upload.js
-      node infra-tests/test_message_update.js
+  test_docker_local)
+      configure_local_envs
+      get_latest_commit_hash
+      dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
   tf)
       check_env
@@ -202,8 +265,8 @@ case "${command}" in
   _wait_ecs)
       aws ecs wait services-stable \
         --region $AWS_DEFAULT_REGION \
-        --cluster $NHS_ENVIRONMENT-deductions-core-ecs-cluster \
-        --services $NHS_ENVIRONMENT-ehr-repo-service
+        --cluster $NHS_ENVIRONMENT-deductions-private-ecs-cluster \
+        --service $NHS_ENVIRONMENT-${NHS_SERVICE}-service
       ;;
   wait_ecs)
       check_env

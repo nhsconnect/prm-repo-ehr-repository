@@ -5,11 +5,6 @@
 
 DB_CONNECTION_TIMEOUT=30
 
-if [ -z "${NHS_ENVIRONMENT}" ]; then
-  echo "NHS_ENVIRONMENT must be set."
-  exit 4
-fi
-
 if [ "${EHR_REPO_SKIP_MIGRATION}" == "true" ]; then
   echo "EHR_REPO_SKIP_MIGRATION is set to true. Skipping DB migration"
 else
@@ -30,7 +25,7 @@ else
     --username="${DATABASE_USER}" $DATABASE_NAME || true
   set -e
   echo "Migrating DB, will not migrate parts that have already been migrated (meta)" && \
-  sequelize-cli db:migrate
+  npx sequelize-cli db:migrate
   echo "DB migration completed."
 fi
 

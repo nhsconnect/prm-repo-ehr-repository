@@ -30,10 +30,7 @@ COPY .sequelizerc   /app/
 # Migration script
 COPY scripts/migrate-db.sh /usr/bin/run-ehr-server
 
-# This should be done to avoid any platform dependent packages
-RUN npm install && npm audit --fix
-RUN npm install -g sequelize-cli
-
+RUN npm install
 
 EXPOSE 3000
 

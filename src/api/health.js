@@ -13,10 +13,10 @@ router.get('/', (req, res, next) => {
         status.details.database.writable &&
         status.details.filestore.available
       ) {
-        res.status(200).send(status);
+        res.status(200).json(status);
       } else {
         updateLogEvent(status);
-        res.status(503).send(status);
+        res.status(503).json(status);
       }
     })
     .catch(err => {
