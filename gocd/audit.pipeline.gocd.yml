@@ -1,0 +1,26 @@
+format_version: 4
+pipelines:
+  'prm-deductions-ehr-repository.audit':
+    group: deductions-audit
+    label_template: '${git[:8]}'
+    materials:
+      git:
+        type: configrepo
+        blacklist:
+          - docs/**/*.*
+    timer:
+      spec: 0 0 8 ? * MON,TUE,WED,THU,FRI *
+    stages:
+      - audit:
+          clean_workspace: true
+          approval: manual
+          jobs:
+            dependency_check:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dep
