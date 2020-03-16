@@ -12,10 +12,6 @@ describe('HealthRecordManifest integration', () => {
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     sequelize.close();
   });

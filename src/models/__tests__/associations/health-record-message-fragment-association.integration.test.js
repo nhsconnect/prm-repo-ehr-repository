@@ -23,10 +23,6 @@ describe('HealthRecord - MessageFragment associations', () => {
     uuid.mockImplementation(() => testUUID);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     sequelize.close();
   });

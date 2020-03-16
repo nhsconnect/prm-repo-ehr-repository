@@ -10,10 +10,6 @@ describe('MessageFragment integration', () => {
   const expectedMessageId = '8c0f741e-82fa-46f1-9686-23a1c08657f1';
   const expectedHealthRecordId = '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4';
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     sequelize.close();
   });

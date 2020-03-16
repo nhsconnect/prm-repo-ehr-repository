@@ -19,8 +19,6 @@ describe('app', () => {
     ModelFactory.sequelize.close();
   });
 
-  afterEach(() => jest.clearAllMocks());
-
   describe('POST /health-record/{conversationId}/message', () => {
     const TEST_ENDPOINT = `/health-record/${conversationId}/message`;
 

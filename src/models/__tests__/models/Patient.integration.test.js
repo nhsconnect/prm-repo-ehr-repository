@@ -8,10 +8,6 @@ describe('Patient integration', () => {
   const existingNhsNumber = '1111111111';
   const existingUUID = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     sequelize.close();
   });

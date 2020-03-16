@@ -1,5 +1,5 @@
-import ModelFactory from '../../index';
 import uuid from 'uuid/v4';
+import ModelFactory from '../../index';
 
 jest.mock('uuid/v4');
 
@@ -14,10 +14,6 @@ describe('HealthRecordManifest', () => {
 
   beforeEach(() => {
     uuid.mockImplementation(() => testUUID);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   afterAll(() => {

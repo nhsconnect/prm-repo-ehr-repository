@@ -1,6 +1,6 @@
-import { createAndLinkEntries } from '../persist-health-record';
 import { updateLogEvent, updateLogEventWithError } from '../../../middleware/logging';
 import ModelFactory from '../../../models';
+import { createAndLinkEntries } from '../persist-health-record';
 
 jest.mock('../../../middleware/logging');
 
@@ -16,7 +16,6 @@ describe('persistHealthRecord', () => {
   const messageId = 'df13fc7b-89f7-4f80-b31c-b9720ac40296';
   const manifest = ['df13fc7b-89f7-4f80-b31c-b9720ac40296', '636c1aae-0fe5-4f46-9e99-a7d46ec55ef9'];
 
-  afterEach(() => jest.clearAllMocks());
   afterAll(() => sequelize.close());
 
   it('should call updateLogEvent if data persisted correctly', () => {

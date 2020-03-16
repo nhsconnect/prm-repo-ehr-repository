@@ -42,8 +42,6 @@ describe('S3Service', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
-
       S3.mockImplementation(() => ({
         putObject: mockPutObject,
         headBucket: mockHeadBucket
