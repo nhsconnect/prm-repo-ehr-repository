@@ -6,7 +6,7 @@ import ModelFactory from '../models';
 
 jest.mock('../middleware/logging');
 
-describe('POST /health-record/:conversationId/message', () => {
+describe('POST /health-record/:conversationId/new/message', () => {
   afterAll(() => {
     ModelFactory.sequelize.close();
   });
@@ -16,7 +16,7 @@ describe('POST /health-record/:conversationId/message', () => {
     const messageId = uuid();
 
     request(app)
-      .post(`/health-record/${conversationId}/message`)
+      .post(`/health-record/${conversationId}/new/message`)
       .send({ messageId })
       .expect(res => {
         expect(res.text).toContain(

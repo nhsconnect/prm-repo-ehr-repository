@@ -6,9 +6,6 @@ import { persistHealthRecord } from '../services/database';
 import { getSignedUrl } from '../services/storage';
 
 const router = express.Router();
-
-const createMessageValidationRules = [body('messageId').notEmpty()];
-
 const createNewMessageValidationRules = [
   param('conversationId')
     .isUUID('4')
@@ -34,24 +31,6 @@ const createNewMessageValidationRules = [
 ];
 
 const updateMessageValidationRules = [body('transferComplete').notEmpty()];
-
-// TODO: Remove after changes made to GP2GP Adapter
-router.post(
-  '/:conversationId/message',
-  createMessageValidationRules,
-  validate,
-  (req, res, next) => {
-    getSignedUrl(req.params.conversationId, req.body.messageId)
-      .then(url => {
-        updateLogEvent({ status: 'Retrieved presigned url successfully' });
-        res.status(201).send(url);
-      })
-      .catch(err => {
-        updateLogEventWithError(err);
-        next(err);
-      });
-  }
-);
 
 router.post(
   '/:conversationId/new/message',

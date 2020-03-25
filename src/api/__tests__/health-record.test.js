@@ -24,8 +24,8 @@ describe('health-record', () => {
     ModelFactory.sequelize.close();
   });
 
-  describe('POST /health-record/{conversationId}/message', () => {
-    const testEndpoint = `/health-record/${conversationId}/message`;
+  describe('POST /health-record/{conversationId}/new/message', () => {
+    const testEndpoint = `/health-record/${conversationId}/new/message`;
 
     describe('success', () => {
       it('should return 201', done => {
@@ -86,7 +86,7 @@ describe('health-record', () => {
           .send()
           .expect(res => {
             expect(res.body).toEqual({
-              errors: expect.arrayContaining([{ messageId: 'Invalid value' }])
+              errors: expect.arrayContaining([{ messageId: "'messageId' is a required field" }])
             });
           })
           .end(done);
