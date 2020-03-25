@@ -36,9 +36,9 @@ data "aws_ssm_parameter" "deductions_core_private_subnets" {
   name = "/nhs/${var.environment}/deductions_core_private_subnets"
 }
 
-data "aws_ssm_parameter" "deductions_core_ehr_repo_public_alb_tg_arn" {
-  name = "/nhs/${var.environment}/deductions_core_ehr_repo_alb_tg_arn"
-}
+# data "aws_ssm_parameter" "deductions_core_ehr_repo_public_alb_tg_arn" {
+#   name = "/nhs/${var.environment}/deductions_core_ehr_repo_alb_tg_arn"
+# }
 
 data "aws_ssm_parameter" "deductions_core_ehr_repo_internal_alb_tg_arn" {
   name = "/nhs/${var.environment}/deductions_core_ehr_repo_internal_alb_tg_arn"
