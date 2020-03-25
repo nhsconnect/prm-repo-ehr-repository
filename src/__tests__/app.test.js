@@ -5,6 +5,10 @@ import { getHealthCheck } from '../services/get-health-check';
 
 jest.mock('../middleware/logging');
 
+jest.mock('../services/database/persist-health-record', () => ({
+  persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
+}));
+
 jest.mock('../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
@@ -12,8 +16,8 @@ jest.mock('../services/storage/get-signed-url', () =>
 jest.mock('../services/get-health-check');
 
 describe('app', () => {
-  const conversationId = 'de6d511c-f7d5-4ba5-8584-07fe1c1463da';
-  const messageId = 'fdfc5cee-8a9f-44e2-835d-8a786e04d16b';
+  const conversationId = 'db4b773d-f171-4a5f-a23b-6a387f8792b7';
+  const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
 
   afterAll(() => {
     ModelFactory.sequelize.close();
