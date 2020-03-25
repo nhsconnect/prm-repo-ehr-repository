@@ -40,9 +40,9 @@ data "aws_ssm_parameter" "deductions_core_ehr_repo_internal_alb_tg_arn" {
   name = "/nhs/${var.environment}/deductions_core_ehr_repo_internal_alb_tg_arn"
 }
 
-data "aws_ssm_parameter" "deductions_core_alb_dns" {
-  name = "/nhs/${var.environment}/deductions_core_alb_dns"
-}
+# data "aws_ssm_parameter" "deductions_core_alb_dns" {
+#   name = "/nhs/${var.environment}/deductions_core_alb_dns"
+# }
 
 data "aws_ssm_parameter" "deductions_core_internal_alb_dns" {
   name = "/nhs/${var.environment}/deductions_core_internal_alb_dns"
