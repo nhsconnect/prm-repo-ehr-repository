@@ -37,6 +37,7 @@ function configure_service_url {
 }
 
 function configure_local_envs {
+  export AUTHORIZATION_KEYS=auth-key-1,auth-key-2
   export DATABASE_NAME=deductions_test
   export DATABASE_USER=deductions_user
   export DATABASE_PASSWORD=secret
@@ -205,6 +206,7 @@ case "${command}" in
       npm run test:functional
       ;;
   test_functional)
+      configure_aws_service_auth_keys
       configure_service_url
       dojo "./tasks _test_functional"
       ;;

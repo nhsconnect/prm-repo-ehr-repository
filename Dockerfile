@@ -9,7 +9,8 @@ COPY ./certs/deductions.crt /usr/local/share/ca-certificates/deductions.crt
 RUN update-ca-certificates
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/deductions.crt
 
-ENV EHR_REPO_SKIP_MIGRATION=false \
+ENV AUTHORIZATION_KEYS="auth-key-1,auth-key-2" \
+  EHR_REPO_SKIP_MIGRATION=false \
   NODE_ENV="prod" \
   NHS_ENVIRONMENT="" \
   S3_BUCKET_NAME="" \

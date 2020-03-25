@@ -9,6 +9,7 @@ services:
       - db:db
       - localstack:localstack
     environment:
+      - AUTHORIZATION_KEYS=auth-key-1,auth-key-2
       - EHR_REPO_SKIP_MIGRATION=false
       - S3_BUCKET_NAME=test-bucket
       - DATABASE_USER=deductions_user
