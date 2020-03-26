@@ -5,6 +5,7 @@ import config from '../config';
 import ModelFactory from '../models';
 
 jest.mock('../middleware/logging');
+jest.mock('../middleware/auth');
 
 describe('POST /health-record/:conversationId/new/message', () => {
   afterAll(() => {

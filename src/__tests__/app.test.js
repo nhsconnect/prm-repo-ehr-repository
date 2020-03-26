@@ -13,6 +13,7 @@ jest.mock('../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 
+jest.mock('../middleware/auth');
 jest.mock('../services/get-health-check');
 
 describe('app', () => {

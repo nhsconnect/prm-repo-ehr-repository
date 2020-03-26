@@ -4,6 +4,7 @@ import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
 import { validate } from '../middleware/validation';
 import { persistHealthRecord } from '../services/database';
 import { getSignedUrl } from '../services/storage';
+import { authenticateRequest } from '../middleware/auth';
 
 const router = express.Router();
 const createNewMessageValidationRules = [
@@ -34,6 +35,7 @@ const updateMessageValidationRules = [body('transferComplete').notEmpty()];
 
 router.post(
   '/:conversationId/new/message',
+  authenticateRequest,
   createNewMessageValidationRules,
   validate,
   (req, res, next) => {

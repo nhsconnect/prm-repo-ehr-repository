@@ -5,7 +5,7 @@ import { persistHealthRecord } from '../../services/database';
 import { getSignedUrl } from '../../services/storage';
 
 jest.mock('../../middleware/logging');
-
+jest.mock('../../middleware/auth');
 jest.mock('../../services/database/persist-health-record', () => ({
   persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
 }));
