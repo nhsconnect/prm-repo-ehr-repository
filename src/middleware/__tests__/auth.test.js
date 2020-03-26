@@ -2,6 +2,12 @@ import request from 'supertest';
 import app from '../../app';
 
 jest.mock('../logging');
+jest.mock('../../services/database/persist-health-record', () => ({
+  persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
+}));
+jest.mock('../../services/storage/get-signed-url', () =>
+  jest.fn().mockReturnValue(Promise.resolve('some-url'))
+);
 
 const conversationId = 'db4b773d-f171-4a5f-a23b-6a387f8792b7';
 const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
@@ -20,19 +26,19 @@ describe('auth', () => {
   });
 
   describe('authenticated successfully', () => {
-    it('should return HTTP 503 when correctly authenticated', done => {
+    it('should return HTTP 201 when correctly authenticated', done => {
       request(app)
         .post(`/health-record/${conversationId}/new/message`)
         .send({
           messageId
         })
         .set('Authorization', 'correct-key')
-        .expect(503)
+        .expect(201)
         .end(done);
     });
   });
 
-  describe('AUTHORIZATION_KEYS environment variables not provides', () => {
+  describe('AUTHORIZATION_KEYS environment variables not provided', () => {
     beforeEach(() => {
       if (process.env.AUTHORIZATION_KEYS) {
         delete process.env.AUTHORIZATION_KEYS;
