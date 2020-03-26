@@ -132,7 +132,7 @@ describe('auth', () => {
     });
   });
 
-  describe('should only authenticate string auth key', () => {
+  describe('should only authenticate with exact value of the auth key', () => {
     it('should return HTTP 403 when authorization key is incorrect', done => {
       request(app)
         .post(`/health-record/${conversationId}/new/message`)
@@ -144,7 +144,7 @@ describe('auth', () => {
         .end(done);
     });
 
-    it('should return HTTP 403 when authorization key ', done => {
+    it('should return HTTP 403 when authorization key is partial string', done => {
       process.env.AUTHORIZATION_KEYS = 'correct-key,other-key';
       request(app)
         .post(`/health-record/${conversationId}/new/message`)
@@ -156,7 +156,7 @@ describe('auth', () => {
         .end(done);
     });
 
-    it('should return HTTP 403 when authorization key ', done => {
+    it('should return HTTP 201 when authorization keys have a comma but are one string ', done => {
       process.env.AUTHORIZATION_KEYS = 'correct-key,other-key';
       request(app)
         .post(`/health-record/${conversationId}/new/message`)

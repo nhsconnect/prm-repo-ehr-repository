@@ -59,6 +59,7 @@ router.post(
 
 router.patch(
   '/:conversationId/message/:messageId',
+  authenticateRequest,
   updateMessageValidationRules,
   validate,
   (req, res) => {
