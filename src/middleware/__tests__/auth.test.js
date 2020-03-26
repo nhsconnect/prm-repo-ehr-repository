@@ -16,7 +16,7 @@ const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
 // jest.mock('../auth') will call the manual mock in __mocks__ automatically
 describe('auth', () => {
   beforeEach(() => {
-    process.env.AUTHORIZATION_KEYS = 'correct-key,other-key';
+    process.env.AUTHORIZATION_KEYS = 'correct-key';
   });
 
   afterEach(() => {
@@ -128,6 +128,43 @@ describe('auth', () => {
             })
           );
         })
+        .end(done);
+    });
+  });
+
+  describe('should only authenticate string auth key', () => {
+    it('should return HTTP 403 when authorization key is incorrect', done => {
+      request(app)
+        .post(`/health-record/${conversationId}/new/message`)
+        .send({
+          messageId
+        })
+        .set('Authorization', 'co')
+        .expect(403)
+        .end(done);
+    });
+
+    it('should return HTTP 403 when authorization key ', done => {
+      process.env.AUTHORIZATION_KEYS = 'correct-key,other-key';
+      request(app)
+        .post(`/health-record/${conversationId}/new/message`)
+        .send({
+          messageId
+        })
+        .set('Authorization', 'correct-key')
+        .expect(403)
+        .end(done);
+    });
+
+    it('should return HTTP 403 when authorization key ', done => {
+      process.env.AUTHORIZATION_KEYS = 'correct-key,other-key';
+      request(app)
+        .post(`/health-record/${conversationId}/new/message`)
+        .send({
+          messageId
+        })
+        .set('Authorization', 'correct-key,other-key')
+        .expect(201)
         .end(done);
     });
   });

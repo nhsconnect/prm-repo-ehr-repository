@@ -16,7 +16,7 @@ export const authenticateRequest = (req, res, next) => {
     return;
   }
 
-  if (!validAuthorizationKeys.includes(authorizationKey)) {
+  if (validAuthorizationKeys !== authorizationKey) {
     res.status(403).json({
       error: `Authorization header is provided but not valid`
     });

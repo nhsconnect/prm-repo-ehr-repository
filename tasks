@@ -37,7 +37,7 @@ function configure_service_url {
 }
 
 function configure_local_envs {
-  export AUTHORIZATION_KEYS=auth-key-1,auth-key-2
+  export AUTHORIZATION_KEYS=auth-key-1
   export DATABASE_NAME=deductions_test
   export DATABASE_USER=deductions_user
   export DATABASE_PASSWORD=secret
