@@ -2,9 +2,6 @@ import request from 'supertest';
 import app from '../../app';
 
 jest.mock('../logging');
-jest.mock('../../services/database/persist-health-record', () => ({
-  persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
-}));
 
 const conversationId = 'db4b773d-f171-4a5f-a23b-6a387f8792b7';
 const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
@@ -23,14 +20,14 @@ describe('auth', () => {
   });
 
   describe('authenticated successfully', () => {
-    it('should return HTTP 201 when correctly authenticated', done => {
+    it('should return HTTP 503 when correctly authenticated', done => {
       request(app)
         .post(`/health-record/${conversationId}/new/message`)
         .send({
           messageId
         })
         .set('Authorization', 'correct-key')
-        .expect(201)
+        .expect(503)
         .end(done);
     });
   });

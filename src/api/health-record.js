@@ -38,7 +38,7 @@ router.post(
   authenticateRequest,
   createNewMessageValidationRules,
   validate,
-  (req, res, next) => {
+  (req, res) => {
     persistHealthRecord(
       req.body.nhsNumber,
       req.params.conversationId,
@@ -52,7 +52,7 @@ router.post(
       })
       .catch(err => {
         updateLogEventWithError(err);
-        next(err);
+        res.status(503).send({ error: err.message });
       });
   }
 );
