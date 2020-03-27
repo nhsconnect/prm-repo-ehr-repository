@@ -14,25 +14,25 @@ jest.mock('../../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 
-describe('health-record', () => {
+describe('fragments', () => {
   const nhsNumber = '0123456789';
   const conversationId = 'db4b773d-f171-4a5f-a23b-6a387f8792b7';
   const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
   const manifest = ['0809570a-3ae2-409c-a924-60766b39550f', '88148835-2708-4914-a1d2-39c84560a937'];
+  const testEndpoint = `/fragments`;
 
   afterAll(() => {
     ModelFactory.sequelize.close();
   });
 
-  describe('POST /health-record/{conversationId}/new/message', () => {
-    const testEndpoint = `/health-record/${conversationId}/new/message`;
-
-    describe('success', () => {
+  describe('POST /fragments', () => {
+    describe('Success', () => {
       it('should return 201', done => {
         request(app)
           .post(testEndpoint)
           .send({
-            messageId
+            messageId,
+            conversationId
           })
           .expect(201)
           .end(done);
@@ -42,7 +42,8 @@ describe('health-record', () => {
         request(app)
           .post(testEndpoint)
           .send({
-            messageId
+            messageId,
+            conversationId
           })
           .expect(() => {
             expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId);
@@ -54,7 +55,8 @@ describe('health-record', () => {
         request(app)
           .post(testEndpoint)
           .send({
-            messageId
+            messageId,
+            conversationId
           })
           .expect(res => {
             expect(res.text).toEqual('some-url');
@@ -94,16 +96,15 @@ describe('health-record', () => {
     });
   });
 
-  describe('POST /health-record/{conversationId}/new/message', () => {
-    const testEndpoint = `/health-record/${conversationId}/new/message`;
-
+  describe('POST /fragments', () => {
     describe('success', () => {
       it('should return 201', done => {
         request(app)
           .post(testEndpoint)
           .send({
             nhsNumber,
-            messageId
+            messageId,
+            conversationId
           })
           .expect(201)
           .end(done);
@@ -114,7 +115,8 @@ describe('health-record', () => {
           .post(testEndpoint)
           .send({
             nhsNumber,
-            messageId
+            messageId,
+            conversationId
           })
           .expect(() => {
             expect(persistHealthRecord).toHaveBeenCalledTimes(1);
@@ -134,6 +136,7 @@ describe('health-record', () => {
           .send({
             nhsNumber,
             messageId,
+            conversationId,
             manifest
           })
           .expect(() => {
@@ -153,7 +156,8 @@ describe('health-record', () => {
           .post(testEndpoint)
           .send({
             nhsNumber,
-            messageId
+            messageId,
+            conversationId
           })
           .expect(() => {
             expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId);
@@ -166,7 +170,8 @@ describe('health-record', () => {
           .post(testEndpoint)
           .send({
             nhsNumber,
-            messageId
+            messageId,
+            conversationId
           })
           .expect(res => {
             expect(res.text).toEqual('some-url');
@@ -226,7 +231,8 @@ describe('health-record', () => {
           .send({
             nhsNumber: 'abcdefghij',
             messageId,
-            manifest
+            manifest,
+            conversationId
           })
           .expect(422)
           .end(done);
@@ -238,6 +244,7 @@ describe('health-record', () => {
           .send({
             nhsNumber: 'abcdefghij',
             messageId,
+            conversationId,
             manifest
           })
           .expect(res => {
@@ -254,6 +261,7 @@ describe('health-record', () => {
           .send({
             nhsNumber: '123456789',
             messageId,
+            conversationId,
             manifest
           })
           .expect(res => {
@@ -270,10 +278,11 @@ describe('health-record', () => {
     describe('validation from conversationId', () => {
       it('should return 422 when the conversationId is not UUID', done => {
         request(app)
-          .post(`/health-record/123/new/message`)
+          .post(testEndpoint)
           .send({
             nhsNumber,
             messageId,
+            conversationId: '123',
             manifest
           })
           .expect(422)
@@ -282,10 +291,11 @@ describe('health-record', () => {
 
       it('should throw an error when the conversationId is not UUID', done => {
         request(app)
-          .post(`/health-record/123/new/message`)
+          .post(testEndpoint)
           .send({
             nhsNumber,
             messageId,
+            conversationId: '123',
             manifest
           })
           .expect(res => {
@@ -306,6 +316,7 @@ describe('health-record', () => {
           .send({
             nhsNumber,
             messageId,
+            conversationId,
             manifest: 'manifest'
           })
           .expect(422)
@@ -318,6 +329,7 @@ describe('health-record', () => {
           .send({
             nhsNumber,
             messageId,
+            conversationId,
             manifest: 'manifest'
           })
           .expect(res => {
@@ -332,8 +344,8 @@ describe('health-record', () => {
     });
   });
 
-  describe('PATCH /health-record/{conversationId}/message/{messageId}', () => {
-    const testEndpoint = `/health-record/${conversationId}/message/${messageId}`;
+  describe('PATCH /fragments', () => {
+    const testEndpoint = `/fragments`;
 
     describe('success', () => {
       it('should return 204', done => {

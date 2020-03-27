@@ -28,9 +28,10 @@ describe('auth', () => {
   describe('authenticated successfully', () => {
     it('should return HTTP 201 when correctly authenticated', done => {
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .set('Authorization', 'correct-key')
         .expect(201)
@@ -47,9 +48,10 @@ describe('auth', () => {
 
     it('should return 412 if AUTHORIZATION_KEYS have not been set', done => {
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .set('Authorization', 'correct-key')
         .expect(412)
@@ -58,9 +60,10 @@ describe('auth', () => {
 
     it('should return an explicit error message in the body if AUTHORIZATION_KEYS have not been set', done => {
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .set('Authorization', 'correct-key')
         .expect(res => {
@@ -77,9 +80,10 @@ describe('auth', () => {
   describe('Authorization header not provided', () => {
     it('should return HTTP 401 when no authorization header provided', done => {
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .expect(401)
         .end(done);
@@ -87,14 +91,15 @@ describe('auth', () => {
 
     it('should return an explicit error message in the body when no authorization header provided', done => {
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .expect(res => {
           expect(res.body).toEqual(
             expect.objectContaining({
-              error: 'The request (/health-record) requires a valid Authorization header to be set'
+              error: 'The request (/fragments) requires a valid Authorization header to be set'
             })
           );
         })
@@ -105,9 +110,10 @@ describe('auth', () => {
   describe('incorrect Authorisation header value provided ', () => {
     it('should return HTTP 403 when authorization key is incorrect', done => {
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .set('Authorization', 'incorrect-key')
         .expect(403)
@@ -116,9 +122,10 @@ describe('auth', () => {
 
     it('should return an explicit error message in the body when authorization key is incorrect', done => {
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .set('Authorization', 'incorrect-key')
         .expect(res => {
@@ -135,9 +142,10 @@ describe('auth', () => {
   describe('should only authenticate with exact value of the auth key', () => {
     it('should return HTTP 403 when authorization key is incorrect', done => {
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .set('Authorization', 'co')
         .expect(403)
@@ -147,9 +155,10 @@ describe('auth', () => {
     it('should return HTTP 403 when authorization key is partial string', done => {
       process.env.AUTHORIZATION_KEYS = 'correct-key,other-key';
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .set('Authorization', 'correct-key')
         .expect(403)
@@ -159,9 +168,10 @@ describe('auth', () => {
     it('should return HTTP 201 when authorization keys have a comma but are one string ', done => {
       process.env.AUTHORIZATION_KEYS = 'correct-key,other-key';
       request(app)
-        .post(`/health-record/${conversationId}/new/message`)
+        .post(`/fragments`)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .set('Authorization', 'correct-key,other-key')
         .expect(201)

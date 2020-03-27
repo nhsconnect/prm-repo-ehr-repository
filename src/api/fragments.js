@@ -1,5 +1,5 @@
 import express from 'express';
-import { body, param } from 'express-validator';
+import { body } from 'express-validator';
 import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
 import { validate } from '../middleware/validation';
 import { persistHealthRecord } from '../services/database';
@@ -8,7 +8,7 @@ import { authenticateRequest } from '../middleware/auth';
 
 const router = express.Router();
 const createNewMessageValidationRules = [
-  param('conversationId')
+  body('conversationId')
     .isUUID('4')
     .withMessage("'conversationId' provided is not of type UUIDv4"),
   body('nhsNumber')
@@ -33,38 +33,26 @@ const createNewMessageValidationRules = [
 
 const updateMessageValidationRules = [body('transferComplete').notEmpty()];
 
-router.post(
-  '/:conversationId/new/message',
-  authenticateRequest,
-  createNewMessageValidationRules,
-  validate,
-  (req, res) => {
-    persistHealthRecord(
-      req.body.nhsNumber,
-      req.params.conversationId,
-      req.body.messageId,
-      req.body.manifest ? req.body.manifest : null
-    )
-      .then(() => getSignedUrl(req.params.conversationId, req.body.messageId))
-      .then(url => {
-        updateLogEvent({ status: 'Retrieved presigned url successfully' });
-        res.status(201).send(url);
-      })
-      .catch(err => {
-        updateLogEventWithError(err);
-        res.status(503).send({ error: err.message });
-      });
-  }
-);
+router.post('/', authenticateRequest, createNewMessageValidationRules, validate, (req, res) => {
+  persistHealthRecord(
+    req.body.nhsNumber,
+    req.body.conversationId,
+    req.body.messageId,
+    req.body.manifest ? req.body.manifest : null
+  )
+    .then(() => getSignedUrl(req.body.conversationId, req.body.messageId))
+    .then(url => {
+      updateLogEvent({ status: 'Retrieved presigned url successfully' });
+      res.status(201).send(url);
+    })
+    .catch(err => {
+      updateLogEventWithError(err);
+      res.status(503).send({ error: err.message });
+    });
+});
 
-router.patch(
-  '/:conversationId/message/:messageId',
-  authenticateRequest,
-  updateMessageValidationRules,
-  validate,
-  (req, res) => {
-    res.sendStatus(204);
-  }
-);
+router.patch('/', authenticateRequest, updateMessageValidationRules, validate, (req, res) => {
+  res.sendStatus(204);
+});
 
 export default router;

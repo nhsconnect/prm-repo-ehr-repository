@@ -7,18 +7,20 @@ import ModelFactory from '../models';
 jest.mock('../middleware/logging');
 jest.mock('../middleware/auth');
 
-describe('POST /health-record/:conversationId/new/message', () => {
+describe('POST /fragments', () => {
+  const TEST_ENDPOINT = `/fragments`;
+  const conversationId = uuid();
+  const messageId = uuid();
+  const nhsNumber = '1234567890';
+
   afterAll(() => {
     ModelFactory.sequelize.close();
   });
 
   it('should return presigned url', done => {
-    const conversationId = uuid();
-    const messageId = uuid();
-
     request(app)
-      .post(`/health-record/${conversationId}/new/message`)
-      .send({ messageId })
+      .post(TEST_ENDPOINT)
+      .send({ conversationId, messageId })
       .expect(res => {
         expect(res.text).toContain(
           `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
@@ -27,20 +29,15 @@ describe('POST /health-record/:conversationId/new/message', () => {
       .end(done);
   });
 
-  describe('POST /health-record/{conversationId}/new/message', () => {
-    const testUUID = '04d71080-e9da-4b3d-8f6f-0bfea8786187';
-    const TEST_ENDPOINT = `/health-record/${testUUID}/new/message`;
-    const nhsNumber = '1234567890';
-
-    it('should return 201', done => {
-      request(app)
-        .post(TEST_ENDPOINT)
-        .send({
-          nhsNumber,
-          messageId: testUUID
-        })
-        .expect(201)
-        .end(done);
-    });
+  it('should return 201', done => {
+    request(app)
+      .post(TEST_ENDPOINT)
+      .send({
+        nhsNumber,
+        messageId,
+        conversationId
+      })
+      .expect(201)
+      .end(done);
   });
 });

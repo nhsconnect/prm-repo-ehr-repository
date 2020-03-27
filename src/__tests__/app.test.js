@@ -24,23 +24,23 @@ describe('app', () => {
     ModelFactory.sequelize.close();
   });
 
-  describe('POST /health-record/{conversationId}/new/message', () => {
-    const TEST_ENDPOINT = `/health-record/${conversationId}/new/message`;
+  describe('POST /fragments', () => {
+    const TEST_ENDPOINT = `/fragments`;
 
     it('should return 201', done => {
       request(app)
         .post(TEST_ENDPOINT)
         .send({
-          messageId
+          messageId,
+          conversationId
         })
         .expect(201)
         .end(done);
     });
   });
 
-  describe('PATCH /health-record/{conversationId}/message/{messageId}', () => {
-    const TEST_ENDPOINT = `/health-record/${conversationId}/message/${messageId}`;
-
+  describe('PATCH /fragments', () => {
+    const TEST_ENDPOINT = `/fragments`;
     it('should return 204', done => {
       request(app)
         .patch(TEST_ENDPOINT)
