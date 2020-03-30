@@ -1,13 +1,9 @@
-import express from 'express';
 import { body } from 'express-validator';
-import { updateLogEvent, updateLogEventWithError } from '../middleware/logging';
-import { validate } from '../middleware/validation';
-import { persistHealthRecord } from '../services/database';
-import { getSignedUrl } from '../services/storage';
-import { authenticateRequest } from '../middleware/auth';
+import { updateLogEvent, updateLogEventWithError } from '../../middleware/logging';
+import { persistHealthRecord } from '../../services/database';
+import { getSignedUrl } from '../../services/storage';
 
-const router = express.Router();
-const createNewMessageValidationRules = [
+export const createNewMessageValidationRules = [
   body('conversationId')
     .isUUID('4')
     .withMessage("'conversationId' provided is not of type UUIDv4"),
@@ -31,9 +27,7 @@ const createNewMessageValidationRules = [
     .withMessage("'manifest' provided is not of type Array")
 ];
 
-const updateMessageValidationRules = [body('transferComplete').notEmpty()];
-
-router.post('/', authenticateRequest, createNewMessageValidationRules, validate, (req, res) => {
+export const createMessage = (req, res) => {
   persistHealthRecord(
     req.body.nhsNumber,
     req.body.conversationId,
@@ -49,10 +43,4 @@ router.post('/', authenticateRequest, createNewMessageValidationRules, validate,
       updateLogEventWithError(err);
       res.status(503).send({ error: err.message });
     });
-});
-
-router.patch('/', authenticateRequest, updateMessageValidationRules, validate, (req, res) => {
-  res.sendStatus(204);
-});
-
-export default router;
+};

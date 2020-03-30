@@ -4,7 +4,7 @@ import { errorLogger, logger as requestLogger } from 'express-winston';
 import swaggerUi from 'swagger-ui-express';
 import errorEndpoint from './api/error';
 import health from './api/health';
-import fragments from './api/fragments';
+import { fragments } from './api/fragments';
 import { options } from './config/logging';
 import * as correlationInfo from './middleware/correlation';
 import * as logging from './middleware/logging';
