@@ -1,13 +1,15 @@
 import request from 'supertest';
 import app from '../../../app';
 import ModelFactory from '../../../models';
+import { updateLogEventWithError } from '../../../middleware/logging';
 import { persistHealthRecord } from '../../../services/database';
 import { getSignedUrl } from '../../../services/storage';
 
 jest.mock('../../../middleware/logging');
+jest.mock('../../../config/logging');
 jest.mock('../../../middleware/auth');
 jest.mock('../../../services/database/persist-health-record', () => ({
-  persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
+  persistHealthRecord: jest.fn()
 }));
 jest.mock('../../../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
@@ -19,6 +21,7 @@ describe('Create new message fragments', () => {
   const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
   const manifest = ['0809570a-3ae2-409c-a924-60766b39550f', '88148835-2708-4914-a1d2-39c84560a937'];
   const testEndpoint = `/fragments`;
+  persistHealthRecord.mockResolvedValue('Persisted');
 
   afterAll(() => {
     ModelFactory.sequelize.close();
@@ -46,6 +49,34 @@ describe('Create new message fragments', () => {
           })
           .expect(res => {
             expect(res.text).toEqual('some-url');
+          })
+          .end(done);
+      });
+    });
+
+    describe('error', () => {
+      it('should return 503 when there is an error', done => {
+        persistHealthRecord.mockRejectedValueOnce(Error('some-error'));
+        request(app)
+          .post(testEndpoint)
+          .send({
+            messageId,
+            conversationId
+          })
+          .expect(503)
+          .end(done);
+      });
+      it('should return error message when there is an error', done => {
+        persistHealthRecord.mockRejectedValueOnce(Error('some-error'));
+        request(app)
+          .post(testEndpoint)
+          .send({
+            messageId,
+            conversationId
+          })
+          .expect(res => {
+            expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
+            expect(res.body).toEqual({ error: 'some-error' });
           })
           .end(done);
       });
