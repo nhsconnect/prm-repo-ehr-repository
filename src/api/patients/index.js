@@ -3,6 +3,7 @@ import { authenticateRequest } from '../../middleware/auth';
 import { validate } from '../../middleware/validation';
 import { patientDetails } from './patient-details';
 import { patientHealthRecords, patientHealthRecordsValidation } from './patient-health-records';
+import { patientFragments, patientFragmentsValidation } from './patient-fragments';
 
 const patients = express.Router();
 
@@ -13,6 +14,13 @@ patients.get(
   patientHealthRecordsValidation,
   validate,
   patientHealthRecords
+);
+patients.get(
+  '/:nhsNumber/health-records/fragments',
+  authenticateRequest,
+  patientFragmentsValidation,
+  validate,
+  patientFragments
 );
 
 export { patients };
