@@ -47,7 +47,7 @@
         }
       }
     },
-    "/health-record/{conversationId}/new/message": {
+    "/fragments": {
       "post": {
         "tags": [],
         "summary": "Generate S3 upload URL",
@@ -56,16 +56,8 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "conversationId",
-            "description": "The conversation ID from the EHR messages",
-            "required": true,
-            "type": "string"
-          },
-          {
             "in": "body",
             "name": "body",
-            "description": "The message ID from the EHR message fragments",
             "schema": {
               "$ref": "#/definitions/UploadUrlRequest"
             }
@@ -93,10 +85,8 @@
             "api_key": []
           }
         ]
-      }
-    },
-    "/health-record/{conversationId}/message/{messageId}": {
-      "put": {
+      },
+      "patch": {
         "tags": [],
         "summary": "Mark message as transfer complete",
         "consumes": [
@@ -104,31 +94,119 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "conversationId",
-            "description": "The conversation ID from the EHR messages",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "messageId",
-            "description": "The message ID from the EHR messages",
-            "required": true,
-            "type": "string"
-          },
-          {
             "in": "body",
             "name": "body",
-            "description": "Indicates if the transfer has completed successfully",
             "schema": {
               "$ref": "#/definitions/UpdateMessageRequest"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Successful update of message transfer status"
+          "201": {
+            "description": "Successful Generation of URL"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/patients": {
+      "get": {
+        "tags": [],
+        "summary": "Patient details",
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/patients/{nhsNumber}/health-records": {
+      "get": {
+        "tags": [],
+        "summary": "Gets health records for a patient",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nhsNumber",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/patients/{nhsNumber}/health-records/fragments": {
+      "get": {
+        "tags": [],
+        "summary": "Gets health record fragments for a patient",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nhsNumber",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful"
           },
           "401": {
             "description": "Authorization header missing"
@@ -163,6 +241,9 @@
       "type": "object",
       "properties": {
         "nhsNumber": {
+          "type": "string"
+        },
+        "conversationId": {
           "type": "string"
         },
         "messageId": {
