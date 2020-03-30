@@ -5,6 +5,7 @@ import swaggerUi from 'swagger-ui-express';
 import errorEndpoint from './api/error';
 import health from './api/health';
 import { fragments } from './api/fragments';
+import { patients } from './api/patients';
 import { options } from './config/logging';
 import * as correlationInfo from './middleware/correlation';
 import * as logging from './middleware/logging';
@@ -21,6 +22,8 @@ app.use(requestLogger(options));
 app.use('/health', logging.middleware, health);
 
 app.use('/fragments', logging.middleware, fragments);
+
+app.use('/patients', logging.middleware, patients);
 
 app.use('/error', logging.middleware, errorEndpoint);
 
