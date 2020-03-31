@@ -3,7 +3,7 @@ locals {
   ecs_tasks_sg_id   = data.aws_ssm_parameter.deductions_core_ecs_tasks_sg_id.value
   private_subnets   = split(",", data.aws_ssm_parameter.deductions_core_private_subnets.value)
   # public_alb_tg_arn = data.aws_ssm_parameter.deductions_core_ehr_repo_public_alb_tg_arn.value
-  internal_alb_tg_arn = data.aws_ssm_parameter.deductions_core_ehr_repo_internal_alb_tg_arn.value
+  internal_alb_tg_arn = aws_alb_target_group.internal-alb-tg.arn
 }
 
 resource "aws_ecs_service" "ecs-service" {
@@ -26,9 +26,18 @@ resource "aws_ecs_service" "ecs-service" {
 
   load_balancer {
     target_group_arn = local.internal_alb_tg_arn
-    container_name   = var.service_container_name
-    container_port   = var.service_container_port
+    container_name   = "${var.component_name}-container"
+    container_port   = var.port
   }
+
+  depends_on = [
+                    # aws_alb_target_group.alb-tg,
+                    aws_alb_target_group.internal-alb-tg,
+                    # aws_alb_listener_rule.alb-http-listener-rule,
+                    aws_alb_listener_rule.int-alb-http-listener-rule,
+                    # aws_alb_listener_rule.alb-https-listener-rule,
+                    aws_alb_listener_rule.int-alb-https-listener-rule
+                    ]
 
   # tags = {
   #   Terraform = "true"
