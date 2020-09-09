@@ -16,7 +16,7 @@
     "test:coverage:local": "npm run db:setup && npm run test:coverage ; npm run db:teardown",
     "build": "babel src -d build --ignore '**/*.test.js' --ignore '**/__mocks__/*' && cp src/*.json build",
     "start": "node build/server.js",
-    "start:local": "npm run db:migrate ; babel-node -r node_modules/dotenv/config src/server.js",
+    "start:local": "npm run db:migrate ; babel-node -r dotenv/config src/server.js",
     "db:wait": "babel-node scripts/wait_for_postgres.js",
     "db:migrate": "npm run db:wait && sequelize-cli db:migrate",
     "db:teardown": "sequelize-cli db:migrate:undo:all",
