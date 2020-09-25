@@ -82,7 +82,7 @@ function tf_plan {
   COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
   IMAGE_TAG=${COMMIT_HASH}
 
-  terraform init -backend-config key=${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate
+  terraform init -reconfigure -backend-config key=${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate
   terraform get # modules
   if [[ "${operation}" == "create" ]]; then
     terraform plan -var task_image_tag=$IMAGE_TAG -var-file=$NHS_ENVIRONMENT.tfvars -out="nhs_deployment.tfplan"
