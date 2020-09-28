@@ -27,9 +27,9 @@ services:
       POSTGRES_DB: deductions_test
       LC_ALL: C
   localstack:
-    image: localstack/localstack:0.11.5
+    image: localstack/localstack:0.10.9
     environment:
-      - SERVICES=s3
+      - SERVICES=s3:4572
       - DEBUG=true
       - PORT_WEB_UI=5555
       - LAMBDA_EXECUTOR=local
@@ -37,7 +37,6 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - S3_BUCKET_NAME=test-bucket
       - LOCALSTACK_URL=http://localstack:4572
-      - EDGE_PORT=4572
     volumes:
       - ./scripts/create-bucket.sh:/docker-entrypoint-initaws.d/create-bucket.sh
       - /var/run/docker.sock:/var/run/docker.sock
