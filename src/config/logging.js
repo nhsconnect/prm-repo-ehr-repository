@@ -5,6 +5,7 @@ import { getCorrelationId } from '../middleware/correlation';
 
 const OBFUSCATED_VALUE = '********';
 const SECRET_KEYS = ['passcode', 'data'];
+const LEVEL = process.env.LOG_LEVEL || 'warn';
 
 export const obfuscateSecrets = format(info => {
   const updated = cloneDeep(info);
@@ -27,7 +28,7 @@ export const options = {
     format.json(),
     obfuscateSecrets()
   ),
-  transports: [new transports.Console({ handleExceptions: true })]
+  transports: [new transports.Console({ level: LEVEL, handleExceptions: true })]
 };
 
 const logger = createLogger(options);
