@@ -56,7 +56,7 @@ function get_aws_account_id {
 function configure_aws_service_auth_keys {
     check_env
     get_aws_account_id
-    parameter_name="/NHS/${NHS_ENVIRONMENT}-${AWS_ACCOUNT_ID}/${NHS_SERVICE}/authorization_keys"
+    parameter_name="/repo/${NHS_ENVIRONMENT}/prm-deductions-component-template/user-input/${NHS_SERVICE}-authorization-keys"
     echo "${parameter_name}"
     export AUTHORIZATION_KEYS=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${parameter_name} | jq -r .Parameter.Value")
 }
@@ -112,7 +112,7 @@ function send_canary_update_message {
 }
 
 function configure_hangout_webhook {
-  export GOOGLE_CHAT_CANARY_WEBHOOK=$(get_aws_ssm_secret "/NHS/GoCD/prod/google-chat-canary-webhook")
+  export GOOGLE_CHAT_CANARY_WEBHOOK=$(get_aws_ssm_secret "/repo/prod/prm-deductions-component-template/user-input/gocd-google-chat-canary-webhook")
   if [ -z "${GOOGLE_CHAT_CANARY_WEBHOOK}" ]; then
     echo "Unable to obtain GOOGLE_CHAT_CANARY_WEBHOOK from AWS"
     exit 5

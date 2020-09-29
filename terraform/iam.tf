@@ -104,10 +104,10 @@ data "aws_iam_policy_document" "ssm_policy_doc" {
     ]
 
     resources = [
-      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/NHS/${var.environment}-${local.account_id}/${var.component_name}/authorization_keys",
-      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/NHS/${var.environment}-${local.account_id}/core/rds_endpoint",
-      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/nhs/${var.environment}/db/db-username",
-      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/nhs/${var.environment}/db/db-password"
+      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/prm-deductions-component-template/user-input/${var.component_name}-authorization-keys",
+      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/prm-deductions-infra/output/core-rds-endpoint",
+      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/prm-deductions-infra/output/db-username",
+      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/prm-deductions-infra/output/db-password"
     ]
   }
 }
