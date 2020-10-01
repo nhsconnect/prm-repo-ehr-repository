@@ -15,9 +15,8 @@ resource "aws_alb_target_group" "internal-alb-tg" {
   }
 
   tags = {
-    Terraform = "true"
     Environment = var.environment
-    Deductions-Component = var.component_name
+    CreatedBy = var.repo_name
   }
 }
 

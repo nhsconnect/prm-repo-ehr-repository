@@ -1,6 +1,7 @@
 environment          = "test"
 component_name       = "ehr-repo"
 dns_name             = "ehr-repo"
+repo_name            = "prm-deductions-ehr-repository"
 
 node_env             = "prod"
 database_name        = "deductions_db"
