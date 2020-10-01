@@ -13,15 +13,15 @@ data "aws_ssm_parameter" "private_zone_id" {
 }
 
 data "aws_ssm_parameter" "authorization_keys" {
-  name = "/repo/${var.environment}/prm-deductions-component-template/user-input/ehr-repo-authorization-keys"
+  name = "/repo/${var.environment}/user-input/ehr-repo-authorization-keys"
 }
 
 data "aws_ssm_parameter" "db-username" {
-  name = "/repo/${var.environment}/prm-deductions-infra/user-input/db-username"
+  name = "/repo/${var.environment}/user-input/db-username"
 }
 
 data "aws_ssm_parameter" "db-password" {
-  name = "/repo/${var.environment}/prm-deductions-infra/user-input/db-password"
+  name = "/repo/${var.environment}/user-input/db-password"
 }
 
 data "aws_ssm_parameter" "rds_endpoint" {
