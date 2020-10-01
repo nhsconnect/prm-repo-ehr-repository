@@ -109,7 +109,7 @@ data "aws_iam_policy_document" "ssm_policy_doc" {
 
     resources = [
       "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/user-input/${var.component_name}-authorization-keys",
-      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/prm-deductions-infra/output/core-rds-endpoint",
+      "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/output/prm-deductions-infra/core-rds-endpoint",
       "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/user-input/db-username",
       "arn:aws:ssm:${var.region}:${local.account_id}:parameter/repo/${var.environment}/user-input/db-password"
     ]
