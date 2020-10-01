@@ -3,6 +3,11 @@ variable "region" {
   default     = "eu-west-2"
 }
 
+variable "repo_name" {
+  type = string
+  default = "prm-deductions-ehr-repository"
+}
+
 variable "node_env" {}
 
 variable "environment" {}
