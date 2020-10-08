@@ -1,8 +1,8 @@
 # Deductions EHR Repository
 
-A Proof of Concept implementation of how the Health Records of Patients that are not registered with a GP Practise could be stored digitally.
+A Proof of Concept implementation of how the Health Records of Patients that are not registered with a GP Practice could be stored digitally.
 
-This is a component of the solution to validate that the GP2GP process can be used to preserve the Health Records of Patients that are deducted(no longer registered with a GP Practise). If successful this would allow their health record to be preserved in a digital format replacing the current practise of printing and storing the record.
+This is a component of the solution to validate that the GP2GP process can be used to preserve the Health Records of Patients that are deducted(no longer registered with a GP Practice). If successful this would allow their health record to be preserved in a digital format replacing the current practice of printing and storing the record.
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ dojo -c Dojofile-itest
 
 npm run test-local
 
-# This is equivilent of:
+# This is equivalent of:
 sequelize-cli db:migrate    # Runs the migration
 sequelize-cli db:seed:all   # Seeds test data
 
@@ -57,6 +57,8 @@ To run them before commit in dojo.
 ```
 
 ## Start the app locally
+
+Run `docker-compose up -d` to spin up all the dependencies.
 
 Run a development server with `npm run start:local`.
 
