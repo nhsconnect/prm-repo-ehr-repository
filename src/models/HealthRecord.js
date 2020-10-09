@@ -29,6 +29,10 @@ const model = dataType => ({
   updated_at: {
     type: dataType.DATE,
     allowNull: false
+  },
+  is_large_message: {
+    type: dataType.BOOLEAN,
+    defaultValue: true
   }
 });
 
