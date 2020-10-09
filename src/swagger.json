@@ -254,6 +254,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "isLargeMessage": {
+          "type": "boolean"
         }
       },
       "required": [

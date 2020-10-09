@@ -21,6 +21,8 @@ describe('Create new message fragments', () => {
   const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
   const manifest = ['0809570a-3ae2-409c-a924-60766b39550f', '88148835-2708-4914-a1d2-39c84560a937'];
   const testEndpoint = `/fragments`;
+  const isLargeMessage = true;
+
   persistHealthRecord.mockResolvedValue('Persisted');
 
   afterAll(() => {
@@ -97,7 +99,8 @@ describe('Create new message fragments', () => {
               nhsNumber,
               conversationId,
               messageId,
-              null
+              null,
+              isLargeMessage
             );
           })
           .end(done);
@@ -118,7 +121,54 @@ describe('Create new message fragments', () => {
               nhsNumber,
               conversationId,
               messageId,
-              manifest
+              manifest,
+              isLargeMessage
+            );
+          })
+          .end(done);
+      });
+
+      it('should call persistHealthRecord with information provided when large message is false', done => {
+        request(app)
+          .post(testEndpoint)
+          .send({
+            nhsNumber,
+            messageId,
+            conversationId,
+            manifest,
+            isLargeMessage: false
+          })
+          .expect(() => {
+            expect(persistHealthRecord).toHaveBeenCalledTimes(1);
+            expect(persistHealthRecord).toHaveBeenCalledWith(
+              nhsNumber,
+              conversationId,
+              messageId,
+              manifest,
+              false
+            );
+          })
+          .end(done);
+      });
+
+      it('should call persistHealthRecord with information provided when large message is true', done => {
+        request(app)
+          .post(testEndpoint)
+          .send({
+            nhsNumber,
+            messageId,
+            conversationId,
+            manifest,
+            isLargeMessage: true
+          })
+          .expect(() => {
+            expect(persistHealthRecord).toHaveBeenCalledTimes(1);
+            expect(persistHealthRecord).toHaveBeenCalledWith(
+              nhsNumber,
+              conversationId,
+              messageId,
+              manifest,
+              true
             );
           })
           .end(done);

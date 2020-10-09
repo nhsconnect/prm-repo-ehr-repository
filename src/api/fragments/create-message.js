@@ -24,15 +24,21 @@ export const createNewMessageValidationRules = [
   body('manifest')
     .optional()
     .isArray()
-    .withMessage("'manifest' provided is not of type Array")
+    .withMessage("'manifest' provided is not of type Array"),
+  body('isLargeMessage')
+    .optional()
+    .isBoolean()
+    .withMessage("'isLargeMessage' provided is not a boolean")
 ];
 
 export const createMessage = (req, res) => {
+  const largeMessageFieldExists = req.body.isLargeMessage !== undefined;
   persistHealthRecord(
     req.body.nhsNumber,
     req.body.conversationId,
     req.body.messageId,
-    req.body.manifest ? req.body.manifest : null
+    req.body.manifest ? req.body.manifest : null,
+    largeMessageFieldExists ? req.body.isLargeMessage : true
   )
     .then(() => getSignedUrl(req.body.conversationId, req.body.messageId))
     .then(url => {
