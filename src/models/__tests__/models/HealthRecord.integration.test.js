@@ -127,5 +127,22 @@ describe('HealthRecord integration', () => {
           .finally(() => t.rollback())
       );
     });
+
+    it('should retrieve the health record by conversation_id', () => {
+      return sequelize.transaction().then(t =>
+        HealthRecord.findByConversationId(conversationId, t)
+          .then(healthRecord => {
+            return healthRecord.hasManifest('b6d2073d-2381-4d5c-bd10-0d016161588e', t);
+          })
+          .then(healthRecord => {
+            expect(healthRecord).not.toBeNull();
+            return healthRecord.getHealthRecordManifests({ transaction: t });
+          })
+          .then(manifests =>
+            expect(manifests[0].get().health_record_id).toBe(expectedHealthRecordId)
+          )
+          .finally(() => t.rollback())
+      );
+    });
   });
 });
