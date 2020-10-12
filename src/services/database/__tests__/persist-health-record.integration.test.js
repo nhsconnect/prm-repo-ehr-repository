@@ -15,12 +15,13 @@ describe('persistHealthRecord', () => {
   const conversationId = '099cd501-034f-4e17-a461-cf4fd93ae0cf';
   const messageId = 'df13fc7b-89f7-4f80-b31c-b9720ac40296';
   const manifest = ['df13fc7b-89f7-4f80-b31c-b9720ac40296', '636c1aae-0fe5-4f46-9e99-a7d46ec55ef9'];
+  const isLargeMessage = true;
 
   afterAll(() => sequelize.close());
 
   it('should call updateLogEvent if data persisted correctly', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() => {
           expect(updateLogEvent).toHaveBeenCalledTimes(1);
           return expect(updateLogEvent).toHaveBeenCalledWith({
@@ -33,7 +34,7 @@ describe('persistHealthRecord', () => {
 
   it('should make message fragment with message id', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() =>
           MessageFragment.findOne({
             where: {
@@ -52,7 +53,7 @@ describe('persistHealthRecord', () => {
 
   it('should make health record with conversation id', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() =>
           HealthRecord.findOne({
             where: {
@@ -71,7 +72,7 @@ describe('persistHealthRecord', () => {
 
   it('should make patient with nhs number', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() =>
           Patient.findOne({
             where: {
@@ -90,7 +91,7 @@ describe('persistHealthRecord', () => {
 
   it('should not make patient when no nhs number given', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(null, conversationId, messageId, manifest, t)
+      createAndLinkEntries(null, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() =>
           HealthRecord.findOne({
             where: {
@@ -112,7 +113,7 @@ describe('persistHealthRecord', () => {
 
   it('should propagate and log errors from invalid nhs number', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries('1234', conversationId, messageId, manifest, t)
+      createAndLinkEntries('1234', conversationId, isLargeMessage, messageId, manifest, t)
         .catch(error => {
           expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
           expect(updateLogEventWithError).toHaveBeenCalledWith(error);
@@ -124,7 +125,7 @@ describe('persistHealthRecord', () => {
 
   it('should propagate and log errors from invalid conversation id', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, 'invalid', messageId, manifest, t)
+      createAndLinkEntries(nhsNumber, 'invalid', isLargeMessage, messageId, manifest, t)
         .catch(error => {
           expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
           expect(updateLogEventWithError).toHaveBeenCalledWith(error);
@@ -136,7 +137,7 @@ describe('persistHealthRecord', () => {
 
   it('should propagate and log errors from invalid message id', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, 'invalid', manifest, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, 'invalid', manifest, t)
         .catch(error => {
           expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
           expect(updateLogEventWithError).toHaveBeenCalledWith(error);
@@ -148,7 +149,7 @@ describe('persistHealthRecord', () => {
 
   it('should create association between message fragment and health record', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() =>
           MessageFragment.findOne({
             where: {
@@ -171,7 +172,7 @@ describe('persistHealthRecord', () => {
 
   it('should still associate fragment with health record if no manifest is given', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, [], t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, [], t)
         .then(() =>
           MessageFragment.findOne({
             where: {
@@ -194,7 +195,7 @@ describe('persistHealthRecord', () => {
 
   it('should create association between health record and manifest', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() =>
           HealthRecord.findOne({
             where: {
@@ -217,7 +218,7 @@ describe('persistHealthRecord', () => {
 
   it('should not associate manifest with health record if no manifest is given', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, [], t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, [], t)
         .then(() =>
           HealthRecord.findOne({
             where: {
@@ -240,7 +241,7 @@ describe('persistHealthRecord', () => {
 
   it('should not create or associate with manifest if no manifest is given', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, [], t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, [], t)
         .then(() =>
           MessageFragment.findOne({
             where: {
@@ -262,7 +263,7 @@ describe('persistHealthRecord', () => {
 
   it('should not create or associate with manifest if manifest is null', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, null, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, null, t)
         .then(() =>
           MessageFragment.findOne({
             where: {
@@ -284,7 +285,7 @@ describe('persistHealthRecord', () => {
 
   it('should get all message fragments from health record via manifest', () => {
     return sequelize.transaction().then(t =>
-      createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, t)
+      createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() =>
           HealthRecord.findOne({
             where: {

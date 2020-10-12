@@ -5,7 +5,7 @@ describe('MessageFragment integration', () => {
   const MessageFragment = ModelFactory.getByName('MessageFragment');
 
   const testUUID = 'f72b6225-1cac-43d7-85dd-a0b5b4211cd9';
-
+  const isLargeMessage = true;
   const expectedUUID = '74c6230b-36d9-4940-bdd6-495ba87ed634';
   const expectedMessageId = '8c0f741e-82fa-46f1-9686-23a1c08657f1';
   const expectedHealthRecordId = '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4';
@@ -54,7 +54,11 @@ describe('MessageFragment integration', () => {
       return sequelize.transaction().then(t =>
         MessageFragment.findOrCreateOne(testUUID, t)
           .then(fragment => {
-            return fragment.withHealthRecord('3244a7bb-555e-433b-b2cc-1aa8178da99e', t);
+            return fragment.withHealthRecord(
+              '3244a7bb-555e-433b-b2cc-1aa8178da99e',
+              isLargeMessage,
+              t
+            );
           })
           .then(fragment => {
             expect(fragment).not.toBeNull();
@@ -68,7 +72,7 @@ describe('MessageFragment integration', () => {
       return sequelize.transaction().then(t =>
         MessageFragment.findOrCreateOne(testUUID, t)
           .then(fragment => {
-            return fragment.withHealthRecord('invalid', t);
+            return fragment.withHealthRecord('invalid', isLargeMessage, t);
           })
           .catch(error => {
             expect(error).not.toBeNull();

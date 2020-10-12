@@ -10,6 +10,7 @@ jest.mock('../middleware/auth');
 describe('POST /fragments', () => {
   const TEST_ENDPOINT = `/fragments`;
   const conversationId = uuid();
+  const isLargeMessage = true;
   const messageId = uuid();
   const nhsNumber = '1234567890';
 
@@ -35,7 +36,8 @@ describe('POST /fragments', () => {
       .send({
         nhsNumber,
         messageId,
-        conversationId
+        conversationId,
+        isLargeMessage
       })
       .expect(201)
       .end(done);

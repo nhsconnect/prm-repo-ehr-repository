@@ -246,6 +246,9 @@
         "conversationId": {
           "type": "string"
         },
+        "isLargeMessage": {
+          "type": "boolean"
+        },
         "messageId": {
           "type": "string"
         },
@@ -254,9 +257,6 @@
           "items": {
             "type": "string"
           }
-        },
-        "isLargeMessage": {
-          "type": "boolean"
         }
       },
       "required": [

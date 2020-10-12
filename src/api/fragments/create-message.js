@@ -36,9 +36,9 @@ export const createMessage = (req, res) => {
   persistHealthRecord(
     req.body.nhsNumber,
     req.body.conversationId,
+    largeMessageFieldExists ? req.body.isLargeMessage : true,
     req.body.messageId,
-    req.body.manifest ? req.body.manifest : null,
-    largeMessageFieldExists ? req.body.isLargeMessage : true
+    req.body.manifest ? req.body.manifest : null
   )
     .then(() => getSignedUrl(req.body.conversationId, req.body.messageId))
     .then(url => {

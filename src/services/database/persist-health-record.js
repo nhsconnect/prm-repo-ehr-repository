@@ -4,14 +4,21 @@ import { updateLogEvent, updateLogEventWithError } from '../../middleware/loggin
 const sequelize = ModelFactory.sequelize;
 const MessageFragment = ModelFactory.getByName('MessageFragment');
 
-export const createAndLinkEntries = (nhsNumber, conversationId, messageId, manifest, transaction) =>
+export const createAndLinkEntries = (
+  nhsNumber,
+  conversationId,
+  isLargeMessage,
+  messageId,
+  manifest,
+  transaction
+) =>
   MessageFragment.findOrCreateOne(messageId, transaction)
     .then(fragment =>
       Array.isArray(manifest) && manifest.length
         ? fragment.containsManifest(messageId, manifest, transaction)
         : fragment
     )
-    .then(fragment => fragment.withHealthRecord(conversationId, transaction))
+    .then(fragment => fragment.withHealthRecord(conversationId, isLargeMessage, transaction))
     .then(fragment => fragment.getHealthRecord({ transaction: transaction }))
     .then(healthRecord =>
       nhsNumber === undefined || nhsNumber === null
@@ -29,9 +36,22 @@ export const createAndLinkEntries = (nhsNumber, conversationId, messageId, manif
       throw error;
     });
 
-export const persistHealthRecord = (nhsNumber, conversationId, messageId, manifest) =>
+export const persistHealthRecord = (
+  nhsNumber,
+  conversationId,
+  isLargeMessage,
+  messageId,
+  manifest
+) =>
   sequelize.transaction().then(transaction =>
-    createAndLinkEntries(nhsNumber, conversationId, messageId, manifest, transaction)
+    createAndLinkEntries(
+      nhsNumber,
+      conversationId,
+      isLargeMessage,
+      messageId,
+      manifest,
+      transaction
+    )
       .then(() => transaction.commit())
       .catch(error => {
         transaction.rollback();

@@ -98,9 +98,9 @@ describe('Create new message fragments', () => {
             expect(persistHealthRecord).toHaveBeenCalledWith(
               nhsNumber,
               conversationId,
+              isLargeMessage,
               messageId,
-              null,
-              isLargeMessage
+              null
             );
           })
           .end(done);
@@ -120,9 +120,9 @@ describe('Create new message fragments', () => {
             expect(persistHealthRecord).toHaveBeenCalledWith(
               nhsNumber,
               conversationId,
+              isLargeMessage,
               messageId,
-              manifest,
-              isLargeMessage
+              manifest
             );
           })
           .end(done);
@@ -134,18 +134,18 @@ describe('Create new message fragments', () => {
           .send({
             nhsNumber,
             messageId,
+            isLargeMessage: false,
             conversationId,
-            manifest,
-            isLargeMessage: false
+            manifest
           })
           .expect(() => {
             expect(persistHealthRecord).toHaveBeenCalledTimes(1);
             expect(persistHealthRecord).toHaveBeenCalledWith(
               nhsNumber,
               conversationId,
+              false,
               messageId,
-              manifest,
-              false
+              manifest
             );
           })
           .end(done);
@@ -157,19 +157,19 @@ describe('Create new message fragments', () => {
           .send({
             nhsNumber,
             messageId,
+            isLargeMessage: true,
             conversationId,
-            manifest,
-            isLargeMessage: true
+            manifest
           })
           .expect(() => {
-            expect(persistHealthRecord).toHaveBeenCalledTimes(1);
             expect(persistHealthRecord).toHaveBeenCalledWith(
               nhsNumber,
               conversationId,
+              true,
               messageId,
-              manifest,
-              true
+              manifest
             );
+            expect(persistHealthRecord).toHaveBeenCalledTimes(1);
           })
           .end(done);
       });

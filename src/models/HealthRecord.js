@@ -54,10 +54,11 @@ module.exports = (sequelize, DataTypes) => {
     HealthRecord.hasMany(models.HealthRecordManifest, { foreignKey: 'health_record_id' });
   };
 
-  HealthRecord.findOrCreateOne = (conversationId, transaction) =>
+  HealthRecord.findOrCreateOne = (conversationId, isLargeMessage, transaction) =>
     HealthRecord.findOrCreate({
       where: {
-        conversation_id: conversationId
+        conversation_id: conversationId,
+        is_large_message: isLargeMessage
       },
       transaction: transaction
     }).then(healthRecords => healthRecords[0]);

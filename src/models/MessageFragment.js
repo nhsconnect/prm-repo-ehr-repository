@@ -61,9 +61,14 @@ module.exports = (sequelize, DataTypes) => {
       transaction: transaction
     }).then(fragments => fragments[0]);
 
-  MessageFragment.prototype.withHealthRecord = function(conversationId, transaction) {
+  MessageFragment.prototype.withHealthRecord = function(
+    conversationId,
+    isLargeMessage,
+    transaction
+  ) {
     return sequelize.models.HealthRecord.findOrCreateOne(
       conversationId,
+      isLargeMessage,
       transaction
     ).then(healthRecord =>
       this.setHealthRecord(healthRecord.get().id, { transaction: transaction })
