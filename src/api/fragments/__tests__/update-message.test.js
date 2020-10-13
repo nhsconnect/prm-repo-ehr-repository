@@ -1,11 +1,15 @@
 import request from 'supertest';
 import app from '../../../app';
+import { retrieveHealthRecord, markHealthRecordAsCompleted } from '../../../services/database';
 
 jest.mock('../../../middleware/logging');
 jest.mock('../../../middleware/auth');
 
-jest.mock('../../../services/database/retrieve-health-record', () => ({
-  retrieveHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Retrieved'))
+jest.mock('../../../services/database/health-record-repository', () => ({
+  retrieveHealthRecord: jest
+    .fn()
+    .mockReturnValue(Promise.resolve({ dataValues: { is_large_message: false } })),
+  markHealthRecordAsCompleted: jest.fn()
 }));
 
 describe('PATCH /fragments', () => {
@@ -20,6 +24,21 @@ describe('PATCH /fragments', () => {
           conversationId: '3244a7bb-555e-433b-b2cc-1aa8178da99e'
         })
         .expect(204)
+        .end(done);
+    });
+
+    it('should mark health record as completed when the health record is not large', done => {
+      let conversationId = '3244a7bb-555e-433b-b2cc-1aa8178da99e';
+      request(app)
+        .patch(testEndpoint)
+        .send({
+          transferComplete: true,
+          conversationId: conversationId
+        })
+        .expect(() => {
+          expect(retrieveHealthRecord).toHaveBeenCalledWith(conversationId);
+          expect(markHealthRecordAsCompleted).toHaveBeenCalledWith(conversationId);
+        })
         .end(done);
     });
   });

@@ -1,14 +1,13 @@
 import ModelFactory from '../../models';
 
 const sequelize = ModelFactory.sequelize;
-const HealthRecord = ModelFactory.getByName('HealthRecord');
 
-export const retrieveHealthRecord = async conversationId => {
+export const runWithinTransaction = async dbInteractionLambda => {
   const transaction = await sequelize.transaction();
   try {
-    const healthRecord = await HealthRecord.findByConversationId(conversationId, transaction);
+    const response = await dbInteractionLambda(transaction);
     transaction.commit();
-    return healthRecord;
+    return response;
   } catch (err) {
     await transaction.rollback();
     throw err;
