@@ -9,6 +9,10 @@ jest.mock('../services/database/persist-health-record', () => ({
   persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
 }));
 
+jest.mock('../services/database/retrieve-health-record', () => ({
+  retrieveHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Retrieved'))
+}));
+
 jest.mock('../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );

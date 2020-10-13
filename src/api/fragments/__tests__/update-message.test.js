@@ -4,6 +4,10 @@ import app from '../../../app';
 jest.mock('../../../middleware/logging');
 jest.mock('../../../middleware/auth');
 
+jest.mock('../../../services/database/retrieve-health-record', () => ({
+  retrieveHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Retrieved'))
+}));
+
 describe('PATCH /fragments', () => {
   const testEndpoint = `/fragments`;
 
