@@ -45,7 +45,8 @@ describe('app', () => {
       request(app)
         .patch(TEST_ENDPOINT)
         .send({
-          transferComplete: true
+          transferComplete: true,
+          conversationId
         })
         .expect(204)
         .end(done);

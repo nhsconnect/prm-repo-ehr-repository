@@ -12,7 +12,8 @@ describe('PATCH /fragments', () => {
       request(app)
         .patch(testEndpoint)
         .send({
-          transferComplete: true
+          transferComplete: true,
+          conversationId: '3244a7bb-555e-433b-b2cc-1aa8178da99e'
         })
         .expect(204)
         .end(done);
@@ -35,6 +36,32 @@ describe('PATCH /fragments', () => {
         .expect(res => {
           expect(res.body).toEqual({
             errors: expect.arrayContaining([{ transferComplete: 'Invalid value' }])
+          });
+        })
+        .end(done);
+    });
+  });
+
+  describe('validation for conversationId', () => {
+    it('should return 422 if conversationId is not provided in body', done => {
+      request(app)
+        .patch(testEndpoint)
+        .send({
+          transferComplete: true
+        })
+        .expect(422)
+        .end(done);
+    });
+
+    it('should return error message if conversationId is not provided in body', done => {
+      request(app)
+        .patch(testEndpoint)
+        .send({
+          transferComplete: true
+        })
+        .expect(res => {
+          expect(res.body).toEqual({
+            errors: expect.arrayContaining([{ conversationId: 'Invalid value' }])
           });
         })
         .end(done);

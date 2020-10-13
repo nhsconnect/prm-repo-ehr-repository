@@ -57,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
   HealthRecord.findByConversationId = (conversationId, transaction) =>
     HealthRecord.findOne({
       where: {
-        conversation_id: conversationId,
+        conversation_id: conversationId
       },
       transaction: transaction
     });

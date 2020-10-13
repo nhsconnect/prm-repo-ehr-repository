@@ -269,10 +269,14 @@
       "properties": {
         "transferComplete": {
           "type": "boolean"
+        },
+        "conversationId": {
+          "type": "string"
         }
       },
       "required": [
-        "transferComplete"
+        "transferComplete",
+        "conversationId"
       ]
     },
     "ValidationErrors": {

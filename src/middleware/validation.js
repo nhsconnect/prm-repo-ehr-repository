@@ -3,6 +3,7 @@ import { updateLogEvent } from './logging';
 
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
+
   if (errors.isEmpty()) {
     updateLogEvent({ status: 'validation-passed', validation: { status: 'passed' } });
     return next();
