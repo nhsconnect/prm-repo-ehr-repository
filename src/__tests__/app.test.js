@@ -13,7 +13,8 @@ jest.mock('../services/database/health-record-repository', () => ({
   retrieveHealthRecord: jest
     .fn()
     .mockReturnValue(Promise.resolve({ dataValues: { is_large_message: false } })),
-  markHealthRecordAsCompleted: jest.fn()
+  markHealthRecordAsCompleted: jest.fn(),
+  markHealthRecordFragmentsAsCompleted: jest.fn()
 }));
 
 jest.mock('../services/storage/get-signed-url', () =>
