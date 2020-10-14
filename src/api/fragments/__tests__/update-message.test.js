@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../../../app';
 import { retrieveHealthRecord, markHealthRecordAsCompleted } from '../../../services/database';
+import { updateLogEventWithError } from '../../../middleware/logging';
 
 jest.mock('../../../middleware/logging');
 jest.mock('../../../middleware/auth');
@@ -12,6 +13,8 @@ jest.mock('../../../services/database/health-record-repository', () => ({
   markHealthRecordAsCompleted: jest.fn()
 }));
 
+const conversationId = "25155ea7-d7da-4097-9324-a18952e72697";
+
 describe('PATCH /fragments', () => {
   const testEndpoint = `/fragments`;
 
@@ -21,14 +24,13 @@ describe('PATCH /fragments', () => {
         .patch(testEndpoint)
         .send({
           transferComplete: true,
-          conversationId: '3244a7bb-555e-433b-b2cc-1aa8178da99e'
+          conversationId: conversationId
         })
         .expect(204)
         .end(done);
     });
 
     it('should mark health record as completed when the health record is not large', done => {
-      let conversationId = '3244a7bb-555e-433b-b2cc-1aa8178da99e';
       request(app)
         .patch(testEndpoint)
         .send({
@@ -38,6 +40,53 @@ describe('PATCH /fragments', () => {
         .expect(() => {
           expect(retrieveHealthRecord).toHaveBeenCalledWith(conversationId);
           expect(markHealthRecordAsCompleted).toHaveBeenCalledWith(conversationId);
+        })
+        .end(done);
+    });
+
+    it('should not mark health record as completed when the health record is large', done => {
+      retrieveHealthRecord.mockReturnValue(
+        Promise.resolve({ dataValues: { is_large_message: true } })
+      );
+      request(app)
+        .patch(testEndpoint)
+        .send({
+          transferComplete: true,
+          conversationId: conversationId
+        })
+        .expect(204)
+        .expect(() => {
+          expect(retrieveHealthRecord).toHaveBeenCalledWith(conversationId);
+          expect(markHealthRecordAsCompleted).not.toHaveBeenCalled();
+        })
+        .end(done);
+    });
+  });
+
+  describe('error', () => {
+    it('should return 503 when cannot retrieve health record', done => {
+      retrieveHealthRecord.mockRejectedValueOnce(Error('some-error'));
+      request(app)
+        .patch(testEndpoint)
+        .send({
+          transferComplete: true,
+          conversationId: conversationId
+        })
+        .expect(503)
+        .end(done);
+    });
+
+    it('should return error message when there is an error', done => {
+      retrieveHealthRecord.mockRejectedValueOnce(Error('some-error'));
+      request(app)
+        .patch(testEndpoint)
+        .send({
+          transferComplete: true,
+          conversationId: conversationId
+        })
+        .expect(res => {
+          expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
+          expect(res.body).toEqual({ error: 'some-error' });
         })
         .end(done);
     });

@@ -54,9 +54,10 @@ describe('Patient - HealthRecord associations', () => {
         .then(patient => {
           expect(patient.get().id).toBe(secondPatientUUID);
           return patient.getHealthRecords({ transaction: t }).then(healthRecords => {
+            const conversationIds = [healthRecords[0].get().conversation_id, healthRecords[1].get().conversation_id];
             expect(healthRecords.length).toBe(2);
-            expect(healthRecords[0].get().conversation_id).toBe(secondHealthRecordConvoId1);
-            return expect(healthRecords[1].get().conversation_id).toBe(secondHealthRecordConvoId2);
+            expect(conversationIds).toContain(secondHealthRecordConvoId1);
+            return expect(conversationIds).toContain(secondHealthRecordConvoId2);
           });
         })
         .finally(() => t.rollback())
