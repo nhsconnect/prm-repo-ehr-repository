@@ -1,6 +1,10 @@
 import request from 'supertest';
 import app from '../../../app';
-import { retrieveHealthRecord, markHealthRecordAsCompleted } from '../../../services/database';
+import {
+  retrieveHealthRecord,
+  markHealthRecordAsCompleted,
+  markHealthRecordFragmentsAsCompleted
+} from '../../../services/database';
 import { updateLogEventWithError } from '../../../middleware/logging';
 
 jest.mock('../../../middleware/logging');
@@ -9,11 +13,14 @@ jest.mock('../../../middleware/auth');
 jest.mock('../../../services/database/health-record-repository', () => ({
   retrieveHealthRecord: jest
     .fn()
-    .mockReturnValue(Promise.resolve({ dataValues: { is_large_message: false } })),
-  markHealthRecordAsCompleted: jest.fn()
+    .mockReturnValue(
+      Promise.resolve({ dataValues: { is_large_message: false } })
+    ),
+  markHealthRecordAsCompleted: jest.fn(),
+  markHealthRecordFragmentsAsCompleted: jest.fn()
 }));
 
-const conversationId = "25155ea7-d7da-4097-9324-a18952e72697";
+const conversationId = '25155ea7-d7da-4097-9324-a18952e72697';
 
 describe('PATCH /fragments', () => {
   const testEndpoint = `/fragments`;
@@ -31,6 +38,11 @@ describe('PATCH /fragments', () => {
     });
 
     it('should mark health record as completed when the health record is not large', done => {
+      const healthRecordId = 'd5afe49d-78c6-4bac-88a8-794d20c481f9';
+      let singleFileHealthRecord = { dataValues: { is_large_message: false, id: healthRecordId } };
+      retrieveHealthRecord.mockReturnValue(
+        Promise.resolve(singleFileHealthRecord)
+      );
       request(app)
         .patch(testEndpoint)
         .send({
@@ -40,6 +52,7 @@ describe('PATCH /fragments', () => {
         .expect(() => {
           expect(retrieveHealthRecord).toHaveBeenCalledWith(conversationId);
           expect(markHealthRecordAsCompleted).toHaveBeenCalledWith(conversationId);
+          expect(markHealthRecordFragmentsAsCompleted).toHaveBeenCalledWith(healthRecordId);
         })
         .end(done);
     });

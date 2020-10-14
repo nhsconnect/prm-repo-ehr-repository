@@ -1,6 +1,10 @@
 import { body } from 'express-validator';
 import { updateLogEventWithError, updateLogEvent } from '../../middleware/logging';
-import { retrieveHealthRecord, markHealthRecordAsCompleted } from '../../services/database';
+import {
+  retrieveHealthRecord,
+  markHealthRecordAsCompleted,
+  markHealthRecordFragmentsAsCompleted
+} from '../../services/database';
 
 export const updateMessageValidationRules = [
   body('transferComplete').notEmpty(),
@@ -14,6 +18,7 @@ export const updateMessage = (req, res) => {
     .then(healthRecord => {
       if (healthRecord.dataValues.is_large_message === false) {
         markHealthRecordAsCompleted(conversationId);
+        markHealthRecordFragmentsAsCompleted(healthRecord.dataValues.id);
       }
     })
     .then(() => {
