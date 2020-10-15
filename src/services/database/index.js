@@ -3,9 +3,15 @@ import { persistHealthRecord } from './persist-health-record';
 import {
   retrieveHealthRecord,
   markHealthRecordAsCompleted,
-  markHealthRecordFragmentsAsCompleted
+  markHealthRecordFragmentsAsCompleted,
+  markHealthRecordManifestAsCompleted
 } from './health-record-repository';
 
 export { checkDbHealth };
 export { persistHealthRecord };
-export { retrieveHealthRecord, markHealthRecordAsCompleted, markHealthRecordFragmentsAsCompleted };
+export {
+  retrieveHealthRecord,
+  markHealthRecordAsCompleted,
+  markHealthRecordFragmentsAsCompleted,
+  markHealthRecordManifestAsCompleted
+};

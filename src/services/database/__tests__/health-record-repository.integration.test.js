@@ -1,7 +1,8 @@
 import {
   markHealthRecordAsCompleted,
   retrieveHealthRecord,
-  markHealthRecordFragmentsAsCompleted
+  markHealthRecordFragmentsAsCompleted,
+  markHealthRecordManifestAsCompleted
 } from '../';
 
 jest.mock('../../../middleware/logging');
@@ -31,6 +32,14 @@ describe('healthRecordRepository', () => {
     it('should mark message fragments of health record as complete', () => {
       return markHealthRecordFragmentsAsCompleted(healthRecordId).then(messageFragment => {
         expect(messageFragment.completed_at).not.toBeNull();
+      });
+    });
+  });
+
+  describe('markHealthRecordManifestAsCompleted', () => {
+    it('should mark manifest of health record as complete', () => {
+      return markHealthRecordManifestAsCompleted(healthRecordId).then(manifest => {
+        expect(manifest.completed_at).not.toBeNull();
       });
     });
   });

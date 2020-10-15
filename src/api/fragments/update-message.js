@@ -3,7 +3,8 @@ import { updateLogEventWithError, updateLogEvent } from '../../middleware/loggin
 import {
   retrieveHealthRecord,
   markHealthRecordAsCompleted,
-  markHealthRecordFragmentsAsCompleted
+  markHealthRecordFragmentsAsCompleted,
+  markHealthRecordManifestAsCompleted
 } from '../../services/database';
 
 export const updateMessageValidationRules = [
@@ -19,6 +20,7 @@ export const updateMessage = (req, res) => {
       if (healthRecord.dataValues.is_large_message === false) {
         markHealthRecordAsCompleted(conversationId);
         markHealthRecordFragmentsAsCompleted(healthRecord.dataValues.id);
+        markHealthRecordManifestAsCompleted(healthRecord.dataValues.id);
       }
     })
     .then(() => {

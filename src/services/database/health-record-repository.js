@@ -3,6 +3,7 @@ import { runWithinTransaction } from './helper';
 
 const HealthRecord = ModelFactory.getByName('HealthRecord');
 const MessageFragment = ModelFactory.getByName('MessageFragment');
+const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
 
 export const retrieveHealthRecord = conversationId =>
   runWithinTransaction(transaction =>
@@ -17,4 +18,9 @@ export const markHealthRecordAsCompleted = conversationId =>
 export const markHealthRecordFragmentsAsCompleted = healthRecordId =>
   runWithinTransaction(transaction =>
     MessageFragment.complete({ where: { health_record_id: healthRecordId }, transaction })
+  );
+
+export const markHealthRecordManifestAsCompleted = healthRecordId =>
+  runWithinTransaction(transaction =>
+    HealthRecordManifest.complete({ where: { health_record_id: healthRecordId }, transaction })
   );

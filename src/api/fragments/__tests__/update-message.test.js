@@ -3,7 +3,8 @@ import app from '../../../app';
 import {
   retrieveHealthRecord,
   markHealthRecordAsCompleted,
-  markHealthRecordFragmentsAsCompleted
+  markHealthRecordFragmentsAsCompleted,
+  markHealthRecordManifestAsCompleted
 } from '../../../services/database';
 import { updateLogEventWithError } from '../../../middleware/logging';
 
@@ -13,11 +14,10 @@ jest.mock('../../../middleware/auth');
 jest.mock('../../../services/database/health-record-repository', () => ({
   retrieveHealthRecord: jest
     .fn()
-    .mockReturnValue(
-      Promise.resolve({ dataValues: { is_large_message: false } })
-    ),
+    .mockReturnValue(Promise.resolve({ dataValues: { is_large_message: false } })),
   markHealthRecordAsCompleted: jest.fn(),
-  markHealthRecordFragmentsAsCompleted: jest.fn()
+  markHealthRecordFragmentsAsCompleted: jest.fn(),
+  markHealthRecordManifestAsCompleted: jest.fn()
 }));
 
 const conversationId = '25155ea7-d7da-4097-9324-a18952e72697';
@@ -40,9 +40,7 @@ describe('PATCH /fragments', () => {
     it('should mark health record as completed when the health record is not large', done => {
       const healthRecordId = 'd5afe49d-78c6-4bac-88a8-794d20c481f9';
       let singleFileHealthRecord = { dataValues: { is_large_message: false, id: healthRecordId } };
-      retrieveHealthRecord.mockReturnValue(
-        Promise.resolve(singleFileHealthRecord)
-      );
+      retrieveHealthRecord.mockReturnValue(Promise.resolve(singleFileHealthRecord));
       request(app)
         .patch(testEndpoint)
         .send({
@@ -53,6 +51,7 @@ describe('PATCH /fragments', () => {
           expect(retrieveHealthRecord).toHaveBeenCalledWith(conversationId);
           expect(markHealthRecordAsCompleted).toHaveBeenCalledWith(conversationId);
           expect(markHealthRecordFragmentsAsCompleted).toHaveBeenCalledWith(healthRecordId);
+          expect(markHealthRecordManifestAsCompleted).toHaveBeenCalledWith(healthRecordId);
         })
         .end(done);
     });
@@ -71,6 +70,8 @@ describe('PATCH /fragments', () => {
         .expect(() => {
           expect(retrieveHealthRecord).toHaveBeenCalledWith(conversationId);
           expect(markHealthRecordAsCompleted).not.toHaveBeenCalled();
+          expect(markHealthRecordFragmentsAsCompleted).not.toHaveBeenCalled();
+          expect(markHealthRecordManifestAsCompleted).not.toHaveBeenCalled();
         })
         .end(done);
     });

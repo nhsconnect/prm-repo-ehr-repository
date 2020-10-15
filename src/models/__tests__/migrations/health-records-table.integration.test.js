@@ -38,12 +38,6 @@ describe('HealthRecord', () => {
     );
   });
 
-  it('should return null object for completed_at', () => {
-    return HealthRecord.findOne().then(healthRecord =>
-      expect(healthRecord.get().completed_at).toBeNull()
-    );
-  });
-
   it('should return Date object for created_at', () => {
     return HealthRecord.findOne().then(healthRecord =>
       expect(typeof healthRecord.get().created_at).toBe(typeof new Date())
