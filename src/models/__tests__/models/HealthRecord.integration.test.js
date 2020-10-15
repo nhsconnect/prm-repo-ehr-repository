@@ -144,5 +144,16 @@ describe('HealthRecord integration', () => {
           .finally(() => t.rollback())
       );
     });
+
+    it('should not retrieve the health record when conversation_id not found', () => {
+      let missingConversationId = '1e4b5365-0cc2-4943-9aef-5681c01c0d15';
+      return sequelize.transaction().then(t =>
+        HealthRecord.findByConversationId(missingConversationId, t)
+          .then(healthRecord => {
+            expect(healthRecord).toBeNull();
+          })
+          .finally(() => t.rollback())
+      );
+    });
   });
 });

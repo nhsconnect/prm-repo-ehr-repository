@@ -52,7 +52,9 @@ describe('HealthRecord - MessageFragment associations', () => {
           return healthRecord
             .getMessageFragments({ paranoid: false, transaction: t })
             .then(messageFragments => {
-              const messageFragmentsIds = messageFragments.map(fragment => fragment.get().message_id);
+              const messageFragmentsIds = messageFragments.map(
+                fragment => fragment.get().message_id
+              );
               expect(messageFragments.length).toBe(3);
               expect(messageFragmentsIds).toContain(messageFragmentMessageId1);
               expect(messageFragmentsIds).toContain(messageFragmentMessageId2);
