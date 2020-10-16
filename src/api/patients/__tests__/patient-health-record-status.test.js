@@ -1,3 +1,4 @@
+import dateFormat from 'dateformat';
 import request from 'supertest';
 import app from '../../../app';
 import { retrieveHealthRecord } from '../../../services/database';
@@ -5,7 +6,8 @@ import { retrieveHealthRecord } from '../../../services/database';
 jest.mock('../../../middleware/logging');
 jest.mock('../../../middleware/auth');
 
-let completedAt = new Date(2020, 10, 9, 2, 30, 0);
+const completedAt = dateFormat(Date.now(), 'yyyymmddHHMMss');
+
 jest.mock('../../../services/database/health-record-repository', () => ({
   retrieveHealthRecord: jest.fn()
 }));
@@ -20,7 +22,7 @@ describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
       id: conversationId,
       attributes: {
         status: 'success',
-        completed_at: '2020-11-09T02:30:00.000Z'
+        completed_at: completedAt
       }
     }
   };
@@ -73,17 +75,17 @@ describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
 
   describe('validations', () => {
     it('should return 422 if nhsNumber is defined but not numeric', done => {
-      const wrongNhsNumber = 'not-numeric';
+      const incorrectConversationId = 'not-numeric';
       request(app)
-        .get(`/patients/${wrongNhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${incorrectConversationId}/health-records/${conversationId}`)
         .expect(422)
         .end(done);
     });
 
     it('should return 422 if conversation ID is defined but not uuid', done => {
-      const wrongConversationId = 'not-uuid';
+      const incorrectConversationId = 'not-uuid';
       request(app)
-        .get(`/patients/${nhsNumber}/health-records/${wrongConversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${incorrectConversationId}`)
         .expect(422)
         .end(done);
     });
