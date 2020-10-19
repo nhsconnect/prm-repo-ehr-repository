@@ -32,12 +32,6 @@ describe('MessageFragment', () => {
     );
   });
 
-  it('should return null object for completed_at', () => {
-    return MessageFragment.findOne().then(messageFragment =>
-      expect(messageFragment.get().completed_at).toBeNull()
-    );
-  });
-
   it('should return Date object for created_at', () => {
     return MessageFragment.findOne().then(messageFragment =>
       expect(typeof messageFragment.get().created_at).toBe(typeof new Date())
