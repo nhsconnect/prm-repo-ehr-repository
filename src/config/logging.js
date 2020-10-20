@@ -4,7 +4,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { getCorrelationId } from '../middleware/correlation';
 
 const OBFUSCATED_VALUE = '********';
-const SECRET_KEYS = ['passcode', 'data'];
+const SECRET_KEYS = ['passcode', 'data', 'authorization'];
 const LEVEL = process.env.LOG_LEVEL || 'warn';
 
 export const obfuscateSecrets = format(info => {
@@ -23,10 +23,10 @@ const addCorrelationInfo = format(info => {
 export const options = {
   level: 'debug',
   format: format.combine(
+    obfuscateSecrets(),
     addCorrelationInfo(),
     format.timestamp(),
-    format.json(),
-    obfuscateSecrets()
+    format.json()
   ),
   transports: [new transports.Console({ level: LEVEL, handleExceptions: true })]
 };
