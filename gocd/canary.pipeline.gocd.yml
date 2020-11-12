@@ -43,7 +43,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks test
+                      - ./tasks test_unit
                 - exec:
                     run_if: failed
                     command: /bin/bash

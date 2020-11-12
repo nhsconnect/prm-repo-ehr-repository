@@ -53,7 +53,7 @@ sequelize-cli db:migrate:undo:all # Undoes the migration to leave clean env
 To run them before commit in dojo.
 
 ```bash
-./tasks test
+./tasks test_unit
 ```
 
 ## Start the app locally

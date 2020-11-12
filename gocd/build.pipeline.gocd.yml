@@ -21,7 +21,7 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks dep
-            test:
+            test_lint:
               resources:
                 - docker
               tasks:
@@ -29,8 +29,17 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks test
-            integration:
+                      - ./tasks test_lint
+            test_unit:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_unit
+            test_integration:
               resources:
                 - docker
               tasks:
