@@ -2,9 +2,8 @@ const { Endpoint, S3 } = require('aws-sdk');
 
 const MAX_ATTEMPTS = 30;
 
-
 const isConnected = () => {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     const s3 = new S3({
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
@@ -25,26 +24,27 @@ const isConnected = () => {
 };
 
 function sleep(ms) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(resolve, ms);
   });
 }
 
 const checkIfConnected = async () => {
-  for(let count = 0; count <= MAX_ATTEMPTS;  ++count) {
-
-    console.log(`Attempting to connect to bucket in localstack (Attempt ${count} of ${MAX_ATTEMPTS})`);
+  for (let count = 0; count <= MAX_ATTEMPTS; ++count) {
+    console.log(
+      `Attempting to connect to bucket in localstack (Attempt ${count} of ${MAX_ATTEMPTS})`
+    );
 
     const result = await isConnected();
 
-    if(result) {
+    if (result) {
       console.log('Successfully connected to localstack');
       return;
     }
     await sleep(1000);
   }
 
-  throw new Error(`Connection to Localstack timedout after ${MAX_ATTEMPTS}`)
+  throw new Error(`Connection to Localstack timedout after ${MAX_ATTEMPTS}`);
 };
 
 checkIfConnected();
