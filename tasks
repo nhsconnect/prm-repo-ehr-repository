@@ -239,7 +239,7 @@ case "${command}" in
       ;;
   _test_docker)
       npm install
-      node scripts/wait_for_localstack.js
+      node scripts/wait-for-localstack.js
       npm run test:docker
       ;;
   test_docker)
