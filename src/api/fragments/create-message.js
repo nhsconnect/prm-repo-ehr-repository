@@ -16,8 +16,8 @@ export const createNewMessageValidationRules = [
     .isLength({ min: 10, max: 10 })
     .withMessage("'nhsNumber' provided is not 10 characters"),
   body('messageId')
-    .isUUID('4')
-    .withMessage("'messageId' provided is not of type UUIDv4"),
+    .isUUID()
+    .withMessage("'messageId' provided is not of type UUID"),
   body('messageId')
     .notEmpty()
     .withMessage("'messageId' is a required field"),

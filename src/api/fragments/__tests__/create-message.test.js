@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
 import app from '../../../app';
 import ModelFactory from '../../../models';
 import { updateLogEventWithError } from '../../../middleware/logging';
@@ -17,8 +18,8 @@ jest.mock('../../../services/storage/get-signed-url', () =>
 
 describe('Create new message fragments', () => {
   const nhsNumber = '0123456789';
-  const conversationId = 'db4b773d-f171-4a5f-a23b-6a387f8792b7';
-  const messageId = '0809570a-3ae2-409c-a924-60766b39550f';
+  const conversationId = uuidv4();
+  const messageId = uuidv1();
   const manifest = ['0809570a-3ae2-409c-a924-60766b39550f', '88148835-2708-4914-a1d2-39c84560a937'];
   const testEndpoint = `/fragments`;
   const isLargeMessage = true;
@@ -36,6 +37,17 @@ describe('Create new message fragments', () => {
           .post(testEndpoint)
           .send({
             messageId,
+            conversationId
+          })
+          .expect(201)
+          .end(done);
+      });
+
+      it('should accept a message id with uuidv4', done => {
+        request(app)
+          .post(testEndpoint)
+          .send({
+            messageId: uuidv4(),
             conversationId
           })
           .expect(201)
@@ -230,7 +242,7 @@ describe('Create new message fragments', () => {
             .expect(res => {
               expect(res.body).toEqual({
                 errors: expect.arrayContaining([
-                  { messageId: "'messageId' provided is not of type UUIDv4" }
+                  { messageId: "'messageId' provided is not of type UUID" }
                 ])
               });
             })
