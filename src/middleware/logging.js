@@ -20,3 +20,6 @@ export const middleware = (req, res, next) => {
   });
   next();
 };
+
+export const logEvent = (status, event) => logger.info(status, event);
+export const logError = (status, event) => logger.error(status, event);

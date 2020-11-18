@@ -2,7 +2,7 @@ import request from 'supertest';
 import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
 import app from '../../../app';
 import ModelFactory from '../../../models';
-import { updateLogEventWithError } from '../../../middleware/logging';
+import { logError } from '../../../middleware/logging';
 import { persistHealthRecord } from '../../../services/database';
 import { getSignedUrl } from '../../../services/storage';
 
@@ -89,7 +89,7 @@ describe('Create new message fragments', () => {
             conversationId
           })
           .expect(res => {
-            expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
+            expect(logError).toHaveBeenCalledTimes(1);
             expect(res.body).toEqual({ error: 'some-error' });
           })
           .end(done);

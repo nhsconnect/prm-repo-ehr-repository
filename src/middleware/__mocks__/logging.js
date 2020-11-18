@@ -1,4 +1,6 @@
 export const updateLogEvent = jest.fn();
+export const logEvent = jest.fn();
+export const logError = jest.fn();
 
 export const updateLogEventWithError = jest.fn();
 
