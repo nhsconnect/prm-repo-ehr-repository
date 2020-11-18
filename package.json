@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint src/ test/ scripts/",
     "lint:fix": "npm run lint -- --fix",
-    "test": "npm run lint && npm run test:unit",
+    "test": "npm run lint:fix && npm run test:unit",
     "test:unit": "jest \"src/(?!(.*\\integration.test\\.js))\" --setupFiles dotenv/config",
     "test:integration": "jest \"src/.*\\integration.test\\.js\" --detectOpenHandles --forceExit --setupFiles dotenv/config",
     "test:integration:local": "npm run db:setup && npm run test:integration ; npm run db:teardown",
