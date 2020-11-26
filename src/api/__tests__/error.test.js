@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../../app';
-import { updateLogEventWithError } from '../../middleware/logging';
+import { logError } from '../../middleware/logging';
 
 jest.mock('../../middleware/logging');
 
@@ -21,14 +21,12 @@ describe('GET /error', () => {
       .end(done);
   });
 
-  it('should call updateLogEvent with error with error message', done => {
+  it('should call logError with error with error message', done => {
     request(app)
       .get('/error')
       .expect(() => {
-        expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
-        expect(updateLogEventWithError).toHaveBeenCalledWith(
-          Error('TEST: EHR Repo Error logging test entry')
-        );
+        expect(logError).toHaveBeenCalledTimes(1);
+        expect(logError).toHaveBeenCalledWith('TEST: EHR Repo Error logging test entry');
       })
       .end(done);
   });

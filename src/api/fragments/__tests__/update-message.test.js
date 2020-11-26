@@ -6,7 +6,7 @@ import {
   markHealthRecordFragmentsAsCompleted,
   markHealthRecordManifestAsCompleted
 } from '../../../services/database';
-import { updateLogEventWithError } from '../../../middleware/logging';
+import { logError } from '../../../middleware/logging';
 
 jest.mock('../../../middleware/logging');
 jest.mock('../../../middleware/auth');
@@ -99,7 +99,7 @@ describe('PATCH /fragments', () => {
           conversationId: conversationId
         })
         .expect(res => {
-          expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
+          expect(logError).toHaveBeenCalledTimes(1);
           expect(res.body).toEqual({ error: 'some-error' });
         })
         .end(done);

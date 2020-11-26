@@ -1,5 +1,5 @@
 import { body } from 'express-validator';
-import { logError, logEvent } from '../../middleware/logging';
+import { logEvent, logError } from '../../middleware/logging';
 import { persistHealthRecord } from '../../services/database';
 import { getSignedUrl } from '../../services/storage';
 
@@ -42,11 +42,11 @@ export const createMessage = (req, res) => {
   )
     .then(() => getSignedUrl(req.body.conversationId, req.body.messageId))
     .then(url => {
-      logEvent({ status: 'Retrieved presigned url successfully' });
+      logEvent('Retrieved pre-signed url successfully');
       res.status(201).send(url);
     })
     .catch(err => {
-      logError('ehr repo - failed to store ehr', err);
+      logError('Failed to store ehr', err);
       res.status(503).send({ error: err.message });
     });
 };

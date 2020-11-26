@@ -1,7 +1,7 @@
 import app from '../../app';
 import request from 'supertest';
 import { getHealthCheck } from '../../services/get-health-check';
-import { updateLogEvent, updateLogEventWithError } from '../../middleware/logging';
+import { logEvent, logError } from '../../middleware/logging';
 
 jest.mock('../../config/logging');
 jest.mock('../../services/get-health-check');
@@ -40,15 +40,11 @@ describe('GET /health', () => {
         .end(done);
     });
 
-    it('should call updateLogEvent with result when all dependencies are ok', done => {
+    it('should call logEvent with result when all dependencies are ok', done => {
       request(app)
         .get('/health')
         .expect(() => {
-          expect(updateLogEvent).toHaveBeenCalledWith(
-            expect.objectContaining({
-              status: 'Health check completed'
-            })
-          );
+          expect(logEvent).toHaveBeenCalledWith('Health check successful');
         })
         .end(done);
     });
@@ -75,11 +71,14 @@ describe('GET /health', () => {
         .end(done);
     });
 
-    it('should call updateLogEvent with the healthcheck result if s3 writable is false', done => {
+    it('should call logError with the health check result if s3 writable is false', done => {
       request(app)
         .get('/health')
         .expect(() => {
-          expect(updateLogEvent).toHaveBeenCalledWith(expectedHealthCheckBase(false));
+          expect(logError).toHaveBeenCalledWith(
+            'Health check failed',
+            expectedHealthCheckBase(false)
+          );
         })
         .end(done);
     });
@@ -106,17 +105,20 @@ describe('GET /health', () => {
         .end(done);
     });
 
-    it('should call updateLogEvent with the healthcheck result if db writable is false', done => {
+    it('should call logError with the health check result if db writable is false', done => {
       request(app)
         .get('/health')
         .expect(() => {
-          expect(updateLogEvent).toHaveBeenCalledWith(expectedHealthCheckBase(true, true, false));
+          expect(logError).toHaveBeenCalledWith(
+            'Health check failed',
+            expectedHealthCheckBase(true, true, false)
+          );
         })
         .end(done);
     });
   });
 
-  describe('s3 is not avaialble', () => {
+  describe('s3 is not available', () => {
     beforeEach(() => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(true, false)));
     });
@@ -137,11 +139,14 @@ describe('GET /health', () => {
         .end(done);
     });
 
-    it('should call updateLogEvent with the healthcheck result if s3 available is false', done => {
+    it('should call logError with the health check result if s3 available is false', done => {
       request(app)
         .get('/health')
         .expect(() => {
-          expect(updateLogEvent).toHaveBeenCalledWith(expectedHealthCheckBase(true, false));
+          expect(logError).toHaveBeenCalledWith(
+            'Health check failed',
+            expectedHealthCheckBase(true, false)
+          );
         })
         .end(done);
     });
@@ -161,11 +166,12 @@ describe('GET /health', () => {
         .end(done);
     });
 
-    it('should call updateLogEvent with the healthcheck result if both s3 and db are not writable', done => {
+    it('should call logError with the health check result if both s3 and db are not writable', done => {
       request(app)
         .get('/health')
         .expect(() => {
-          expect(updateLogEvent).toHaveBeenCalledWith(
+          expect(logError).toHaveBeenCalledWith(
+            'Health check failed',
             expectedHealthCheckBase(false, false, false, false)
           );
         })
@@ -178,19 +184,19 @@ describe('GET /health', () => {
       getHealthCheck.mockRejectedValue(Error('some-error'));
     });
 
-    it('should return 500 if getHealthCheck if it cannot provide a healthcheck', done => {
+    it('should return 500 if getHealthCheck if it cannot provide a health check', done => {
       request(app)
         .get('/health')
         .expect(500)
         .end(done);
     });
 
-    it('should updateLogEventWithError if getHealthCheck throws an error', done => {
+    it('should logError if getHealthCheck throws an error', done => {
       request(app)
         .get('/health')
         .expect(() => {
-          expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
-          expect(updateLogEventWithError).toHaveBeenCalledWith(Error('some-error'));
+          expect(logError).toHaveBeenCalledTimes(1);
+          expect(logError).toHaveBeenCalledWith('Health check error', expect.anything());
         })
         .end(done);
     });
@@ -201,9 +207,11 @@ describe('GET /health', () => {
       request(app)
         .get('/health')
         .expect(() => {
-          expect(updateLogEvent).toHaveBeenCalledTimes(2);
-          expect(updateLogEvent).toHaveBeenCalledWith({ status: 'Health check completed' });
-          expect(updateLogEvent).toHaveBeenCalledWith(expectedHealthCheckBase(false));
+          expect(logError).toHaveBeenCalledTimes(1);
+          expect(logError).toHaveBeenCalledWith(
+            'Health check failed',
+            expectedHealthCheckBase(false)
+          );
         })
         .end(done);
     });

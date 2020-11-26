@@ -1,4 +1,4 @@
-import logger, { obfuscateSecrets, options } from '../logging';
+import { obfuscateSecrets, options } from '../logging';
 
 jest.mock('winston', () => ({
   ...jest.requireActual('winston'),
@@ -112,31 +112,8 @@ describe('logging', () => {
       expect(options.transports.length).toBe(1);
     });
 
-    it('should be at level debug', () => {
-      expect(options.level).toBe('debug');
-    });
-
     it('should have a formatter', () => {
       expect(options.format).not.toBeNull();
-    });
-  });
-
-  describe('logger.error override', () => {
-    const message = 'failed';
-    const errorMessage = 'some-error';
-
-    it('should call logger.log only once', () => {
-      logger.error(message, Error(errorMessage));
-      expect(logger.log).toHaveBeenCalledTimes(1);
-    });
-
-    it('should call logger.log with correct message', () => {
-      logger.error(message, Error(errorMessage));
-      expect(logger.log).toHaveBeenCalledWith(
-        'error',
-        `${message}: ${errorMessage}`,
-        expect.objectContaining(Error(errorMessage))
-      );
     });
   });
 

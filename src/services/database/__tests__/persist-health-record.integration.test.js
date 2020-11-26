@@ -1,4 +1,4 @@
-import { updateLogEvent, updateLogEventWithError } from '../../../middleware/logging';
+import { logEvent, logError } from '../../../middleware/logging';
 import ModelFactory from '../../../models';
 import { createAndLinkEntries } from '../persist-health-record';
 
@@ -19,14 +19,12 @@ describe('persistHealthRecord', () => {
 
   afterAll(() => sequelize.close());
 
-  it('should call updateLogEvent if data persisted correctly', () => {
+  it('should call logEvent if data persisted correctly', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() => {
-          expect(updateLogEvent).toHaveBeenCalledTimes(1);
-          return expect(updateLogEvent).toHaveBeenCalledWith({
-            status: 'Meta-data has been persisted'
-          });
+          expect(logEvent).toHaveBeenCalledTimes(1);
+          return expect(logEvent).toHaveBeenCalledWith('Meta-data has been persisted');
         })
         .finally(() => t.rollback())
     );
@@ -115,8 +113,11 @@ describe('persistHealthRecord', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries('1234', conversationId, isLargeMessage, messageId, manifest, t)
         .catch(error => {
-          expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
-          expect(updateLogEventWithError).toHaveBeenCalledWith(error);
+          expect(logError).toHaveBeenCalledTimes(1);
+          expect(logError).toHaveBeenCalledWith(
+            'Validation error: Validation len on nhs_number failed',
+            expect.anything()
+          );
           return expect(error.message).toContain('Validation len on nhs_number failed');
         })
         .finally(() => t.rollback())
@@ -127,8 +128,11 @@ describe('persistHealthRecord', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries(nhsNumber, 'invalid', isLargeMessage, messageId, manifest, t)
         .catch(error => {
-          expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
-          expect(updateLogEventWithError).toHaveBeenCalledWith(error);
+          expect(logError).toHaveBeenCalledTimes(1);
+          expect(logError).toHaveBeenCalledWith(
+            'invalid input syntax for type uuid: "invalid"',
+            expect.anything()
+          );
           return expect(error.message).toBe('invalid input syntax for type uuid: "invalid"');
         })
         .finally(() => t.rollback())
@@ -139,8 +143,11 @@ describe('persistHealthRecord', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, 'invalid', manifest, t)
         .catch(error => {
-          expect(updateLogEventWithError).toHaveBeenCalledTimes(1);
-          expect(updateLogEventWithError).toHaveBeenCalledWith(error);
+          expect(logError).toHaveBeenCalledTimes(1);
+          expect(logError).toHaveBeenCalledWith(
+            'invalid input syntax for type uuid: "invalid"',
+            expect.anything()
+          );
           return expect(error.message).toBe('invalid input syntax for type uuid: "invalid"');
         })
         .finally(() => t.rollback())

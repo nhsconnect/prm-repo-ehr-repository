@@ -7,7 +7,6 @@ import health from './api/health';
 import { fragments } from './api/fragments';
 import { patients } from './api/patients';
 import { options } from './config/logging';
-import * as correlationInfo from './middleware/correlation';
 import * as logging from './middleware/logging';
 import swaggerDocument from './swagger.json';
 
@@ -16,7 +15,6 @@ httpContext.enable();
 const app = express();
 
 app.use(express.json());
-app.use(correlationInfo.middleware);
 app.use(requestLogger(options));
 
 app.use('/health', logging.middleware, health);

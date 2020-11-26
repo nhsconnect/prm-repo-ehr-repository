@@ -1,25 +1,21 @@
-import httpContext from 'async-local-storage';
-import merge from 'lodash.merge';
-import logger from '../config/logging';
+import { logger } from '../config/logging';
 
-const LOG_EVENT_KEY = 'logEvent';
-
-export const updateLogEvent = event => {
-  httpContext.set(LOG_EVENT_KEY, merge(httpContext.get(LOG_EVENT_KEY), event));
-  logger.info('New event info', event);
-};
-
-export const updateLogEventWithError = err =>
-  updateLogEvent({ error: { ...err, message: err.message, stack: err.stack } });
+export const logEvent = (status, event) => logger.info(status, { event });
+export const logError = (status, event) => logger.error(status, { event });
 
 export const middleware = (req, res, next) => {
-  httpContext.scope();
-  httpContext.set(LOG_EVENT_KEY, { status: 'unknown' });
-  res.on('finish', () => {
-    logger.info('Event finished', { event: httpContext.get(LOG_EVENT_KEY) });
-  });
+  res.on('finish', () => eventFinished(req, res));
   next();
 };
 
-export const logEvent = (status, event) => logger.info(status, event);
-export const logError = (status, event) => logger.error(status, event);
+export const eventFinished = (req, res) => {
+  const url = req.originalUrl;
+  const reqLog = { req: { headers: req.headers, method: req.method } };
+  const resLog = { res: { statusCode: res.statusCode, statusMessage: res.statusMessage } };
+
+  if (res.statusCode < 400) {
+    logEvent(url, { req: reqLog, res: resLog });
+  } else {
+    logError(url, { req: reqLog, res: resLog });
+  }
+};
