@@ -5,6 +5,8 @@ const HealthRecord = ModelFactory.getByName('HealthRecord');
 const MessageFragment = ModelFactory.getByName('MessageFragment');
 const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
 
+export const getCurrentHealthRecordForPatient = () => null;
+
 export const retrieveHealthRecord = conversationId =>
   runWithinTransaction(transaction =>
     HealthRecord.findByConversationId(conversationId, transaction)

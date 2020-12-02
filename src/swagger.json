@@ -125,12 +125,20 @@
         ]
       }
     },
-    "/patients": {
+    "/patients/:nhsNumber": {
       "get": {
         "tags": [],
-        "summary": "Patient details",
+        "summary": "Retrieve current patient health record",
         "consumes": [
           "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nhsNumber",
+            "type": "string",
+            "required": true
+          }
         ],
         "responses": {
           "200": {
@@ -141,6 +149,9 @@
           },
           "403": {
             "description": "Authorization key invalid"
+          },
+          "404": {
+            "description": "No complete health record found for patient"
           }
         },
         "security": [
