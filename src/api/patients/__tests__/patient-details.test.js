@@ -24,7 +24,13 @@ describe('GET /patients', () => {
 
   describe('success', () => {
     beforeEach(() => {
-      getCurrentHealthRecordForPatient.mockResolvedValue({ conversation_id: conversationId });
+      getCurrentHealthRecordForPatient.mockResolvedValue({
+        dataValues: {
+          id: '7d5712f2-d203-4f11-8527-1175db0d2a4a',
+          patient_id: 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1',
+          conversation_id: conversationId
+        }
+      });
     });
 
     it('should return 200', done => {

@@ -155,5 +155,45 @@ describe('HealthRecord integration', () => {
           .finally(() => t.rollback())
       );
     });
+
+    it('should reject with error if the patient_id is invalid', () => {
+      return sequelize.transaction().then(t =>
+        HealthRecord.findByPatientId('123')
+          .catch(error => {
+            expect(error).not.toBeNull();
+            return expect(error.message).toBe('invalid input syntax for type uuid: "123"');
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should retrieve the health record by patient_id', () => {
+      const expectedHealthRecordId = '7d5712f2-d203-4f11-8527-1175db0d2a4a';
+      return sequelize.transaction().then(t =>
+        HealthRecord.findByPatientId(expectedPatientId, t)
+          .then(healthRecord => {
+            return healthRecord.hasManifest('b6d2073d-2381-4d5c-bd10-0d016161588e', t);
+          })
+          .then(healthRecord => {
+            expect(healthRecord).not.toBeNull();
+            return healthRecord.getHealthRecordManifests({ transaction: t });
+          })
+          .then(manifests =>
+            expect(manifests[0].get().health_record_id).toBe(expectedHealthRecordId)
+          )
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should not retrieve the health record when patient_id not found', () => {
+      let missingPatientId = '1e4b5365-0cc2-4943-9aef-5681c01c0d15';
+      return sequelize.transaction().then(t =>
+        HealthRecord.findByPatientId(missingPatientId, t)
+          .then(healthRecord => {
+            expect(healthRecord).toBeNull();
+          })
+          .finally(() => t.rollback())
+      );
+    });
   });
 });

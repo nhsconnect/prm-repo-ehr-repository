@@ -5,7 +5,9 @@ import {
   markHealthRecordAsCompleted,
   markHealthRecordFragmentsAsCompleted,
   markHealthRecordManifestAsCompleted,
-  getCurrentHealthRecordForPatient
+  getCurrentHealthRecordForPatient,
+  getPatientByNhsNumber,
+  getHealthRecordByPatientId
 } from './health-record-repository';
 
 export { checkDbHealth };
@@ -15,5 +17,7 @@ export {
   markHealthRecordAsCompleted,
   markHealthRecordFragmentsAsCompleted,
   markHealthRecordManifestAsCompleted,
-  getCurrentHealthRecordForPatient
+  getCurrentHealthRecordForPatient,
+  getPatientByNhsNumber,
+  getHealthRecordByPatientId
 };

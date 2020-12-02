@@ -62,6 +62,14 @@ module.exports = (sequelize, DataTypes) => {
       transaction: transaction
     });
 
+  HealthRecord.findByPatientId = (patientId, transaction) =>
+    HealthRecord.findOne({
+      where: {
+        patient_id: patientId
+      },
+      transaction: transaction
+    });
+
   HealthRecord.findOrCreateOne = (conversationId, isLargeMessage, transaction) =>
     HealthRecord.findOrCreate({
       where: {

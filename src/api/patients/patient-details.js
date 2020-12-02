@@ -23,7 +23,7 @@ export const patientDetails = async (req, res) => {
       id: req.params.nhsNumber,
       type: 'patient',
       attributes: {
-        conversationId: healthRecord.conversation_id
+        conversationId: healthRecord.dataValues.conversation_id
       }
     }
   };

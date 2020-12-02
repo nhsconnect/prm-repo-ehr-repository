@@ -4,8 +4,18 @@ import { runWithinTransaction } from './helper';
 const HealthRecord = ModelFactory.getByName('HealthRecord');
 const MessageFragment = ModelFactory.getByName('MessageFragment');
 const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
+const Patient = ModelFactory.getByName('Patient');
 
-export const getCurrentHealthRecordForPatient = () => null;
+export const getCurrentHealthRecordForPatient = nhsNumber =>
+  getPatientByNhsNumber(nhsNumber).then(patient =>
+    getHealthRecordByPatientId(patient.dataValues.id)
+  );
+
+export const getPatientByNhsNumber = nhsNumber =>
+  runWithinTransaction(transaction => Patient.findOrCreateOne(nhsNumber, transaction));
+
+export const getHealthRecordByPatientId = patientId =>
+  runWithinTransaction(transaction => HealthRecord.findByPatientId(patientId, transaction));
 
 export const retrieveHealthRecord = conversationId =>
   runWithinTransaction(transaction =>
