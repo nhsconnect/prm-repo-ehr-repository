@@ -1,3 +1,4 @@
+import Sequelize from 'sequelize';
 import getParameters from './parameters';
 const modelName = 'HealthRecord';
 const tableName = 'health_records';
@@ -37,6 +38,7 @@ const model = dataType => ({
 });
 
 module.exports = (sequelize, DataTypes) => {
+  const Op = Sequelize.Op;
   const HealthRecord = sequelize.define(modelName, model(DataTypes), getParameters(tableName));
 
   HealthRecord.complete = options => {
@@ -63,12 +65,16 @@ module.exports = (sequelize, DataTypes) => {
     });
 
   HealthRecord.findByPatientId = (patientId, transaction) =>
-    HealthRecord.findOne({
+    HealthRecord.findAll({
       where: {
-        patient_id: patientId
+        patient_id: patientId,
+        completed_at: {
+          [Op.ne]: null
+        }
       },
+      order: [['completed_at', 'DESC']],
       transaction: transaction
-    });
+    }).then(healthRecord => (healthRecord.length ? healthRecord[0] : null));
 
   HealthRecord.findOrCreateOne = (conversationId, isLargeMessage, transaction) =>
     HealthRecord.findOrCreate({

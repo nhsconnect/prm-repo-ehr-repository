@@ -78,9 +78,9 @@ describe('healthRecordRepository', () => {
 
   describe('getCurrentHealthRecordForPatient', () => {
     it('should retrieve correct health record for patient', async () => {
-      const existingNhsNumber = '1111111111';
-      const expectedHealthRecordId = `7d5712f2-d203-4f11-8527-1175db0d2a4a`;
-      const expectedConversationId = '8ab7f61f-0e6b-4378-8cac-dcb4f9e3ec54';
+      const existingNhsNumber = '5555555555';
+      const expectedHealthRecordId = `e66716d2-3208-4ef6-88b5-6a77f16125f5`;
+      const expectedConversationId = '6952c28c-b806-44f9-9b06-6bfe2e99dcba';
 
       return getCurrentHealthRecordForPatient(existingNhsNumber).then(healthRecord => {
         expect(healthRecord).not.toBeNull();
@@ -91,8 +91,9 @@ describe('healthRecordRepository', () => {
   });
 
   describe('getPatientByNhsNumber', () => {
-    const existingNhsNumber = '1111111111';
-    const expectedPatientId = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
+    const existingNhsNumber = '5555555555';
+    const missingNhsNumber = '0009991112';
+    const expectedPatientId = 'd316b74f-5338-434d-9268-760781a04835';
 
     it('should retrieve patient by nhs number', () => {
       return getPatientByNhsNumber(existingNhsNumber).then(patient => {
@@ -100,16 +101,29 @@ describe('healthRecordRepository', () => {
         return expect(patient.get().id).toBe(expectedPatientId);
       });
     });
+
+    it('should return null if patient cannot be found', () => {
+      return getPatientByNhsNumber(missingNhsNumber).then(patient => {
+        expect(patient).toBeNull();
+      });
+    });
   });
 
   describe('getHealthRecordByPatientId', () => {
-    const existingPatientId = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
-    const expectedHealthRecordId = `7d5712f2-d203-4f11-8527-1175db0d2a4a`;
+    const existingPatientId = 'd316b74f-5338-434d-9268-760781a04835';
+    const expectedHealthRecordId = `e66716d2-3208-4ef6-88b5-6a77f16125f5`;
 
-    it('should retrieve patient by nhs number', () => {
+    it('should retrieve most recent complete health record if patient exists', () => {
       return getHealthRecordByPatientId(existingPatientId).then(healthRecord => {
         expect(healthRecord).not.toBeNull();
         return expect(healthRecord.get().id).toBe(expectedHealthRecordId);
+      });
+    });
+
+    it('should return null if cannot find a complete health record', () => {
+      const missingPatientId = '85cf0816-2911-4c84-868f-46fe0056e3ae';
+      return getHealthRecordByPatientId(missingPatientId).then(healthRecord => {
+        expect(healthRecord).toBeNull();
       });
     });
   });

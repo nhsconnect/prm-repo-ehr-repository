@@ -155,7 +155,9 @@ describe('HealthRecord integration', () => {
           .finally(() => t.rollback())
       );
     });
+  });
 
+  describe('findByPatientId', () => {
     it('should reject with error if the patient_id is invalid', () => {
       return sequelize.transaction().then(t =>
         HealthRecord.findByPatientId('123')
@@ -167,20 +169,13 @@ describe('HealthRecord integration', () => {
       );
     });
 
-    it('should retrieve the health record by patient_id', () => {
-      const expectedHealthRecordId = '7d5712f2-d203-4f11-8527-1175db0d2a4a';
+    it('should return null when there are no complete health records for an existing patient', () => {
+      const existingPatientWithNoCompleteRecords = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
       return sequelize.transaction().then(t =>
-        HealthRecord.findByPatientId(expectedPatientId, t)
+        HealthRecord.findByPatientId(existingPatientWithNoCompleteRecords, t)
           .then(healthRecord => {
-            return healthRecord.hasManifest('b6d2073d-2381-4d5c-bd10-0d016161588e', t);
+            expect(healthRecord).toBeNull();
           })
-          .then(healthRecord => {
-            expect(healthRecord).not.toBeNull();
-            return healthRecord.getHealthRecordManifests({ transaction: t });
-          })
-          .then(manifests =>
-            expect(manifests[0].get().health_record_id).toBe(expectedHealthRecordId)
-          )
           .finally(() => t.rollback())
       );
     });
@@ -191,6 +186,18 @@ describe('HealthRecord integration', () => {
         HealthRecord.findByPatientId(missingPatientId, t)
           .then(healthRecord => {
             expect(healthRecord).toBeNull();
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should retrieve the most recent complete health record when patient exists', () => {
+      const patientWithMultipleHealthRecords = `d316b74f-5338-434d-9268-760781a04835`;
+      const expectedConversationId = `6952c28c-b806-44f9-9b06-6bfe2e99dcba`;
+      return sequelize.transaction().then(t =>
+        HealthRecord.findByPatientId(patientWithMultipleHealthRecords, t)
+          .then(healthRecord => {
+            expect(healthRecord.get().conversation_id).toBe(expectedConversationId);
           })
           .finally(() => t.rollback())
       );
