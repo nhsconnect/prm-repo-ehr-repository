@@ -33,6 +33,29 @@ module.exports = {
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: new Date()
+      },
+      {
+        id: 'b8be9129-b2b6-48cd-b9b4-7576f0869057',
+        conversation_id: '07ba6c7b-a794-48f6-80aa-91055bf15758',
+        patient_id: 'd316b74f-5338-434d-9268-760781a04835',
+        created_at: new Date(`2015-03-25T12:00:00Z`),
+        updated_at: new Date(`2015-03-26T12:00:00Z`),
+        completed_at: new Date(`2015-03-26T12:00:00Z`)
+      },
+      {
+        id: 'e66716d2-3208-4ef6-88b5-6a77f16125f5',
+        conversation_id: '6952c28c-b806-44f9-9b06-6bfe2e99dcba',
+        patient_id: 'd316b74f-5338-434d-9268-760781a04835',
+        created_at: new Date(`2018-03-25T12:00:00Z`),
+        updated_at: new Date(`2018-03-26T12:00:00Z`),
+        completed_at: new Date(`2018-03-26T12:00:00Z`)
+      },
+      {
+        id: '2613d1bd-0ee1-40de-9702-3937318e7276',
+        conversation_id: '1a528bd9-3861-4a8f-a64e-9a469f9f90e7',
+        patient_id: 'd316b74f-5338-434d-9268-760781a04835',
+        created_at: new Date(`2020-03-25T12:00:00Z`),
+        updated_at: new Date(`2020-03-25T12:00:00Z`)
       }
     ]);
   },

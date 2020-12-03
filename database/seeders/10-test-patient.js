@@ -23,6 +23,12 @@ module.exports = {
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: new Date()
+      },
+      {
+        id: 'd316b74f-5338-434d-9268-760781a04835',
+        nhs_number: 5555555555,
+        created_at: new Date(`2015-03-25T12:00:00Z`),
+        updated_at: new Date(`2015-03-26T12:00:00Z`)
       }
     ]);
   },

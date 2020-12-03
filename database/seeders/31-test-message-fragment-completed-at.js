@@ -26,6 +26,22 @@ module.exports = {
         health_record_id: '7a1515b9-4d2d-415c-b4e2-09392af8fec4',
         created_at: new Date(),
         updated_at: new Date()
+      },
+      {
+        id: '572c0b80-df78-4975-9a2b-f5ccc7cc495b',
+        message_id: '5a5fd36a-47fc-4e85-81d2-d05c05666667',
+        health_record_id: 'b8be9129-b2b6-48cd-b9b4-7576f0869057',
+        created_at: new Date(`2015-03-25T12:00:00Z`),
+        updated_at: new Date(`2015-03-26T12:00:00Z`),
+        completed_at: new Date(`2015-03-26T12:00:00Z`)
+      },
+      {
+        id: '911804e8-2b23-48f9-9261-ee6df2f14e64',
+        message_id: '5bcf9bc1-190a-4c1c-814d-0fa6ef3ecce6',
+        health_record_id: 'e66716d2-3208-4ef6-88b5-6a77f16125f5',
+        created_at: new Date(`2018-03-25T12:00:00Z`),
+        updated_at: new Date(`2018-03-26T12:00:00Z`),
+        completed_at: new Date(`2018-03-26T12:00:00Z`)
       }
     ]);
   },
