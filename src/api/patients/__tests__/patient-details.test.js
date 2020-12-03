@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../../../app';
 import { getCurrentHealthRecordForPatient } from '../../../services/database';
+import { logError } from '../../../middleware/logging';
 
 jest.mock('../../../middleware/logging');
 jest.mock('../../../middleware/auth');
@@ -58,6 +59,38 @@ describe('GET /patients', () => {
       request(app)
         .get(testEndpoint)
         .expect(404)
+        .end(done);
+    });
+  });
+
+  describe('error', () => {
+    it('should return 500 when cannot retrieve health record', done => {
+      getCurrentHealthRecordForPatient.mockRejectedValueOnce(Error('some-error'));
+      request(app)
+        .get(testEndpoint)
+        .expect(500)
+        .end(done);
+    });
+
+    it('should return error message when there is an error', done => {
+      getCurrentHealthRecordForPatient.mockRejectedValueOnce(Error('some-error'));
+      request(app)
+        .get(testEndpoint)
+        .expect(res => {
+          expect(res.body).toEqual({ error: 'some-error' });
+        })
+        .end(done);
+    });
+
+    it('should logError when there is an error', done => {
+      const error = Error('some-error');
+      getCurrentHealthRecordForPatient.mockRejectedValueOnce(error);
+      request(app)
+        .get(testEndpoint)
+        .expect(() => {
+          expect(logError).toHaveBeenCalledTimes(1);
+          expect(logError).toHaveBeenCalledWith('Error retrieving patient health record', error);
+        })
         .end(done);
     });
   });
