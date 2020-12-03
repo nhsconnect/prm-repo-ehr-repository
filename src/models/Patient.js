@@ -48,5 +48,13 @@ module.exports = (sequelize, DataTypes) => {
       transaction: transaction
     }).then(patients => patients[0]);
 
+  Patient.findByNhsNumber = (nhsNumber, transaction) =>
+    Patient.findOne({
+      where: {
+        nhs_number: nhsNumber
+      },
+      transaction: transaction
+    });
+
   return Patient;
 };

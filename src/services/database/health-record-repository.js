@@ -12,7 +12,7 @@ export const getCurrentHealthRecordForPatient = nhsNumber =>
   );
 
 export const getPatientByNhsNumber = nhsNumber =>
-  runWithinTransaction(transaction => Patient.findOrCreateOne(nhsNumber, transaction));
+  runWithinTransaction(transaction => Patient.findByNhsNumber(nhsNumber, transaction));
 
 export const getHealthRecordByPatientId = patientId =>
   runWithinTransaction(transaction => HealthRecord.findByPatientId(patientId, transaction));
