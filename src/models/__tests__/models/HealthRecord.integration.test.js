@@ -192,8 +192,8 @@ describe('HealthRecord integration', () => {
     });
 
     it('should retrieve the most recent complete health record when patient exists', () => {
-      const patientWithMultipleHealthRecords = `d316b74f-5338-434d-9268-760781a04835`;
-      const expectedConversationId = `6952c28c-b806-44f9-9b06-6bfe2e99dcba`;
+      const patientWithMultipleHealthRecords = 'd316b74f-5338-434d-9268-760781a04835';
+      const expectedConversationId = '6952c28c-b806-44f9-9b06-6bfe2e99dcba';
       return sequelize.transaction().then(t =>
         HealthRecord.findByPatientId(patientWithMultipleHealthRecords, t)
           .then(healthRecord => {

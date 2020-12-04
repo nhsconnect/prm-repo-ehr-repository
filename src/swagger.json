@@ -161,45 +161,6 @@
         ]
       }
     },
-    "/patients/{nhsNumber}/health-records": {
-      "get": {
-        "tags": [],
-        "summary": "Gets health records for a patient",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "nhsNumber",
-            "type": "string",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful"
-          },
-          "401": {
-            "description": "Authorization header missing"
-          },
-          "403": {
-            "description": "Authorization key invalid"
-          },
-          "422": {
-            "description": "Validation failed",
-            "schema": {
-              "$ref": "#/definitions/ValidationErrors"
-            }
-          }
-        },
-        "security": [
-          {
-            "api_key": []
-          }
-        ]
-      }
-    },
     "/patients/{nhsNumber}/health-records/{conversationId}": {
       "get": {
         "tags": [],
@@ -233,45 +194,6 @@
           },
           "404": {
             "description": "Health record with that conversation id not found"
-          },
-          "422": {
-            "description": "Validation failed",
-            "schema": {
-              "$ref": "#/definitions/ValidationErrors"
-            }
-          }
-        },
-        "security": [
-          {
-            "api_key": []
-          }
-        ]
-      }
-    },
-    "/patients/{nhsNumber}/health-records/fragments": {
-      "get": {
-        "tags": [],
-        "summary": "Gets health record fragments for a patient",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "nhsNumber",
-            "type": "string",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful"
-          },
-          "401": {
-            "description": "Authorization header missing"
-          },
-          "403": {
-            "description": "Authorization key invalid"
           },
           "422": {
             "description": "Validation failed",
