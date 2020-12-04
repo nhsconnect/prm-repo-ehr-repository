@@ -16,6 +16,7 @@ export const patientDetailsValidation = [
 export const patientDetails = async (req, res) => {
   try {
     const healthRecord = await getCurrentHealthRecordForPatient(req.params.nhsNumber);
+
     if (healthRecord === null) {
       res.sendStatus(404);
       return;
@@ -23,7 +24,7 @@ export const patientDetails = async (req, res) => {
     const responseBody = {
       data: {
         id: req.params.nhsNumber,
-        type: 'patient',
+        type: 'patients',
         attributes: {
           conversationId: healthRecord.dataValues.conversation_id
         }

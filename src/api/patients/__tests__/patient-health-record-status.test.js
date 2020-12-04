@@ -18,7 +18,7 @@ describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
   const testEndpoint = `/patients/${nhsNumber}/health-records/${conversationId}`;
   const body = {
     data: {
-      type: 'health-record',
+      type: 'health-records',
       id: conversationId,
       attributes: {
         status: 'success',
@@ -28,7 +28,7 @@ describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
   };
   const pendingBody = {
     data: {
-      type: 'health-record',
+      type: 'health-records',
       id: conversationId,
       attributes: {
         status: 'pending',

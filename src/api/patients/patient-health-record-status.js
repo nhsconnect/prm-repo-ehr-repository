@@ -21,7 +21,7 @@ export const patientHealthRecordStatus = (req, res) => {
     }
     let body = {
       data: {
-        type: 'health-record',
+        type: 'health-records',
         id: req.params.conversationId,
         attributes: {
           status: healthRecord.dataValues.completed_at ? 'success' : 'pending',

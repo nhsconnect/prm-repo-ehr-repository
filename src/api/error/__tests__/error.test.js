@@ -1,8 +1,8 @@
 import request from 'supertest';
-import app from '../../app';
-import { logError } from '../../middleware/logging';
+import app from '../../../app';
+import { logError } from '../../../middleware/logging';
 
-jest.mock('../../middleware/logging');
+jest.mock('../../../middleware/logging');
 
 describe('GET /error', () => {
   it('should return 200', done => {

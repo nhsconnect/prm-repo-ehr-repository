@@ -15,7 +15,7 @@ describe('GET /patients', () => {
   const testEndpoint = `/patients/${nhsNumber}`;
   const responseBody = {
     data: {
-      type: 'patient',
+      type: 'patients',
       id: nhsNumber,
       attributes: {
         conversationId

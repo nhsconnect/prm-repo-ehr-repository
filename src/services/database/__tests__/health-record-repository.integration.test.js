@@ -79,13 +79,21 @@ describe('healthRecordRepository', () => {
   describe('getCurrentHealthRecordForPatient', () => {
     it('should retrieve correct health record for patient', async () => {
       const existingNhsNumber = '5555555555';
-      const expectedHealthRecordId = `e66716d2-3208-4ef6-88b5-6a77f16125f5`;
+      const expectedHealthRecordId = 'e66716d2-3208-4ef6-88b5-6a77f16125f5';
       const expectedConversationId = '6952c28c-b806-44f9-9b06-6bfe2e99dcba';
 
       return getCurrentHealthRecordForPatient(existingNhsNumber).then(healthRecord => {
         expect(healthRecord).not.toBeNull();
         expect(healthRecord.get().id).toBe(expectedHealthRecordId);
         expect(healthRecord.get().conversation_id).toBe(expectedConversationId);
+      });
+    });
+
+    it('should return null for a patient that does not exist', async () => {
+      const missingNhsNumber = '0009991112';
+
+      return getCurrentHealthRecordForPatient(missingNhsNumber).then(healthRecord => {
+        expect(healthRecord).toBeNull();
       });
     });
   });
@@ -111,7 +119,7 @@ describe('healthRecordRepository', () => {
 
   describe('getHealthRecordByPatientId', () => {
     const existingPatientId = 'd316b74f-5338-434d-9268-760781a04835';
-    const expectedHealthRecordId = `e66716d2-3208-4ef6-88b5-6a77f16125f5`;
+    const expectedHealthRecordId = 'e66716d2-3208-4ef6-88b5-6a77f16125f5';
 
     it('should retrieve most recent complete health record if patient exists', () => {
       return getHealthRecordByPatientId(existingPatientId).then(healthRecord => {

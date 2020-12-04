@@ -1,11 +1,11 @@
-import app from '../../app';
+import app from '../../../app';
 import request from 'supertest';
-import { getHealthCheck } from '../../services/get-health-check';
-import { logEvent, logError } from '../../middleware/logging';
+import { getHealthCheck } from '../../../services/get-health-check';
+import { logEvent, logError } from '../../../middleware/logging';
 
-jest.mock('../../config/logging');
-jest.mock('../../services/get-health-check');
-jest.mock('../../middleware/logging');
+jest.mock('../../../config/logging');
+jest.mock('../../../services/get-health-check');
+jest.mock('../../../middleware/logging');
 
 const mockErrorResponse = 'some-error';
 

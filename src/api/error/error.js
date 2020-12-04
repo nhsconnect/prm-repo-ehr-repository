@@ -1,5 +1,5 @@
 import express from 'express';
-import { logError } from '../middleware/logging';
+import { logError } from '../../middleware/logging';
 
 const router = express.Router();
 

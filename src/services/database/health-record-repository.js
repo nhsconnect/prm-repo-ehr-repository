@@ -7,9 +7,10 @@ const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
 const Patient = ModelFactory.getByName('Patient');
 
 export const getCurrentHealthRecordForPatient = nhsNumber =>
-  getPatientByNhsNumber(nhsNumber).then(patient =>
-    getHealthRecordByPatientId(patient.dataValues.id)
-  );
+  getPatientByNhsNumber(nhsNumber).then(patient => {
+    if (patient === null) return null;
+    return getHealthRecordByPatientId(patient.dataValues.id);
+  });
 
 export const getPatientByNhsNumber = nhsNumber =>
   runWithinTransaction(transaction => Patient.findByNhsNumber(nhsNumber, transaction));
