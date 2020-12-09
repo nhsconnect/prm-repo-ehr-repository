@@ -125,7 +125,7 @@
         ]
       }
     },
-    "/patients/:nhsNumber": {
+    "/patients/{nhsNumber}": {
       "get": {
         "tags": [],
         "summary": "Retrieve current patient health record",
