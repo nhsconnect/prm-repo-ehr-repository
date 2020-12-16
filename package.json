@@ -27,7 +27,7 @@
     "db:data:remove": "sequelize-cli db:seed:undo:all"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
+    "@babel/cli": "^7.12.10",
     "@babel/core": "^7.8.7",
     "@babel/node": "^7.8.7",
     "@babel/plugin-transform-runtime": "^7.8.3",
