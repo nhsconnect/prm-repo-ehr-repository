@@ -1,37 +1,53 @@
 import request from 'supertest';
 import app from '../../../app';
-import { getCurrentHealthRecordForPatient } from '../../../services/database';
+import {
+  getCurrentHealthRecordForPatient,
+  getMessageFragmentByHealthRecordId
+} from '../../../services/database';
 import { logError } from '../../../middleware/logging';
+import getSignedUrl from '../../../services/storage/get-signed-url';
 
 jest.mock('../../../middleware/logging');
 jest.mock('../../../middleware/auth');
+jest.mock('../../../services/storage/get-signed-url');
 jest.mock('../../../services/database', () => ({
-  getCurrentHealthRecordForPatient: jest.fn()
+  getCurrentHealthRecordForPatient: jest.fn(),
+  getMessageFragmentByHealthRecordId: jest.fn()
 }));
 
 describe('GET /patients', () => {
   const nhsNumber = `1234567890`;
-  const conversationId = '123-123';
+  const presignedUrl = 'fake-url';
+  const healthRecordId = '7d5712f2-d203-4f11-8527-1175db0d2a4a';
+  const conversationId = 'E300D50D-F163-4F0C-93A1-19581BC08711';
+  const messageId = '59343E70-AD0A-4D1F-BAF0-30D806948627';
+
   const testEndpoint = `/patients/${nhsNumber}`;
   const responseBody = {
     data: {
       type: 'patients',
       id: nhsNumber,
       attributes: {
-        conversationId
+        presignedUrl
       }
     }
   };
-
   describe('success', () => {
     beforeEach(() => {
       getCurrentHealthRecordForPatient.mockResolvedValue({
         dataValues: {
-          id: '7d5712f2-d203-4f11-8527-1175db0d2a4a',
+          id: healthRecordId,
           patient_id: 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1',
           conversation_id: conversationId
         }
       });
+      getMessageFragmentByHealthRecordId.mockReturnValue({
+        dataValues: {
+          message_id: messageId
+        }
+      });
+
+      getSignedUrl.mockReturnValue(presignedUrl);
     });
 
     it('should return 200', done => {
@@ -47,19 +63,36 @@ describe('GET /patients', () => {
         .expect(res => {
           expect(res.body).toEqual(responseBody);
           expect(getCurrentHealthRecordForPatient).toHaveBeenCalledWith(nhsNumber);
+          expect(getMessageFragmentByHealthRecordId).toHaveBeenCalledWith(healthRecordId);
+          expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId);
         })
         .end(done);
     });
   });
 
-  describe('patient health record not found', () => {
-    it('should return 404', done => {
+  describe('not found', () => {
+    it('should return 404 when patient health record not found', async () => {
       getCurrentHealthRecordForPatient.mockResolvedValue(null);
 
-      request(app)
-        .get(testEndpoint)
-        .expect(404)
-        .end(done);
+      const res = await request(app).get(testEndpoint);
+
+      expect(res.status).toBe(404);
+      expect(getMessageFragmentByHealthRecordId).not.toHaveBeenCalled();
+      expect(getSignedUrl).not.toHaveBeenCalled();
+    });
+
+    it('should return 404 when message fragment not found', async () => {
+      getCurrentHealthRecordForPatient.mockResolvedValue({
+        dataValues: {
+          id: '7d5712f2-d203-4f11-8527-1175db0d2a4a',
+          conversation_id: 'E300D50D-F163-4F0C-93A1-19581BC08711'
+        }
+      });
+      getMessageFragmentByHealthRecordId.mockResolvedValue(null);
+
+      const res = await request(app).get(testEndpoint);
+      expect(res.status).toBe(404);
+      expect(getSignedUrl).not.toHaveBeenCalled();
     });
   });
 

@@ -9,6 +9,7 @@ import {
 } from '../';
 import ModelFactory from '../../../models';
 import { runWithinTransaction } from '../helper';
+import { getMessageFragmentByHealthRecordId } from '../health-record-repository';
 
 jest.mock('../../../middleware/logging');
 
@@ -133,6 +134,21 @@ describe('healthRecordRepository', () => {
       return getHealthRecordByPatientId(missingPatientId).then(healthRecord => {
         expect(healthRecord).toBeNull();
       });
+    });
+  });
+
+  describe('getMessageFragmentByHealthRecordId', () => {
+    it('should retrieve message fragment for a given health record id', async () => {
+      const healthRecordId = '04523969-6679-4ac8-8222-c226ff7a155f';
+      const expectedMessageId = 'dc0626d8-bb01-4b94-a044-9b9322b52634';
+      const messageFragment = await getMessageFragmentByHealthRecordId(healthRecordId);
+      expect(messageFragment.get().message_id).toBe(expectedMessageId);
+    });
+
+    it('should return null if cannot find a message fragment with health record id', async () => {
+      const missingHealthRecordId = 'E44C075D-FD45-4CEF-A14C-472435B1F232';
+      const messageFragment = await getMessageFragmentByHealthRecordId(missingHealthRecordId);
+      expect(messageFragment).toBeNull();
     });
   });
 });

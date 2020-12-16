@@ -53,6 +53,14 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
+  MessageFragment.findByHealthRecordId = (healthRecordId, transaction) =>
+    MessageFragment.findOne({
+      where: {
+        health_record_id: healthRecordId
+      },
+      transaction: transaction
+    });
+
   MessageFragment.findOrCreateOne = (messageId, transaction) =>
     MessageFragment.findOrCreate({
       where: {

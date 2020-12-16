@@ -1,6 +1,8 @@
 import { param } from 'express-validator';
 import { getCurrentHealthRecordForPatient } from '../../services/database';
 import { logError } from '../../middleware/logging';
+import getSignedUrl from '../../services/storage/get-signed-url';
+import { getMessageFragmentByHealthRecordId } from '../../services/database';
 
 export const patientDetailsValidation = [
   param('nhsNumber')
@@ -21,12 +23,21 @@ export const patientDetails = async (req, res) => {
       res.sendStatus(404);
       return;
     }
+    const { id, conversation_id: conversationId } = healthRecord.dataValues;
+    const messageFragment = await getMessageFragmentByHealthRecordId(id);
+    if (messageFragment === null) {
+      res.sendStatus(404);
+      return;
+    }
+    const { message_id: messageId } = messageFragment.dataValues;
+    const presignedUrl = getSignedUrl(conversationId, messageId);
+
     const responseBody = {
       data: {
         id: req.params.nhsNumber,
         type: 'patients',
         attributes: {
-          conversationId: healthRecord.dataValues.conversation_id
+          presignedUrl
         }
       }
     };

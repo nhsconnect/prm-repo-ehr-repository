@@ -2,18 +2,20 @@ import request from 'supertest';
 import uuid from 'uuid/v4';
 import app from '../app';
 import config from '../config';
+import getSignedUrl from '../services/storage/get-signed-url';
 
 jest.mock('../middleware/logging');
 jest.mock('../middleware/auth');
+jest.mock('../services/storage/get-signed-url');
 
 describe('GET /patients/:nhsNumber', () => {
   it('should return 200 and most recent complete health record conversation id', async () => {
+    getSignedUrl.mockReturnValue('fake-url');
     const nhsNumber = '5555555555';
-    const expectedConversationId = '6952c28c-b806-44f9-9b06-6bfe2e99dcba';
     const res = await request(app).get(`/patients/${nhsNumber}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.attributes.conversationId).toBe(expectedConversationId);
+    expect(res.body.data.attributes.presignedUrl).toBe('fake-url');
   });
 
   it('should return 404 when complete health record is not found', async () => {

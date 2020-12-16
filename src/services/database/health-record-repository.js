@@ -6,6 +6,11 @@ const MessageFragment = ModelFactory.getByName('MessageFragment');
 const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
 const Patient = ModelFactory.getByName('Patient');
 
+export const getMessageFragmentByHealthRecordId = healthRecordId =>
+  runWithinTransaction(transaction =>
+    MessageFragment.findByHealthRecordId(healthRecordId, transaction)
+  );
+
 export const getCurrentHealthRecordForPatient = nhsNumber =>
   getPatientByNhsNumber(nhsNumber).then(patient => {
     if (patient === null) return null;
