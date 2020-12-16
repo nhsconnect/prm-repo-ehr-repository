@@ -30,7 +30,7 @@ export const patientDetails = async (req, res) => {
       return;
     }
     const { message_id: messageId } = messageFragment.dataValues;
-    const presignedUrl = getSignedUrl(conversationId, messageId);
+    const presignedUrl = await getSignedUrl(conversationId, messageId);
 
     const responseBody = {
       data: {
