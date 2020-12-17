@@ -49,6 +49,30 @@ describe('MessageFragment integration', () => {
     });
   });
 
+  describe('findByHealthRecordId', () => {
+    it('should reject with error if health_record_id is not a valid UUID', () => {
+      return sequelize.transaction().then(t =>
+        MessageFragment.findByHealthRecordId('not-valid', t)
+          .catch(error => {
+            expect(error).not.toBeNull();
+            return expect(error.message).toBe('invalid input syntax for type uuid: "not-valid"');
+          })
+          .finally(() => t.rollback())
+      );
+    });
+
+    it('should return if record exists', () => {
+      return sequelize.transaction().then(t =>
+        MessageFragment.findByHealthRecordId(expectedHealthRecordId, t)
+          .then(fragment => {
+            expect(fragment.get().id).toBe(expectedUUID);
+            return expect(fragment.get().message_id).toBe(expectedMessageId);
+          })
+          .finally(() => t.rollback())
+      );
+    });
+  });
+
   describe('withHealthRecord', () => {
     it('should associate the message fragment with the health record by conversation_id', () => {
       return sequelize.transaction().then(t =>
