@@ -18,7 +18,6 @@ export const patientDetailsValidation = [
 export const patientDetails = async (req, res) => {
   try {
     const healthRecord = await getCurrentHealthRecordForPatient(req.params.nhsNumber);
-
     if (healthRecord === null) {
       res.sendStatus(404);
       return;
@@ -30,7 +29,8 @@ export const patientDetails = async (req, res) => {
       return;
     }
     const { message_id: messageId } = messageFragment.dataValues;
-    const presignedUrl = await getSignedUrl(conversationId, messageId);
+    const getOperation = 'getObject';
+    const presignedUrl = await getSignedUrl(conversationId, messageId, getOperation);
 
     const responseBody = {
       data: {

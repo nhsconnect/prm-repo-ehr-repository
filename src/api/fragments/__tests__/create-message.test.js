@@ -197,7 +197,7 @@ describe('Create new message fragments', () => {
             conversationId
           })
           .expect(() => {
-            expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId);
+            expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'putObject');
           })
           .end(done);
       });

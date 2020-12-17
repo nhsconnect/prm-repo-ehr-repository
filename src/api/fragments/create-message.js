@@ -33,6 +33,7 @@ export const createNewMessageValidationRules = [
 
 export const createMessage = (req, res) => {
   const largeMessageFieldExists = req.body.isLargeMessage !== undefined;
+  const putOperation = 'putObject';
   persistHealthRecord(
     req.body.nhsNumber,
     req.body.conversationId,
@@ -40,7 +41,7 @@ export const createMessage = (req, res) => {
     req.body.messageId,
     req.body.manifest ? req.body.manifest : null
   )
-    .then(() => getSignedUrl(req.body.conversationId, req.body.messageId))
+    .then(() => getSignedUrl(req.body.conversationId, req.body.messageId, putOperation))
     .then(url => {
       logEvent('Retrieved pre-signed url successfully');
       res.status(201).send(url);

@@ -42,12 +42,17 @@ export default class S3Service {
     });
   }
 
-  getPresignedUrl() {
-    return this.s3.getSignedUrlPromise('putObject', {
+  getPresignedUrl(operation) {
+    const params = {
       ...this.parameters,
-      Expires: URL_EXPIRY_TIME,
-      ContentType: CONTENT_TYPE
-    });
+      Expires: URL_EXPIRY_TIME
+    };
+
+    if (operation === 'putObject') {
+      params.ContentType = CONTENT_TYPE;
+    }
+
+    return this.s3.getSignedUrlPromise(operation, params);
   }
 
   _isConnected() {

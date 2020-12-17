@@ -64,7 +64,7 @@ describe('GET /patients', () => {
           expect(res.body).toEqual(responseBody);
           expect(getCurrentHealthRecordForPatient).toHaveBeenCalledWith(nhsNumber);
           expect(getMessageFragmentByHealthRecordId).toHaveBeenCalledWith(healthRecordId);
-          expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId);
+          expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'getObject');
         })
         .end(done);
     });

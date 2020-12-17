@@ -21,9 +21,28 @@ describe('S3Service', () => {
         ContentType: 'text/xml'
       };
 
-      return new S3Service('some-filename').getPresignedUrl().then(url => {
+      return new S3Service('some-filename').getPresignedUrl('putObject').then(url => {
         expect(url).toEqual('some-presigned-url');
         expect(mockSignedUrl).toHaveBeenCalledWith('putObject', parameters);
+      });
+    });
+
+    it('should call s3 getSignedUrl with parameters', () => {
+      const mockSignedUrl = jest.fn().mockResolvedValue('some-presigned-url');
+
+      S3.mockImplementation(() => ({
+        getSignedUrlPromise: mockSignedUrl
+      }));
+
+      const parameters = {
+        Bucket: config.awsS3BucketName,
+        Key: 'some-filename',
+        Expires: 60
+      };
+
+      return new S3Service('some-filename').getPresignedUrl('getObject').then(url => {
+        expect(url).toEqual('some-presigned-url');
+        expect(mockSignedUrl).toHaveBeenCalledWith('getObject', parameters);
       });
     });
   });
