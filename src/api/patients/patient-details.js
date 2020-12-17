@@ -1,6 +1,6 @@
 import { param } from 'express-validator';
 import { getCurrentHealthRecordForPatient } from '../../services/database';
-import { logError } from '../../middleware/logging';
+import {logError, logEvent} from '../../middleware/logging';
 import getSignedUrl from '../../services/storage/get-signed-url';
 import { getMessageFragmentByHealthRecordId } from '../../services/database';
 
@@ -29,6 +29,7 @@ export const patientDetails = async (req, res) => {
       return;
     }
     const { message_id: messageId } = messageFragment.dataValues;
+    logEvent('requesting signed url for:', { conversationId, messageId })
     const getOperation = 'getObject';
     const presignedUrl = await getSignedUrl(conversationId, messageId, getOperation);
 
