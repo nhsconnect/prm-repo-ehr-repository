@@ -36,8 +36,8 @@ export const patientDetails = async (req, res) => {
       data: {
         id: req.params.nhsNumber,
         type: 'patients',
-        attributes: {
-          presignedUrl
+        links: {
+          currentEhr: presignedUrl
         }
       }
     };

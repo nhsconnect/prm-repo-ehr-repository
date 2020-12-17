@@ -14,7 +14,7 @@ describe('GET /patients/:nhsNumber', () => {
     const res = await request(app).get(`/patients/${nhsNumber}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.attributes.presignedUrl).toContain(
+    expect(res.body.data.links.currentEhr).toContain(
       `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
     );
   });

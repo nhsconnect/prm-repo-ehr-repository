@@ -27,8 +27,8 @@ describe('GET /patients', () => {
     data: {
       type: 'patients',
       id: nhsNumber,
-      attributes: {
-        presignedUrl
+      links: {
+        currentEhr: presignedUrl
       }
     }
   };
