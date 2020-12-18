@@ -19,8 +19,8 @@ describe('GET /patients', () => {
   const nhsNumber = `1234567890`;
   const presignedUrl = 'fake-url';
   const healthRecordId = '7d5712f2-d203-4f11-8527-1175db0d2a4a';
-  const conversationId = 'E300D50D-F163-4F0C-93A1-19581BC08711';
-  const messageId = '59343E70-AD0A-4D1F-BAF0-30D806948627';
+  const conversationId = 'e300d50d-f163-4f0c-93a1-19581bc08711';
+  const messageId = '59343e70-ad0a-4d1f-baf0-30d806948627';
 
   const testEndpoint = `/patients/${nhsNumber}`;
   const responseBody = {
@@ -64,7 +64,11 @@ describe('GET /patients', () => {
           expect(res.body).toEqual(responseBody);
           expect(getCurrentHealthRecordForPatient).toHaveBeenCalledWith(nhsNumber);
           expect(getMessageFragmentByHealthRecordId).toHaveBeenCalledWith(healthRecordId);
-          expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'getObject');
+          expect(getSignedUrl).toHaveBeenCalledWith(
+            conversationId.toUpperCase(),
+            messageId.toUpperCase(),
+            'getObject'
+          );
         })
         .end(done);
     });

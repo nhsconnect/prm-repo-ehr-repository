@@ -9,8 +9,8 @@ jest.mock('../middleware/auth');
 describe('GET /patients/:nhsNumber', () => {
   it('should return 200 and most recent complete health record conversation id', async () => {
     const nhsNumber = '5555555555';
-    const messageId = '5bcf9bc1-190a-4c1c-814d-0fa6ef3ecce6';
-    const conversationId = '6952c28c-b806-44f9-9b06-6bfe2e99dcba';
+    const messageId = '5BCF9BC1-190A-4C1C-814D-0FA6EF3ECCE6';
+    const conversationId = '6952C28C-B806-44F9-9B06-6BFE2E99DCBA';
     const res = await request(app).get(`/patients/${nhsNumber}`);
 
     expect(res.status).toBe(200);

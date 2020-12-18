@@ -31,7 +31,11 @@ export const patientDetails = async (req, res) => {
     const { message_id: messageId } = messageFragment.dataValues;
     logEvent('requesting signed url for:', { conversationId, messageId });
     const getOperation = 'getObject';
-    const presignedUrl = await getSignedUrl(conversationId, messageId, getOperation);
+    const presignedUrl = await getSignedUrl(
+      conversationId.toUpperCase(),
+      messageId.toUpperCase(),
+      getOperation
+    );
 
     const responseBody = {
       data: {
