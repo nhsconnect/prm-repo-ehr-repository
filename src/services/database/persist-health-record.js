@@ -1,8 +1,9 @@
 import ModelFactory from '../../models';
 import { logEvent, logError } from '../../middleware/logging';
+import { modelName } from '../../models/message-fragment';
 
 const sequelize = ModelFactory.sequelize;
-const MessageFragment = ModelFactory.getByName('MessageFragment');
+const MessageFragment = ModelFactory.getByName(modelName);
 
 export const createAndLinkEntries = (
   nhsNumber,

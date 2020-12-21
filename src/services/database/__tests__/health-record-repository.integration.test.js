@@ -10,6 +10,9 @@ import {
 import ModelFactory from '../../../models';
 import { runWithinTransaction } from '../helper';
 import { getMessageFragmentByHealthRecordId } from '../health-record-repository';
+import { modelName } from '../../../models/health-record';
+import { modelName as messageFragment } from '../../../models/message-fragment';
+import { modelName as healthRecordManifest } from '../../../models/health-record-manifest';
 
 jest.mock('../../../middleware/logging');
 
@@ -17,9 +20,9 @@ describe('healthRecordRepository', () => {
   const sequelize = ModelFactory.sequelize;
   const conversationId = '3244a7bb-555e-433b-b2cc-1aa8178da99e';
   const healthRecordId = '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4';
-  const HealthRecord = ModelFactory.getByName('HealthRecord');
-  const MessageFragment = ModelFactory.getByName('MessageFragment');
-  const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
+  const HealthRecord = ModelFactory.getByName(modelName);
+  const MessageFragment = ModelFactory.getByName(messageFragment);
+  const HealthRecordManifest = ModelFactory.getByName(healthRecordManifest);
   afterAll(() => sequelize.close());
 
   describe('retrieveHealthRecord', () => {

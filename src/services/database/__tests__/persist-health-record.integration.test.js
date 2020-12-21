@@ -1,15 +1,18 @@
 import { logEvent, logError } from '../../../middleware/logging';
 import ModelFactory from '../../../models';
 import { createAndLinkEntries } from '../persist-health-record';
+import { modelName } from '../../../models/message-fragment';
+import { modelName as healthRecord } from '../../../models/health-record';
+import { modelName as patient } from '../../../models/patient';
 
 jest.mock('../../../middleware/logging');
 
 describe('persistHealthRecord', () => {
   const sequelize = ModelFactory.sequelize;
 
-  const MessageFragment = ModelFactory.getByName('MessageFragment');
-  const HealthRecord = ModelFactory.getByName('HealthRecord');
-  const Patient = ModelFactory.getByName('Patient');
+  const MessageFragment = ModelFactory.getByName(modelName);
+  const HealthRecord = ModelFactory.getByName(healthRecord);
+  const Patient = ModelFactory.getByName(patient);
 
   const nhsNumber = '1234567890';
   const conversationId = '099cd501-034f-4e17-a461-cf4fd93ae0cf';

@@ -1,8 +1,9 @@
 import ModelFactory from '../../models';
 import { ERROR_CODES } from './pg-error-codes';
+import { modelName } from '../../models/health-check';
 
 export const checkDbHealth = () => {
-  const HealthCheck = ModelFactory.getByName('HealthCheck');
+  const HealthCheck = ModelFactory.getByName(modelName);
 
   return HealthCheck.create()
     .then(() => ({

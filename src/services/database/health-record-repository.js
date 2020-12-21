@@ -1,10 +1,14 @@
 import ModelFactory from '../../models';
 import { runWithinTransaction } from './helper';
+import { modelName } from '../../models/health-record';
+import { modelName as healthRecordManifest } from '../../models/health-record-manifest';
+import { modelName as messageFragment } from '../../models/message-fragment';
+import { modelName as patient } from '../../models/patient';
 
-const HealthRecord = ModelFactory.getByName('HealthRecord');
-const MessageFragment = ModelFactory.getByName('MessageFragment');
-const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
-const Patient = ModelFactory.getByName('Patient');
+const HealthRecord = ModelFactory.getByName(modelName);
+const MessageFragment = ModelFactory.getByName(messageFragment);
+const HealthRecordManifest = ModelFactory.getByName(healthRecordManifest);
+const Patient = ModelFactory.getByName(patient);
 
 export const getMessageFragmentByHealthRecordId = healthRecordId =>
   runWithinTransaction(transaction =>

@@ -1,6 +1,6 @@
 import getParameters from './parameters';
 
-const modelName = 'MessageFragment';
+export const modelName = 'MessageFragment';
 const tableName = 'message_fragments';
 
 const model = dataType => ({
@@ -33,7 +33,7 @@ const model = dataType => ({
   }
 });
 
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const MessageFragment = sequelize.define(modelName, model(DataTypes), getParameters(tableName));
 
   MessageFragment.complete = options => {

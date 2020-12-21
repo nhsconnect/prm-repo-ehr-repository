@@ -1,8 +1,9 @@
 import ModelFactory from '../../index';
+import { modelName } from '../../health-record-manifest';
 
 describe('HealthRecordManifest integration', () => {
   const sequelize = ModelFactory.sequelize;
-  const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
+  const HealthRecordManifest = ModelFactory.getByName(modelName);
 
   const testUUID = 'f72b6225-1cac-43d7-85dd-a0b5b4211cd9';
 

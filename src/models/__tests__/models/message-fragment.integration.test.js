@@ -1,8 +1,9 @@
 import ModelFactory from '../../index';
+import { modelName } from '../../message-fragment';
 
 describe('MessageFragment integration', () => {
   const sequelize = ModelFactory.sequelize;
-  const MessageFragment = ModelFactory.getByName('MessageFragment');
+  const MessageFragment = ModelFactory.getByName(modelName);
 
   const testUUID = 'f72b6225-1cac-43d7-85dd-a0b5b4211cd9';
   const isLargeMessage = true;

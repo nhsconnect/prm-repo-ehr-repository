@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import getParameters from './parameters';
-const modelName = 'HealthRecord';
+export const modelName = 'HealthRecord';
 const tableName = 'health_records';
 
 const model = dataType => ({
@@ -37,7 +37,7 @@ const model = dataType => ({
   }
 });
 
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Op = Sequelize.Op;
   const HealthRecord = sequelize.define(modelName, model(DataTypes), getParameters(tableName));
 

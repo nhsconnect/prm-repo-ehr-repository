@@ -1,9 +1,6 @@
 import config from '../config';
-import fs from 'fs';
-import path from 'path';
 import Sequelize from 'sequelize';
-
-const basename = path.basename(__filename);
+import * as models from './models';
 
 class ModelFactory {
   constructor() {
@@ -41,14 +38,10 @@ class ModelFactory {
   reload_models() {
     this.db = {};
 
-    fs.readdirSync(__dirname)
-      .filter(file => {
-        return file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js';
-      })
-      .forEach(file => {
-        const model = this.sequelize['import'](path.join(__dirname, file));
-        this.db[model.name] = model;
-      });
+    for (const m in models) {
+      const model = models[m](this.sequelize, Sequelize.DataTypes);
+      this.db[model.name] = model;
+    }
 
     Object.keys(this.db).forEach(modelName => {
       if (this.db[modelName].associate) {

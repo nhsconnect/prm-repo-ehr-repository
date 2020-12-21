@@ -1,5 +1,7 @@
 import uuid from 'uuid/v4';
 import ModelFactory from '../../index';
+import { modelName } from '../../health-record-manifest';
+import { modelName as healthRecord } from '../../health-record';
 
 jest.mock('uuid/v4');
 
@@ -9,8 +11,8 @@ describe('HealthRecord - HealthRecordManifest associations', () => {
 
   const testUUID = '213f3d25-c1e9-4024-8955-0d666f80fe41';
 
-  const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
-  const HealthRecord = ModelFactory.getByName('HealthRecord');
+  const HealthRecordManifest = ModelFactory.getByName(modelName);
+  const HealthRecord = ModelFactory.getByName(healthRecord);
   const sequelize = ModelFactory.sequelize;
 
   const healthRecordConvoId = '8ab7f61f-0e6b-4378-8cac-dcb4f9e3ec54';

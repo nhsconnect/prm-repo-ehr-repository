@@ -1,8 +1,10 @@
 import ModelFactory from '../../index';
+import { modelName } from '../../message-fragment';
+import { modelName as patient } from '../../patient';
 
 describe('Patient - MessageFragment navigation', () => {
-  const MessageFragment = ModelFactory.getByName('MessageFragment');
-  const Patient = ModelFactory.getByName('Patient');
+  const MessageFragment = ModelFactory.getByName(modelName);
+  const Patient = ModelFactory.getByName(patient);
   const sequelize = ModelFactory.sequelize;
 
   const testPatientUUID = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';

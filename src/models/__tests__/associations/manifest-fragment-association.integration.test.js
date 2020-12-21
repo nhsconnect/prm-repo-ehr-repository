@@ -1,8 +1,10 @@
 import ModelFactory from '../../index';
+import { modelName } from '../../health-record-manifest';
+import { modelName as messageFragment } from '../../message-fragment';
 
 describe('Patient - MessageFragment navigation', () => {
-  const HealthRecordManifest = ModelFactory.getByName('HealthRecordManifest');
-  const MessageFragment = ModelFactory.getByName('MessageFragment');
+  const HealthRecordManifest = ModelFactory.getByName(modelName);
+  const MessageFragment = ModelFactory.getByName(messageFragment);
   const sequelize = ModelFactory.sequelize;
 
   afterAll(() => {

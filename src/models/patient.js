@@ -1,6 +1,6 @@
 import getParameters from './parameters';
 
-const modelName = 'Patient';
+export const modelName = 'Patient';
 const tableName = 'patients';
 
 const model = dataType => {
@@ -33,7 +33,7 @@ const model = dataType => {
   };
 };
 
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Patient = sequelize.define(modelName, model(DataTypes), getParameters(tableName));
 
   Patient.associate = models => {

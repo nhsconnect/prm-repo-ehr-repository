@@ -1,8 +1,9 @@
 import ModelFactory from '../../index';
+import { modelName } from '../../patient';
 
 describe('Patient integration', () => {
   const sequelize = ModelFactory.sequelize;
-  const Patient = ModelFactory.getByName('Patient');
+  const Patient = ModelFactory.getByName(modelName);
 
   const nhsNumber = '0192837465';
   const existingNhsNumber = '1111111111';

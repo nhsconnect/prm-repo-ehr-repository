@@ -1,12 +1,13 @@
 import uuid from 'uuid/v4';
 import ModelFactory from '../../index';
+import { modelName } from '../../patient';
 
 jest.mock('uuid/v4');
 
 describe('Patient', () => {
   const testUUID = '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54';
 
-  const Patient = ModelFactory.getByName('Patient');
+  const Patient = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
