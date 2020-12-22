@@ -281,6 +281,11 @@ case "${command}" in
       check_env
       dojo -c Dojofile-infra "./tasks _wait_ecs"
       ;;
+  add_record_to_repo)
+      configure_aws_service_auth_keys
+      configure_service_url
+      node ./utils/add-record-to-ehr-repo.js $2
+      ;;
   *)
       echo "Invalid command: '${command}'"
       exit 1
