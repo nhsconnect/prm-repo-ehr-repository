@@ -43,8 +43,7 @@ Content-Type: application/xml
 Content-ID: <50D33D75-04C6-40AF-947D-E6E9656C1EEB@inps.co.uk/Vision/3>
 Content-Transfer-Encoding: 8bit
 
-<RCMR_IN030000UK06 xmlns="urn:hl7-org:v3" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:hl7-org:v3 RCMR_IN030000UK06.xsd">
+<RCMR_IN030000UK06 xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:hl7-org:v3 RCMR_IN030000UK06.xsd">
     <id root="F01B395C-15AD-480C-8FA8-EA930B182788"/>
     <creationTime value="20180612082915"/>
     <versionCode code="V3NPfIT3.1.10"/>
