@@ -1,6 +1,4 @@
-require('dotenv').config();
-
-const base_config = {
+const sequelizeConfig = {
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
@@ -9,9 +7,4 @@ const base_config = {
   logging: false
 };
 
-module.exports = {
-  local: base_config,
-  dev: base_config,
-  test: base_config,
-  prod: base_config
-};
+module.exports = sequelizeConfig;

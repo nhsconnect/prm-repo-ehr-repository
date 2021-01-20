@@ -198,7 +198,15 @@ case "${command}" in
   test_unit)
       dojo "./tasks _test_unit"
       ;;
-  _test_integration)
+ _test_integration_local)
+      configure_local_envs
+      npm install
+      npm run db:teardown
+      npm run db:migrate
+      npm run db:data:seed
+      npm run test:integration
+      ;;
+_test_integration)
       npm install
       npm run db:migrate
       npm run db:data:seed

@@ -1,33 +1,27 @@
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-record';
 import { modelName as patient } from '../../patient';
 
-jest.mock('uuid/v4');
+jest.mock('uuid');
+
+const testUUID = '94c6131a-2111-3252-b015-4953a82ed734';
+uuid.mockImplementation(() => testUUID);
 
 describe('Patient - HealthRecord associations', () => {
   const existingPatientNHSNumber = '1111111111';
   const existingPatientUUID = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
-
   const testNHSNumber = '8245367828';
-  const testUUID = '94c6131a-2111-3252-b015-4953a82ed734';
-
   const HealthRecord = ModelFactory.getByName(modelName);
   const Patient = ModelFactory.getByName(patient);
   const sequelize = ModelFactory.sequelize;
-
   const firstPatientUUID = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
   const firstPatientNHSNumber = '1111111111';
   const firstHealthRecordConvoId = '8ab7f61f-0e6b-4378-8cac-dcb4f9e3ec54';
-
   const secondPatientUUID = 'd126ee7f-035e-4938-8996-09a28c2ba61c';
   const secondPatientNHSNumber = '2222222222';
   const secondHealthRecordConvoId1 = '3244a7bb-555e-433b-b2cc-1aa8178da99e';
   const secondHealthRecordConvoId2 = '10489310-e97b-4744-8f3d-b7af1c47596d';
-
-  beforeEach(() => {
-    uuid.mockImplementation(() => testUUID);
-  });
 
   afterAll(() => {
     sequelize.close();

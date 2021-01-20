@@ -1,21 +1,18 @@
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-record-manifest';
 
-jest.mock('uuid/v4');
+jest.mock('uuid');
+
+const testUUID = 'f1e34360-cf9d-4394-bd2f-2f9d61b202fc';
+uuid.mockImplementation(() => testUUID);
 
 describe('HealthRecordManifest', () => {
-  const testUUID = 'f1e34360-cf9d-4394-bd2f-2f9d61b202fc';
-
   const HealthRecordManifest = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const messageIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
-
-  beforeEach(() => {
-    uuid.mockImplementation(() => testUUID);
-  });
 
   afterAll(() => {
     sequelize.close();

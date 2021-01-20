@@ -1,29 +1,24 @@
+import { v4 as uuid } from 'uuid';
 import ModelFactory from '../../index';
-import uuid from 'uuid/v4';
 import { modelName } from '../../message-fragment';
 import { modelName as healthRecord } from '../../health-record';
 
-jest.mock('uuid/v4');
+jest.mock('uuid');
+
+const testUUID = '213f3d25-c1e9-4024-8955-0d666f80fe41';
+uuid.mockImplementation(() => testUUID);
 
 describe('HealthRecord - MessageFragment associations', () => {
   const existingHealthRecordCovoId = '10489310-e97b-4744-8f3d-b7af1c47596d';
   const existingHealthRecordUUID = '1879b920-7174-4ef1-92f7-12383114b052';
-
-  const testUUID = '213f3d25-c1e9-4024-8955-0d666f80fe41';
-
   const MessageFragment = ModelFactory.getByName(modelName);
   const HealthRecord = ModelFactory.getByName(healthRecord);
   const sequelize = ModelFactory.sequelize;
-
   const healthRecordConvoId = '3244a7bb-555e-433b-b2cc-1aa8178da99e';
   const healthRecordUUID = '99ba0ba1-ed1a-4fc1-ab5b-9d79af71aef4';
   const messageFragmentMessageId1 = '8c0f741e-82fa-46f1-9686-23a1c08657f1';
   const messageFragmentMessageId2 = '5cff6bcf-98ea-4c60-8f65-4b0240324284';
   const messageFragmentMessageId3 = '6f1ad957-aa63-404c-80c5-97d8a73cb5ea';
-
-  beforeEach(() => {
-    uuid.mockImplementation(() => testUUID);
-  });
 
   afterAll(() => {
     sequelize.close();

@@ -1,5 +1,5 @@
 import request from 'supertest';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import app from '../app';
 import config from '../config';
 

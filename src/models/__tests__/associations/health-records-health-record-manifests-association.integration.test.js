@@ -1,29 +1,23 @@
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-record-manifest';
 import { modelName as healthRecord } from '../../health-record';
 
-jest.mock('uuid/v4');
+jest.mock('uuid');
+
+const testUUID = '213f3d25-c1e9-4024-8955-0d666f80fe41';
+uuid.mockImplementation(() => testUUID);
 
 describe('HealthRecord - HealthRecordManifest associations', () => {
   const existingHealthRecordCovoId = '10489310-e97b-4744-8f3d-b7af1c47596d';
   const existingHealthRecordUUID = '1879b920-7174-4ef1-92f7-12383114b052';
-
-  const testUUID = '213f3d25-c1e9-4024-8955-0d666f80fe41';
-
   const HealthRecordManifest = ModelFactory.getByName(modelName);
   const HealthRecord = ModelFactory.getByName(healthRecord);
   const sequelize = ModelFactory.sequelize;
-
   const healthRecordConvoId = '8ab7f61f-0e6b-4378-8cac-dcb4f9e3ec54';
   const healthRecordUUID = '7d5712f2-d203-4f11-8527-1175db0d2a4a';
-
   const manifestMessageId1 = '03ba2531-42e3-4a70-82e6-df6fff52b226';
   const manifestMessageId2 = 'ae078243-59d8-4d21-b587-daac5d126f68';
-
-  beforeEach(() => {
-    uuid.mockImplementation(() => testUUID);
-  });
 
   afterAll(() => {
     sequelize.close();

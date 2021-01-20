@@ -1,21 +1,17 @@
+import { v4 as uuid } from 'uuid';
 import ModelFactory from '../../index';
-
-import uuid from 'uuid/v4';
 import { modelName } from '../../health-check';
 
-const testUUID = '74c6230b-36d9-4940-bdd6-495ba87ed634';
+jest.mock('uuid');
 
-jest.mock('uuid/v4');
+const testUUID = '74c6230b-36d9-4940-bdd6-495ba87ed634';
+uuid.mockImplementation(() => testUUID);
 
 describe('models.HealthCheck', () => {
   const HealthCheck = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-
-  beforeEach(() => {
-    uuid.mockImplementation(() => testUUID);
-  });
 
   afterAll(() => {
     sequelize.close();
