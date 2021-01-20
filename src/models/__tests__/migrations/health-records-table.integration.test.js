@@ -97,7 +97,8 @@ describe('HealthRecord', () => {
 
   it('should create new entry using model', () => {
     const new_entry_params = {
-      conversation_id: uuid()
+      conversation_id: uuid(),
+      id: testUUID
     };
 
     return sequelize.transaction().then(t =>
