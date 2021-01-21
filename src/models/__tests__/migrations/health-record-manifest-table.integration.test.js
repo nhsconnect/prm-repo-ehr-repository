@@ -1,16 +1,15 @@
-import { v4 as uuid } from 'uuid';
+import { v4 } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-record-manifest';
 
-jest.mock('uuid');
-
-const testUUID = 'f1e34360-cf9d-4394-bd2f-2f9d61b202fc';
-uuid.mockImplementation(() => testUUID);
+jest.mock('uuid', () => ({
+  v4: () => 'f1e34360-cf9d-4394-bd2f-2f9d61b202fc'
+}));
 
 describe('HealthRecordManifest', () => {
   const HealthRecordManifest = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
-
+  const testUUID = v4();
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const messageIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
@@ -110,9 +109,8 @@ describe('HealthRecordManifest', () => {
 
   it('should create new entry using model', () => {
     const newHealthRecordManifest = {
-      message_id: uuid()
+      message_id: v4()
     };
-
     return sequelize.transaction().then(t =>
       HealthRecordManifest.create(newHealthRecordManifest, { transaction: t })
         .then(healthRecordManifest => {
@@ -134,7 +132,7 @@ describe('HealthRecordManifest', () => {
 
     return sequelize.transaction().then(t =>
       HealthRecordManifest.update(
-        { message_id: uuid() },
+        { message_id: v4() },
         { ...where(healthRecordManifestId), transaction: t }
       )
         .then(updated => expect(updated[0]).toBe(1))

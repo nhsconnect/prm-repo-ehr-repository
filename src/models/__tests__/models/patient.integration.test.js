@@ -4,7 +4,6 @@ import { modelName } from '../../patient';
 describe('Patient integration', () => {
   const sequelize = ModelFactory.sequelize;
   const Patient = ModelFactory.getByName(modelName);
-
   const nhsNumber = '0192837465';
   const existingNhsNumber = '1111111111';
   const existingUUID = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';

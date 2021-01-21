@@ -1,15 +1,15 @@
-import { v4 as uuid } from 'uuid';
+import { v4 } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../message-fragment';
 
-jest.mock('uuid');
-
-const testUUID = '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54';
-uuid.mockImplementation(() => testUUID);
+jest.mock('uuid', () => ({
+  v4: () => '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54'
+}));
 
 describe('MessageFragment', () => {
   const MessageFragment = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
+  const testUUID = v4();
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const messageIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
@@ -94,9 +94,8 @@ describe('MessageFragment', () => {
 
   it('should create new entry using model', () => {
     const newMessageFragment = {
-      message_id: uuid()
+      message_id: v4()
     };
-
     return sequelize.transaction().then(t =>
       MessageFragment.create(newMessageFragment, { transaction: t })
         .then(messageFragment => {
@@ -117,10 +116,7 @@ describe('MessageFragment', () => {
     };
 
     return sequelize.transaction().then(t =>
-      MessageFragment.update(
-        { message_id: uuid() },
-        { ...where(messageFragmentId), transaction: t }
-      )
+      MessageFragment.update({ message_id: v4() }, { ...where(messageFragmentId), transaction: t })
         .then(updated => expect(updated[0]).toBe(1))
         .then(() => MessageFragment.findOne({ ...where(messageFragmentId), transaction: t }))
         .then(messageFragment =>

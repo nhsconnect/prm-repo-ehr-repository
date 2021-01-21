@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { v4 as uuid } from 'uuid';
+import { v4 } from 'uuid';
 import app from '../app';
 import config from '../config';
 
@@ -35,9 +35,9 @@ describe('GET /patients/:nhsNumber', () => {
 });
 
 describe('POST /fragments', () => {
-  const conversationId = uuid();
+  const conversationId = v4();
   const isLargeMessage = true;
-  const messageId = uuid();
+  const messageId = v4();
   const nhsNumber = '1234567890';
 
   it('should return presigned url', async () => {

@@ -1,14 +1,14 @@
-import { v4 as uuid } from 'uuid';
+import { v4 } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-record';
 import { modelName as patient } from '../../patient';
 
-jest.mock('uuid');
-
-const testUUID = '94c6131a-2111-3252-b015-4953a82ed734';
-uuid.mockImplementation(() => testUUID);
+jest.mock('uuid', () => ({
+  v4: () => '94c6131a-2111-3252-b015-4953a82ed734'
+}));
 
 describe('Patient - HealthRecord associations', () => {
+  const testUUID = v4();
   const existingPatientNHSNumber = '1111111111';
   const existingPatientUUID = 'e479ca12-4a7d-41cb-86a2-775f36b8a0d1';
   const testNHSNumber = '8245367828';

@@ -1,15 +1,15 @@
-import { v4 as uuid } from 'uuid';
+import { v4 } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-record';
 
-jest.mock('uuid');
-
-const testUUID = '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54';
-uuid.mockImplementation(() => testUUID);
+jest.mock('uuid', () => ({
+  v4: () => '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54'
+}));
 
 describe('HealthRecord', () => {
   const HealthRecord = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
+  const testUUID = v4();
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const convoIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
@@ -97,8 +97,7 @@ describe('HealthRecord', () => {
 
   it('should create new entry using model', () => {
     const new_entry_params = {
-      conversation_id: uuid(),
-      id: testUUID
+      conversation_id: v4()
     };
 
     return sequelize.transaction().then(t =>
@@ -109,7 +108,7 @@ describe('HealthRecord', () => {
           expect(healthRecord.get().deleted_at).toBeNull();
           expect(healthRecord.get().completed_at).toBeNull();
           expect(healthRecord.get().patient_id).toBeNull();
-          expect(healthRecord.get().conversation_id).toMatch(new_entry_params.conversation_id);
+          expect(healthRecord.get().conversation_id).toMatch(testUUID);
           return expect(healthRecord.get().id).toMatch(testUUID);
         })
         .finally(() => t.rollback())

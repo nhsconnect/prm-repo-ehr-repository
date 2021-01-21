@@ -1,14 +1,14 @@
-import { v4 as uuid } from 'uuid';
+import { v4 } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-record-manifest';
 import { modelName as healthRecord } from '../../health-record';
 
-jest.mock('uuid');
-
-const testUUID = '213f3d25-c1e9-4024-8955-0d666f80fe41';
-uuid.mockImplementation(() => testUUID);
+jest.mock('uuid', () => ({
+  v4: () => '213f3d25-c1e9-4024-8955-0d666f80fe41'
+}));
 
 describe('HealthRecord - HealthRecordManifest associations', () => {
+  const testUUID = v4();
   const existingHealthRecordCovoId = '10489310-e97b-4744-8f3d-b7af1c47596d';
   const existingHealthRecordUUID = '1879b920-7174-4ef1-92f7-12383114b052';
   const HealthRecordManifest = ModelFactory.getByName(modelName);
