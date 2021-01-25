@@ -3,10 +3,6 @@ import ModelFactory from '../../index';
 import { modelName } from '../../message-fragment';
 import { modelName as healthRecord } from '../../health-record';
 
-jest.mock('uuid', () => ({
-  v4: () => '213f3d25-c1e9-4024-8955-0d666f80fe41'
-}));
-
 describe('HealthRecord - MessageFragment associations', () => {
   const testUUID = v4();
   const existingHealthRecordCovoId = '10489310-e97b-4744-8f3d-b7af1c47596d';
@@ -63,6 +59,7 @@ describe('HealthRecord - MessageFragment associations', () => {
   });
 
   it('should create new health record and associate with new message fragment', () => {
+    const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
     const healthFragmentConversationId = { conversation_id: testUUID };
     const newMessageFragment = { message_id: testUUID };
 
@@ -71,7 +68,7 @@ describe('HealthRecord - MessageFragment associations', () => {
         .then(healthRecord =>
           MessageFragment.create(newMessageFragment, { transaction: t }).then(messageFragment => {
             messageFragment.setHealthRecord(healthRecord[0].id, { transaction: t });
-            return expect(messageFragment.get().health_record_id).toBe(testUUID);
+            return expect(messageFragment.get().health_record_id).toMatch(uuidPattern);
           })
         )
         .finally(() => t.rollback())

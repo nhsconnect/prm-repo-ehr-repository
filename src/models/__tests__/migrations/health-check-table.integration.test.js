@@ -1,15 +1,9 @@
-import { v4 } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-check';
-
-jest.mock('uuid', () => ({
-  v4: () => '74c6230b-36d9-4940-bdd6-495ba87ed634'
-}));
 
 describe('models.HealthCheck', () => {
   const HealthCheck = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
-  const testUUID = v4();
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
   afterAll(() => {
@@ -43,7 +37,7 @@ describe('models.HealthCheck', () => {
   it('should automatically created the id when a record is created', () => {
     return sequelize.transaction().then(t =>
       HealthCheck.create({}, { transaction: t })
-        .then(value => expect(value.get().id).toBe(testUUID))
+        .then(value => expect(value.get().id).toMatch(uuidPattern))
         .finally(() => t.rollback())
     );
   });

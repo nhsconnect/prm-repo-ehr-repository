@@ -2,14 +2,9 @@ import { v4 } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../health-record-manifest';
 
-jest.mock('uuid', () => ({
-  v4: () => 'f1e34360-cf9d-4394-bd2f-2f9d61b202fc'
-}));
-
 describe('HealthRecordManifest', () => {
   const HealthRecordManifest = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
-  const testUUID = v4();
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const messageIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
@@ -119,7 +114,7 @@ describe('HealthRecordManifest', () => {
           expect(healthRecordManifest.get().deleted_at).toBeNull();
           expect(healthRecordManifest.get().completed_at).toBeNull();
           expect(healthRecordManifest.get().message_id).toMatch(newHealthRecordManifest.message_id);
-          return expect(healthRecordManifest.get().id).toMatch(testUUID);
+          return expect(healthRecordManifest.get().id).toMatch(uuidPattern);
         })
         .finally(() => t.rollback())
     );

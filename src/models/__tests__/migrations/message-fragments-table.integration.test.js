@@ -2,14 +2,9 @@ import { v4 } from 'uuid';
 import ModelFactory from '../../index';
 import { modelName } from '../../message-fragment';
 
-jest.mock('uuid', () => ({
-  v4: () => '0af9f62f-0e6b-4378-8cfc-dcb4f9e3ec54'
-}));
-
 describe('MessageFragment', () => {
   const MessageFragment = ModelFactory.getByName(modelName);
   const sequelize = ModelFactory.sequelize;
-  const testUUID = v4();
 
   const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const messageIdPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
@@ -104,7 +99,7 @@ describe('MessageFragment', () => {
           expect(messageFragment.get().deleted_at).toBeNull();
           expect(messageFragment.get().completed_at).toBeNull();
           expect(messageFragment.get().message_id).toMatch(newMessageFragment.message_id);
-          return expect(messageFragment.get().id).toMatch(testUUID);
+          return expect(messageFragment.get().id).toMatch(uuidPattern);
         })
         .finally(() => t.rollback())
     );

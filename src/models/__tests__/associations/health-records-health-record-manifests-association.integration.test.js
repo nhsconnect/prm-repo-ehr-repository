@@ -3,10 +3,6 @@ import ModelFactory from '../../index';
 import { modelName } from '../../health-record-manifest';
 import { modelName as healthRecord } from '../../health-record';
 
-jest.mock('uuid', () => ({
-  v4: () => '213f3d25-c1e9-4024-8955-0d666f80fe41'
-}));
-
 describe('HealthRecord - HealthRecordManifest associations', () => {
   const testUUID = v4();
   const existingHealthRecordCovoId = '10489310-e97b-4744-8f3d-b7af1c47596d';
@@ -58,6 +54,7 @@ describe('HealthRecord - HealthRecordManifest associations', () => {
   });
 
   it('should create new health record and associate with new health record manifest', () => {
+    const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
     const healthRecordConversationId = { conversation_id: testUUID };
     const newHealthRecordManifest = { message_id: testUUID };
 
@@ -67,7 +64,7 @@ describe('HealthRecord - HealthRecordManifest associations', () => {
           HealthRecordManifest.create(newHealthRecordManifest, { transaction: t }).then(
             healthRecordManifest => {
               healthRecordManifest.setHealthRecord(healthRecord[0].id, { transaction: t });
-              return expect(healthRecordManifest.get().health_record_id).toBe(testUUID);
+              return expect(healthRecordManifest.get().health_record_id).toMatch(uuidPattern);
             }
           )
         )

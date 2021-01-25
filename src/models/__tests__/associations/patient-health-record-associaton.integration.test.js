@@ -3,10 +3,6 @@ import ModelFactory from '../../index';
 import { modelName } from '../../health-record';
 import { modelName as patient } from '../../patient';
 
-jest.mock('uuid', () => ({
-  v4: () => '94c6131a-2111-3252-b015-4953a82ed734'
-}));
-
 describe('Patient - HealthRecord associations', () => {
   const testUUID = v4();
   const existingPatientNHSNumber = '1111111111';
@@ -64,6 +60,7 @@ describe('Patient - HealthRecord associations', () => {
   });
 
   it('should create new patient and associate with new health record', () => {
+    const uuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
     const patientNhsNumber = { nhs_number: testNHSNumber };
     const newHealthRecord = { conversation_id: testUUID };
 
@@ -72,7 +69,7 @@ describe('Patient - HealthRecord associations', () => {
         .then(patient =>
           HealthRecord.create(newHealthRecord, { transaction: t }).then(healthRecord => {
             healthRecord.setPatient(patient[0].id, { transaction: t });
-            return expect(healthRecord.get().patient_id).toBe(testUUID);
+            return expect(healthRecord.get().patient_id).toMatch(uuidPattern);
           })
         )
         .finally(() => t.rollback())
