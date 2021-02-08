@@ -64,11 +64,7 @@ describe('GET /patients', () => {
           expect(res.body).toEqual(responseBody);
           expect(getCurrentHealthRecordForPatient).toHaveBeenCalledWith(nhsNumber);
           expect(getMessageFragmentByHealthRecordId).toHaveBeenCalledWith(healthRecordId);
-          expect(getSignedUrl).toHaveBeenCalledWith(
-            conversationId.toUpperCase(),
-            messageId.toUpperCase(),
-            'getObject'
-          );
+          expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'getObject');
         })
         .end(done);
     });
@@ -89,7 +85,7 @@ describe('GET /patients', () => {
       getCurrentHealthRecordForPatient.mockResolvedValue({
         dataValues: {
           id: '7d5712f2-d203-4f11-8527-1175db0d2a4a',
-          conversation_id: 'E300D50D-F163-4F0C-93A1-19581BC08711'
+          conversation_id: 'e300d50d-f163-4f0c-93a1-19581bc08711'
         }
       });
       getMessageFragmentByHealthRecordId.mockResolvedValue(null);

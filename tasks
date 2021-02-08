@@ -206,7 +206,7 @@ case "${command}" in
       npm run db:data:seed
       npm run test:integration
       ;;
-_test_integration)
+  _test_integration)
       npm install
       npm run db:migrate
       npm run db:data:seed
