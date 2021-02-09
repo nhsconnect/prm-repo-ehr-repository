@@ -119,6 +119,19 @@ function configure_hangout_webhook {
   fi
 }
 
+function get_db_credentials {
+  export DATABASE_PASSWORD=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/db-password")
+  export DATABASE_USER=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/db-username")
+  export DATABASE_HOST=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-infra/core-rds-endpoint")
+  export DATABASE_NAME="deductions_db"
+}
+
+
+function drop_db {
+  PGPASSWORD="${DATABASE_PASSWORD}" dropdb --host="${DATABASE_HOST}" --username="${DATABASE_USER}" $DATABASE_NAME
+  echo "Database $DATABASE_NAME was dropped successfully"
+}
+
 ############################
 # Docker Related Functions #
 ############################
@@ -261,6 +274,14 @@ case "${command}" in
       configure_local_envs
       get_latest_commit_hash
       dojo -c Dojofile-dtest "./tasks _test_docker"
+      ;;
+  _drop_db)
+      drop_db
+      ;;
+  drop_db)
+      check_env
+      get_db_credentials
+      dojo -c Dojofile-infra "./tasks _drop_db"
       ;;
   tf)
       check_env
