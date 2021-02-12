@@ -40,7 +40,9 @@ describe('Old API', () => {
 
     it('should return 404 when patient is not found', async () => {
       const missingNhsNumber = '0009991112';
-      const res = await request(app).get(`/patients/${missingNhsNumber}`).set('Authorization', 'correct-key');;
+      const res = await request(app)
+        .get(`/patients/${missingNhsNumber}`)
+        .set('Authorization', 'correct-key');
 
       expect(res.status).toBe(404);
     });
