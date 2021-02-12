@@ -1,0 +1,21 @@
+import { getSignedUrl } from '../../services/storage';
+import { param } from 'express-validator';
+
+export const messageLocationControllerValidation = [
+  param('conversationId')
+    .isUUID()
+    .withMessage("'conversationId' provided is not a UUID"),
+  param('messageId')
+    .isUUID()
+    .withMessage("'messageId' provided is not a UUID")
+];
+
+export const messageLocationController = async (req, res) => {
+  const { conversationId, messageId } = req.params;
+  const operation = 'putObject';
+  const presignedUrl = await getSignedUrl(conversationId, messageId, operation);
+  res
+    .status(302)
+    .location(presignedUrl)
+    .send();
+};

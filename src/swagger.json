@@ -217,6 +217,63 @@
           }
         ]
       }
+    },
+    "/messages/{conversationId}/{messageId}": {
+      "get": {
+        "tags": [],
+        "summary": "Gets pre-signed url from s3",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversationId",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "messageId",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Retrieves s3 pre-signed URL for the message",
+            "headers": {
+              "Location": {
+                "description": "pre-signed url",
+                "type": "string"
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "404": {
+            "description": "Health record with that conversation id not found"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          },
+          "500": {
+            "description": "Failed to get presigned url"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
     }
   },
   "securityDefinitions": {
@@ -236,7 +293,9 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["patients"]
+              "enum": [
+                "patients"
+              ]
             },
             "id": {
               "type": "string"

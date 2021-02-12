@@ -1,0 +1,52 @@
+import request from 'supertest';
+import app from '../../../app';
+import { getSignedUrl } from '../../../services/storage';
+import { v4 as uuid } from 'uuid';
+
+jest.mock('../../../services/storage');
+jest.mock('../../../middleware/auth');
+
+describe('messageLocationController', () => {
+  describe('success', () => {
+    const conversationId = uuid();
+    const messageId = uuid();
+
+    it('should return a 302 with location', async () => {
+      getSignedUrl.mockResolvedValue('presigned-url');
+
+      const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
+
+      expect(res.status).toBe(302);
+      expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'putObject');
+      expect(res.headers.location).toEqual('presigned-url');
+    });
+  });
+
+  describe('validation', () => {
+    it('should return 422 and an error message when conversationId is not a UUID', async () => {
+      const conversationId = 'not-a-uuid';
+      const messageId = uuid();
+      const errorMessage = [{ conversationId: "'conversationId' provided is not a UUID" }];
+
+      const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
+
+      expect(res.statusCode).toBe(422);
+      expect(res.body).toEqual({
+        errors: errorMessage
+      });
+    });
+
+    it('should return 422 and an error message when messageId is not a UUID', async () => {
+      const conversationId = uuid();
+      const messageId = 'not-a-uuid';
+      const errorMessage = [{ messageId: "'messageId' provided is not a UUID" }];
+
+      const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
+
+      expect(res.statusCode).toBe(422);
+      expect(res.body).toEqual({
+        errors: errorMessage
+      });
+    });
+  });
+});
