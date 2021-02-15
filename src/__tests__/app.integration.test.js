@@ -1,5 +1,5 @@
 import request from 'supertest';
-import {v4 as uuid, v4} from 'uuid';
+import { v4 as uuid, v4 } from 'uuid';
 import app from '../app';
 import config from '../config';
 
@@ -112,7 +112,7 @@ describe('New API', () => {
     const conversationId = uuid();
     const nhsNumber = '1234567890';
     const messageId = uuid();
-    const messageType = "ehrExtract"
+    const messageType = 'ehrExtract';
     const listOfMessageIds = [];
     const requestBody = {
       data: {
@@ -125,7 +125,7 @@ describe('New API', () => {
           listOfMessageIds
         }
       }
-    }
+    };
 
     it('should return 201', async () => {
       const res = await request(app)

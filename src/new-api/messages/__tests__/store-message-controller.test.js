@@ -1,12 +1,12 @@
-import { v4 as uuid } from "uuid";
-import request from "supertest";
-import app from "../../../app";
+import { v4 as uuid } from 'uuid';
+import request from 'supertest';
+import app from '../../../app';
 
 describe('storeMessageController', () => {
   const conversationId = uuid();
   const nhsNumber = '1234567890';
   const messageId = uuid();
-  const messageType = "ehrExtract"
+  const messageType = 'ehrExtract';
   const attachmentMessageIds = [];
   const requestBody = {
     data: {
@@ -19,11 +19,13 @@ describe('storeMessageController', () => {
         attachmentMessageIds
       }
     }
-  }
+  };
 
   describe('success', () => {
     it('should return a 201 when message has successfully been stored in database', async () => {
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(201);
     });
@@ -37,10 +39,14 @@ describe('storeMessageController', () => {
             conversationId: 'not-a-uuid'
           }
         }
-      }
-      const errorMessage = { "data.attributes.conversationId": "'conversationId' provided is not a UUID" };
+      };
+      const errorMessage = {
+        'data.attributes.conversationId': "'conversationId' provided is not a UUID"
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -51,10 +57,12 @@ describe('storeMessageController', () => {
         data: {
           id: 'not-a-uuid'
         }
-      }
-      const errorMessage = { "data.id": "'id' provided is not a UUID" };
+      };
+      const errorMessage = { 'data.id': "'id' provided is not a UUID" };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -65,10 +73,12 @@ describe('storeMessageController', () => {
         data: {
           type: 'not-messages'
         }
-      }
-      const errorMessage = { "data.type": "Invalid value" };
+      };
+      const errorMessage = { 'data.type': 'Invalid value' };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -85,10 +95,12 @@ describe('storeMessageController', () => {
             messageType: 'ehrExtract'
           }
         }
-      }
-      const errorMessage = { "data.attributes.nhsNumber": "'nhsNumber' provided is not numeric" };
+      };
+      const errorMessage = { 'data.attributes.nhsNumber': "'nhsNumber' provided is not numeric" };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -102,10 +114,14 @@ describe('storeMessageController', () => {
             messageType: 'ehrExtract'
           }
         }
-      }
-      const errorMessage = { "data.attributes.nhsNumber": "'nhsNumber' provided is not 10 characters" };
+      };
+      const errorMessage = {
+        'data.attributes.nhsNumber': "'nhsNumber' provided is not 10 characters"
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -118,10 +134,15 @@ describe('storeMessageController', () => {
             messageType: 'not-a-message-type'
           }
         }
-      }
-      const errorMessage = { "data.attributes.messageType": "'messageType' provided is not one of the following: ehrExtract, attachment" };
+      };
+      const errorMessage = {
+        'data.attributes.messageType':
+          "'messageType' provided is not one of the following: ehrExtract, attachment"
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -138,9 +159,11 @@ describe('storeMessageController', () => {
             messageType: 'ehrExtract'
           }
         }
-      }
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(201);
     });
@@ -152,11 +175,15 @@ describe('storeMessageController', () => {
             messageType: 'ehrExtract'
           }
         }
-      }
+      };
 
-      const errorMessage = { "data.attributes.nhsNumber": "'nhsNumber' is required for messageType ehrExtract" };
+      const errorMessage = {
+        'data.attributes.nhsNumber': "'nhsNumber' is required for messageType ehrExtract"
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -173,8 +200,10 @@ describe('storeMessageController', () => {
             messageType: 'ehrExtract'
           }
         }
-      }
-      const res = await request(app).post('/messages').send(requestBody);
+      };
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(201);
     });
@@ -187,11 +216,15 @@ describe('storeMessageController', () => {
             messageType: 'attachment'
           }
         }
-      }
+      };
 
-      const errorMessage = { "data.attributes.nhsNumber": "'nhsNumber' should be empty for messageType attachment" };
+      const errorMessage = {
+        'data.attributes.nhsNumber': "'nhsNumber' should be empty for messageType attachment"
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -207,9 +240,11 @@ describe('storeMessageController', () => {
             messageType: 'attachment'
           }
         }
-      }
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(201);
     });
@@ -221,11 +256,15 @@ describe('storeMessageController', () => {
             attachmentMessageIds: ['not-a-uuid']
           }
         }
-      }
+      };
 
-      const errorMessage = { "data.attributes.attachmentMessageIds[0]": "'attachmentMessageIds' should be UUIDs" };
+      const errorMessage = {
+        'data.attributes.attachmentMessageIds[0]': "'attachmentMessageIds' should be UUIDs"
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -238,11 +277,15 @@ describe('storeMessageController', () => {
             attachmentMessageIds: 'not-an-array'
           }
         }
-      }
+      };
 
-      const errorMessage = { "data.attributes.attachmentMessageIds": "'attachmentMessageIds' should be an array" };
+      const errorMessage = {
+        'data.attributes.attachmentMessageIds': "'attachmentMessageIds' should be an array"
+      };
 
-      const res = await request(app).post('/messages').send(requestBody);
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);

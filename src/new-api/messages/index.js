@@ -5,7 +5,10 @@ import {
   messageLocationController,
   messageLocationControllerValidation
 } from './message-location-controller';
-import { storeMessageController, storeMessageControllerValidation } from "./store-message-controller";
+import {
+  storeMessageController,
+  storeMessageControllerValidation
+} from './store-message-controller';
 
 export const messages = express.Router();
 
@@ -17,9 +20,4 @@ messages.get(
   messageLocationController
 );
 
-messages.post(
-  '/',
-  storeMessageControllerValidation,
-  validate,
-  storeMessageController
-);
+messages.post('/', storeMessageControllerValidation, validate, storeMessageController);
