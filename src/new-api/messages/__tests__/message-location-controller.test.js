@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../../../app';
 import { getSignedUrl } from '../../../services/storage';
 import { v4 as uuid } from 'uuid';
-import {logError} from "../../../middleware/logging";
+import { logError, logEvent } from "../../../middleware/logging";
 
 jest.mock('../../../services/storage');
 jest.mock('../../../middleware/auth');
@@ -21,6 +21,7 @@ describe('messageLocationController', () => {
       expect(res.status).toBe(302);
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'putObject');
       expect(res.headers.location).toEqual('presigned-url');
+      expect(logEvent).toHaveBeenCalledWith('Presigned URL sent successfully')
     });
   });
 

@@ -1,6 +1,6 @@
 import { getSignedUrl } from '../../services/storage';
 import { param } from 'express-validator';
-import { logError } from "../../middleware/logging";
+import {logError, logEvent} from "../../middleware/logging";
 
 export const messageLocationControllerValidation = [
   param('conversationId')
@@ -21,6 +21,7 @@ export const messageLocationController = async (req, res) => {
       .status(302)
       .location(presignedUrl)
       .send();
+    logEvent('Presigned URL sent successfully');
   } catch (err) {
     logError('Failed to retrieve pre-signed url', err)
     res.sendStatus(500);
