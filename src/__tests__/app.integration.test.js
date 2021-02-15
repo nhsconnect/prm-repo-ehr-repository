@@ -2,6 +2,8 @@ import request from 'supertest';
 import { v4 as uuid, v4 } from 'uuid';
 import app from '../app';
 import config from '../config';
+import ModelFactory from '../models';
+import { modelName } from '../models/message';
 
 jest.mock('../middleware/logging');
 
@@ -109,6 +111,7 @@ describe('New API', () => {
   });
 
   describe('POST /messages', () => {
+    const Message = ModelFactory.getByName(modelName);
     const conversationId = uuid();
     const nhsNumber = '1234567890';
     const messageId = uuid();
@@ -127,11 +130,21 @@ describe('New API', () => {
       }
     };
 
-    it('should return 201', async () => {
+    afterAll(async () => {
+      await ModelFactory.sequelize.close();
+    });
+
+    it('should save the message metadata in the database and return 201', async () => {
       const res = await request(app)
         .post(`/messages`)
         .send(requestBody)
         .set('Authorization', 'correct-key');
+
+      const message = await Message.findByPk(messageId);
+
+      expect(message.conversationId).toBe(conversationId);
+      expect(message.type).toBe(messageType);
+      expect(message.parentId).toBeUndefined();
       expect(res.status).toBe(201);
     });
   });

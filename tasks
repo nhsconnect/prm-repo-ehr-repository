@@ -36,6 +36,18 @@ function configure_service_url {
   fi
 }
 
+function prepare_local_envs_for_ide {
+  export DATABASE_HOST=localhost
+  envs=$(printenv | grep "NODE_ENV" && \
+          printenv | grep "DATABASE" && \
+          printenv | grep "AUTHORIZATION_KEYS" && \
+          printenv | grep "SERVICE_URL"
+  )
+
+  echo "Paste these env vars to your Intelij run template:"
+  echo $envs | tr ' ' ';'
+}
+
 function configure_local_envs {
   export AUTHORIZATION_KEYS=auth-key-1
   export DATABASE_NAME=deductions_test
@@ -197,6 +209,11 @@ case "${command}" in
   build)
       dojo "./tasks _build"
       ;;
+  _setup_test_integration_local)
+    configure_local_envs
+    npm run db:migrate
+    prepare_local_envs_for_ide
+    ;;
   _test_lint)
       npm install
       npm run lint

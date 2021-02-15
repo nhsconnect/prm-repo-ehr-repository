@@ -1,7 +1,5 @@
 import { body } from 'express-validator';
-
-const EHR_EXTRACT_MESSAGE_TYPE = 'ehrExtract';
-const ATTACHMENT_MESSAGE_TYPE = 'attachment';
+import { MessageType } from '../../models/message';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
@@ -12,21 +10,21 @@ export const storeMessageControllerValidation = [
     .isUUID()
     .withMessage("'conversationId' provided is not a UUID"),
   body('data.attributes.nhsNumber')
-    .if(body('data.attributes.messageType').equals(EHR_EXTRACT_MESSAGE_TYPE))
+    .if(body('data.attributes.messageType').equals(MessageType.EHR_EXTRACT))
     .notEmpty()
-    .withMessage(`'nhsNumber' is required for messageType ${EHR_EXTRACT_MESSAGE_TYPE}`)
+    .withMessage(`'nhsNumber' is required for messageType ${MessageType.EHR_EXTRACT}`)
     .isNumeric()
     .withMessage("'nhsNumber' provided is not numeric")
     .isLength({ min: 10, max: 10 })
     .withMessage("'nhsNumber' provided is not 10 characters"),
   body('data.attributes.nhsNumber')
-    .if(body('data.attributes.messageType').equals(ATTACHMENT_MESSAGE_TYPE))
+    .if(body('data.attributes.messageType').equals(MessageType.ATTACHMENT))
     .isEmpty()
-    .withMessage(`'nhsNumber' should be empty for messageType ${ATTACHMENT_MESSAGE_TYPE}`),
+    .withMessage(`'nhsNumber' should be empty for messageType ${MessageType.ATTACHMENT}`),
   body('data.attributes.messageType')
-    .isIn([EHR_EXTRACT_MESSAGE_TYPE, ATTACHMENT_MESSAGE_TYPE])
+    .isIn([MessageType.EHR_EXTRACT, MessageType.ATTACHMENT])
     .withMessage(
-      `'messageType' provided is not one of the following: ${EHR_EXTRACT_MESSAGE_TYPE}, ${ATTACHMENT_MESSAGE_TYPE}`
+      `'messageType' provided is not one of the following: ${MessageType.EHR_EXTRACT}, ${MessageType.ATTACHMENT}`
     ),
   body('data.attributes.attachmentMessageIds.*')
     .isUUID()

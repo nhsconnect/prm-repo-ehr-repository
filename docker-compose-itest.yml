@@ -12,3 +12,5 @@ services:
       POSTGRES_USER: deductions_user
       POSTGRES_DB: deductions_test
       LC_ALL: C
+    ports:
+      - 5432:5432
