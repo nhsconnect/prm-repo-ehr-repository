@@ -20,4 +20,10 @@ messages.get(
   messageLocationController
 );
 
-messages.post('/', storeMessageControllerValidation, validate, storeMessageController);
+messages.post(
+  '/',
+  authenticateRequest,
+  storeMessageControllerValidation,
+  validate,
+  storeMessageController
+);

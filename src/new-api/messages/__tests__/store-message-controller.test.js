@@ -3,6 +3,7 @@ import request from 'supertest';
 import app from '../../../app';
 
 describe('storeMessageController', () => {
+  const authorizationKeys = 'correct-key';
   const conversationId = uuid();
   const nhsNumber = '1234567890';
   const messageId = uuid();
@@ -21,11 +22,22 @@ describe('storeMessageController', () => {
     }
   };
 
+  beforeEach(() => {
+    process.env.AUTHORIZATION_KEYS = authorizationKeys;
+  });
+
+  afterEach(() => {
+    if (process.env.AUTHORIZATION_KEYS) {
+      delete process.env.AUTHORIZATION_KEYS;
+    }
+  });
+
   describe('success', () => {
     it('should return a 201 when message has successfully been stored in database', async () => {
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
     });
@@ -46,7 +58,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -62,7 +75,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -78,7 +92,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -100,7 +115,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -121,7 +137,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -142,7 +159,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -163,7 +181,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
     });
@@ -183,7 +202,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -203,7 +223,8 @@ describe('storeMessageController', () => {
       };
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
     });
@@ -224,7 +245,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -244,7 +266,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
     });
@@ -264,7 +287,8 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
@@ -285,10 +309,42 @@ describe('storeMessageController', () => {
 
       const res = await request(app)
         .post('/messages')
-        .send(requestBody);
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body.errors).toContainEqual(errorMessage);
+    });
+  });
+
+  describe('authentication', () => {
+    const requestBody = {
+      data: {
+        type: 'messages',
+        id: uuid(),
+        attributes: {
+          conversationId: uuid(),
+          nhsNumber: '1234567890',
+          messageType: 'ehrExtract'
+        }
+      }
+    };
+
+    it('should return 401 when authentication keys are missing', async () => {
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody);
+
+      expect(res.status).toBe(401);
+    });
+
+    it('should return 403 when authentication keys are incorrect', async () => {
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody)
+        .set('Authorization', 'incorrect');
+
+      expect(res.status).toBe(403);
     });
   });
 });
