@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { v4 } from 'uuid';
+import {v4 as uuid, v4} from 'uuid';
 import app from '../app';
 import config from '../config';
 
@@ -105,6 +105,34 @@ describe('New API', () => {
       expect(res.headers.location).toContain(
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
       );
+    });
+  });
+
+  describe('POST /messages', () => {
+    const conversationId = uuid();
+    const nhsNumber = '1234567890';
+    const messageId = uuid();
+    const messageType = "ehrExtract"
+    const listOfMessageIds = [];
+    const requestBody = {
+      data: {
+        type: 'messages',
+        id: messageId,
+        attributes: {
+          conversationId,
+          messageType,
+          nhsNumber,
+          listOfMessageIds
+        }
+      }
+    }
+
+    it('should return 201', async () => {
+      const res = await request(app)
+        .post(`/messages`)
+        .send(requestBody)
+        .set('Authorization', 'correct-key');
+      expect(res.status).toBe(201);
     });
   });
 });

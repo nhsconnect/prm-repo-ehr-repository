@@ -274,8 +274,51 @@
           }
         ]
       }
+    },
+    "/messages": {
+      "post": {
+        "tags": [],
+        "summary": "Store EHR Messages in DB",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/StoreMessages"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Message was successfully stored"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          },
+          "500": {
+            "description": "Failed to store message"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
     }
-  },
+    },
   "securityDefinitions": {
     "api_key": {
       "type": "apiKey",
@@ -353,6 +396,47 @@
         "transferComplete",
         "conversationId"
       ]
+    },
+    "StoreMessages": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["messages"]
+            },
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "conversationId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "messageType": {
+                  "type": "string"
+                },
+                "nhsNumber": {
+                  "type": "string"
+                },
+                "attachmentMessageIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["type", "id", "attributes","conversationId", "messageType"]
     },
     "ValidationErrors": {
       "type": "object",
