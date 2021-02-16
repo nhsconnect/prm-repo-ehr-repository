@@ -14,18 +14,6 @@ describe('storeMessageController', () => {
   const messageId = uuid();
   const messageType = 'ehrExtract';
   const attachmentMessageIds = [];
-  const requestBody = {
-    data: {
-      type: 'messages',
-      id: messageId,
-      attributes: {
-        conversationId,
-        messageType,
-        nhsNumber,
-        attachmentMessageIds
-      }
-    }
-  };
 
   beforeEach(() => {
     process.env.AUTHORIZATION_KEYS = authorizationKeys;
@@ -38,6 +26,18 @@ describe('storeMessageController', () => {
   });
 
   describe('success', () => {
+    const requestBody = {
+      data: {
+        type: 'messages',
+        id: messageId,
+        attributes: {
+          conversationId,
+          messageType,
+          nhsNumber,
+          attachmentMessageIds
+        }
+      }
+    };
     it('should return a 201 when message has successfully been stored in database', async () => {
       const message = { messageId, conversationId, type: messageType };
       const res = await request(app)
@@ -51,8 +51,20 @@ describe('storeMessageController', () => {
   });
 
   describe('failure', () => {
+    const requestBody = {
+      data: {
+        type: 'messages',
+        id: messageId,
+        attributes: {
+          conversationId,
+          messageType,
+          nhsNumber,
+          attachmentMessageIds
+        }
+      }
+    };
     it('should return a 503 when message cannot be stored in the database', async () => {
-      createMessage.mockRejectedValue({ error: 'db is down' });
+      createMessage.mockRejectedValueOnce({ error: 'db is down' });
       const res = await request(app)
         .post('/messages')
         .send(requestBody)
