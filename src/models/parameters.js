@@ -8,4 +8,14 @@ const getParameters = tableName => ({
   paranoid: true
 });
 
-module.exports = getParameters;
+export const getParametersRefactored = tableName => ({
+  tableName: tableName,
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  timestamps: true,
+  schema: 'public',
+  paranoid: true
+});
+
+export default getParameters;

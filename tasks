@@ -211,7 +211,9 @@ case "${command}" in
       ;;
   _setup_test_integration_local)
     configure_local_envs
+    npm run db:teardown
     npm run db:migrate
+    npm run db:data:seed
     prepare_local_envs_for_ide
     ;;
   _test_lint)

@@ -23,6 +23,9 @@ describe('Old API', () => {
       const nhsNumber = '5555555555';
       const messageId = '5bcf9bc1-190a-4c1c-814d-0fa6ef3ecce6';
       const conversationId = '6952c28c-b806-44f9-9b06-6bfe2e99dcba';
+      config.awsS3BucketName = 'some-bucket';
+      config.localstackUrl = 'localstack';
+
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set('Authorization', 'correct-key');
@@ -55,6 +58,8 @@ describe('Old API', () => {
     const isLargeMessage = true;
     const messageId = v4();
     const nhsNumber = '1234567890';
+    config.awsS3BucketName = 'some-bucket';
+    config.localstackUrl = 'localstack';
 
     it('should return presigned url', async () => {
       const res = await request(app)
@@ -144,7 +149,7 @@ describe('New API', () => {
 
       expect(message.conversationId).toBe(conversationId);
       expect(message.type).toBe(messageType);
-      expect(message.parentId).toBeUndefined();
+      expect(message.parentId).toBeNull();
       expect(res.status).toBe(201);
     });
   });

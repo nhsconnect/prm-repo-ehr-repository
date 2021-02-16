@@ -1,5 +1,6 @@
 import { body } from 'express-validator';
 import { MessageType } from '../../models/message';
+import { createMessage } from '../../services/database/message-repository';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
@@ -35,6 +36,12 @@ export const storeMessageControllerValidation = [
     .withMessage("'attachmentMessageIds' should be an array")
 ];
 
-export const storeMessageController = (req, res) => {
+export const storeMessageController = async (req, res) => {
+  const message = {
+    messageId: req.body.data.id,
+    conversationId: req.body.data.attributes.conversationId,
+    type: req.body.data.attributes.messageType
+  };
+  await createMessage(message);
   res.sendStatus(201);
 };

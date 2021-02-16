@@ -1,7 +1,7 @@
-import getParameters from './parameters';
+import { getParametersRefactored } from './parameters';
 
 export const modelName = 'Message';
-const tableName = 'message';
+const tableName = 'messages';
 
 export const MessageType = {
   EHR_EXTRACT: 'ehrExtract',
@@ -49,5 +49,5 @@ const model = dataType => ({
 });
 
 export default (sequelize, DataTypes) => {
-  return sequelize.define(modelName, model(DataTypes), getParameters(tableName));
+  return sequelize.define(modelName, model(DataTypes), getParametersRefactored(tableName));
 };
