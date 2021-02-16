@@ -29,7 +29,9 @@ const model = dataType => ({
   type: {
     field: 'type',
     type: dataType.STRING,
-    isIn: [Object.values(MessageType)],
+    validate: {
+      isIn: [Object.values(MessageType)]
+    },
     allowNull: false
   },
   createdAt: {

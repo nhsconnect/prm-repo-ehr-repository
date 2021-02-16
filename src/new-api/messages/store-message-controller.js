@@ -1,6 +1,7 @@
 import { body } from 'express-validator';
 import { MessageType } from '../../models/message';
 import { createMessage } from '../../services/database/message-repository';
+import { logError } from '../../middleware/logging';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
@@ -42,6 +43,12 @@ export const storeMessageController = async (req, res) => {
     conversationId: req.body.data.attributes.conversationId,
     type: req.body.data.attributes.messageType
   };
-  await createMessage(message);
+  try {
+    await createMessage(message);
+  } catch (e) {
+    logError(`Returned 503 due to error while saving message: ${e.message}`);
+    res.sendStatus(503);
+    return;
+  }
   res.sendStatus(201);
 };

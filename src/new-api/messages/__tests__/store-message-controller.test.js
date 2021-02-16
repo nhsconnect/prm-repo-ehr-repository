@@ -1,6 +1,11 @@
 import { v4 as uuid } from 'uuid';
 import request from 'supertest';
 import app from '../../../app';
+import { createMessage } from '../../../services/database/message-repository';
+import { logError } from '../../../middleware/logging';
+
+jest.mock('../../../services/database/message-repository');
+jest.mock('../../../middleware/logging');
 
 describe('storeMessageController', () => {
   const authorizationKeys = 'correct-key';
@@ -34,12 +39,28 @@ describe('storeMessageController', () => {
 
   describe('success', () => {
     it('should return a 201 when message has successfully been stored in database', async () => {
+      const message = { messageId, conversationId, type: messageType };
       const res = await request(app)
         .post('/messages')
         .send(requestBody)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
+      expect(createMessage).toHaveBeenCalledWith(message);
+    });
+  });
+
+  describe('failure', () => {
+    it('should return a 503 when message cannot be stored in the database', async () => {
+      createMessage.mockRejectedValue({ error: 'db is down' });
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
+
+      expect(logError).toHaveBeenCalled();
+      expect(logError.mock.calls[0][0]).toContain('Returned 503 due to error while saving message');
+      expect(res.status).toBe(503);
     });
   });
 
