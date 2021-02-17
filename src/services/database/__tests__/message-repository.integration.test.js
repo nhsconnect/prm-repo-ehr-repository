@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { updateAttachmentReceivedAt, createEhrExtract } from '../message-repository';
+import { updateAttachmentAndCreateItsParts, createEhrExtract } from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
 import { modelName as healthRecordModelName } from '../../../models/health-record-new';
@@ -115,7 +115,7 @@ describe('messageRepository', () => {
     });
   });
 
-  describe('createAttachment', () => {
+  describe('updateAttachmentAndCreateItsParts', () => {
     it('should update receivedAt for an attachment with current date', async () => {
       const conversationId = uuid();
       const ehrMessageId = uuid();
@@ -133,16 +133,17 @@ describe('messageRepository', () => {
         type: MessageType.ATTACHMENT,
         receivedAt: null
       });
-      await updateAttachmentReceivedAt(attachmentMessageId);
+      await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, []);
       const attachment = await Message.findByPk(attachmentMessageId);
 
       expect(attachment.receivedAt).toEqual(now);
     });
 
-    it('should not update receivedAt for a given attachment', async () => {
+    it('should not update receivedAt for a given attachment if uuid is not valid', async () => {
       let caughtException = null;
+      const conversationId = uuid();
       try {
-        await updateAttachmentReceivedAt('not-valid');
+        await updateAttachmentAndCreateItsParts('not-valid', conversationId, []);
       } catch (e) {
         caughtException = e;
       }
@@ -150,6 +151,35 @@ describe('messageRepository', () => {
       expect(caughtException).not.toBeNull();
       expect(logError).toHaveBeenCalled();
       expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
+    });
+
+    it('should create messages for attachment parts', async () => {
+      const conversationId = uuid();
+      const ehrMessageId = uuid();
+      const attachmentMessageId = uuid();
+      const attachmentRemainingPartId = uuid();
+
+      await HealthRecord.create({ conversationId, nhsNumber });
+      await Message.create({
+        conversationId,
+        messageId: ehrMessageId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date()
+      });
+      await Message.create({
+        conversationId,
+        messageId: attachmentMessageId,
+        type: MessageType.ATTACHMENT,
+        receivedAt: null
+      });
+      await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, [
+        attachmentRemainingPartId
+      ]);
+      const attachmentRemainingPart = await Message.findByPk(attachmentRemainingPartId);
+
+      expect(attachmentRemainingPart.receivedAt).toEqual(null);
+      expect(attachmentRemainingPart.parentId).toEqual(attachmentMessageId);
+      expect(attachmentRemainingPart.conversationId).toEqual(conversationId);
     });
   });
 });

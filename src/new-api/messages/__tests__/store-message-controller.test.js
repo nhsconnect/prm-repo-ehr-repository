@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import request from 'supertest';
 import app from '../../../app';
 import {
-  updateAttachmentReceivedAt,
+  updateAttachmentAndCreateItsParts,
   createEhrExtract
 } from '../../../services/database/message-repository';
 import { logError } from '../../../middleware/logging';
@@ -58,11 +58,12 @@ describe('storeMessageController', () => {
       expect(createEhrExtract).toHaveBeenCalledWith(ehrExtract);
     });
 
-    it('should create ehrExtract when type is attachment', async () => {
+    it('should update receivedAt for given attachment and store its parts', async () => {
+      const attachmentPartId = uuid();
       requestBody.data.attributes = {
         messageType: MessageType.ATTACHMENT,
         conversationId,
-        attachmentMessageIds: []
+        attachmentMessageIds: [attachmentPartId]
       };
       const res = await request(app)
         .post('/messages')
@@ -71,7 +72,9 @@ describe('storeMessageController', () => {
 
       expect(res.status).toBe(201);
       expect(createEhrExtract).not.toHaveBeenCalled();
-      expect(updateAttachmentReceivedAt).toHaveBeenCalledWith(messageId);
+      expect(updateAttachmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
+        attachmentPartId
+      ]);
     });
   });
 

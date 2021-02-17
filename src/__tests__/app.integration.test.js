@@ -141,14 +141,14 @@ describe('New API', () => {
       }
     });
 
-    const createReqBodyForAttachment = (messageId, conversationId) => ({
+    const createReqBodyForAttachment = (messageId, conversationId, attachmentMessageIds = []) => ({
       data: {
         type: 'messages',
         id: messageId,
         attributes: {
           conversationId,
           messageType: MessageType.ATTACHMENT,
-          attachmentMessageIds: []
+          attachmentMessageIds: attachmentMessageIds
         }
       }
     });
@@ -211,6 +211,32 @@ describe('New API', () => {
       const attachmentMessage = await Message.findByPk(attachment);
 
       expect(attachmentMessage.receivedAt).not.toBeNull();
+      expect(attachmentRes.status).toBe(201);
+    });
+
+    it('should create large attachment parts messages in the database and return 201', async () => {
+      const firstPartOfLargeAttachmentId = uuid();
+      const restOfAttachmentId = uuid();
+
+      await request(app)
+        .post(`/messages`)
+        .send(
+          createReqBodyForEhr(messageId, conversationId, nhsNumber, [firstPartOfLargeAttachmentId])
+        )
+        .set('Authorization', 'correct-key');
+
+      const attachmentRes = await request(app)
+        .post(`/messages`)
+        .send(
+          createReqBodyForAttachment(firstPartOfLargeAttachmentId, conversationId, [
+            restOfAttachmentId
+          ])
+        )
+        .set('Authorization', 'correct-key');
+
+      const restOfAttachmentMessage = await Message.findByPk(restOfAttachmentId);
+
+      expect(restOfAttachmentMessage.receivedAt).toBeNull();
       expect(attachmentRes.status).toBe(201);
     });
   });
