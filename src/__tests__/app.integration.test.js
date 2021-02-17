@@ -3,7 +3,7 @@ import { v4 as uuid, v4 } from 'uuid';
 import app from '../app';
 import config from '../config';
 import ModelFactory from '../models';
-import { modelName as messageModelName } from '../models/message';
+import { MessageType, modelName as messageModelName } from '../models/message';
 import { modelName as healthRecordModelName } from '../models/health-record-new';
 
 jest.mock('../middleware/logging');
@@ -119,23 +119,31 @@ describe('New API', () => {
   describe('POST /messages', () => {
     const Message = ModelFactory.getByName(messageModelName);
     const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-    const conversationId = uuid();
     const nhsNumber = '1234567890';
-    const messageId = uuid();
-    const messageType = 'ehrExtract';
-    const listOfMessageIds = [];
-    const requestBody = {
-      data: {
-        type: 'messages',
-        id: messageId,
-        attributes: {
-          conversationId,
-          messageType,
-          nhsNumber,
-          listOfMessageIds
+    let conversationId;
+    let messageId;
+    let requestBody;
+
+    const ehrExtractMessageType = MessageType.EHR_EXTRACT;
+    const attachmentMessageType = MessageType.ATTACHMENT;
+    const attachmentMessageIds = [];
+
+    beforeEach(() => {
+      messageId = uuid();
+      conversationId = uuid();
+      requestBody = {
+        data: {
+          type: 'messages',
+          id: messageId,
+          attributes: {
+            conversationId,
+            messageType: ehrExtractMessageType,
+            nhsNumber,
+            attachmentMessageIds
+          }
         }
-      }
-    };
+      };
+    });
 
     afterAll(async () => {
       await ModelFactory.sequelize.close();
@@ -151,9 +159,26 @@ describe('New API', () => {
       const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(message.conversationId).toBe(conversationId);
-      expect(message.type).toBe(messageType);
+      expect(message.type).toBe(ehrExtractMessageType);
       expect(message.parentId).toBeNull();
       expect(healthRecord.nhsNumber).toBe(nhsNumber);
+      expect(res.status).toBe(201);
+    });
+
+    it('should save ehr with attachments in the database and return 201', async () => {
+      const attachment = uuid();
+      requestBody.data.attributes.attachmentMessageIds = [attachment];
+
+      const res = await request(app)
+        .post(`/messages`)
+        .send(requestBody)
+        .set('Authorization', 'correct-key');
+
+      const attachmentMessage = await Message.findByPk(attachment);
+
+      expect(attachmentMessage.conversationId).toBe(conversationId);
+      expect(attachmentMessage.type).toBe(attachmentMessageType);
+      expect(attachmentMessage.parentId).toBe(messageId);
       expect(res.status).toBe(201);
     });
   });

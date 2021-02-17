@@ -32,7 +32,6 @@ export const storeMessageControllerValidation = [
     .isUUID()
     .withMessage("'attachmentMessageIds' should be UUIDs"),
   body('data.attributes.attachmentMessageIds')
-    .optional()
     .isArray()
     .withMessage("'attachmentMessageIds' should be an array")
 ];
@@ -42,7 +41,8 @@ export const storeMessageController = async (req, res) => {
   const ehrExtract = {
     messageId: id,
     conversationId: attributes.conversationId,
-    nhsNumber: attributes.nhsNumber
+    nhsNumber: attributes.nhsNumber,
+    attachmentMessageIds: attributes.attachmentMessageIds
   };
   try {
     if (attributes.messageType === MessageType.EHR_EXTRACT) {

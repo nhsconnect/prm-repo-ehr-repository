@@ -14,7 +14,7 @@ describe('storeMessageController', () => {
   const nhsNumber = '1234567890';
   const messageId = uuid();
   const ehrExtractMessageType = MessageType.EHR_EXTRACT;
-  const attachmentMessageIds = [];
+  const attachmentMessageIds = [uuid()];
 
   beforeEach(() => {
     process.env.AUTHORIZATION_KEYS = authorizationKeys;
@@ -27,20 +27,25 @@ describe('storeMessageController', () => {
   });
 
   describe('success', () => {
-    const requestBody = {
-      data: {
-        type: 'messages',
-        id: messageId,
-        attributes: {
-          conversationId,
-          messageType: ehrExtractMessageType,
-          nhsNumber,
-          attachmentMessageIds
+    let requestBody;
+
+    beforeEach(() => {
+      requestBody = {
+        data: {
+          type: 'messages',
+          id: messageId,
+          attributes: {
+            conversationId,
+            messageType: ehrExtractMessageType,
+            nhsNumber,
+            attachmentMessageIds
+          }
         }
-      }
-    };
+      };
+    });
+
     it('should return a 201 when message has successfully been stored in database', async () => {
-      const ehrExtract = { messageId, conversationId, nhsNumber };
+      const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds };
       const res = await request(app)
         .post('/messages')
         .send(requestBody)
@@ -51,7 +56,11 @@ describe('storeMessageController', () => {
     });
 
     it('should create ehrExtract when type is attachment', async () => {
-      requestBody.data.attributes = { messageType: MessageType.ATTACHMENT, conversationId };
+      requestBody.data.attributes = {
+        messageType: MessageType.ATTACHMENT,
+        conversationId,
+        attachmentMessageIds: []
+      };
       const res = await request(app)
         .post('/messages')
         .send(requestBody)
@@ -219,7 +228,8 @@ describe('storeMessageController', () => {
           attributes: {
             conversationId: uuid(),
             nhsNumber: '1234567890',
-            messageType: 'ehrExtract'
+            messageType: 'ehrExtract',
+            attachmentMessageIds: []
           }
         }
       };
@@ -262,7 +272,8 @@ describe('storeMessageController', () => {
           attributes: {
             conversationId: uuid(),
             nhsNumber: '1234567890',
-            messageType: 'ehrExtract'
+            messageType: 'ehrExtract',
+            attachmentMessageIds: []
           }
         }
       };
@@ -304,7 +315,8 @@ describe('storeMessageController', () => {
           id: uuid(),
           attributes: {
             conversationId: uuid(),
-            messageType: 'attachment'
+            messageType: 'attachment',
+            attachmentMessageIds: []
           }
         }
       };

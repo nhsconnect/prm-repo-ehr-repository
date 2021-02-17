@@ -11,6 +11,8 @@ describe('messageRepository', () => {
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const ehrExtractType = MessageType.EHR_EXTRACT;
+  const attachment = uuid();
+  const attachmentMessageIds = [attachment];
   const nhsNumber = '1234567890';
 
   afterAll(async () => {
@@ -20,7 +22,7 @@ describe('messageRepository', () => {
   it('should create message in db', async () => {
     const conversationId = uuid();
     const messageId = uuid();
-    const ehrExtract = { messageId, conversationId, nhsNumber };
+    const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds: [] };
     await createEhrExtract(ehrExtract);
 
     const actualMessage = await Message.findByPk(messageId);
@@ -32,17 +34,34 @@ describe('messageRepository', () => {
   it('should create health record in db', async () => {
     const conversationId = uuid();
     const messageId = uuid();
-    const ehrExtract = { messageId, conversationId, nhsNumber };
+    const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds: [] };
     await createEhrExtract(ehrExtract);
 
     const actualHealthRecord = await HealthRecord.findByPk(conversationId);
     expect(actualHealthRecord.nhsNumber).toBe(nhsNumber);
   });
 
+  it('should create attachment message in db when health record has attachments', async () => {
+    const conversationId = uuid();
+    const messageId = uuid();
+    const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds };
+    await createEhrExtract(ehrExtract);
+
+    const actualAttachmentMessage = await Message.findByPk(attachment);
+    expect(actualAttachmentMessage.conversationId).toBe(conversationId);
+    expect(actualAttachmentMessage.type).toBe(MessageType.ATTACHMENT);
+    expect(actualAttachmentMessage.parentId).toBe(messageId);
+  });
+
   it('should not save message or health record with wrong type', async () => {
     const conversationId = uuid();
     const messageId = uuid();
-    const ehrExtract = { messageId: 'not-a-valid-message-id', conversationId, nhsNumber };
+    const ehrExtract = {
+      messageId: 'not-a-valid-message-id',
+      conversationId,
+      nhsNumber,
+      attachmentMessageIds: []
+    };
 
     let caughtException = null;
     try {
@@ -62,7 +81,13 @@ describe('messageRepository', () => {
   it('should not save message or health record with wrong nhs number', async () => {
     const conversationId = uuid();
     const messageId = uuid();
-    const ehrExtract = { messageId, conversationId, type: ehrExtractType, nhsNumber: 'not-valid' };
+    const ehrExtract = {
+      messageId,
+      conversationId,
+      type: ehrExtractType,
+      nhsNumber: 'not-valid',
+      attachmentMessageIds: []
+    };
 
     let caughtException = null;
     try {
