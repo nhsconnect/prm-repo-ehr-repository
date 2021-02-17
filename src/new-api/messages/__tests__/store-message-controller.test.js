@@ -1,8 +1,9 @@
 import { v4 as uuid } from 'uuid';
 import request from 'supertest';
 import app from '../../../app';
-import { createMessage } from '../../../services/database/message-repository';
+import { createEhrExtract } from '../../../services/database/message-repository';
 import { logError } from '../../../middleware/logging';
+import { MessageType } from '../../../models/message';
 
 jest.mock('../../../services/database/message-repository');
 jest.mock('../../../middleware/logging');
@@ -12,7 +13,7 @@ describe('storeMessageController', () => {
   const conversationId = uuid();
   const nhsNumber = '1234567890';
   const messageId = uuid();
-  const messageType = 'ehrExtract';
+  const ehrExtractMessageType = MessageType.EHR_EXTRACT;
   const attachmentMessageIds = [];
 
   beforeEach(() => {
@@ -32,21 +33,32 @@ describe('storeMessageController', () => {
         id: messageId,
         attributes: {
           conversationId,
-          messageType,
+          messageType: ehrExtractMessageType,
           nhsNumber,
           attachmentMessageIds
         }
       }
     };
     it('should return a 201 when message has successfully been stored in database', async () => {
-      const message = { messageId, conversationId, type: messageType };
+      const ehrExtract = { messageId, conversationId, nhsNumber };
       const res = await request(app)
         .post('/messages')
         .send(requestBody)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
-      expect(createMessage).toHaveBeenCalledWith(message);
+      expect(createEhrExtract).toHaveBeenCalledWith(ehrExtract);
+    });
+
+    it('should create ehrExtract when type is attachment', async () => {
+      requestBody.data.attributes = { messageType: MessageType.ATTACHMENT, conversationId };
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toBe(201);
+      expect(createEhrExtract).not.toHaveBeenCalled();
     });
   });
 
@@ -57,14 +69,14 @@ describe('storeMessageController', () => {
         id: messageId,
         attributes: {
           conversationId,
-          messageType,
+          messageType: ehrExtractMessageType,
           nhsNumber,
           attachmentMessageIds
         }
       }
     };
     it('should return a 503 when message cannot be stored in the database', async () => {
-      createMessage.mockRejectedValueOnce({ error: 'db is down' });
+      createEhrExtract.mockRejectedValueOnce({ error: 'db is down' });
       const res = await request(app)
         .post('/messages')
         .send(requestBody)

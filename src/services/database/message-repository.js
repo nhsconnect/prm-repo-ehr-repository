@@ -1,14 +1,21 @@
 import ModelFactory from '../../models';
-import { modelName } from '../../models/message';
+import { MessageType, modelName as messageModelName } from '../../models/message';
+import { modelName as healthRecordModelName } from '../../models/health-record-new';
 import { logError } from '../../middleware/logging';
 
-export const createMessage = async message => {
-  const Message = ModelFactory.getByName(modelName);
+export const createEhrExtract = async ehrExtract => {
+  const Message = ModelFactory.getByName(messageModelName);
+  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+  const { conversationId, messageId, nhsNumber } = ehrExtract;
+  const healthRecord = { conversationId, nhsNumber };
+  const message = { conversationId, messageId, type: MessageType.EHR_EXTRACT };
+
   const sequelize = ModelFactory.sequelize;
   const t = await sequelize.transaction();
 
   try {
     await Message.create(message, { transaction: t });
+    await HealthRecord.create(healthRecord, { transaction: t });
   } catch (e) {
     logError(`Message could not be stored because: ${e.message}`);
     await t.rollback();

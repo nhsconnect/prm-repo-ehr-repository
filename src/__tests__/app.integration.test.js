@@ -3,7 +3,8 @@ import { v4 as uuid, v4 } from 'uuid';
 import app from '../app';
 import config from '../config';
 import ModelFactory from '../models';
-import { modelName } from '../models/message';
+import { modelName as messageModelName } from '../models/message';
+import { modelName as healthRecordModelName } from '../models/health-record-new';
 
 jest.mock('../middleware/logging');
 
@@ -116,7 +117,8 @@ describe('New API', () => {
   });
 
   describe('POST /messages', () => {
-    const Message = ModelFactory.getByName(modelName);
+    const Message = ModelFactory.getByName(messageModelName);
+    const HealthRecord = ModelFactory.getByName(healthRecordModelName);
     const conversationId = uuid();
     const nhsNumber = '1234567890';
     const messageId = uuid();
@@ -146,10 +148,12 @@ describe('New API', () => {
         .set('Authorization', 'correct-key');
 
       const message = await Message.findByPk(messageId);
+      const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(message.conversationId).toBe(conversationId);
       expect(message.type).toBe(messageType);
       expect(message.parentId).toBeNull();
+      expect(healthRecord.nhsNumber).toBe(nhsNumber);
       expect(res.status).toBe(201);
     });
   });
