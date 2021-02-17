@@ -1,7 +1,10 @@
 import { v4 as uuid } from 'uuid';
 import request from 'supertest';
 import app from '../../../app';
-import { createEhrExtract } from '../../../services/database/message-repository';
+import {
+  updateAttachmentReceivedAt,
+  createEhrExtract
+} from '../../../services/database/message-repository';
 import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/message';
 
@@ -68,6 +71,7 @@ describe('storeMessageController', () => {
 
       expect(res.status).toBe(201);
       expect(createEhrExtract).not.toHaveBeenCalled();
+      expect(updateAttachmentReceivedAt).toHaveBeenCalledWith(messageId);
     });
   });
 

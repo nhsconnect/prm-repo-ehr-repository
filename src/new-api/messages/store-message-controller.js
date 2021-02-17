@@ -1,6 +1,9 @@
 import { body } from 'express-validator';
 import { MessageType } from '../../models/message';
-import { createEhrExtract } from '../../services/database/message-repository';
+import {
+  updateAttachmentReceivedAt,
+  createEhrExtract
+} from '../../services/database/message-repository';
 import { logError } from '../../middleware/logging';
 
 export const storeMessageControllerValidation = [
@@ -47,6 +50,9 @@ export const storeMessageController = async (req, res) => {
   try {
     if (attributes.messageType === MessageType.EHR_EXTRACT) {
       await createEhrExtract(ehrExtract);
+    }
+    if (attributes.messageType === MessageType.ATTACHMENT) {
+      await updateAttachmentReceivedAt(id);
     }
   } catch (e) {
     logError(`Returned 503 due to error while saving message: ${e.message}`);

@@ -128,21 +128,35 @@ describe('New API', () => {
     const attachmentMessageType = MessageType.ATTACHMENT;
     const attachmentMessageIds = [];
 
+    const createReqBodyForEhr = (messageId, conversationId, nhsNumber, attachmentMessageIds) => ({
+      data: {
+        type: 'messages',
+        id: messageId,
+        attributes: {
+          conversationId,
+          messageType: ehrExtractMessageType,
+          nhsNumber,
+          attachmentMessageIds
+        }
+      }
+    });
+
+    const createReqBodyForAttachment = (messageId, conversationId) => ({
+      data: {
+        type: 'messages',
+        id: messageId,
+        attributes: {
+          conversationId,
+          messageType: MessageType.ATTACHMENT,
+          attachmentMessageIds: []
+        }
+      }
+    });
+
     beforeEach(() => {
       messageId = uuid();
       conversationId = uuid();
-      requestBody = {
-        data: {
-          type: 'messages',
-          id: messageId,
-          attributes: {
-            conversationId,
-            messageType: ehrExtractMessageType,
-            nhsNumber,
-            attachmentMessageIds
-          }
-        }
-      };
+      requestBody = createReqBodyForEhr(messageId, conversationId, nhsNumber, attachmentMessageIds);
     });
 
     afterAll(async () => {
@@ -180,6 +194,24 @@ describe('New API', () => {
       expect(attachmentMessage.type).toBe(attachmentMessageType);
       expect(attachmentMessage.parentId).toBe(messageId);
       expect(res.status).toBe(201);
+    });
+
+    it('should update receivedAt for attachments in the database and return 201', async () => {
+      const attachment = uuid();
+      await request(app)
+        .post(`/messages`)
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachment]))
+        .set('Authorization', 'correct-key');
+
+      const attachmentRes = await request(app)
+        .post(`/messages`)
+        .send(createReqBodyForAttachment(attachment, conversationId))
+        .set('Authorization', 'correct-key');
+
+      const attachmentMessage = await Message.findByPk(attachment);
+
+      expect(attachmentMessage.receivedAt).not.toBeNull();
+      expect(attachmentRes.status).toBe(201);
     });
   });
 });

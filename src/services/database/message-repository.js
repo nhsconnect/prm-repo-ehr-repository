@@ -39,3 +39,17 @@ export const createEhrExtract = async ehrExtract => {
   }
   await t.commit();
 };
+
+export const updateAttachmentReceivedAt = async id => {
+  const Message = ModelFactory.getByName(messageModelName);
+  const sequelize = ModelFactory.sequelize;
+  const t = await sequelize.transaction();
+  try {
+    await Message.update({ receivedAt: getNow() }, { where: { messageId: id }, transaction: t });
+  } catch (e) {
+    logError(`Message could not be stored because: ${e.message}`);
+    await t.rollback();
+    throw e;
+  }
+  await t.commit();
+};
