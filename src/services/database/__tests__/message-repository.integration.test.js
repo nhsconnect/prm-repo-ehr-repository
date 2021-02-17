@@ -4,8 +4,10 @@ import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
 import { modelName as healthRecordModelName } from '../../../models/health-record-new';
 import { logError } from '../../../middleware/logging';
+import { getNow } from '../../time';
 
 jest.mock('../../../middleware/logging');
+jest.mock('../../time');
 
 describe('messageRepository', () => {
   const Message = ModelFactory.getByName(messageModelName);
@@ -14,6 +16,11 @@ describe('messageRepository', () => {
   const attachment = uuid();
   const attachmentMessageIds = [attachment];
   const nhsNumber = '1234567890';
+  const now = new Date();
+
+  beforeEach(() => {
+    getNow.mockReturnValue(now);
+  });
 
   afterAll(async () => {
     await ModelFactory.sequelize.close();
@@ -29,6 +36,7 @@ describe('messageRepository', () => {
     expect(actualMessage.messageId).toBe(messageId);
     expect(actualMessage.conversationId).toBe(conversationId);
     expect(actualMessage.type).toBe(ehrExtractType);
+    expect(actualMessage.receivedAt).toEqual(now);
   });
 
   it('should create health record in db', async () => {
@@ -51,6 +59,7 @@ describe('messageRepository', () => {
     expect(actualAttachmentMessage.conversationId).toBe(conversationId);
     expect(actualAttachmentMessage.type).toBe(MessageType.ATTACHMENT);
     expect(actualAttachmentMessage.parentId).toBe(messageId);
+    expect(actualAttachmentMessage.receivedAt).toBeNull();
   });
 
   it('should not save message or health record with wrong type', async () => {

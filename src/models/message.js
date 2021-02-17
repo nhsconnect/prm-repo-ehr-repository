@@ -34,6 +34,10 @@ const model = dataType => ({
     },
     allowNull: false
   },
+  receivedAt: {
+    field: 'received_at',
+    type: dataType.DATE
+  },
   createdAt: {
     field: 'created_at',
     type: dataType.DATE,

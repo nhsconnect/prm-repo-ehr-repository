@@ -2,13 +2,19 @@ import ModelFactory from '../../models';
 import { MessageType, modelName as messageModelName } from '../../models/message';
 import { modelName as healthRecordModelName } from '../../models/health-record-new';
 import { logError } from '../../middleware/logging';
+import { getNow } from '../time';
 
 export const createEhrExtract = async ehrExtract => {
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const { conversationId, messageId, nhsNumber, attachmentMessageIds } = ehrExtract;
   const healthRecord = { conversationId, nhsNumber };
-  const message = { conversationId, messageId, type: MessageType.EHR_EXTRACT };
+  const message = {
+    conversationId,
+    messageId,
+    type: MessageType.EHR_EXTRACT,
+    receivedAt: getNow()
+  };
 
   const sequelize = ModelFactory.sequelize;
   const t = await sequelize.transaction();
