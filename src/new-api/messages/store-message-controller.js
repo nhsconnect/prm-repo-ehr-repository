@@ -2,7 +2,9 @@ import { body } from 'express-validator';
 import { MessageType } from '../../models/message';
 import {
   updateAttachmentAndCreateItsParts,
-  createEhrExtract
+  createEhrExtract,
+  attachmentExists,
+  createAttachmentPart
 } from '../../services/database/message-repository';
 import { logError } from '../../middleware/logging';
 
@@ -52,11 +54,15 @@ export const storeMessageController = async (req, res) => {
       await createEhrExtract(ehrExtract);
     }
     if (attributes.messageType === MessageType.ATTACHMENT) {
-      await updateAttachmentAndCreateItsParts(
-        id,
-        attributes.conversationId,
-        attributes.attachmentMessageIds
-      );
+      if (await attachmentExists(id)) {
+        await updateAttachmentAndCreateItsParts(
+          id,
+          attributes.conversationId,
+          attributes.attachmentMessageIds
+        );
+      } else {
+        await createAttachmentPart(id, attributes.conversationId);
+      }
     }
   } catch (e) {
     logError(`Returned 503 due to error while saving message: ${e.message}`);

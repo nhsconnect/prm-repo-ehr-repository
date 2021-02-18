@@ -1,5 +1,10 @@
 import { v4 as uuid } from 'uuid';
-import { updateAttachmentAndCreateItsParts, createEhrExtract } from '../message-repository';
+import {
+  updateAttachmentAndCreateItsParts,
+  createEhrExtract,
+  attachmentExists,
+  createAttachmentPart
+} from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
 import { modelName as healthRecordModelName } from '../../../models/health-record-new';
@@ -139,7 +144,7 @@ describe('messageRepository', () => {
       expect(attachment.receivedAt).toEqual(now);
     });
 
-    it('should not update receivedAt for a given attachment if uuid is not valid', async () => {
+    it('should not update receivedAt for a given attachment if database update query throws', async () => {
       let caughtException = null;
       const conversationId = uuid();
       try {
@@ -180,6 +185,110 @@ describe('messageRepository', () => {
       expect(attachmentRemainingPart.receivedAt).toEqual(null);
       expect(attachmentRemainingPart.parentId).toEqual(attachmentMessageId);
       expect(attachmentRemainingPart.conversationId).toEqual(conversationId);
+    });
+
+    it('should update parentId for an attachment part already existing in the DB', async () => {
+      const conversationId = uuid();
+      const ehrMessageId = uuid();
+      const attachmentMessageId = uuid();
+      const attachmentRemainingPartId = uuid();
+
+      await HealthRecord.create({ conversationId, nhsNumber });
+      await Message.create({
+        conversationId,
+        messageId: ehrMessageId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date()
+      });
+      await Message.create({
+        conversationId,
+        messageId: attachmentMessageId,
+        type: MessageType.ATTACHMENT,
+        receivedAt: null
+      });
+      await Message.create({
+        conversationId,
+        messageId: attachmentRemainingPartId,
+        type: MessageType.ATTACHMENT,
+        receivedAt: new Date(),
+        parentId: null
+      });
+
+      await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, [
+        attachmentRemainingPartId
+      ]);
+
+      const attachmentRemainingPart = await Message.findByPk(attachmentRemainingPartId);
+
+      expect(attachmentRemainingPart.parentId).toEqual(attachmentMessageId);
+    });
+  });
+
+  describe('attachmentExists', () => {
+    it('should return true for an attachment existing in the database', async () => {
+      const conversationId = uuid();
+      const messageId = uuid();
+      await Message.create({
+        conversationId,
+        messageId: messageId,
+        type: MessageType.ATTACHMENT,
+        receivedAt: null
+      });
+
+      expect(await attachmentExists(messageId)).toBe(true);
+    });
+
+    it('should return false for an attachment that does not exist in the database', async () => {
+      const messageId = uuid();
+      expect(await attachmentExists(messageId)).toBe(false);
+    });
+
+    it('should throw if database querying throws', async () => {
+      const messageId = 'not-valid';
+      let caughtException = null;
+      try {
+        await attachmentExists(messageId);
+      } catch (e) {
+        caughtException = e;
+      }
+
+      expect(caughtException).not.toBeNull();
+      expect(logError).toHaveBeenCalledWith(
+        'Querying database for attachment message failed',
+        caughtException
+      );
+    });
+  });
+
+  describe('createAttachmentPart', () => {
+    it('should create attachment entry in the database', async () => {
+      const messageId = uuid();
+      const conversationId = uuid();
+      await createAttachmentPart(messageId, conversationId);
+
+      const attachment = await Message.findByPk(messageId);
+
+      expect(attachment.conversationId).toEqual(conversationId);
+      expect(attachment.receivedAt).toEqual(now);
+      expect(attachment.type).toEqual(MessageType.ATTACHMENT);
+      expect(attachment.parentId).toBeNull();
+    });
+
+    it('should throw if database creation query throws', async () => {
+      const conversationId = uuid();
+      const messageId = 'not-valid';
+      let caughtException = null;
+      try {
+        await createAttachmentPart(messageId, conversationId);
+      } catch (e) {
+        caughtException = e;
+      }
+
+      expect(caughtException).not.toBeNull();
+      expect(logError).toHaveBeenCalledWith(
+        'Creating attachment database entry failed',
+        caughtException
+      );
     });
   });
 });

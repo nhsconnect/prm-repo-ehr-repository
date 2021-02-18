@@ -196,24 +196,6 @@ describe('New API', () => {
       expect(res.status).toBe(201);
     });
 
-    it('should update receivedAt for attachments in the database and return 201', async () => {
-      const attachment = uuid();
-      await request(app)
-        .post(`/messages`)
-        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachment]))
-        .set('Authorization', 'correct-key');
-
-      const attachmentRes = await request(app)
-        .post(`/messages`)
-        .send(createReqBodyForAttachment(attachment, conversationId))
-        .set('Authorization', 'correct-key');
-
-      const attachmentMessage = await Message.findByPk(attachment);
-
-      expect(attachmentMessage.receivedAt).not.toBeNull();
-      expect(attachmentRes.status).toBe(201);
-    });
-
     it('should create large attachment parts messages in the database and return 201', async () => {
       const firstPartOfLargeAttachmentId = uuid();
       const restOfAttachmentId = uuid();
@@ -238,6 +220,44 @@ describe('New API', () => {
 
       expect(restOfAttachmentMessage.receivedAt).toBeNull();
       expect(attachmentRes.status).toBe(201);
+    });
+
+    it('should update receivedAt for attachments in the database and return 201', async () => {
+      const attachment = uuid();
+      await request(app)
+        .post(`/messages`)
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachment]))
+        .set('Authorization', 'correct-key');
+
+      const attachmentRes = await request(app)
+        .post(`/messages`)
+        .send(createReqBodyForAttachment(attachment, conversationId))
+        .set('Authorization', 'correct-key');
+
+      const attachmentMessage = await Message.findByPk(attachment);
+
+      expect(attachmentMessage.receivedAt).not.toBeNull();
+      expect(attachmentRes.status).toBe(201);
+    });
+
+    it('should create message in the database when an attachment part arrives before first attachment part', async () => {
+      const attachmentId = uuid();
+      const attachmentPartId = uuid();
+      await request(app)
+        .post(`/messages`)
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachmentId]))
+        .set('Authorization', 'correct-key');
+
+      const res = await request(app)
+        .post(`/messages`)
+        .send(createReqBodyForAttachment(attachmentPartId, conversationId))
+        .set('Authorization', 'correct-key');
+
+      const attachmentPartMessage = await Message.findByPk(attachmentPartId);
+
+      expect(attachmentPartMessage.conversationId).toEqual(conversationId);
+      expect(attachmentPartMessage.receivedAt).not.toBeNull();
+      expect(res.status).toBe(201);
     });
   });
 });

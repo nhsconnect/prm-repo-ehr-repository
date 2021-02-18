@@ -3,7 +3,9 @@ import request from 'supertest';
 import app from '../../../app';
 import {
   updateAttachmentAndCreateItsParts,
-  createEhrExtract
+  createEhrExtract,
+  createAttachmentPart,
+  attachmentExists
 } from '../../../services/database/message-repository';
 import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/message';
@@ -65,6 +67,9 @@ describe('storeMessageController', () => {
         conversationId,
         attachmentMessageIds: [attachmentPartId]
       };
+
+      attachmentExists.mockResolvedValueOnce(true);
+
       const res = await request(app)
         .post('/messages')
         .send(requestBody)
@@ -75,6 +80,28 @@ describe('storeMessageController', () => {
       expect(updateAttachmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
         attachmentPartId
       ]);
+    });
+
+    it('should create message in the database when an attachment part arrives before first attachment part', async () => {
+      const attachmentPartId = uuid();
+      requestBody.data.id = attachmentPartId;
+      requestBody.data.attributes = {
+        messageType: MessageType.ATTACHMENT,
+        conversationId,
+        attachmentMessageIds: []
+      };
+
+      attachmentExists.mockResolvedValueOnce(false);
+
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toBe(201);
+      expect(attachmentExists).toHaveBeenCalledWith(attachmentPartId);
+      expect(createAttachmentPart).toHaveBeenCalledWith(attachmentPartId, conversationId);
+      expect(updateAttachmentAndCreateItsParts).not.toHaveBeenCalled();
     });
   });
 
