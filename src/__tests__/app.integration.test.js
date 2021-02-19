@@ -117,6 +117,38 @@ describe('New API', () => {
     });
   });
 
+  describe('GET /new/patients/:nhsNumber/health-records/:conversationId', () => {
+    it('should return 200', async () => {
+      const conversationId = uuid();
+      const messageId = uuid();
+      const nhsNumber = '1234567890';
+
+      const messageRes = await request(app)
+        .post(`/messages`)
+        .send({
+          data: {
+            id: messageId,
+            type: 'messages',
+            attributes: {
+              conversationId,
+              messageType: MessageType.EHR_EXTRACT,
+              nhsNumber,
+              attachmentMessageIds: []
+            }
+          }
+        })
+        .set('Authorization', authorizationKeys);
+
+      expect(messageRes.status).toEqual(201);
+
+      const recordRes = await request(app)
+        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(recordRes.status).toEqual(200);
+    });
+  });
+
   describe('POST /messages', () => {
     const Message = ModelFactory.getByName(messageModelName);
     const HealthRecord = ModelFactory.getByName(healthRecordModelName);
@@ -259,19 +291,6 @@ describe('New API', () => {
       expect(attachmentPartMessage.conversationId).toEqual(conversationId);
       expect(attachmentPartMessage.receivedAt).not.toBeNull();
       expect(res.status).toBe(201);
-    });
-  });
-
-  describe('GET /new/patients/:nhsNumber/health-records/:conversationId', () => {
-    it('should return 200', async () => {
-      const conversationId = uuid();
-      const nhsNumber = '1234567890';
-
-      const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
-        .set('Authorization', authorizationKeys);
-
-      expect(res.status).toEqual(200);
     });
   });
 });

@@ -1,4 +1,8 @@
 import { param } from 'express-validator';
+import {
+  getHealthRecordStatus,
+  HealthRecordStatus
+} from '../../services/database/new-health-record-repository';
 
 export const healthRecordLocationControllerValidation = [
   param('conversationId')
@@ -12,5 +16,9 @@ export const healthRecordLocationControllerValidation = [
 ];
 
 export const healthRecordLocationController = async (req, res) => {
-  res.sendStatus(200);
+  const status = await getHealthRecordStatus(req.params.conversationId);
+
+  if (status === HealthRecordStatus.COMPLETE) {
+    res.sendStatus(200);
+  }
 };

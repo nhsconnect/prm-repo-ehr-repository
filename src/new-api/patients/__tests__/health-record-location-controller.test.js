@@ -1,7 +1,12 @@
 import request from 'supertest';
 import { v4 as uuid } from 'uuid';
-
 import app from '../../../app';
+import {
+  getHealthRecordStatus,
+  HealthRecordStatus
+} from '../../../services/database/new-health-record-repository';
+
+jest.mock('../../../services/database/new-health-record-repository');
 
 describe('healthRecordLocationController', () => {
   const authorizationKeys = 'correct-key';
@@ -17,15 +22,17 @@ describe('healthRecordLocationController', () => {
   });
 
   describe('success', () => {
-    const nhsNumber = '1234567890';
-    const conversationId = uuid();
+    it('should return 200 when a health record is complete', async () => {
+      const nhsNumber = '1234567890';
+      const conversationId = uuid();
+      getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.COMPLETE);
 
-    it('should return 200', async () => {
       const res = await request(app)
         .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(200);
+      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
     });
   });
 
