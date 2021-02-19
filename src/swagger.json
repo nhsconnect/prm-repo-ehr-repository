@@ -218,6 +218,54 @@
         ]
       }
     },
+    "/new/patients/{nhsNumber}/health-records/{conversationId}": {
+      "get": {
+        "tags": [],
+        "summary": "Gets health record status through the associated conversation id",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nhsNumber",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "conversationId",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "404": {
+            "description": "Health record with that conversation id not found"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
     "/messages/{conversationId}/{messageId}": {
       "get": {
         "tags": [],

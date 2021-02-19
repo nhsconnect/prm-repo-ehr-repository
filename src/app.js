@@ -7,6 +7,7 @@ import health from './api/health/health';
 import { fragments } from './api/fragments';
 import { patients } from './api/patients';
 import { messages } from './new-api/messages';
+import { patients as newPatients } from './new-api/patients';
 import { options } from './config/logging';
 import * as logging from './middleware/logging';
 import swaggerDocument from './swagger.json';
@@ -23,6 +24,7 @@ app.use('/health', logging.middleware, health);
 app.use('/fragments', logging.middleware, fragments);
 
 app.use('/patients', logging.middleware, patients);
+app.use('/new/patients', logging.middleware, newPatients);
 
 app.use('/messages', logging.middleware, messages);
 

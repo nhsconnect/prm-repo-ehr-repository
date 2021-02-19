@@ -88,8 +88,9 @@ describe('Old API', () => {
 });
 
 describe('New API', () => {
+  const authorizationKeys = 'correct-key';
   beforeEach(() => {
-    process.env.AUTHORIZATION_KEYS = 'correct-key';
+    process.env.AUTHORIZATION_KEYS = authorizationKeys;
   });
 
   afterEach(() => {
@@ -108,7 +109,7 @@ describe('New API', () => {
 
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
       expect(res.status).toBe(302);
       expect(res.headers.location).toContain(
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
@@ -167,7 +168,7 @@ describe('New API', () => {
       const res = await request(app)
         .post(`/messages`)
         .send(requestBody)
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
 
       const message = await Message.findByPk(messageId);
       const healthRecord = await HealthRecord.findByPk(conversationId);
@@ -186,7 +187,7 @@ describe('New API', () => {
       const res = await request(app)
         .post(`/messages`)
         .send(requestBody)
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
 
       const attachmentMessage = await Message.findByPk(attachment);
 
@@ -205,7 +206,7 @@ describe('New API', () => {
         .send(
           createReqBodyForEhr(messageId, conversationId, nhsNumber, [firstPartOfLargeAttachmentId])
         )
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
 
       const attachmentRes = await request(app)
         .post(`/messages`)
@@ -214,7 +215,7 @@ describe('New API', () => {
             restOfAttachmentId
           ])
         )
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
 
       const restOfAttachmentMessage = await Message.findByPk(restOfAttachmentId);
 
@@ -227,12 +228,12 @@ describe('New API', () => {
       await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachment]))
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
 
       const attachmentRes = await request(app)
         .post(`/messages`)
         .send(createReqBodyForAttachment(attachment, conversationId))
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
 
       const attachmentMessage = await Message.findByPk(attachment);
 
@@ -246,18 +247,31 @@ describe('New API', () => {
       await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachmentId]))
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
 
       const res = await request(app)
         .post(`/messages`)
         .send(createReqBodyForAttachment(attachmentPartId, conversationId))
-        .set('Authorization', 'correct-key');
+        .set('Authorization', authorizationKeys);
 
       const attachmentPartMessage = await Message.findByPk(attachmentPartId);
 
       expect(attachmentPartMessage.conversationId).toEqual(conversationId);
       expect(attachmentPartMessage.receivedAt).not.toBeNull();
       expect(res.status).toBe(201);
+    });
+  });
+
+  describe('GET /new/patients/:nhsNumber/health-records/:conversationId', () => {
+    it('should return 200', async () => {
+      const conversationId = uuid();
+      const nhsNumber = '1234567890';
+
+      const res = await request(app)
+        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toEqual(200);
     });
   });
 });
