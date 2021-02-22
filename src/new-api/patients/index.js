@@ -5,6 +5,7 @@ import {
 } from './health-record-controller';
 import { validate } from '../../middleware/validation';
 import { authenticateRequest } from '../../middleware/auth';
+import { patientDetailsController } from './patient-details-controller';
 
 export const patients = express.Router();
 
@@ -15,3 +16,5 @@ patients.get(
   validate,
   healthRecordController
 );
+
+patients.get('/:nhsNumber', patientDetailsController);

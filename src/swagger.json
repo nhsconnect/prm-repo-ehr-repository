@@ -266,6 +266,51 @@
         ]
       }
     },
+    "/new/patients/{nhsNumber}": {
+      "get": {
+        "tags": [],
+        "summary": "Retrieve current patient health record",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nhsNumber",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "$ref": "#/definitions/NewPatientDetails"
+            }
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "404": {
+            "description": "No complete health record found for patient"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
     "/messages/{conversationId}/{messageId}": {
       "get": {
         "tags": [],
@@ -326,7 +371,7 @@
     "/messages": {
       "post": {
         "tags": [],
-        "summary": "Store EHR Messages in DB",
+        "summary": "Store Health Record Messages in DB",
         "consumes": [
           "application/json"
         ],
@@ -377,7 +422,7 @@
   "definitions": {
     "PatientDetails": {
       "type": "object",
-      "description": "Retrieves current ehr for patients current health record",
+      "description": "Retrieves patient's current health record",
       "properties": {
         "data": {
           "type": "object",
@@ -396,6 +441,40 @@
               "properties": {
                 "currentEhr": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "NewPatientDetails": {
+      "type": "object",
+      "description": "Retrieves patient's current health record",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "patients"
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "links": {
+              "type": "object",
+              "properties": {
+                "healthRecordExtract": {
+                  "type": "string"
+                },
+                "attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
