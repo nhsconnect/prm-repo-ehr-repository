@@ -83,6 +83,7 @@ describe('storeMessageController', () => {
       expect(updateAttachmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
         attachmentPartId
       ]);
+      expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
 
     it('should create message in the database when an attachment part arrives before first attachment part', async () => {
@@ -105,6 +106,7 @@ describe('storeMessageController', () => {
       expect(attachmentExists).toHaveBeenCalledWith(attachmentPartId);
       expect(createAttachmentPart).toHaveBeenCalledWith(attachmentPartId, conversationId);
       expect(updateAttachmentAndCreateItsParts).not.toHaveBeenCalled();
+      expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
   });
 

@@ -53,7 +53,6 @@ export const storeMessageController = async (req, res) => {
   try {
     if (attributes.messageType === MessageType.EHR_EXTRACT) {
       await createEhrExtract(ehrExtract);
-      await updateHealthRecordCompleteness(attributes.conversationId);
     }
     if (attributes.messageType === MessageType.ATTACHMENT) {
       if (await attachmentExists(id)) {
@@ -66,6 +65,7 @@ export const storeMessageController = async (req, res) => {
         await createAttachmentPart(id, attributes.conversationId);
       }
     }
+    await updateHealthRecordCompleteness(attributes.conversationId);
   } catch (e) {
     logError(`Returned 503 due to error while saving message: ${e.message}`);
     res.sendStatus(503);

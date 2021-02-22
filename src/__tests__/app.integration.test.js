@@ -197,11 +197,6 @@ describe('New API', () => {
     const nhsNumber = '1234567890';
     let conversationId;
     let messageId;
-    let requestBody;
-
-    const ehrExtractMessageType = MessageType.EHR_EXTRACT;
-    const attachmentMessageType = MessageType.ATTACHMENT;
-    const attachmentMessageIds = [];
 
     const createReqBodyForEhr = (messageId, conversationId, nhsNumber, attachmentMessageIds) => ({
       data: {
@@ -209,7 +204,7 @@ describe('New API', () => {
         id: messageId,
         attributes: {
           conversationId,
-          messageType: ehrExtractMessageType,
+          messageType: MessageType.EHR_EXTRACT,
           nhsNumber,
           attachmentMessageIds
         }
@@ -231,43 +226,44 @@ describe('New API', () => {
     beforeEach(() => {
       messageId = uuid();
       conversationId = uuid();
-      requestBody = createReqBodyForEhr(messageId, conversationId, nhsNumber, attachmentMessageIds);
     });
 
     afterAll(async () => {
       await ModelFactory.sequelize.close();
     });
 
-    it('should save the message metadata in the database and return 201', async () => {
+    it('should save health record without attachments in the database and return 201', async () => {
       const res = await request(app)
         .post(`/messages`)
-        .send(requestBody)
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, []))
         .set('Authorization', authorizationKeys);
 
       const message = await Message.findByPk(messageId);
       const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(message.conversationId).toBe(conversationId);
-      expect(message.type).toBe(ehrExtractMessageType);
+      expect(message.type).toBe(MessageType.EHR_EXTRACT);
       expect(message.parentId).toBeNull();
       expect(healthRecord.nhsNumber).toBe(nhsNumber);
+      expect(healthRecord.completedAt).not.toBeNull();
       expect(res.status).toBe(201);
     });
 
-    it('should save ehr with attachments in the database and return 201', async () => {
+    it('should save health record with attachments in the database and return 201', async () => {
       const attachment = uuid();
-      requestBody.data.attributes.attachmentMessageIds = [attachment];
 
       const res = await request(app)
         .post(`/messages`)
-        .send(requestBody)
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachment]))
         .set('Authorization', authorizationKeys);
 
       const attachmentMessage = await Message.findByPk(attachment);
+      const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(attachmentMessage.conversationId).toBe(conversationId);
-      expect(attachmentMessage.type).toBe(attachmentMessageType);
+      expect(attachmentMessage.type).toBe(MessageType.ATTACHMENT);
       expect(attachmentMessage.parentId).toBe(messageId);
+      expect(healthRecord.completedAt).toBeNull();
       expect(res.status).toBe(201);
     });
 
@@ -292,12 +288,14 @@ describe('New API', () => {
         .set('Authorization', authorizationKeys);
 
       const restOfAttachmentMessage = await Message.findByPk(restOfAttachmentId);
+      const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(restOfAttachmentMessage.receivedAt).toBeNull();
+      expect(healthRecord.completedAt).toBeNull();
       expect(attachmentRes.status).toBe(201);
     });
 
-    it('should update receivedAt for attachments in the database and return 201', async () => {
+    it('should update database for attachments and return 201 when all attachments have been received', async () => {
       const attachment = uuid();
       await request(app)
         .post(`/messages`)
@@ -310,12 +308,14 @@ describe('New API', () => {
         .set('Authorization', authorizationKeys);
 
       const attachmentMessage = await Message.findByPk(attachment);
+      const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(attachmentMessage.receivedAt).not.toBeNull();
+      expect(healthRecord.completedAt).not.toBeNull();
       expect(attachmentRes.status).toBe(201);
     });
 
-    it('should create message in the database when an attachment part arrives before first attachment part', async () => {
+    it('should update database when attachment part arrives before first attachment part', async () => {
       const attachmentId = uuid();
       const attachmentPartId = uuid();
       await request(app)
@@ -329,9 +329,11 @@ describe('New API', () => {
         .set('Authorization', authorizationKeys);
 
       const attachmentPartMessage = await Message.findByPk(attachmentPartId);
+      const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(attachmentPartMessage.conversationId).toEqual(conversationId);
       expect(attachmentPartMessage.receivedAt).not.toBeNull();
+      expect(healthRecord.completedAt).toBeNull();
       expect(res.status).toBe(201);
     });
   });

@@ -241,7 +241,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful"
+            "description": "Health Record is complete"
           },
           "401": {
             "description": "Authorization header missing"
@@ -250,7 +250,7 @@
             "description": "Authorization key invalid"
           },
           "404": {
-            "description": "Health record with that conversation id not found"
+            "description": "Health record with that conversation id not found or pending"
           },
           "422": {
             "description": "Validation failed",

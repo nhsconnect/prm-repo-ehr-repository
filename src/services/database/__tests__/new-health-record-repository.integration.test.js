@@ -83,5 +83,31 @@ describe('healthRecordRepository', () => {
 
       expect(healthRecord.completedAt).not.toBeNull();
     });
+
+    it("should not set 'completedAt' property when there are still messages to be received", async () => {
+      const conversationId = uuid();
+      const messageId = uuid();
+      const attachmentId = uuid();
+      const nhsNumber = '1234567890';
+
+      await HealthRecord.create({ conversationId, nhsNumber, completedAt: null });
+      await Message.create({
+        conversationId,
+        messageId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date()
+      });
+      await Message.create({
+        conversationId,
+        messageId: attachmentId,
+        type: MessageType.ATTACHMENT,
+        receivedAt: null
+      });
+
+      await updateHealthRecordCompleteness(conversationId);
+      const healthRecord = await HealthRecord.findByPk(conversationId);
+
+      expect(healthRecord.completedAt).toBeNull();
+    });
   });
 });
