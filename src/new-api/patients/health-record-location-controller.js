@@ -16,9 +16,20 @@ export const healthRecordLocationControllerValidation = [
 ];
 
 export const healthRecordLocationController = async (req, res) => {
-  const status = await getHealthRecordStatus(req.params.conversationId);
-
-  if (status === HealthRecordStatus.COMPLETE) {
-    res.sendStatus(200);
+  try {
+    const status = await getHealthRecordStatus(req.params.conversationId);
+    switch (status) {
+      case HealthRecordStatus.COMPLETE:
+        res.sendStatus(200);
+        break;
+      case HealthRecordStatus.PENDING:
+        res.sendStatus(404);
+        break;
+      case HealthRecordStatus.NOT_FOUND:
+        res.sendStatus(404);
+        break;
+    }
+  } catch (err) {
+    res.sendStatus(503);
   }
 };

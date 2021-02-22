@@ -7,6 +7,9 @@ import {
 import ModelFactory from '../../../models';
 import { modelName as healthRecordModelName } from '../../../models/health-record-new';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
+import { logError } from '../../../middleware/logging';
+
+jest.mock('../../../middleware/logging');
 
 describe('healthRecordRepository', () => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
@@ -25,6 +28,39 @@ describe('healthRecordRepository', () => {
       const status = await getHealthRecordStatus(conversationId);
 
       expect(status).toEqual(HealthRecordStatus.COMPLETE);
+    });
+
+    it("should return status 'pending' when health record 'completedAt' field is null", async () => {
+      const conversationId = uuid();
+      const nhsNumber = '1234567890';
+
+      await HealthRecord.create({ conversationId, nhsNumber, completedAt: null });
+      const status = await getHealthRecordStatus(conversationId);
+
+      expect(status).toEqual(HealthRecordStatus.PENDING);
+    });
+
+    it("should return status 'notFound' when health record is not found", async () => {
+      const conversationId = uuid();
+      const status = await getHealthRecordStatus(conversationId);
+
+      expect(status).toEqual(HealthRecordStatus.NOT_FOUND);
+    });
+
+    it('should throw error if there is a problem retrieving health record from database', async () => {
+      const conversationId = 'not-a-uuid';
+
+      let caughtException = null;
+      try {
+        await getHealthRecordStatus(conversationId);
+      } catch (e) {
+        caughtException = e;
+      }
+      expect(caughtException).not.toBeNull();
+      expect(logError).toHaveBeenCalledWith(
+        'Health Record could not be retrieved from database',
+        caughtException
+      );
     });
   });
 

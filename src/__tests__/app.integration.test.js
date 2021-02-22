@@ -147,6 +147,48 @@ describe('New API', () => {
 
       expect(recordRes.status).toEqual(200);
     });
+
+    it('should return 404 when health record is not complete', async () => {
+      const conversationId = uuid();
+      const messageId = uuid();
+      const attachmentId = uuid();
+      const nhsNumber = '1234567890';
+
+      const messageRes = await request(app)
+        .post(`/messages`)
+        .send({
+          data: {
+            id: messageId,
+            type: 'messages',
+            attributes: {
+              conversationId,
+              messageType: MessageType.EHR_EXTRACT,
+              nhsNumber,
+              attachmentMessageIds: [attachmentId]
+            }
+          }
+        })
+        .set('Authorization', authorizationKeys);
+
+      expect(messageRes.status).toEqual(201);
+
+      const recordRes = await request(app)
+        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(recordRes.status).toEqual(404);
+    });
+
+    it('should return 404 when health record is not found', async () => {
+      const conversationId = uuid();
+      const nhsNumber = '1234567890';
+
+      const recordRes = await request(app)
+        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(recordRes.status).toEqual(404);
+    });
   });
 
   describe('POST /messages', () => {

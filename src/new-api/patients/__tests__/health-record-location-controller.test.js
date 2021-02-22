@@ -36,6 +36,47 @@ describe('healthRecordLocationController', () => {
     });
   });
 
+  describe('failure', () => {
+    it('should return 404 when a health record is not complete', async () => {
+      const nhsNumber = '1234567890';
+      const conversationId = uuid();
+      getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.PENDING);
+
+      const res = await request(app)
+        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toEqual(404);
+      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
+    });
+
+    it('should return 404 when a health record is not found', async () => {
+      const nhsNumber = '1234567890';
+      const conversationId = uuid();
+      getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.NOT_FOUND);
+
+      const res = await request(app)
+        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toEqual(404);
+      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
+    });
+
+    it('should return 503 when there is an error retrieving the health record', async () => {
+      const nhsNumber = '1234567890';
+      const conversationId = uuid();
+      getHealthRecordStatus.mockRejectedValue();
+
+      const res = await request(app)
+        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toEqual(503);
+      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
+    });
+  });
+
   describe('validation', () => {
     it('should return 422 and an error message when conversationId is not a UUID', async () => {
       const conversationId = 'not-a-uuid';
