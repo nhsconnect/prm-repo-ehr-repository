@@ -8,7 +8,7 @@ import {
 
 jest.mock('../../../services/database/new-health-record-repository');
 
-describe('healthRecordLocationController', () => {
+describe('healthRecordController', () => {
   const authorizationKeys = 'correct-key';
 
   beforeEach(() => {

@@ -4,7 +4,7 @@ import {
   HealthRecordStatus
 } from '../../services/database/new-health-record-repository';
 
-export const healthRecordLocationControllerValidation = [
+export const healthRecordControllerValidation = [
   param('conversationId')
     .isUUID()
     .withMessage("'conversationId' provided is not a UUID"),
@@ -15,7 +15,7 @@ export const healthRecordLocationControllerValidation = [
     .withMessage("'nhsNumber' provided is not 10 characters")
 ];
 
-export const healthRecordLocationController = async (req, res) => {
+export const healthRecordController = async (req, res) => {
   try {
     const status = await getHealthRecordStatus(req.params.conversationId);
     switch (status) {
