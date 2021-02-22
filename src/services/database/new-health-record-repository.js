@@ -34,15 +34,27 @@ export const getHealthRecordStatus = async conversationId => {
 export const updateHealthRecordCompleteness = async conversationId => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const Message = ModelFactory.getByName(messageModelName);
+  const sequelize = ModelFactory.sequelize;
+  const t = await sequelize.transaction();
 
-  const pendingMessages = await Message.findAll({
-    where: {
-      conversationId,
-      receivedAt: null
+  try {
+    const pendingMessages = await Message.findAll({
+      where: {
+        conversationId,
+        receivedAt: null
+      }
+    });
+    if (pendingMessages.length === 0) {
+      await HealthRecord.update(
+        { completedAt: getNow() },
+        { where: { conversationId }, transaction: t }
+      );
     }
-  });
-
-  if (pendingMessages.length === 0) {
-    await HealthRecord.update({ completedAt: getNow() }, { where: { conversationId } });
+  } catch (err) {
+    logError('Failed to update health record completeness', err);
+    await t.rollback();
+    throw err;
   }
+
+  await t.commit();
 };

@@ -109,5 +109,21 @@ describe('healthRecordRepository', () => {
 
       expect(healthRecord.completedAt).toBeNull();
     });
+
+    it('should throw an error when database query fails', async () => {
+      const conversationId = 'not-valid';
+
+      let caughtException = null;
+      try {
+        await updateHealthRecordCompleteness(conversationId);
+      } catch (e) {
+        caughtException = e;
+      }
+      expect(caughtException).not.toBeNull();
+      expect(logError).toHaveBeenCalledWith(
+        'Failed to update health record completeness',
+        caughtException
+      );
+    });
   });
 });
