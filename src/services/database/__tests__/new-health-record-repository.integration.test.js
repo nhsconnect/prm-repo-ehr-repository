@@ -2,7 +2,9 @@ import { v4 as uuid } from 'uuid';
 import {
   getHealthRecordStatus,
   updateHealthRecordCompleteness,
-  HealthRecordStatus
+  HealthRecordStatus,
+  getCurrentHealthRecordIdForPatient,
+  getHealthRecordExtractMessageId
 } from '../new-health-record-repository';
 import ModelFactory from '../../../models';
 import { modelName as healthRecordModelName } from '../../../models/health-record-new';
@@ -124,6 +126,52 @@ describe('healthRecordRepository', () => {
         'Failed to update health record completeness',
         caughtException
       );
+    });
+  });
+
+  describe('getCurrentHealthRecordIdForPatient', () => {
+    it('should return most recent complete health record conversation id', async () => {
+      const nhsNumber = '9876543210';
+      const previousHealthRecordConversationId = uuid();
+      const incompleteHealthRecordConversationId = uuid();
+      const currentHealthRecordConversationId = uuid();
+
+      await HealthRecord.create({
+        conversationId: previousHealthRecordConversationId,
+        nhsNumber,
+        completedAt: new Date()
+      });
+      await HealthRecord.create({
+        conversationId: incompleteHealthRecordConversationId,
+        nhsNumber,
+        completedAt: null
+      });
+      await HealthRecord.create({
+        conversationId: currentHealthRecordConversationId,
+        nhsNumber,
+        completedAt: new Date()
+      });
+
+      const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
+
+      expect(currentHealthRecordId).toEqual(currentHealthRecordConversationId);
+    });
+  });
+
+  describe('getHealthRecordExtractMessageId', () => {
+    it('should return health record extract message id given a conversation id', async () => {
+      const messageId = uuid();
+      const conversationId = uuid();
+
+      await Message.create({
+        messageId,
+        conversationId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date()
+      });
+      const healthRecordExtractId = await getHealthRecordExtractMessageId(conversationId);
+
+      expect(healthRecordExtractId).toEqual(messageId);
     });
   });
 });

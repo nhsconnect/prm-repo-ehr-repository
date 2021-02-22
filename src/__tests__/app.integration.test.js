@@ -191,6 +191,43 @@ describe('New API', () => {
     });
   });
 
+  describe('GET /new/patients/:nhsNumber', () => {
+    it('should return 200 and patient health record link', async () => {
+      const conversationId = uuid();
+      const messageId = uuid();
+      const nhsNumber = '1234567890';
+      const serviceUrl = process.env.SERVICE_URL;
+      const expectedHealthRecordExtractUrl = `${serviceUrl}/messages/${conversationId}/${messageId}`;
+
+      const messageRes = await request(app)
+        .post(`/messages`)
+        .send({
+          data: {
+            id: messageId,
+            type: 'messages',
+            attributes: {
+              conversationId,
+              messageType: MessageType.EHR_EXTRACT,
+              nhsNumber,
+              attachmentMessageIds: []
+            }
+          }
+        })
+        .set('Authorization', authorizationKeys);
+
+      expect(messageRes.status).toEqual(201);
+
+      const patientRes = await request(app)
+        .get(`/new/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(patientRes.status).toEqual(200);
+      expect(patientRes.body.data.links.healthRecordExtract).toEqual(
+        expectedHealthRecordExtractUrl
+      );
+    });
+  });
+
   describe('POST /messages', () => {
     const Message = ModelFactory.getByName(messageModelName);
     const HealthRecord = ModelFactory.getByName(healthRecordModelName);

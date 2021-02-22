@@ -1,4 +1,8 @@
 import { param } from 'express-validator';
+import {
+  getCurrentHealthRecordIdForPatient,
+  getHealthRecordExtractMessageId
+} from '../../services/database/new-health-record-repository';
 
 export const patientDetailsValidation = [
   param('nhsNumber')
@@ -8,6 +12,23 @@ export const patientDetailsValidation = [
     .withMessage("'nhsNumber' provided is not 10 characters")
 ];
 
-export const patientDetailsController = (req, res) => {
-  res.sendStatus(200);
+export const patientDetailsController = async (req, res) => {
+  const { nhsNumber } = req.params;
+  const serviceUrl = process.env.SERVICE_URL;
+  const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
+  const healthRecordExtractId = await getHealthRecordExtractMessageId(currentHealthRecordId);
+
+  const healthRecordExtractUrl = `${serviceUrl}/messages/${currentHealthRecordId}/${healthRecordExtractId}`;
+
+  const responseBody = {
+    data: {
+      type: 'patients',
+      id: nhsNumber,
+      links: {
+        healthRecordExtract: healthRecordExtractUrl
+      }
+    }
+  };
+
+  res.status(200).json(responseBody);
 };
