@@ -73,6 +73,11 @@ export const getCurrentHealthRecordIdForPatient = async nhsNumber => {
     },
     order: [['completedAt', 'DESC']]
   });
+
+  if (!healthRecords.length) {
+    return undefined;
+  }
+
   const currentHealthRecord = healthRecords[0];
 
   return currentHealthRecord.conversationId;

@@ -5,7 +5,7 @@ import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds
 } from '../../../services/database/new-health-record-repository';
-import { logError } from '../../../middleware/logging';
+import { logError, logEvent } from '../../../middleware/logging';
 
 jest.mock('../../../services/database/new-health-record-repository');
 jest.mock('../../../middleware/logging');
@@ -80,6 +80,16 @@ describe('patientDetailsController', () => {
 
   describe('failure', () => {
     const nhsNumber = '1234567890';
+
+    it('should return a 404 when no complete health record is found', async () => {
+      getCurrentHealthRecordIdForPatient.mockReturnValue(undefined);
+      const res = await request(app)
+        .get(`/new/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toEqual(404);
+      expect(logEvent).toHaveBeenCalledWith('Did not find a complete patient health record');
+    });
 
     it('should return a 503 when cannot get patient health record from database', async () => {
       getCurrentHealthRecordIdForPatient.mockRejectedValue({});

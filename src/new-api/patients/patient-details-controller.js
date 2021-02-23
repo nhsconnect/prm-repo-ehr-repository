@@ -3,7 +3,7 @@ import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds
 } from '../../services/database/new-health-record-repository';
-import { logError } from '../../middleware/logging';
+import { logError, logEvent } from '../../middleware/logging';
 
 export const patientDetailsValidation = [
   param('nhsNumber')
@@ -19,6 +19,11 @@ export const patientDetailsController = async (req, res) => {
 
   try {
     const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
+    if (!currentHealthRecordId) {
+      logEvent('Did not find a complete patient health record');
+      res.sendStatus(404);
+      return;
+    }
     const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
       currentHealthRecordId
     );

@@ -156,6 +156,28 @@ describe('healthRecordRepository', () => {
 
       expect(currentHealthRecordId).toEqual(currentHealthRecordConversationId);
     });
+
+    it('should return undefined if no complete health record is found', async () => {
+      const nhsNumber = '9876543211';
+      const incompleteHealthRecordConversationId = uuid();
+
+      await HealthRecord.create({
+        conversationId: incompleteHealthRecordConversationId,
+        nhsNumber,
+        completedAt: null
+      });
+
+      const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
+
+      expect(currentHealthRecordId).toBeUndefined();
+    });
+
+    it('should return undefined when cannot find any health record', async () => {
+      const nhsNumber = '1111111112';
+      const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
+
+      expect(currentHealthRecordId).toBeUndefined();
+    });
   });
 
   describe('getHealthRecordExtractMessageId', () => {
