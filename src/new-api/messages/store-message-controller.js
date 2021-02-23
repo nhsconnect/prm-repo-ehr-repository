@@ -44,15 +44,15 @@ export const storeMessageControllerValidation = [
 
 export const storeMessageController = async (req, res) => {
   const { id, attributes } = req.body.data;
-  const ehrExtract = {
-    messageId: id,
-    conversationId: attributes.conversationId,
-    nhsNumber: attributes.nhsNumber,
-    attachmentMessageIds: attributes.attachmentMessageIds
-  };
+
   try {
     if (attributes.messageType === MessageType.EHR_EXTRACT) {
-      await createEhrExtract(ehrExtract);
+      await createEhrExtract({
+        messageId: id,
+        conversationId: attributes.conversationId,
+        nhsNumber: attributes.nhsNumber,
+        attachmentMessageIds: attributes.attachmentMessageIds
+      });
     }
     if (attributes.messageType === MessageType.ATTACHMENT) {
       if (await attachmentExists(id)) {
@@ -66,10 +66,9 @@ export const storeMessageController = async (req, res) => {
       }
     }
     await updateHealthRecordCompleteness(attributes.conversationId);
+    res.sendStatus(201);
   } catch (e) {
     logError(`Returned 503 due to error while saving message: ${e.message}`);
     res.sendStatus(503);
-    return;
   }
-  res.sendStatus(201);
 };
