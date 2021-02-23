@@ -194,22 +194,23 @@ describe('New API', () => {
   describe('GET /new/patients/:nhsNumber', () => {
     it('should return 200 and patient health record link', async () => {
       const conversationId = uuid();
-      const messageId = uuid();
+      const healthRecordExtractId = uuid();
+      const attachmentId = uuid();
+      const attachmentPartId = uuid();
       const nhsNumber = '1234567890';
-      const serviceUrl = process.env.SERVICE_URL;
-      const expectedHealthRecordExtractUrl = `${serviceUrl}/messages/${conversationId}/${messageId}`;
+      const endpointUrl = `${process.env.SERVICE_URL}/messages`;
 
       const messageRes = await request(app)
         .post(`/messages`)
         .send({
           data: {
-            id: messageId,
+            id: healthRecordExtractId,
             type: 'messages',
             attributes: {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: []
+              attachmentMessageIds: [attachmentId]
             }
           }
         })
@@ -217,14 +218,52 @@ describe('New API', () => {
 
       expect(messageRes.status).toEqual(201);
 
+      const attachmentRes = await request(app)
+        .post(`/messages`)
+        .send({
+          data: {
+            id: attachmentId,
+            type: 'messages',
+            attributes: {
+              conversationId,
+              messageType: MessageType.ATTACHMENT,
+              attachmentMessageIds: [attachmentPartId]
+            }
+          }
+        })
+        .set('Authorization', authorizationKeys);
+
+      expect(attachmentRes.status).toEqual(201);
+
+      const attachmentPartRes = await request(app)
+        .post(`/messages`)
+        .send({
+          data: {
+            id: attachmentPartId,
+            type: 'messages',
+            attributes: {
+              conversationId,
+              messageType: MessageType.ATTACHMENT,
+              attachmentMessageIds: []
+            }
+          }
+        })
+        .set('Authorization', authorizationKeys);
+
+      expect(attachmentPartRes.status).toEqual(201);
+
       const patientRes = await request(app)
         .get(`/new/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(patientRes.status).toEqual(200);
       expect(patientRes.body.data.links.healthRecordExtract).toEqual(
-        expectedHealthRecordExtractUrl
+        `${endpointUrl}/${conversationId}/${healthRecordExtractId}`
       );
+      expect(patientRes.body.data.links.attachments).toEqual([
+        `${endpointUrl}/${conversationId}/${attachmentId}`,
+        `${endpointUrl}/${conversationId}/${attachmentPartId}`
+      ]);
     });
   });
 

@@ -1,8 +1,9 @@
 import { param } from 'express-validator';
 import {
   getCurrentHealthRecordIdForPatient,
-  getHealthRecordExtractMessageId
+  getHealthRecordMessageIds
 } from '../../services/database/new-health-record-repository';
+import { logError } from '../../middleware/logging';
 
 export const patientDetailsValidation = [
   param('nhsNumber')
@@ -14,21 +15,35 @@ export const patientDetailsValidation = [
 
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
-  const serviceUrl = process.env.SERVICE_URL;
-  const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
-  const healthRecordExtractId = await getHealthRecordExtractMessageId(currentHealthRecordId);
+  const endpointUrl = `${process.env.SERVICE_URL}/messages`;
 
-  const healthRecordExtractUrl = `${serviceUrl}/messages/${currentHealthRecordId}/${healthRecordExtractId}`;
+  try {
+    const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
+    const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
+      currentHealthRecordId
+    );
+    const healthRecordExtractUrl = `${endpointUrl}/${currentHealthRecordId}/${healthRecordExtractId}`;
 
-  const responseBody = {
-    data: {
-      type: 'patients',
-      id: nhsNumber,
-      links: {
-        healthRecordExtract: healthRecordExtractUrl
-      }
+    let attachmentUrls = [];
+    for (const attachmentId in attachmentIds) {
+      const url = `${endpointUrl}/${currentHealthRecordId}/${attachmentIds[attachmentId]}`;
+      attachmentUrls.push(url);
     }
-  };
 
-  res.status(200).json(responseBody);
+    const responseBody = {
+      data: {
+        type: 'patients',
+        id: nhsNumber,
+        links: {
+          healthRecordExtract: healthRecordExtractUrl,
+          attachments: attachmentUrls
+        }
+      }
+    };
+
+    res.status(200).json(responseBody);
+  } catch (err) {
+    logError('Could not retrieve patient health record', err);
+    res.sendStatus(503);
+  }
 };

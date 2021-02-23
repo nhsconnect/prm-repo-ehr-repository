@@ -4,7 +4,7 @@ import {
   updateHealthRecordCompleteness,
   HealthRecordStatus,
   getCurrentHealthRecordIdForPatient,
-  getHealthRecordExtractMessageId
+  getHealthRecordMessageIds
 } from '../new-health-record-repository';
 import ModelFactory from '../../../models';
 import { modelName as healthRecordModelName } from '../../../models/health-record-new';
@@ -159,7 +159,7 @@ describe('healthRecordRepository', () => {
   });
 
   describe('getHealthRecordExtractMessageId', () => {
-    it('should return health record extract message id given a conversation id', async () => {
+    it('should return health record extract message id given a conversation id for a small health record', async () => {
       const messageId = uuid();
       const conversationId = uuid();
 
@@ -169,9 +169,76 @@ describe('healthRecordRepository', () => {
         type: MessageType.EHR_EXTRACT,
         receivedAt: new Date()
       });
-      const healthRecordExtractId = await getHealthRecordExtractMessageId(conversationId);
+      const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
+        conversationId
+      );
 
       expect(healthRecordExtractId).toEqual(messageId);
+      expect(attachmentIds).toEqual([]);
+    });
+
+    it('should return health record extract message id and attachment ids given small attachment', async () => {
+      const messageId = uuid();
+      const conversationId = uuid();
+      const attachmentId = uuid();
+
+      await Message.create({
+        messageId,
+        conversationId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date()
+      });
+
+      await Message.create({
+        messageId: attachmentId,
+        conversationId,
+        type: MessageType.ATTACHMENT,
+        receivedAt: new Date(),
+        parentId: messageId
+      });
+      const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
+        conversationId
+      );
+
+      expect(healthRecordExtractId).toEqual(messageId);
+      expect(attachmentIds).toEqual([attachmentId]);
+    });
+
+    it('should return health record extract message id and attachment ids given large attachment', async () => {
+      const messageId = uuid();
+      const conversationId = uuid();
+      const attachmentId = uuid();
+      const attachmentPartId = uuid();
+
+      await Message.create({
+        messageId,
+        conversationId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date()
+      });
+
+      await Message.create({
+        messageId: attachmentId,
+        conversationId,
+        type: MessageType.ATTACHMENT,
+        receivedAt: new Date(),
+        parentId: messageId
+      });
+
+      await Message.create({
+        messageId: attachmentPartId,
+        conversationId,
+        type: MessageType.ATTACHMENT,
+        receivedAt: new Date(),
+        parentId: attachmentId
+      });
+
+      const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
+        conversationId
+      );
+
+      expect(healthRecordExtractId).toEqual(messageId);
+      expect(attachmentIds).toEqual([attachmentId, attachmentPartId]);
     });
   });
 });

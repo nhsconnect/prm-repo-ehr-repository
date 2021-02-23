@@ -78,15 +78,22 @@ export const getCurrentHealthRecordIdForPatient = async nhsNumber => {
   return currentHealthRecord.conversationId;
 };
 
-export const getHealthRecordExtractMessageId = async conversationId => {
+export const getHealthRecordMessageIds = async conversationId => {
   const Message = ModelFactory.getByName(messageModelName);
 
-  const extractMessage = await Message.findOne({
+  const messages = await Message.findAll({
     where: {
-      conversationId,
-      type: MessageType.EHR_EXTRACT
+      conversationId
     }
   });
 
-  return extractMessage.messageId;
+  const healthRecordExtractIndex = messages.findIndex(
+    message => message.type === MessageType.EHR_EXTRACT
+  );
+  const healthRecordExtractId = messages[healthRecordExtractIndex].messageId;
+
+  messages.splice(healthRecordExtractIndex, 1);
+  const attachmentIds = messages.map(message => message.messageId);
+
+  return { healthRecordExtractId, attachmentIds };
 };

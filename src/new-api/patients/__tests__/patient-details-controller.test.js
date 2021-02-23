@@ -3,10 +3,12 @@ import { v4 as uuid } from 'uuid';
 import app from '../../../app';
 import {
   getCurrentHealthRecordIdForPatient,
-  getHealthRecordExtractMessageId
+  getHealthRecordMessageIds
 } from '../../../services/database/new-health-record-repository';
+import { logError } from '../../../middleware/logging';
 
 jest.mock('../../../services/database/new-health-record-repository');
+jest.mock('../../../middleware/logging');
 
 describe('patientDetailsController', () => {
   const authorizationKeys = 'correct-key';
@@ -21,26 +23,73 @@ describe('patientDetailsController', () => {
     }
   });
 
-  it('should return 200 and correct link to health record extract given a small record', async () => {
+  describe('success', () => {
+    it('should return 200 and correct link to health record extract given a small record', async () => {
+      const nhsNumber = '1234567890';
+      const conversationId = uuid();
+      const messageId = uuid();
+      const serviceUrl = process.env.SERVICE_URL;
+
+      getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
+      getHealthRecordMessageIds.mockResolvedValue({
+        healthRecordExtractId: messageId,
+        attachmentIds: []
+      });
+
+      const res = await request(app)
+        .get(`/new/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toBe(200);
+      expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
+      expect(res.body.data.id).toEqual(nhsNumber);
+      expect(res.body.data.type).toEqual('patients');
+      expect(res.body.data.links.healthRecordExtract).toEqual(
+        `${serviceUrl}/messages/${conversationId}/${messageId}`
+      );
+      expect(res.body.data.links.attachments).toEqual([]);
+    });
+
+    it('should return 200 and correct link to health record extract and attachment', async () => {
+      const nhsNumber = '1234567890';
+      const conversationId = uuid();
+      const healthRecordExtractId = uuid();
+      const attachmentId = uuid();
+      const endpointUrl = `${process.env.SERVICE_URL}/messages`;
+
+      getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
+      getHealthRecordMessageIds.mockResolvedValue({
+        healthRecordExtractId: healthRecordExtractId,
+        attachmentIds: [attachmentId]
+      });
+
+      const res = await request(app)
+        .get(`/new/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toBe(200);
+      expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
+      expect(res.body.data.links.healthRecordExtract).toEqual(
+        `${endpointUrl}/${conversationId}/${healthRecordExtractId}`
+      );
+      expect(res.body.data.links.attachments).toEqual([
+        `${endpointUrl}/${conversationId}/${attachmentId}`
+      ]);
+    });
+  });
+
+  describe('failure', () => {
     const nhsNumber = '1234567890';
-    const conversationId = uuid();
-    const messageId = uuid();
-    const serviceUrl = process.env.SERVICE_URL;
 
-    getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
-    getHealthRecordExtractMessageId.mockResolvedValue(messageId);
+    it('should return a 503 when cannot get patient health record from database', async () => {
+      getCurrentHealthRecordIdForPatient.mockRejectedValue({});
+      const res = await request(app)
+        .get(`/new/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
 
-    const res = await request(app)
-      .get(`/new/patients/${nhsNumber}`)
-      .set('Authorization', authorizationKeys);
-
-    expect(res.status).toBe(200);
-    expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
-    expect(res.body.data.id).toEqual(nhsNumber);
-    expect(res.body.data.type).toEqual('patients');
-    expect(res.body.data.links.healthRecordExtract).toEqual(
-      `${serviceUrl}/messages/${conversationId}/${messageId}`
-    );
+      expect(res.status).toEqual(503);
+      expect(logError).toHaveBeenCalledWith('Could not retrieve patient health record', {});
+    });
   });
 
   describe('authentication', () => {
