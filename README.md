@@ -13,8 +13,6 @@ This is a component of the solution to validate that the GP2GP process can be us
 Run `npm install` to install all node dependencies.
 
 Add a .env file in the project root directory with the following environment variables
-(such as [.env.example](./.env.example)):
-
 ```
 NODE_ENV=local
 DATABASE_NAME=deductions_test
