@@ -4,6 +4,7 @@ import {
   getHealthRecordMessageIds
 } from '../../services/database/new-health-record-repository';
 import { logError, logEvent } from '../../middleware/logging';
+import getSignedUrl from '../../services/storage/get-signed-url';
 
 export const patientDetailsValidation = [
   param('nhsNumber')
@@ -15,7 +16,7 @@ export const patientDetailsValidation = [
 
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
-  const endpointUrl = `${process.env.SERVICE_URL}/messages`;
+  const getOperation = 'getObject';
 
   try {
     const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
@@ -27,11 +28,16 @@ export const patientDetailsController = async (req, res) => {
     const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
       currentHealthRecordId
     );
-    const healthRecordExtractUrl = `${endpointUrl}/${currentHealthRecordId}/${healthRecordExtractId}`;
+
+    const healthRecordExtractUrl = await getSignedUrl(
+      currentHealthRecordId,
+      healthRecordExtractId,
+      getOperation
+    );
 
     let attachmentUrls = [];
-    for (const attachmentId in attachmentIds) {
-      const url = `${endpointUrl}/${currentHealthRecordId}/${attachmentIds[attachmentId]}`;
+    for (const index in attachmentIds) {
+      const url = await getSignedUrl(currentHealthRecordId, attachmentIds[index], getOperation);
       attachmentUrls.push(url);
     }
 

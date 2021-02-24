@@ -89,6 +89,10 @@ describe('Old API', () => {
 
 describe('New API', () => {
   const authorizationKeys = 'correct-key';
+  // TODO: refactor config to initializeConfig function which would allow mocking instead of overriding config
+  config.awsS3BucketName = 'some-bucket';
+  config.localstackUrl = 'localstack';
+
   beforeEach(() => {
     process.env.AUTHORIZATION_KEYS = authorizationKeys;
   });
@@ -198,7 +202,6 @@ describe('New API', () => {
       const attachmentId = uuid();
       const attachmentPartId = uuid();
       const nhsNumber = '1234567890';
-      const endpointUrl = `${process.env.SERVICE_URL}/messages`;
 
       const messageRes = await request(app)
         .post(`/messages`)
@@ -257,13 +260,15 @@ describe('New API', () => {
         .set('Authorization', authorizationKeys);
 
       expect(patientRes.status).toEqual(200);
-      expect(patientRes.body.data.links.healthRecordExtract).toEqual(
-        `${endpointUrl}/${conversationId}/${healthRecordExtractId}`
+      expect(patientRes.body.data.links.healthRecordExtract).toContain(
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${healthRecordExtractId}`
       );
-      expect(patientRes.body.data.links.attachments).toEqual([
-        `${endpointUrl}/${conversationId}/${attachmentId}`,
-        `${endpointUrl}/${conversationId}/${attachmentPartId}`
-      ]);
+      expect(patientRes.body.data.links.attachments[0]).toContain(
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${attachmentId}`
+      );
+      expect(patientRes.body.data.links.attachments[1]).toContain(
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${attachmentPartId}`
+      );
     });
 
     it('should return a 404 if no complete health record is found', async () => {

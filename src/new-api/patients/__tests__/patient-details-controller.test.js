@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { when } from 'jest-when';
 import { v4 as uuid } from 'uuid';
 import app from '../../../app';
 import {
@@ -6,9 +7,11 @@ import {
   getHealthRecordMessageIds
 } from '../../../services/database/new-health-record-repository';
 import { logError, logEvent } from '../../../middleware/logging';
+import getSignedUrl from '../../../services/storage/get-signed-url';
 
 jest.mock('../../../services/database/new-health-record-repository');
 jest.mock('../../../middleware/logging');
+jest.mock('../../../services/storage/get-signed-url');
 
 describe('patientDetailsController', () => {
   const authorizationKeys = 'correct-key';
@@ -28,13 +31,14 @@ describe('patientDetailsController', () => {
       const nhsNumber = '1234567890';
       const conversationId = uuid();
       const messageId = uuid();
-      const serviceUrl = process.env.SERVICE_URL;
+      const presignedUrl = 'test-url';
 
       getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
       getHealthRecordMessageIds.mockResolvedValue({
         healthRecordExtractId: messageId,
         attachmentIds: []
       });
+      getSignedUrl.mockResolvedValue(presignedUrl);
 
       const res = await request(app)
         .get(`/new/patients/${nhsNumber}`)
@@ -44,9 +48,8 @@ describe('patientDetailsController', () => {
       expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
       expect(res.body.data.id).toEqual(nhsNumber);
       expect(res.body.data.type).toEqual('patients');
-      expect(res.body.data.links.healthRecordExtract).toEqual(
-        `${serviceUrl}/messages/${conversationId}/${messageId}`
-      );
+      expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'getObject');
+      expect(res.body.data.links.healthRecordExtract).toEqual(presignedUrl);
       expect(res.body.data.links.attachments).toEqual([]);
     });
 
@@ -55,13 +58,19 @@ describe('patientDetailsController', () => {
       const conversationId = uuid();
       const healthRecordExtractId = uuid();
       const attachmentId = uuid();
-      const endpointUrl = `${process.env.SERVICE_URL}/messages`;
+      const extractPresignedUrl = 'extract-url';
+      const attachmentPresignedUrl = 'attachment-url';
 
       getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
       getHealthRecordMessageIds.mockResolvedValue({
         healthRecordExtractId: healthRecordExtractId,
         attachmentIds: [attachmentId]
       });
+      when(getSignedUrl)
+        .calledWith(conversationId, healthRecordExtractId, 'getObject')
+        .mockResolvedValue(extractPresignedUrl)
+        .calledWith(conversationId, attachmentId, 'getObject')
+        .mockResolvedValue(attachmentPresignedUrl);
 
       const res = await request(app)
         .get(`/new/patients/${nhsNumber}`)
@@ -69,12 +78,10 @@ describe('patientDetailsController', () => {
 
       expect(res.status).toBe(200);
       expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
-      expect(res.body.data.links.healthRecordExtract).toEqual(
-        `${endpointUrl}/${conversationId}/${healthRecordExtractId}`
-      );
-      expect(res.body.data.links.attachments).toEqual([
-        `${endpointUrl}/${conversationId}/${attachmentId}`
-      ]);
+      expect(getSignedUrl).toHaveBeenCalledWith(conversationId, healthRecordExtractId, 'getObject');
+      expect(getSignedUrl).toHaveBeenCalledWith(conversationId, attachmentId, 'getObject');
+      expect(res.body.data.links.healthRecordExtract).toEqual(extractPresignedUrl);
+      expect(res.body.data.links.attachments).toEqual([attachmentPresignedUrl]);
     });
   });
 
