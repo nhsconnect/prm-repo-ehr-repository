@@ -1,5 +1,5 @@
 import { body } from 'express-validator';
-import { logEvent, logError } from '../../middleware/logging';
+import { logInfo, logError } from '../../middleware/logging';
 import { persistHealthRecord } from '../../services/database';
 import { getSignedUrl } from '../../services/storage';
 
@@ -43,7 +43,7 @@ export const createMessage = (req, res) => {
   )
     .then(() => getSignedUrl(req.body.conversationId, req.body.messageId, putOperation))
     .then(url => {
-      logEvent('Retrieved pre-signed url successfully');
+      logInfo('Retrieved pre-signed url successfully');
       res.status(201).send(url);
     })
     .catch(err => {

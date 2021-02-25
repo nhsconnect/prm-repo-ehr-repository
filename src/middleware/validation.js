@@ -1,11 +1,11 @@
 import { validationResult } from 'express-validator';
-import { logEvent, logError } from './logging';
+import { logInfo, logError } from './logging';
 
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
 
   if (errors.isEmpty()) {
-    logEvent('validation-passed');
+    logInfo('validation-passed');
     return next();
   }
 

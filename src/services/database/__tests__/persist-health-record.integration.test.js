@@ -1,4 +1,4 @@
-import { logEvent, logError } from '../../../middleware/logging';
+import { logInfo, logError } from '../../../middleware/logging';
 import ModelFactory from '../../../models';
 import { createAndLinkEntries } from '../persist-health-record';
 import { modelName } from '../../../models/message-fragment';
@@ -22,12 +22,12 @@ describe('persistHealthRecord', () => {
 
   afterAll(() => sequelize.close());
 
-  it('should call logEvent if data persisted correctly', () => {
+  it('should call logInfo if data persisted correctly', () => {
     return sequelize.transaction().then(t =>
       createAndLinkEntries(nhsNumber, conversationId, isLargeMessage, messageId, manifest, t)
         .then(() => {
-          expect(logEvent).toHaveBeenCalledTimes(1);
-          return expect(logEvent).toHaveBeenCalledWith('Meta-data has been persisted');
+          expect(logInfo).toHaveBeenCalledTimes(1);
+          return expect(logInfo).toHaveBeenCalledWith('Meta-data has been persisted');
         })
         .finally(() => t.rollback())
     );

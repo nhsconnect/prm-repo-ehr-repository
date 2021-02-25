@@ -1,7 +1,7 @@
 import app from '../../../app';
 import request from 'supertest';
 import { getHealthCheck } from '../../../services/get-health-check';
-import { logEvent, logError } from '../../../middleware/logging';
+import { logInfo, logError } from '../../../middleware/logging';
 
 jest.mock('../../../config/logging');
 jest.mock('../../../services/get-health-check');
@@ -40,11 +40,11 @@ describe('GET /health', () => {
         .end(done);
     });
 
-    it('should call logEvent with result when all dependencies are ok', done => {
+    it('should call logInfo with result when all dependencies are ok', done => {
       request(app)
         .get('/health')
         .expect(() => {
-          expect(logEvent).toHaveBeenCalledWith('Health check successful');
+          expect(logInfo).toHaveBeenCalledWith('Health check successful');
         })
         .end(done);
     });

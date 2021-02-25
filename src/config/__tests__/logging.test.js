@@ -4,7 +4,9 @@ jest.mock('winston', () => ({
   ...jest.requireActual('winston'),
   createLogger: jest.fn().mockImplementation(() => ({
     log: jest.fn(),
-    error: jest.fn()
+    error: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn()
   }))
 }));
 
@@ -121,6 +123,7 @@ describe('logging', () => {
     it('should replace secret values with obfuscated value', () => {
       const formatter = options.format;
       const result = formatter.transform({
+        level: 'INFO',
         message: `some-message`,
         data: 'secret-payload',
         error: {

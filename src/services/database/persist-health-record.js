@@ -1,5 +1,5 @@
 import ModelFactory from '../../models';
-import { logEvent, logError } from '../../middleware/logging';
+import { logInfo, logError } from '../../middleware/logging';
 import { modelName } from '../../models/message-fragment';
 
 const sequelize = ModelFactory.sequelize;
@@ -31,7 +31,7 @@ export const createAndLinkEntries = (
         ? healthRecord.hasManifest(messageId, transaction)
         : healthRecord
     )
-    .then(() => logEvent('Meta-data has been persisted'))
+    .then(() => logInfo('Meta-data has been persisted'))
     .catch(err => {
       logError(err.message, err);
       throw err;

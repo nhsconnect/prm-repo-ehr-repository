@@ -6,7 +6,7 @@ import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds
 } from '../../../services/database/new-health-record-repository';
-import { logError, logEvent } from '../../../middleware/logging';
+import { logError, logInfo } from '../../../middleware/logging';
 import getSignedUrl from '../../../services/storage/get-signed-url';
 
 jest.mock('../../../services/database/new-health-record-repository');
@@ -95,7 +95,7 @@ describe('patientDetailsController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(404);
-      expect(logEvent).toHaveBeenCalledWith('Did not find a complete patient health record');
+      expect(logInfo).toHaveBeenCalledWith('Did not find a complete patient health record');
     });
 
     it('should return a 503 when cannot get patient health record from database', async () => {

@@ -1,5 +1,5 @@
 import { body } from 'express-validator';
-import { logError, logEvent } from '../../middleware/logging';
+import { logError, logInfo } from '../../middleware/logging';
 import {
   retrieveHealthRecord,
   markHealthRecordAsCompleted,
@@ -24,7 +24,7 @@ export const updateMessage = (req, res) => {
       }
     })
     .then(() => {
-      logEvent('Retrieved health record successfully');
+      logInfo('Retrieved health record successfully');
       res.sendStatus(204);
     })
     .catch(err => {
