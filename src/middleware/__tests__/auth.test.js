@@ -31,7 +31,7 @@ describe('auth', () => {
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', 'correct-key');
-      expect(res.status).toBe(302);
+      expect(res.status).toBe(200);
     });
   });
 
@@ -116,7 +116,7 @@ describe('auth', () => {
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', 'correct-key,other-key');
-      expect(res.status).toBe(302);
+      expect(res.status).toBe(200);
     });
   });
 });

@@ -13,14 +13,14 @@ describe('messageLocationController', () => {
     const conversationId = uuid();
     const messageId = uuid();
 
-    it('should return a 302 with location', async () => {
+    it('should return a 200 with presigned url in body', async () => {
       getSignedUrl.mockResolvedValue('presigned-url');
 
       const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
 
-      expect(res.status).toBe(302);
+      expect(res.status).toBe(200);
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'putObject');
-      expect(res.headers.location).toEqual('presigned-url');
+      expect(res.text).toEqual('presigned-url');
       expect(logEvent).toHaveBeenCalledWith('Presigned URL sent successfully');
     });
   });

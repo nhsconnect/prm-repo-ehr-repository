@@ -333,14 +333,8 @@
           }
         ],
         "responses": {
-          "302": {
-            "description": "Retrieves s3 pre-signed URL for the message",
-            "headers": {
-              "Location": {
-                "description": "pre-signed url",
-                "type": "string"
-              }
-            }
+          "200": {
+            "description": "Retrieves s3 pre-signed URL for the message and sends it as the body"
           },
           "401": {
             "description": "Authorization header missing"

@@ -114,8 +114,8 @@ describe('New API', () => {
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', authorizationKeys);
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toContain(
+      expect(res.status).toBe(200);
+      expect(res.text).toContain(
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
       );
     });
