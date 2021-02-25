@@ -20,7 +20,7 @@ describe('messageLocationController', () => {
 
       expect(res.status).toBe(200);
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'putObject');
-      expect(res.headers.location).toEqual('presigned-url');
+      expect(res.text).toEqual('presigned-url');
       expect(logInfo).toHaveBeenCalledWith('Presigned URL sent successfully');
     });
   });

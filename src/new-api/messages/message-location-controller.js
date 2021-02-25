@@ -17,10 +17,7 @@ export const messageLocationController = async (req, res) => {
 
   try {
     const presignedUrl = await getSignedUrl(conversationId, messageId, operation);
-    res
-      .status(302)
-      .location(presignedUrl)
-      .send();
+    res.status(200).send(presignedUrl);
     logInfo('Presigned URL sent successfully');
   } catch (err) {
     logError('Failed to retrieve pre-signed url', err);
