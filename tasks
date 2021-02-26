@@ -257,6 +257,15 @@ case "${command}" in
       configure_service_url
       dojo "./tasks _test_functional"
       ;;
+  _test_performance)
+      npm install
+      npm run test:performance
+      ;;
+  test_performance)
+      configure_aws_service_auth_keys
+      configure_service_url
+      dojo "./tasks _test_performance"
+      ;;
   _test_coverage)
       npm install
       npm run db:migrate

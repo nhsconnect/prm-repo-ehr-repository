@@ -11,6 +11,7 @@
     "test:integration": "jest \"src/.*\\integration.test\\.js\" --detectOpenHandles --forceExit --setupFiles dotenv/config",
     "test:integration:local": "npm run db:setup && npm run test:integration ; npm run db:teardown",
     "test:functional": "jest test/functional/*",
+    "test:performance": "jest test/performance/*",
     "test:docker": "jest test/docker/*",
     "test:watch": "jest \"src/(?!(.*\\integration.test\\.js))\" --setupFiles dotenv/config --watch",
     "test:coverage": "jest src/ --maxWorkers=1 --coverage --detectOpenHandles --forceExit --setupFiles dotenv/config",
