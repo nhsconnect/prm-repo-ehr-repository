@@ -89,3 +89,16 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test_functional
+      - performance:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - deductions-private
+                - test
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_performance
