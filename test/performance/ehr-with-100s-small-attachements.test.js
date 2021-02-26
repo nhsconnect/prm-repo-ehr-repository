@@ -2,10 +2,8 @@ import { v4 } from 'uuid';
 import axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 
-describe('Performance of EHR with hundreds of small attachements',  () => {
-
+describe('Performance of EHR with hundreds of small attachements', () => {
   it('should save everything within 10 seconds', async () => {
-
     //send ehr with 100 attachements to ehr repo - POST /messages with type ehrExtract and 100
     //entries in the attachement list
     const ehrExtractMessageId = v4();
@@ -14,8 +12,8 @@ describe('Performance of EHR with hundreds of small attachements',  () => {
     let attachmentMessageIds = [];
 
     const noOfAttachments = 100;
-    for (let i=0; i<noOfAttachments; i++) {
-      attachmentMessageIds.push(v4())
+    for (let i = 0; i < noOfAttachments; i++) {
+      attachmentMessageIds.push(v4());
     }
 
     const ehrExtract = {
@@ -33,9 +31,12 @@ describe('Performance of EHR with hundreds of small attachements',  () => {
 
     const headers = { Authorization: process.env.AUTHORIZATION_KEYS };
 
-    console.log(`${process.env.SERVICE_URL}/messages`)
+    console.log(`${process.env.SERVICE_URL}/messages`);
     const before = new Date();
-    const response = await axios.post(`${process.env.SERVICE_URL}/messages`, ehrExtract, { adapter, headers });
+    const response = await axios.post(`${process.env.SERVICE_URL}/messages`, ehrExtract, {
+      adapter,
+      headers
+    });
     const after = new Date();
 
     console.log(after - before);
@@ -55,27 +56,29 @@ describe('Performance of EHR with hundreds of small attachements',  () => {
           }
         }
       };
-      const response = await axios.post(`${process.env.SERVICE_URL}/messages`, attachment, { adapter, headers });
+      const response = await axios.post(`${process.env.SERVICE_URL}/messages`, attachment, {
+        adapter,
+        headers
+      });
       expect(response.status).toEqual(201);
     }
 
     const afterAttachments = new Date();
-    console.log(afterAttachments - beforeAttachments)
+    console.log(afterAttachments - beforeAttachments);
 
     //send each attachement to ehr repo - POST /messages with type attachment for each
     //assert 200 for each
     //measure how long it took
 
-    const retrieval = await axios.get(`${process.env.SERVICE_URL}/new/patients/${nhsNumber}`, { adapter, headers });
+    const retrieval = await axios.get(`${process.env.SERVICE_URL}/new/patients/${nhsNumber}`, {
+      adapter,
+      headers
+    });
     expect(retrieval.status).toEqual(200);
-    expect(retrieval.data.data.links.attachments.length).toEqual(noOfAttachments)
-
+    expect(retrieval.data.data.links.attachments.length).toEqual(noOfAttachments);
 
     //retrieve ehr
     //assert 200
     //measure how long it took
-
-
   }, 10000);
-
 });
