@@ -2,10 +2,10 @@ import { v4 } from 'uuid';
 import axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 
-describe('Performance of EHR with hundreds of small attachements', () => {
+describe('Performance of EHR with hundreds of small attachments', () => {
   it('should save everything within 10 seconds', async () => {
-    //send ehr with 100 attachements to ehr repo - POST /messages with type ehrExtract and 100
-    //entries in the attachement list
+    // Send ehr with 100 attachments to ehr repo -
+    // POST /messages with type ehrExtract and 100 entries in the attachment list
     const ehrExtractMessageId = v4();
     const conversationId = v4();
     const nhsNumber = '1234567890';
@@ -31,18 +31,23 @@ describe('Performance of EHR with hundreds of small attachements', () => {
 
     const headers = { Authorization: process.env.AUTHORIZATION_KEYS };
 
-    console.log(`${process.env.SERVICE_URL}/messages`);
-    const before = new Date();
+    const beforeEhrExtract = new Date();
     const response = await axios.post(`${process.env.SERVICE_URL}/messages`, ehrExtract, {
       adapter,
       headers
     });
-    const after = new Date();
+    const afterEhrExtract = new Date();
 
-    console.log(after - before);
-    expect(response.status).toEqual(201);
-    //assert it returns 200
+    //assert it returns 201
     //measure how long it took
+    console.log(
+      'Time taken to store health record extract: ',
+      afterEhrExtract - beforeEhrExtract,
+      'ms'
+    );
+    expect(response.status).toEqual(201);
+
+    //send each attachment to ehr repo - POST /messages with type attachment for each
     const beforeAttachments = new Date();
     for (const id of attachmentMessageIds) {
       const attachment = {
@@ -60,25 +65,28 @@ describe('Performance of EHR with hundreds of small attachements', () => {
         adapter,
         headers
       });
+      //assert 201 for each attachment
       expect(response.status).toEqual(201);
     }
 
-    const afterAttachments = new Date();
-    console.log(afterAttachments - beforeAttachments);
-
-    //send each attachement to ehr repo - POST /messages with type attachment for each
-    //assert 200 for each
     //measure how long it took
+    const afterAttachments = new Date();
+    console.log(
+      'Time taken to store all attachments: ',
+      afterAttachments - beforeAttachments,
+      'ms'
+    );
 
+    //retrieve ehr
     const retrieval = await axios.get(`${process.env.SERVICE_URL}/new/patients/${nhsNumber}`, {
-      adapter,
-      headers
+      headers,
+      adapter
     });
+    //assert 200
     expect(retrieval.status).toEqual(200);
     expect(retrieval.data.data.links.attachments.length).toEqual(noOfAttachments);
 
-    //retrieve ehr
-    //assert 200
     //measure how long it took
+    console.log('Time taken to store entire EHR: ', afterAttachments - beforeEhrExtract, 'ms');
   }, 10000);
 });
