@@ -213,7 +213,6 @@ case "${command}" in
     configure_local_envs
     npm run db:teardown
     npm run db:migrate
-    npm run db:data:seed
     prepare_local_envs_for_ide
     ;;
   _test_lint)
@@ -235,13 +234,11 @@ case "${command}" in
       npm install
       npm run db:teardown
       npm run db:migrate
-      npm run db:data:seed
       npm run test:integration
       ;;
   _test_integration)
       npm install
       npm run db:migrate
-      npm run db:data:seed
       npm run test:integration
       ;;
   test_integration)
@@ -269,7 +266,6 @@ case "${command}" in
   _test_coverage)
       npm install
       npm run db:migrate
-      npm run db:data:seed
       npm run test:coverage
       ;;
   test_coverage)

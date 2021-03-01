@@ -3,9 +3,6 @@ import app from '../../app';
 import { v4 as uuid } from 'uuid';
 
 jest.mock('../logging');
-jest.mock('../../services/database/persist-health-record', () => ({
-  persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
-}));
 jest.mock('../../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );

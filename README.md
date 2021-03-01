@@ -41,7 +41,6 @@ npm run test-local
 
 # This is equivalent of:
 sequelize-cli db:migrate    # Runs the migration
-sequelize-cli db:seed:all   # Seeds test data
 
 npm test
 
@@ -94,29 +93,6 @@ Image is configurable by environment variables:
 - `DATABASE_NAME` - name of the database on server.
 - `DATABASE_HOST` - database server hostname to connect with.
 - `LOCALSTACK_URL` - (Test) the location of localstack, only used for tests
-
-## Creating the database locally
-
-In order to see if the database has been seeded correctly, perform the following steps:
-
-1. Run `docker-compose up`
-2. Leaving that running in the terminal, and in another terminal run `npm run migrate`
-3. Then run `npm run seed-test-data` to seed the database with the test data
-4. Then run `run docker ps` and copy the id of the image ‘postgres’, then run `docker exec -it <id of process> psql -d deductions_test -U deductions_user`
-   You can now query the database.
-
-Alternatively you can either use a VSCode database plugin or IntelliJ database visualisation feature, with the following details:
-
-```json
-{
-  "database": "deductions_test",
-  "dialect": "PostgreSQL",
-  "name": "EHR local",
-  "port": 5432,
-  "server": "localhost",
-  "username": "deductions_user"
-}
-```
 
 ## Access to AWS
 

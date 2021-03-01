@@ -1,34 +1,11 @@
 import request from 'supertest';
 import app from '../app';
-import ModelFactory from '../models';
 
 jest.mock('../middleware/logging');
-
-jest.mock('../services/database/persist-health-record', () => ({
-  persistHealthRecord: jest.fn().mockReturnValue(Promise.resolve('Persisted'))
-}));
-
-jest.mock('../services/database/health-record-repository', () => ({
-  retrieveHealthRecord: jest
-    .fn()
-    .mockReturnValue(Promise.resolve({ dataValues: { is_large_message: false } })),
-  markHealthRecordAsCompleted: jest.fn(),
-  markHealthRecordFragmentsAsCompleted: jest.fn(),
-  markHealthRecordManifestAsCompleted: jest.fn()
-}));
-
-jest.mock('../services/storage/get-signed-url', () =>
-  jest.fn().mockReturnValue(Promise.resolve('some-url'))
-);
-
 jest.mock('../middleware/auth');
 jest.mock('../services/health-check/get-health-check');
 
 describe('app', () => {
-  afterAll(() => {
-    ModelFactory.sequelize.close();
-  });
-
   describe('GET /', () => {
     it('should return a 404 status code', done => {
       request(app)
