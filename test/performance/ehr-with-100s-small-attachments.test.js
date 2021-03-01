@@ -71,7 +71,7 @@ const testPerformance = async (
   const conversationId = v4();
   const nhsNumber = '1234567890';
 
-  let ehrExtractAttachments = smallAttachmentMessageIds.slice();
+  let ehrExtractAttachments = [...smallAttachmentMessageIds];
   if (largeAttachmentId) {
     ehrExtractAttachments = smallAttachmentMessageIds.concat([largeAttachmentId]);
   }
@@ -106,7 +106,7 @@ const testPerformance = async (
 };
 
 describe('Performance of EHR', () => {
-  it('Performance of EHR with hundreds of small attachments - within 10 seconds', async () => {
+  it('Performance of EHR with 100 small attachments - within 10 seconds', async () => {
     //send ehr with 100 attachments to ehr repo -
     // POST /messages with type ehrExtract and 100 entries in the attachment list
     let attachmentMessageIds = [];
