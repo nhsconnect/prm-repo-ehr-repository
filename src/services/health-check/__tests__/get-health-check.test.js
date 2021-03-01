@@ -1,7 +1,7 @@
 import { getHealthCheck } from '../get-health-check';
 import { S3 } from 'aws-sdk';
-import ModelFactory from '../../models';
-import config from '../../config';
+import ModelFactory from '../../../models';
+import config from '../../../config';
 
 jest.mock('aws-sdk');
 

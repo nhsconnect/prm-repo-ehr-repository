@@ -22,7 +22,7 @@ jest.mock('../services/storage/get-signed-url', () =>
 );
 
 jest.mock('../middleware/auth');
-jest.mock('../services/get-health-check');
+jest.mock('../services/health-check/get-health-check');
 
 describe('app', () => {
   afterAll(() => {

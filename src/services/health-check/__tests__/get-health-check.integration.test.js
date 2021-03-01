@@ -1,5 +1,5 @@
 import { getHealthCheck } from '../get-health-check';
-import ModelFactory from '../../models';
+import ModelFactory from '../../../models';
 
 describe('getHealthCheck', () => {
   it('should return successful db health check if db connection is healthy', () => {

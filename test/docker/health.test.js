@@ -8,7 +8,7 @@ describe('GET /health', () => {
     expect(res.data).toEqual(
       expect.objectContaining({
         version: '1',
-        description: 'Health of Electronic Health Record Repository service',
+        description: 'Health of EHR Repo service',
         details: expect.objectContaining({
           filestore: expect.objectContaining({
             available: true,

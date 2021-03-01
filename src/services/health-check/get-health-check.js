@@ -1,6 +1,6 @@
-import { S3Service } from './storage';
-import { checkDbHealth } from './database';
-import { logInfo } from '../middleware/logging';
+import { S3Service } from '../storage';
+import { checkDbHealth } from '../database';
+import { logInfo } from '../../middleware/logging';
 
 export function getHealthCheck() {
   logInfo('Starting health check');
@@ -11,8 +11,8 @@ export function getHealthCheck() {
     logInfo('Health check status', db, s3);
     return {
       version: '1',
-      description: 'Health of Electronic Health Record Repository service',
-      node_env: process.env.NODE_ENV,
+      description: 'Health of EHR Repo service',
+      nhsEnvironment: process.env.NHS_ENVIRONMENT,
       details: {
         filestore: s3,
         database: db

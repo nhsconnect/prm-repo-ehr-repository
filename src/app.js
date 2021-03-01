@@ -3,7 +3,8 @@ import express from 'express';
 import { errorLogger, logger as requestLogger } from 'express-winston';
 import swaggerUi from 'swagger-ui-express';
 import { messages } from './new-api/messages';
-import { patients as newPatients } from './new-api/patients';
+import { patients } from './new-api/patients';
+import { healthCheck } from './new-api/health-check/health-check';
 import { options } from './config/logging';
 import * as logging from './middleware/logging';
 import swaggerDocument from './swagger.json';
@@ -15,9 +16,9 @@ const app = express();
 app.use(express.json());
 app.use(requestLogger(options));
 
-app.use('/new/patients', logging.middleware, newPatients);
+app.use('/new/patients', logging.middleware, patients);
 app.use('/messages', logging.middleware, messages);
-
+app.use('/health', logging.middleware, healthCheck);
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(errorLogger(options));
 
