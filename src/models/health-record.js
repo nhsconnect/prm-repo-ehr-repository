@@ -1,7 +1,7 @@
 import { getParametersRefactored } from './parameters';
 
-export const modelName = 'HealthRecordNew';
-const tableName = 'health_records_new';
+export const modelName = 'HealthRecord';
+const tableName = 'health_records';
 
 const model = dataType => ({
   conversationId: {

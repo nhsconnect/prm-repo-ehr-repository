@@ -5,11 +5,11 @@ import app from '../../../app';
 import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds
-} from '../../../services/database/new-health-record-repository';
+} from '../../../services/database/health-record-repository';
 import { logError, logInfo } from '../../../middleware/logging';
 import getSignedUrl from '../../../services/storage/get-signed-url';
 
-jest.mock('../../../services/database/new-health-record-repository');
+jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../services/storage/get-signed-url');
 

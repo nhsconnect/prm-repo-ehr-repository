@@ -4,9 +4,9 @@ import app from '../../../app';
 import {
   getHealthRecordStatus,
   HealthRecordStatus
-} from '../../../services/database/new-health-record-repository';
+} from '../../../services/database/health-record-repository';
 
-jest.mock('../../../services/database/new-health-record-repository');
+jest.mock('../../../services/database/health-record-repository');
 
 describe('healthRecordController', () => {
   const authorizationKeys = 'correct-key';

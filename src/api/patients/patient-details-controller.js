@@ -2,7 +2,7 @@ import { param } from 'express-validator';
 import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds
-} from '../../services/database/new-health-record-repository';
+} from '../../services/database/health-record-repository';
 import { logError, logInfo } from '../../middleware/logging';
 import getSignedUrl from '../../services/storage/get-signed-url';
 

@@ -7,12 +7,12 @@ import {
   createAttachmentPart,
   attachmentExists
 } from '../../../services/database/message-repository';
-import { updateHealthRecordCompleteness } from '../../../services/database/new-health-record-repository';
+import { updateHealthRecordCompleteness } from '../../../services/database/health-record-repository';
 import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/message';
 
 jest.mock('../../../services/database/message-repository');
-jest.mock('../../../services/database/new-health-record-repository');
+jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
 
 describe('storeMessageController', () => {

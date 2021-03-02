@@ -1,7 +1,7 @@
 import HealthCheck from './health-check';
 import Message from './message';
-import HealthRecordNew from './health-record-new';
+import HealthRecord from './health-record';
 
 export { HealthCheck };
 export { Message };
-export { HealthRecordNew };
+export { HealthRecord };

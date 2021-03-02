@@ -7,7 +7,7 @@ import {
   createAttachmentPart
 } from '../../services/database/message-repository';
 import { logError } from '../../middleware/logging';
-import { updateHealthRecordCompleteness } from '../../services/database/new-health-record-repository';
+import { updateHealthRecordCompleteness } from '../../services/database/health-record-repository';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),

@@ -4,7 +4,7 @@ import app from '../app';
 import config from '../config';
 import ModelFactory from '../models';
 import { MessageType, modelName as messageModelName } from '../models/message';
-import { modelName as healthRecordModelName } from '../models/health-record-new';
+import { modelName as healthRecordModelName } from '../models/health-record';
 
 jest.mock('../middleware/logging');
 

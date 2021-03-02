@@ -1,6 +1,6 @@
 'use strict';
 
-const tableName = 'health_records_new';
+const tableName = 'health_records';
 
 const model = dataType => {
   return {
@@ -18,6 +18,10 @@ const model = dataType => {
         len: 10
       },
       allowNull: false
+    },
+    completedAt: {
+      field: 'completed_at',
+      type: dataType.DATE
     },
     createdAt: {
       field: 'created_at',

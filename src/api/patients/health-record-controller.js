@@ -2,7 +2,7 @@ import { param } from 'express-validator';
 import {
   getHealthRecordStatus,
   HealthRecordStatus
-} from '../../services/database/new-health-record-repository';
+} from '../../services/database/health-record-repository';
 
 export const healthRecordControllerValidation = [
   param('conversationId')

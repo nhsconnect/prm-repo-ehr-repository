@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import ModelFactory from '../../models';
-import { modelName as healthRecordModelName } from '../../models/health-record-new';
+import { modelName as healthRecordModelName } from '../../models/health-record';
 import { MessageType, modelName as messageModelName } from '../../models/message';
 import { logError } from '../../middleware/logging';
 import { getNow } from '../time';
