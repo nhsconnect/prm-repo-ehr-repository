@@ -17,6 +17,7 @@ app.use(express.json());
 app.use(requestLogger(options));
 
 app.use('/new/patients', logging.middleware, patients);
+app.use('/patients', logging.middleware, patients);
 app.use('/messages', logging.middleware, messages);
 app.use('/health', logging.middleware, healthCheck);
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
