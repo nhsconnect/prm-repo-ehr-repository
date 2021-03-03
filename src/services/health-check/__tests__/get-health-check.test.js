@@ -1,11 +1,12 @@
 import { getHealthCheck } from '../get-health-check';
 import { S3 } from 'aws-sdk';
 import ModelFactory from '../../../models';
-import config from '../../../config';
+import { initializeConfig } from '../../../config';
 
 jest.mock('aws-sdk');
 
 describe('getHealthCheck', () => {
+  const config = initializeConfig();
   const mockHeadBucket = jest.fn().mockImplementation((config, callback) => callback());
   const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
   const error = 'some-error';

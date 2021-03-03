@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { v4 as uuid, v4 } from 'uuid';
 import app from '../app';
-import config from '../config';
+import { initializeConfig } from '../config';
 import ModelFactory from '../models';
 import { MessageType, modelName as messageModelName } from '../models/message';
 import { modelName as healthRecordModelName } from '../models/health-record';
@@ -9,10 +9,8 @@ import { modelName as healthRecordModelName } from '../models/health-record';
 jest.mock('../middleware/logging');
 
 describe('app', () => {
+  const config = initializeConfig();
   const authorizationKeys = 'correct-key';
-  // TODO: refactor config to initializeConfig function which would allow mocking instead of overriding config
-  config.awsS3BucketName = 'some-bucket';
-  config.localstackUrl = 'localstack';
 
   beforeEach(() => {
     process.env.AUTHORIZATION_KEYS = authorizationKeys;
@@ -29,9 +27,6 @@ describe('app', () => {
     const messageId = v4();
 
     it('should return presigned url', async () => {
-      config.awsS3BucketName = 'some-bucket';
-      config.localstackUrl = 'localstack';
-
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', authorizationKeys);

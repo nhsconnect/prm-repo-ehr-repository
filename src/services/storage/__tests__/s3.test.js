@@ -1,11 +1,12 @@
 import { S3 } from 'aws-sdk';
-import config from '../../../config';
+import { initializeConfig } from '../../../config';
 import S3Service from '../s3';
 
 jest.mock('dayjs', () => () => ({ format: () => '2020-03-11 10:50:56' }));
 jest.mock('aws-sdk');
 
 describe('S3Service', () => {
+  const config = initializeConfig();
   describe('getPresignedUrl', () => {
     it('should call s3 getSignedUrl with parameters', () => {
       const mockSignedUrl = jest.fn().mockResolvedValue('some-presigned-url');

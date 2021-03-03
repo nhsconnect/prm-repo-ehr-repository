@@ -1,12 +1,12 @@
-import config from '../config';
 import Sequelize from 'sequelize';
+import { initializeConfig } from '../config';
 import * as models from './models';
 
 class ModelFactory {
   constructor() {
     this.db = {};
     this.sequelize = {};
-    this.config = config.sequelize;
+    this.config = initializeConfig().sequelize;
     this._resetConfig();
   }
 

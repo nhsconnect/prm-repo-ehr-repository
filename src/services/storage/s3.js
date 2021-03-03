@@ -1,9 +1,10 @@
 import dayjs from 'dayjs';
 import { Endpoint, S3 } from 'aws-sdk';
-import config from '../../config';
+import { initializeConfig } from '../../config';
 
 const URL_EXPIRY_TIME = 60;
 const CONTENT_TYPE = 'text/xml';
+const config = initializeConfig();
 
 export default class S3Service {
   constructor(filename) {
