@@ -3,8 +3,7 @@ import {
   updateAttachmentAndCreateItsParts,
   createEhrExtract,
   attachmentExists,
-  createAttachmentPart,
-  attachmentAlreadyReceived
+  createAttachmentPart
 } from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
@@ -290,39 +289,6 @@ describe('messageRepository', () => {
         'Creating attachment database entry failed',
         caughtException
       );
-    });
-  });
-
-  describe('attachmentAlreadyReceived', () => {
-    it('should return false if the attachment is not found in the db', async () => {
-      const messageId = uuid();
-      expect(await attachmentAlreadyReceived(messageId)).toEqual(false);
-    });
-
-    it('should return false if the attachment receivedAt property is null', async () => {
-      const conversationId = uuid();
-      const messageId = uuid();
-      await Message.create({
-        conversationId,
-        messageId: messageId,
-        type: MessageType.ATTACHMENT,
-        receivedAt: null
-      });
-
-      expect(await attachmentAlreadyReceived(messageId)).toEqual(false);
-    });
-
-    it('should return false if the attachment receivedAt property is not null', async () => {
-      const conversationId = uuid();
-      const messageId = uuid();
-      await Message.create({
-        conversationId,
-        messageId: messageId,
-        type: MessageType.ATTACHMENT,
-        receivedAt: new Date()
-      });
-
-      expect(await attachmentAlreadyReceived(messageId)).toEqual(true);
     });
   });
 });
