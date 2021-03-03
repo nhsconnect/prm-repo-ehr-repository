@@ -4,7 +4,8 @@ import {
   updateAttachmentAndCreateItsParts,
   createEhrExtract,
   attachmentExists,
-  createAttachmentPart
+  createAttachmentPart,
+  attachmentAlreadyReceived
 } from '../../services/database/message-repository';
 import { logError } from '../../middleware/logging';
 import {
@@ -62,6 +63,11 @@ export const storeMessageController = async (req, res) => {
       });
     }
     if (attributes.messageType === MessageType.ATTACHMENT) {
+      if (await attachmentAlreadyReceived(id)) {
+        res.sendStatus(409);
+        return;
+      }
+
       if (await attachmentExists(id)) {
         await updateAttachmentAndCreateItsParts(
           id,

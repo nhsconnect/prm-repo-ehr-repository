@@ -93,6 +93,22 @@ export const attachmentExists = async id => {
   }
 };
 
+export const attachmentAlreadyReceived = async id => {
+  const Message = ModelFactory.getByName(messageModelName);
+  try {
+    const attachment = await Message.findByPk(id);
+
+    if (!attachment || !attachment.receivedAt) {
+      return false;
+    } else {
+      return true;
+    }
+  } catch (e) {
+    logError('Querying database for attachment message failed', e);
+    throw e;
+  }
+};
+
 export const createAttachmentPart = async (id, conversationId) => {
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;

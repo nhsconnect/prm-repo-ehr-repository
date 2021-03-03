@@ -5,7 +5,8 @@ import {
   updateAttachmentAndCreateItsParts,
   createEhrExtract,
   createAttachmentPart,
-  attachmentExists
+  attachmentExists,
+  attachmentAlreadyReceived
 } from '../../../services/database/message-repository';
 import {
   updateHealthRecordCompleteness,
@@ -65,7 +66,7 @@ describe('storeMessageController', () => {
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
 
-    it('should return a 409 when conversationId already exists', async () => {
+    it('should return a 409 when health record is received second time', async () => {
       healthRecordExists.mockResolvedValueOnce(true);
 
       const res = await request(app)
@@ -102,6 +103,27 @@ describe('storeMessageController', () => {
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
 
+    it('should return a 409 if receivedAt for a given attachment is received second time', async () => {
+      const attachmentPartId = uuid();
+      requestBody.data.attributes = {
+        messageType: MessageType.ATTACHMENT,
+        conversationId,
+        attachmentMessageIds: [attachmentPartId]
+      };
+
+      attachmentAlreadyReceived.mockResolvedValue(true);
+
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toBe(409);
+      expect(attachmentAlreadyReceived).toHaveBeenCalledWith(messageId);
+      expect(updateAttachmentAndCreateItsParts).not.toHaveBeenCalled();
+      expect(updateHealthRecordCompleteness).not.toHaveBeenCalled();
+    });
+
     it('should create message in the database when an attachment part arrives before first attachment part', async () => {
       const attachmentPartId = uuid();
       requestBody.data.id = attachmentPartId;
@@ -111,6 +133,7 @@ describe('storeMessageController', () => {
         attachmentMessageIds: []
       };
 
+      attachmentAlreadyReceived.mockResolvedValueOnce(false);
       attachmentExists.mockResolvedValueOnce(false);
 
       const res = await request(app)
@@ -375,6 +398,8 @@ describe('storeMessageController', () => {
           }
         }
       };
+
+      attachmentAlreadyReceived.mockImplementationOnce(false);
 
       const res = await request(app)
         .post('/messages')
