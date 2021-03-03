@@ -3,12 +3,21 @@ import app from '../../../app';
 import { getSignedUrl } from '../../../services/storage';
 import { v4 as uuid } from 'uuid';
 import { logError, logInfo } from '../../../middleware/logging';
+import { initializeConfig } from '../../../config';
 
 jest.mock('../../../services/storage');
-jest.mock('../../../middleware/auth');
 jest.mock('../../../middleware/logging');
+jest.mock('../../../config', () => ({
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+}));
 
 describe('messageLocationController', () => {
+  initializeConfig.mockReturnValue({
+    ehrRepoAuthKeys: 'correct-key'
+  });
+
+  const authorizationKeys = 'correct-key';
+
   describe('success', () => {
     const conversationId = uuid();
     const messageId = uuid();
@@ -16,7 +25,9 @@ describe('messageLocationController', () => {
     it('should return a 200 with presigned url in body', async () => {
       getSignedUrl.mockResolvedValue('presigned-url');
 
-      const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
+      const res = await request(app)
+        .get(`/messages/${conversationId}/${messageId}`)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(200);
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'putObject');
@@ -33,7 +44,9 @@ describe('messageLocationController', () => {
       const error = new Error('error');
       getSignedUrl.mockRejectedValueOnce(error);
 
-      const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
+      const res = await request(app)
+        .get(`/messages/${conversationId}/${messageId}`)
+        .set('Authorization', authorizationKeys);
 
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'putObject');
       expect(logError).toHaveBeenCalledWith('Failed to retrieve pre-signed url', error);
@@ -47,7 +60,9 @@ describe('messageLocationController', () => {
       const messageId = uuid();
       const errorMessage = [{ conversationId: "'conversationId' provided is not a UUID" }];
 
-      const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
+      const res = await request(app)
+        .get(`/messages/${conversationId}/${messageId}`)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body).toEqual({
@@ -60,7 +75,9 @@ describe('messageLocationController', () => {
       const messageId = 'not-a-uuid';
       const errorMessage = [{ messageId: "'messageId' provided is not a UUID" }];
 
-      const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
+      const res = await request(app)
+        .get(`/messages/${conversationId}/${messageId}`)
+        .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
       expect(res.body).toEqual({

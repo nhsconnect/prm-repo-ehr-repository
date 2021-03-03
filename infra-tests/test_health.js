@@ -1,6 +1,10 @@
-const axios = require('axios');
+import { initializeConfig } from '../src/config';
 
-axios.get(process.env.EHR_URL + '/health')
+const axios = require('axios');
+const config = initializeConfig();
+
+axios
+  .get(config.ehrRepoServiceUrl + '/health')
   .then(response => {
     console.log(response);
     if (response.status !== 200) {

@@ -11,29 +11,27 @@ import {
   updateHealthRecordCompleteness,
   healthRecordExists
 } from '../../../services/database/health-record-repository';
+import { initializeConfig } from '../../../config';
 import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/message';
 
 jest.mock('../../../services/database/message-repository');
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
+jest.mock('../../../config', () => ({
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+}));
 
 describe('storeMessageController', () => {
+  initializeConfig.mockReturnValue({
+    ehrRepoAuthKeys: 'correct-key'
+  });
+
   const authorizationKeys = 'correct-key';
   const conversationId = uuid();
   const nhsNumber = '1234567890';
   const messageId = uuid();
   const attachmentMessageIds = [uuid()];
-
-  beforeEach(() => {
-    process.env.AUTHORIZATION_KEYS = authorizationKeys;
-  });
-
-  afterEach(() => {
-    if (process.env.AUTHORIZATION_KEYS) {
-      delete process.env.AUTHORIZATION_KEYS;
-    }
-  });
 
   describe('success', () => {
     let requestBody;

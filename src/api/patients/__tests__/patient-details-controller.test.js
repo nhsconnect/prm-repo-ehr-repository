@@ -6,25 +6,23 @@ import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds
 } from '../../../services/database/health-record-repository';
+import { initializeConfig } from '../../../config';
 import { logError, logInfo } from '../../../middleware/logging';
 import getSignedUrl from '../../../services/storage/get-signed-url';
 
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../services/storage/get-signed-url');
+jest.mock('../../../config', () => ({
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+}));
 
 describe('patientDetailsController', () => {
+  initializeConfig.mockReturnValue({
+    ehrRepoAuthKeys: 'correct-key'
+  });
+
   const authorizationKeys = 'correct-key';
-
-  beforeEach(() => {
-    process.env.AUTHORIZATION_KEYS = authorizationKeys;
-  });
-
-  afterEach(() => {
-    if (process.env.AUTHORIZATION_KEYS) {
-      delete process.env.AUTHORIZATION_KEYS;
-    }
-  });
 
   describe('success', () => {
     it('should return 200 and correct link to health record extract given a small record', async () => {

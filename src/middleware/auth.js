@@ -1,11 +1,14 @@
+import { initializeConfig } from '../config';
+
 export const authenticateRequest = (req, res, next) => {
-  if (!process.env.AUTHORIZATION_KEYS) {
+  const config = initializeConfig();
+  if (!config.ehrRepoAuthKeys) {
     res.status(412).json({
       error: `Server-side Authorization keys have not been set, cannot authenticate`
     });
     return;
   }
-  const validAuthorizationKeys = process.env.AUTHORIZATION_KEYS;
+  const validAuthorizationKeys = config.ehrRepoAuthKeys;
 
   const authorizationKey = req.get('Authorization');
 

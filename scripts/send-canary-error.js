@@ -1,5 +1,8 @@
 // Usage: node scripts/send-canary-error.js
+import { initializeConfig } from '../src/config';
+
 const axios = require('axios');
+const config = initializeConfig();
 
 const options = {
   headers: {
@@ -11,7 +14,7 @@ const body = {
   cards: [
     {
       header: {
-        title: `${process.env.NHS_SERVICE}`,
+        title: `${config.ehrServiceUrl}`,
         subtitle: 'Canary Build',
         imageUrl: 'https://pbs.twimg.com/media/D41piqbWkAAtZaY.png'
       },

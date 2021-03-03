@@ -5,21 +5,19 @@ import {
   getHealthRecordStatus,
   HealthRecordStatus
 } from '../../../services/database/health-record-repository';
+import { initializeConfig } from '../../../config';
 
 jest.mock('../../../services/database/health-record-repository');
+jest.mock('../../../config', () => ({
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+}));
 
 describe('healthRecordController', () => {
+  initializeConfig.mockReturnValue({
+    ehrRepoAuthKeys: 'correct-key'
+  });
+
   const authorizationKeys = 'correct-key';
-
-  beforeEach(() => {
-    process.env.AUTHORIZATION_KEYS = authorizationKeys;
-  });
-
-  afterEach(() => {
-    if (process.env.AUTHORIZATION_KEYS) {
-      delete process.env.AUTHORIZATION_KEYS;
-    }
-  });
 
   describe('success', () => {
     it('should return 200 when a health record is complete', async () => {
