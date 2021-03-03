@@ -6,7 +6,7 @@ import {
   attachmentExists,
   createAttachmentPart
 } from '../../services/database/message-repository';
-import { logError } from '../../middleware/logging';
+import { logError, logWarning } from '../../middleware/logging';
 import {
   updateHealthRecordCompleteness,
   healthRecordExists
@@ -51,6 +51,7 @@ export const storeMessageController = async (req, res) => {
   try {
     if (attributes.messageType === MessageType.EHR_EXTRACT) {
       if (await healthRecordExists(attributes.conversationId)) {
+        logWarning(`Duplicated ehrExtract message ${id}`);
         res.sendStatus(409);
         return;
       }
@@ -69,6 +70,11 @@ export const storeMessageController = async (req, res) => {
           attributes.attachmentMessageIds
         );
       } else {
+        logWarning(
+          `Attachment message ${id} did not arrive in order. Attachment parts: ${JSON.stringify(
+            attributes.attachmentMessageIds
+          )}`
+        );
         await createAttachmentPart(id, attributes.conversationId);
       }
     }
