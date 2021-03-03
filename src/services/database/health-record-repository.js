@@ -102,3 +102,15 @@ export const getHealthRecordMessageIds = async conversationId => {
 
   return { healthRecordExtractId, attachmentIds };
 };
+
+export const healthRecordExists = async conversationId => {
+  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+  try {
+    const healthRecord = await HealthRecord.findByPk(conversationId);
+
+    return !!healthRecord;
+  } catch (e) {
+    logError('Querying database for health record failed', e);
+    throw e;
+  }
+};

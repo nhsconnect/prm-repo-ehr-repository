@@ -4,7 +4,8 @@ import {
   updateHealthRecordCompleteness,
   HealthRecordStatus,
   getCurrentHealthRecordIdForPatient,
-  getHealthRecordMessageIds
+  getHealthRecordMessageIds,
+  healthRecordExists
 } from '../health-record-repository';
 import ModelFactory from '../../../models';
 import { modelName as healthRecordModelName } from '../../../models/health-record';
@@ -261,6 +262,42 @@ describe('healthRecordRepository', () => {
 
       expect(healthRecordExtractId).toEqual(messageId);
       expect(attachmentIds).toEqual([attachmentId, attachmentPartId]);
+    });
+  });
+
+  describe('healthRecordExists', () => {
+    it("should return false if 'conversationId' is not found in db", async () => {
+      const conversationId = uuid();
+      const result = await healthRecordExists(conversationId);
+      expect(result).toEqual(false);
+    });
+
+    it("should return true if 'conversationId' is found in db", async () => {
+      const conversationId = uuid();
+      const nhsNumber = '9876543211';
+
+      await HealthRecord.create({
+        conversationId,
+        nhsNumber
+      });
+      const result = await healthRecordExists(conversationId);
+      expect(result).toEqual(true);
+    });
+
+    it('should throw if database querying throws', async () => {
+      const conversationId = 'not-valid';
+      let caughtException = null;
+      try {
+        await healthRecordExists(conversationId);
+      } catch (e) {
+        caughtException = e;
+      }
+
+      expect(caughtException).not.toBeNull();
+      expect(logError).toHaveBeenCalledWith(
+        'Querying database for health record failed',
+        caughtException
+      );
     });
   });
 });

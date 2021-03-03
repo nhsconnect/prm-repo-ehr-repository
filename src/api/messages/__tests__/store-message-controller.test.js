@@ -7,7 +7,10 @@ import {
   createAttachmentPart,
   attachmentExists
 } from '../../../services/database/message-repository';
-import { updateHealthRecordCompleteness } from '../../../services/database/health-record-repository';
+import {
+  updateHealthRecordCompleteness,
+  healthRecordExists
+} from '../../../services/database/health-record-repository';
 import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/message';
 
@@ -20,7 +23,6 @@ describe('storeMessageController', () => {
   const conversationId = uuid();
   const nhsNumber = '1234567890';
   const messageId = uuid();
-  const ehrExtractMessageType = MessageType.EHR_EXTRACT;
   const attachmentMessageIds = [uuid()];
 
   beforeEach(() => {
@@ -43,7 +45,7 @@ describe('storeMessageController', () => {
           id: messageId,
           attributes: {
             conversationId,
-            messageType: ehrExtractMessageType,
+            messageType: MessageType.EHR_EXTRACT,
             nhsNumber,
             attachmentMessageIds
           }
@@ -61,6 +63,20 @@ describe('storeMessageController', () => {
       expect(res.status).toBe(201);
       expect(createEhrExtract).toHaveBeenCalledWith(ehrExtract);
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
+    });
+
+    it('should return a 409 when conversationId already exists', async () => {
+      healthRecordExists.mockResolvedValueOnce(true);
+
+      const res = await request(app)
+        .post('/messages')
+        .send(requestBody)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toBe(409);
+      expect(healthRecordExists).toHaveBeenCalledWith(conversationId);
+      expect(createEhrExtract).not.toHaveBeenCalled();
+      expect(updateHealthRecordCompleteness).not.toHaveBeenCalled();
     });
 
     it('should update receivedAt for given attachment and store its parts', async () => {
@@ -117,7 +133,7 @@ describe('storeMessageController', () => {
         id: messageId,
         attributes: {
           conversationId,
-          messageType: ehrExtractMessageType,
+          messageType: MessageType.EHR_EXTRACT,
           nhsNumber,
           attachmentMessageIds
         }

@@ -7,7 +7,10 @@ import {
   createAttachmentPart
 } from '../../services/database/message-repository';
 import { logError } from '../../middleware/logging';
-import { updateHealthRecordCompleteness } from '../../services/database/health-record-repository';
+import {
+  updateHealthRecordCompleteness,
+  healthRecordExists
+} from '../../services/database/health-record-repository';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
@@ -47,6 +50,10 @@ export const storeMessageController = async (req, res) => {
 
   try {
     if (attributes.messageType === MessageType.EHR_EXTRACT) {
+      if (await healthRecordExists(attributes.conversationId)) {
+        res.sendStatus(409);
+        return;
+      }
       await createEhrExtract({
         messageId: id,
         conversationId: attributes.conversationId,
