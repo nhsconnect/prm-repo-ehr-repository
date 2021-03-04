@@ -82,8 +82,7 @@ describe('messageRepository', () => {
         await createEhrExtract(ehrExtract);
       } catch (err) {
         expect(err).not.toBeNull();
-        expect(logError).toHaveBeenCalled();
-        expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
+        expect(logError).toHaveBeenCalledWith('Message could not be stored', err);
       }
       const actualMessage = await Message.findByPk(messageId);
       const actualHealthRecord = await HealthRecord.findByPk(conversationId);
@@ -106,8 +105,7 @@ describe('messageRepository', () => {
         await createEhrExtract(ehrExtract);
       } catch (err) {
         expect(err).not.toBeNull();
-        expect(logError).toHaveBeenCalled();
-        expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
+        expect(logError).toHaveBeenCalledWith('Message could not be stored', err);
       }
       const actualMessage = await Message.findByPk(messageId);
       const actualHealthRecord = await HealthRecord.findByPk(conversationId);
@@ -146,8 +144,7 @@ describe('messageRepository', () => {
         await updateAttachmentAndCreateItsParts('not-valid', conversationId, []);
       } catch (err) {
         expect(err).not.toBeNull();
-        expect(logError).toHaveBeenCalled();
-        expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
+        expect(logError).toHaveBeenCalledWith('Message could not be stored', err);
       }
     });
 

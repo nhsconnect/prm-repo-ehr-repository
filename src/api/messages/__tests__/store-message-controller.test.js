@@ -144,8 +144,10 @@ describe('storeMessageController', () => {
         .send(requestBody)
         .set('Authorization', authorizationKeys);
 
-      expect(logError).toHaveBeenCalled();
-      expect(logError.mock.calls[0][0]).toContain('Returned 503 due to error while saving message');
+      expect(logError).toHaveBeenCalledWith(
+        'Returned 503 due to error while saving message',
+        expect.anything()
+      );
       expect(res.status).toBe(503);
     });
   });

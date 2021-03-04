@@ -33,7 +33,7 @@ export const createEhrExtract = async ehrExtract => {
       await Message.create(attachmentMessage, { transaction: t });
     }
   } catch (e) {
-    logError(`Message could not be stored because: ${e.message}`);
+    logError('Message could not be stored', e);
     await t.rollback();
     throw e;
   }
@@ -73,7 +73,7 @@ export const updateAttachmentAndCreateItsParts = async (
       }
     }
   } catch (e) {
-    logError(`Message could not be stored because: ${e.message}`);
+    logError('Message could not be stored', e);
     await t.rollback();
     throw e;
   }

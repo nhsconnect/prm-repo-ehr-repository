@@ -81,7 +81,7 @@ export const storeMessageController = async (req, res) => {
     await updateHealthRecordCompleteness(attributes.conversationId);
     res.sendStatus(201);
   } catch (e) {
-    logError(`Returned 503 due to error while saving message: ${e.message}`);
+    logError('Returned 503 due to error while saving message', e);
     res.sendStatus(503);
   }
 };
