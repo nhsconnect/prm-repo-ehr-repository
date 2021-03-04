@@ -1,5 +1,9 @@
+import { initializeConfig } from '../src/config';
+import { logError, logInfo } from '../src/middleware/logging';
+
 const { Endpoint, S3 } = require('aws-sdk');
 
+const config = initializeConfig();
 const MAX_ATTEMPTS = 30;
 
 const isConnected = () => {
@@ -7,13 +11,13 @@ const isConnected = () => {
     const s3 = new S3({
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
-      endpoint: new Endpoint(process.env.LOCALSTACK_URL),
+      endpoint: new Endpoint(config.localstackUrl),
       s3ForcePathStyle: true
     });
 
     s3.headBucket(
       {
-        Bucket: process.env.S3_BUCKET_NAME
+        Bucket: config.awsS3BucketName
       },
       err => {
         if (err) resolve(false);
@@ -31,19 +35,18 @@ function sleep(ms) {
 
 const checkIfConnected = async () => {
   for (let count = 0; count <= MAX_ATTEMPTS; ++count) {
-    console.log(
-      `Attempting to connect to bucket in localstack (Attempt ${count} of ${MAX_ATTEMPTS})`
-    );
+    logInfo(`Attempting to connect to bucket in localstack (Attempt ${count} of ${MAX_ATTEMPTS})`);
 
     const result = await isConnected();
 
     if (result) {
-      console.log('Successfully connected to localstack');
+      logInfo('Successfully connected to localstack');
       return;
     }
     await sleep(1000);
   }
 
+  logError(`Connection to Localstack timedout after ${MAX_ATTEMPTS}`);
   throw new Error(`Connection to Localstack timedout after ${MAX_ATTEMPTS}`);
 };
 

@@ -1,8 +1,10 @@
 import { S3Service } from '../storage';
 import { checkDbHealth } from '../database';
 import { logInfo } from '../../middleware/logging';
+import { initializeConfig } from '../../config';
 
 export function getHealthCheck() {
+  const config = initializeConfig();
   logInfo('Starting health check');
 
   const s3Service = new S3Service('health-check.txt');
@@ -12,7 +14,7 @@ export function getHealthCheck() {
     return {
       version: '1',
       description: 'Health of EHR Repo service',
-      nhsEnvironment: process.env.NHS_ENVIRONMENT,
+      nhsEnvironment: config.nhsEnvironment,
       details: {
         filestore: s3,
         database: db

@@ -10,7 +10,8 @@ jest.mock('../middleware/logging');
 
 describe('app', () => {
   const config = initializeConfig();
-  const authorizationKeys = 'correct-key';
+  const updatedConfig = { ...config, ehrRepoAuthKeys: 'correct-key' };
+  const authorizationKeys = updatedConfig.ehrRepoAuthKeys;
 
   beforeEach(() => {
     process.env.AUTHORIZATION_KEYS = authorizationKeys;
