@@ -78,15 +78,13 @@ describe('messageRepository', () => {
         attachmentMessageIds: []
       };
 
-      let caughtException = null;
       try {
         await createEhrExtract(ehrExtract);
-      } catch (e) {
-        caughtException = e;
+      } catch (err) {
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalled();
+        expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
       }
-      expect(caughtException).not.toBeNull();
-      expect(logError).toHaveBeenCalled();
-      expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
       const actualMessage = await Message.findByPk(messageId);
       const actualHealthRecord = await HealthRecord.findByPk(conversationId);
       expect(actualMessage).toBeNull();
@@ -104,15 +102,13 @@ describe('messageRepository', () => {
         attachmentMessageIds: []
       };
 
-      let caughtException = null;
       try {
         await createEhrExtract(ehrExtract);
-      } catch (e) {
-        caughtException = e;
+      } catch (err) {
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalled();
+        expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
       }
-      expect(caughtException).not.toBeNull();
-      expect(logError).toHaveBeenCalled();
-      expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
       const actualMessage = await Message.findByPk(messageId);
       const actualHealthRecord = await HealthRecord.findByPk(conversationId);
       expect(actualMessage).toBeNull();
@@ -145,17 +141,14 @@ describe('messageRepository', () => {
     });
 
     it('should not update receivedAt for a given attachment if database update query throws', async () => {
-      let caughtException = null;
       const conversationId = uuid();
       try {
         await updateAttachmentAndCreateItsParts('not-valid', conversationId, []);
-      } catch (e) {
-        caughtException = e;
+      } catch (err) {
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalled();
+        expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
       }
-
-      expect(caughtException).not.toBeNull();
-      expect(logError).toHaveBeenCalled();
-      expect(logError.mock.calls[0][0]).toContain('Message could not be stored because');
     });
 
     it('should create messages for attachment parts', async () => {
@@ -245,18 +238,15 @@ describe('messageRepository', () => {
 
     it('should throw if database querying throws', async () => {
       const messageId = 'not-valid';
-      let caughtException = null;
       try {
         await attachmentExists(messageId);
-      } catch (e) {
-        caughtException = e;
+      } catch (err) {
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalledWith(
+          'Querying database for attachment message failed',
+          err
+        );
       }
-
-      expect(caughtException).not.toBeNull();
-      expect(logError).toHaveBeenCalledWith(
-        'Querying database for attachment message failed',
-        caughtException
-      );
     });
   });
 
@@ -277,18 +267,12 @@ describe('messageRepository', () => {
     it('should throw if database creation query throws', async () => {
       const conversationId = uuid();
       const messageId = 'not-valid';
-      let caughtException = null;
       try {
         await createAttachmentPart(messageId, conversationId);
-      } catch (e) {
-        caughtException = e;
+      } catch (err) {
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalledWith('Creating attachment database entry failed', err);
       }
-
-      expect(caughtException).not.toBeNull();
-      expect(logError).toHaveBeenCalledWith(
-        'Creating attachment database entry failed',
-        caughtException
-      );
     });
   });
 });

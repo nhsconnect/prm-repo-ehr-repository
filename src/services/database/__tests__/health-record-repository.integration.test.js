@@ -52,18 +52,15 @@ describe('healthRecordRepository', () => {
 
     it('should throw error if there is a problem retrieving health record from database', async () => {
       const conversationId = 'not-a-uuid';
-
-      let caughtException = null;
       try {
         await getHealthRecordStatus(conversationId);
-      } catch (e) {
-        caughtException = e;
+      } catch (err) {
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalledWith(
+          'Health Record could not be retrieved from database',
+          err
+        );
       }
-      expect(caughtException).not.toBeNull();
-      expect(logError).toHaveBeenCalledWith(
-        'Health Record could not be retrieved from database',
-        caughtException
-      );
     });
   });
 
@@ -115,18 +112,12 @@ describe('healthRecordRepository', () => {
 
     it('should throw an error when database query fails', async () => {
       const conversationId = 'not-valid';
-
-      let caughtException = null;
       try {
         await updateHealthRecordCompleteness(conversationId);
-      } catch (e) {
-        caughtException = e;
+      } catch (err) {
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalledWith('Failed to update health record completeness', err);
       }
-      expect(caughtException).not.toBeNull();
-      expect(logError).toHaveBeenCalledWith(
-        'Failed to update health record completeness',
-        caughtException
-      );
     });
   });
 
@@ -286,18 +277,12 @@ describe('healthRecordRepository', () => {
 
     it('should throw if database querying throws', async () => {
       const conversationId = 'not-valid';
-      let caughtException = null;
       try {
         await healthRecordExists(conversationId);
-      } catch (e) {
-        caughtException = e;
+      } catch (err) {
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalledWith('Querying database for health record failed', err);
       }
-
-      expect(caughtException).not.toBeNull();
-      expect(logError).toHaveBeenCalledWith(
-        'Querying database for health record failed',
-        caughtException
-      );
     });
   });
 });
