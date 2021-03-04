@@ -97,7 +97,7 @@ const testPerformance = async (
 
   // Retrieve ehr
   const retrieval = await axios.get(
-    `${config.ehrRepoServiceUrl}/new/patients/${nhsNumber}/health-records/${conversationId}`,
+    `${config.ehrRepoServiceUrl}/patients/${nhsNumber}/health-records/${conversationId}`,
     {
       headers,
       adapter

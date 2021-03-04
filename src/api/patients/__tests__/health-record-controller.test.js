@@ -26,7 +26,7 @@ describe('healthRecordController', () => {
       getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.COMPLETE);
 
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(200);
@@ -41,7 +41,7 @@ describe('healthRecordController', () => {
       getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.PENDING);
 
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(404);
@@ -54,7 +54,7 @@ describe('healthRecordController', () => {
       getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.NOT_FOUND);
 
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(404);
@@ -67,7 +67,7 @@ describe('healthRecordController', () => {
       getHealthRecordStatus.mockRejectedValue();
 
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(503);
@@ -82,7 +82,7 @@ describe('healthRecordController', () => {
       const errorMessage = { conversationId: "'conversationId' provided is not a UUID" };
 
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
@@ -95,7 +95,7 @@ describe('healthRecordController', () => {
       const errorMessage = { nhsNumber: "'nhsNumber' provided is not numeric" };
 
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
@@ -108,7 +108,7 @@ describe('healthRecordController', () => {
       const errorMessage = { nhsNumber: "'nhsNumber' provided is not 10 characters" };
 
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
@@ -121,9 +121,7 @@ describe('healthRecordController', () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
 
-      const res = await request(app).get(
-        `/new/patients/${nhsNumber}/health-records/${conversationId}`
-      );
+      const res = await request(app).get(`/patients/${nhsNumber}/health-records/${conversationId}`);
 
       expect(res.status).toBe(401);
     });
@@ -132,7 +130,7 @@ describe('healthRecordController', () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', 'incorrect');
 
       expect(res.status).toBe(403);

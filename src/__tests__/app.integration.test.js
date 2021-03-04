@@ -38,7 +38,7 @@ describe('app', () => {
     });
   });
 
-  describe('GET /new/patients/:nhsNumber/health-records/:conversationId', () => {
+  describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
     it('should return 200', async () => {
       const conversationId = uuid();
       const messageId = uuid();
@@ -63,7 +63,7 @@ describe('app', () => {
       expect(messageRes.status).toEqual(201);
 
       const recordRes = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(recordRes.status).toEqual(200);
@@ -94,7 +94,7 @@ describe('app', () => {
       expect(messageRes.status).toEqual(201);
 
       const recordRes = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(recordRes.status).toEqual(404);
@@ -105,14 +105,14 @@ describe('app', () => {
       const nhsNumber = '1234567890';
 
       const recordRes = await request(app)
-        .get(`/new/patients/${nhsNumber}/health-records/${conversationId}`)
+        .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(recordRes.status).toEqual(404);
     });
   });
 
-  describe('GET /new/patients/:nhsNumber', () => {
+  describe('GET /patients/:nhsNumber', () => {
     it('should return 200 and patient health record link', async () => {
       const conversationId = uuid();
       const healthRecordExtractId = uuid();
@@ -173,7 +173,7 @@ describe('app', () => {
       expect(attachmentPartRes.status).toEqual(201);
 
       const patientRes = await request(app)
-        .get(`/new/patients/${nhsNumber}`)
+        .get(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(patientRes.status).toEqual(200);
@@ -213,7 +213,7 @@ describe('app', () => {
       expect(messageRes.status).toEqual(201);
 
       const res = await request(app)
-        .get(`/new/patients/${nhsNumber}`)
+        .get(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(404);

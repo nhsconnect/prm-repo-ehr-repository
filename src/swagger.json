@@ -33,7 +33,7 @@
         }
       }
     },
-    "/new/patients/{nhsNumber}/health-records/{conversationId}": {
+    "/patients/{nhsNumber}/health-records/{conversationId}": {
       "get": {
         "tags": [],
         "summary": "Gets health record status through the associated conversation id",
@@ -81,7 +81,7 @@
         ]
       }
     },
-    "/new/patients/{nhsNumber}": {
+    "/patients/{nhsNumber}": {
       "get": {
         "tags": [],
         "summary": "Retrieve current patient health record",
@@ -100,7 +100,7 @@
           "200": {
             "description": "Successful",
             "schema": {
-              "$ref": "#/definitions/NewPatientDetails"
+              "$ref": "#/definitions/PatientDetails"
             }
           },
           "401": {
@@ -229,7 +229,7 @@
     }
   },
   "definitions": {
-    "NewPatientDetails": {
+    "PatientDetails": {
       "type": "object",
       "description": "Retrieves patient's current health record",
       "properties": {
