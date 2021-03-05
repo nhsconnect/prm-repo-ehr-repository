@@ -1,11 +1,8 @@
 import { v4 } from 'uuid';
 import axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
-import { initializeConfig } from '../../src/config';
-import { logDebug } from '../../src/middleware/logging';
 
-const config = initializeConfig();
-const headers = { Authorization: config.ehrRepoAuthKeys };
+const headers = { Authorization: process.env.AUTHORIZATION_KEYS };
 
 async function sendAttachment(id, conversationId, attachmentMessageIds) {
   const attachment = {
@@ -20,7 +17,7 @@ async function sendAttachment(id, conversationId, attachmentMessageIds) {
     }
   };
 
-  const response = await axios.post(`${config.ehrRepoServiceUrl}/messages`, attachment, {
+  const response = await axios.post(`${process.env.SERVICE_URL}/messages`, attachment, {
     adapter,
     headers
   });
@@ -47,7 +44,7 @@ async function sendEhrExtract(
     }
   };
 
-  const ehrResponse = await axios.post(`${config.ehrRepoServiceUrl}/messages`, ehrExtract, {
+  const ehrResponse = await axios.post(`${process.env.SERVICE_URL}/messages`, ehrExtract, {
     adapter,
     headers
   });
@@ -62,7 +59,7 @@ const timeAction = async (description, action) => {
 
   // Assert it returns 201
   // Measure how long it took for ehr extract to be stored
-  logDebug(description, after - before, 'ms');
+  console.log(description, after - before, 'ms');
 };
 
 const testPerformance = async (
@@ -97,7 +94,7 @@ const testPerformance = async (
 
   // Retrieve ehr
   const retrieval = await axios.get(
-    `${config.ehrRepoServiceUrl}/patients/${nhsNumber}/health-records/${conversationId}`,
+    `${process.env.SERVICE_URL}/patients/${nhsNumber}/health-records/${conversationId}`,
     {
       headers,
       adapter

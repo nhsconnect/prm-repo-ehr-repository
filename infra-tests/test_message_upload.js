@@ -1,10 +1,7 @@
-import { initializeConfig } from '../src/config';
-
 const axios = require('axios');
-const config = initializeConfig();
 
 axios
-  .post(config.ehrRepoServiceUrl + '/health-record/1234/message', { messageId: '4321' })
+  .post(process.env.EHR_URL + '/health-record/1234/message', { messageId: '4321' })
   .then(response => {
     console.log(response);
     if (response.status !== 201) {
