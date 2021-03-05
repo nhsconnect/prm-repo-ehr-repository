@@ -40,7 +40,7 @@ describe('messageLocationController', () => {
     const conversationId = uuid();
     const messageId = uuid();
 
-    it('should return a 500 when getSignedUrl promise is rejected', async () => {
+    it('should return a 503 when getSignedUrl promise is rejected', async () => {
       const error = new Error('error');
       getSignedUrl.mockRejectedValueOnce(error);
 
@@ -50,7 +50,7 @@ describe('messageLocationController', () => {
 
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'putObject');
       expect(logError).toHaveBeenCalledWith('Failed to retrieve pre-signed url', error);
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(503);
     });
   });
 

@@ -21,6 +21,6 @@ export const messageLocationController = async (req, res) => {
     logInfo('Presigned URL sent successfully');
   } catch (err) {
     logError('Failed to retrieve pre-signed url', err);
-    res.sendStatus(500);
+    res.sendStatus(503);
   }
 };

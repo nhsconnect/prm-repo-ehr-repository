@@ -72,7 +72,11 @@
             "schema": {
               "$ref": "#/definitions/ValidationErrors"
             }
+          },
+          "503": {
+            "description": "Failed to get health record status"
           }
+
         },
         "security": [
           {
@@ -117,6 +121,9 @@
             "schema": {
               "$ref": "#/definitions/ValidationErrors"
             }
+          },
+          "503": {
+            "description": "Failed to get patient health record"
           }
         },
         "security": [
@@ -166,7 +173,7 @@
               "$ref": "#/definitions/ValidationErrors"
             }
           },
-          "500": {
+          "503": {
             "description": "Failed to get presigned url"
           }
         },
@@ -209,7 +216,7 @@
               "$ref": "#/definitions/ValidationErrors"
             }
           },
-          "500": {
+          "503": {
             "description": "Failed to store message"
           }
         },
