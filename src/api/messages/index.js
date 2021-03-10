@@ -3,11 +3,11 @@ import { authenticateRequest } from '../../middleware/auth';
 import { validate } from '../../middleware/validation';
 import {
   messageLocationController,
-  messageLocationControllerValidation
+  messageLocationControllerValidation,
 } from './message-location-controller';
 import {
   storeMessageController,
-  storeMessageControllerValidation
+  storeMessageControllerValidation,
 } from './store-message-controller';
 
 export const messages = express.Router();

@@ -8,7 +8,7 @@ jest.mock('../../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 jest.mock('../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
 
 describe('auth', () => {
@@ -40,7 +40,7 @@ describe('auth', () => {
         .set('Authorization', 'correct-key');
       expect(res.body).toEqual(
         expect.objectContaining({
-          error: 'Server-side Authorization keys have not been set, cannot authenticate'
+          error: 'Server-side Authorization keys have not been set, cannot authenticate',
         })
       );
     });
@@ -57,7 +57,7 @@ describe('auth', () => {
       initializeConfig.mockReturnValue({ ehrRepoAuthKeys: 'correct-key' });
       const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
       expect(res.body).toEqual({
-        error: 'The request (/messages) requires a valid Authorization header to be set'
+        error: 'The request (/messages) requires a valid Authorization header to be set',
       });
     });
   });
@@ -76,7 +76,7 @@ describe('auth', () => {
         .set('Authorization', 'incorrect-key');
       expect(res.body).toEqual(
         expect.objectContaining({
-          error: 'Authorization header is provided but not valid'
+          error: 'Authorization header is provided but not valid',
         })
       );
     });

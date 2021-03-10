@@ -5,53 +5,53 @@ const tableName = 'messages';
 
 export const MessageType = {
   EHR_EXTRACT: 'ehrExtract',
-  ATTACHMENT: 'attachment'
+  ATTACHMENT: 'attachment',
 };
 
 Object.freeze(MessageType);
 
-const model = dataType => ({
+const model = (dataType) => ({
   messageId: {
     field: 'message_id',
     type: dataType.UUID,
     primaryKey: true,
-    defaultValue: dataType.UUIDV4
+    defaultValue: dataType.UUIDV4,
   },
   conversationId: {
     field: 'conversation_id',
     type: dataType.UUID,
-    allowNull: false
+    allowNull: false,
   },
   parentId: {
     field: 'parent_id',
-    type: dataType.UUID
+    type: dataType.UUID,
   },
   type: {
     field: 'type',
     type: dataType.STRING,
     validate: {
-      isIn: [Object.values(MessageType)]
+      isIn: [Object.values(MessageType)],
     },
-    allowNull: false
+    allowNull: false,
   },
   receivedAt: {
     field: 'received_at',
-    type: dataType.DATE
+    type: dataType.DATE,
   },
   createdAt: {
     field: 'created_at',
     type: dataType.DATE,
-    allowNull: false
+    allowNull: false,
   },
   updatedAt: {
     field: 'updated_at',
     type: dataType.DATE,
-    allowNull: false
+    allowNull: false,
   },
   deletedAt: {
     field: 'deleted_at',
-    type: dataType.DATE
-  }
+    type: dataType.DATE,
+  },
 });
 
 export default (sequelize, DataTypes) => {

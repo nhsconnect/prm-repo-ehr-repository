@@ -4,13 +4,13 @@ import getSignedUrl from '../get-signed-url';
 jest.mock('aws-sdk');
 
 describe('getSignedUrl', () => {
-  ['getObject', 'putObject'].forEach(operation => {
+  ['getObject', 'putObject'].forEach((operation) => {
     const conversationId = 'some-id';
     const messageId = 'some-message';
     it('should return presigned url from s3 for storing ehr', async () => {
       const mockGetSignedUrlPromise = jest.fn().mockResolvedValue('some-url');
       S3.mockImplementation(() => ({
-        getSignedUrlPromise: mockGetSignedUrlPromise
+        getSignedUrlPromise: mockGetSignedUrlPromise,
       }));
 
       const url = await getSignedUrl(conversationId, messageId, operation);
@@ -25,7 +25,7 @@ describe('getSignedUrl', () => {
 
     const mockGetSignedUrlPromise = jest.fn();
     S3.mockImplementation(() => ({
-      getSignedUrlPromise: mockGetSignedUrlPromise
+      getSignedUrlPromise: mockGetSignedUrlPromise,
     }));
 
     await getSignedUrl(conversationId, messageId, 'getObject');

@@ -3,19 +3,19 @@ const { Endpoint, S3 } = require('aws-sdk');
 const MAX_ATTEMPTS = 30;
 
 const isConnected = () => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const s3 = new S3({
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
       endpoint: new Endpoint(process.env.LOCALSTACK_URL),
-      s3ForcePathStyle: true
+      s3ForcePathStyle: true,
     });
 
     s3.headBucket(
       {
-        Bucket: process.env.S3_BUCKET_NAME
+        Bucket: process.env.S3_BUCKET_NAME,
       },
-      err => {
+      (err) => {
         if (err) resolve(false);
         resolve(true);
       }
@@ -24,7 +24,7 @@ const isConnected = () => {
 };
 
 function sleep(ms) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }

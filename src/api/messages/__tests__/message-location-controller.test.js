@@ -8,12 +8,12 @@ import { initializeConfig } from '../../../config';
 jest.mock('../../../services/storage');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
 
 describe('messageLocationController', () => {
   initializeConfig.mockReturnValue({
-    ehrRepoAuthKeys: 'correct-key'
+    ehrRepoAuthKeys: 'correct-key',
   });
 
   const authorizationKeys = 'correct-key';
@@ -66,7 +66,7 @@ describe('messageLocationController', () => {
 
       expect(res.status).toBe(422);
       expect(res.body).toEqual({
-        errors: errorMessage
+        errors: errorMessage,
       });
     });
 
@@ -81,7 +81,7 @@ describe('messageLocationController', () => {
 
       expect(res.status).toBe(422);
       expect(res.body).toEqual({
-        errors: errorMessage
+        errors: errorMessage,
       });
     });
   });

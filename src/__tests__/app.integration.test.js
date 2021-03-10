@@ -54,9 +54,9 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: []
-            }
-          }
+              attachmentMessageIds: [],
+            },
+          },
         })
         .set('Authorization', authorizationKeys);
 
@@ -85,9 +85,9 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [attachmentId]
-            }
-          }
+              attachmentMessageIds: [attachmentId],
+            },
+          },
         })
         .set('Authorization', authorizationKeys);
 
@@ -130,9 +130,9 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [attachmentId]
-            }
-          }
+              attachmentMessageIds: [attachmentId],
+            },
+          },
         })
         .set('Authorization', authorizationKeys);
 
@@ -147,9 +147,9 @@ describe('app', () => {
             attributes: {
               conversationId,
               messageType: MessageType.ATTACHMENT,
-              attachmentMessageIds: [attachmentPartId]
-            }
-          }
+              attachmentMessageIds: [attachmentPartId],
+            },
+          },
         })
         .set('Authorization', authorizationKeys);
 
@@ -164,9 +164,9 @@ describe('app', () => {
             attributes: {
               conversationId,
               messageType: MessageType.ATTACHMENT,
-              attachmentMessageIds: []
-            }
-          }
+              attachmentMessageIds: [],
+            },
+          },
         })
         .set('Authorization', authorizationKeys);
 
@@ -204,9 +204,9 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [attachmentId]
-            }
-          }
+              attachmentMessageIds: [attachmentId],
+            },
+          },
         })
         .set('Authorization', authorizationKeys);
 
@@ -235,9 +235,9 @@ describe('app', () => {
           conversationId,
           messageType: MessageType.EHR_EXTRACT,
           nhsNumber,
-          attachmentMessageIds
-        }
-      }
+          attachmentMessageIds,
+        },
+      },
     });
 
     const createReqBodyForAttachment = (messageId, conversationId, attachmentMessageIds = []) => ({
@@ -247,9 +247,9 @@ describe('app', () => {
         attributes: {
           conversationId,
           messageType: MessageType.ATTACHMENT,
-          attachmentMessageIds: attachmentMessageIds
-        }
-      }
+          attachmentMessageIds: attachmentMessageIds,
+        },
+      },
     });
 
     beforeEach(() => {
@@ -311,7 +311,7 @@ describe('app', () => {
         .post(`/messages`)
         .send(
           createReqBodyForAttachment(firstPartOfLargeAttachmentId, conversationId, [
-            restOfAttachmentId
+            restOfAttachmentId,
           ])
         )
         .set('Authorization', authorizationKeys);

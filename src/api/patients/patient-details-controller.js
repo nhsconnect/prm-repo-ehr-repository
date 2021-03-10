@@ -1,7 +1,7 @@
 import { param } from 'express-validator';
 import {
   getCurrentHealthRecordIdForPatient,
-  getHealthRecordMessageIds
+  getHealthRecordMessageIds,
 } from '../../services/database/health-record-repository';
 import { logError, logInfo } from '../../middleware/logging';
 import getSignedUrl from '../../services/storage/get-signed-url';
@@ -11,7 +11,7 @@ export const patientDetailsValidation = [
     .isNumeric()
     .withMessage("'nhsNumber' provided is not numeric")
     .isLength({ min: 10, max: 10 })
-    .withMessage("'nhsNumber' provided is not 10 characters")
+    .withMessage("'nhsNumber' provided is not 10 characters"),
 ];
 
 export const patientDetailsController = async (req, res) => {
@@ -47,9 +47,9 @@ export const patientDetailsController = async (req, res) => {
         id: nhsNumber,
         links: {
           healthRecordExtract: healthRecordExtractUrl,
-          attachments: attachmentUrls
-        }
-      }
+          attachments: attachmentUrls,
+        },
+      },
     };
 
     res.status(200).json(responseBody);

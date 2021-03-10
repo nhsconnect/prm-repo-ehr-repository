@@ -3,12 +3,12 @@ import ModelFactory from '../../../models';
 
 describe('getHealthCheck', () => {
   it('should return successful db health check if db connection is healthy', () => {
-    return getHealthCheck().then(result => {
+    return getHealthCheck().then((result) => {
       const db = result.details['database'];
       return expect(db).toEqual({
         type: 'postgresql',
         connection: true,
-        writable: true
+        writable: true,
       });
     });
   });
@@ -16,14 +16,14 @@ describe('getHealthCheck', () => {
   it('should return failed db health check if username is incorrect', () => {
     ModelFactory._overrideConfig('username', 'wrong-username');
 
-    return getHealthCheck().then(result => {
+    return getHealthCheck().then((result) => {
       const db = result.details['database'];
 
       return expect(db).toEqual({
         type: 'postgresql',
         connection: true,
         writable: false,
-        error: 'Authorization error (Error Code: 28P01)'
+        error: 'Authorization error (Error Code: 28P01)',
       });
     });
   });

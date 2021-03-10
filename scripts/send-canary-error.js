@@ -3,8 +3,8 @@ const axios = require('axios');
 
 const options = {
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 };
 
 const body = {
@@ -13,7 +13,7 @@ const body = {
       header: {
         title: `${process.env.NHS_SERVICE}`,
         subtitle: 'Canary Build',
-        imageUrl: 'https://pbs.twimg.com/media/D41piqbWkAAtZaY.png'
+        imageUrl: 'https://pbs.twimg.com/media/D41piqbWkAAtZaY.png',
       },
       sections: [
         {
@@ -21,10 +21,10 @@ const body = {
             {
               keyValue: {
                 topLabel: 'Stage Name',
-                content: `${process.env.GO_STAGE_NAME} > ${process.env.GO_JOB_NAME}`
-              }
-            }
-          ]
+                content: `${process.env.GO_STAGE_NAME} > ${process.env.GO_JOB_NAME}`,
+              },
+            },
+          ],
         },
         {
           widgets: [
@@ -35,18 +35,18 @@ const body = {
                     text: 'View Failed Pipeline Stage',
                     onClick: {
                       openLink: {
-                        url: `https://prod.gocd.patient-deductions.nhs.uk/go/tab/build/detail/${process.env.GO_PIPELINE_NAME}/${process.env.GO_PIPELINE_COUNTER}/${process.env.GO_STAGE_NAME}/1/${process.env.GO_JOB_NAME}`
-                      }
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+                        url: `https://prod.gocd.patient-deductions.nhs.uk/go/tab/build/detail/${process.env.GO_PIPELINE_NAME}/${process.env.GO_PIPELINE_COUNTER}/${process.env.GO_STAGE_NAME}/1/${process.env.GO_JOB_NAME}`,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 console.log('Sending message to Google Hangout group');

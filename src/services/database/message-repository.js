@@ -4,7 +4,7 @@ import { modelName as healthRecordModelName } from '../../models/health-record';
 import { logError } from '../../middleware/logging';
 import { getNow } from '../time';
 
-export const createEhrExtract = async ehrExtract => {
+export const createEhrExtract = async (ehrExtract) => {
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const { conversationId, messageId, nhsNumber, attachmentMessageIds } = ehrExtract;
@@ -13,7 +13,7 @@ export const createEhrExtract = async ehrExtract => {
     conversationId,
     messageId,
     type: MessageType.EHR_EXTRACT,
-    receivedAt: getNow()
+    receivedAt: getNow(),
   };
 
   const sequelize = ModelFactory.sequelize;
@@ -28,7 +28,7 @@ export const createEhrExtract = async ehrExtract => {
         messageId: attachment,
         parentId: messageId,
         type: MessageType.ATTACHMENT,
-        conversationId
+        conversationId,
       };
       await Message.create(attachmentMessage, { transaction: t });
     }
@@ -59,7 +59,7 @@ export const updateAttachmentAndCreateItsParts = async (
         messageId: attachmentPartId,
         parentId: messageId,
         type: MessageType.ATTACHMENT,
-        conversationId
+        conversationId,
       };
 
       const attachmentPartExists = !!(await Message.findByPk(attachmentPartId));
@@ -80,7 +80,7 @@ export const updateAttachmentAndCreateItsParts = async (
   await t.commit();
 };
 
-export const attachmentExists = async id => {
+export const attachmentExists = async (id) => {
   const Message = ModelFactory.getByName(messageModelName);
 
   try {
@@ -101,7 +101,7 @@ export const createAttachmentPart = async (id, conversationId) => {
     messageId: id,
     conversationId,
     type: MessageType.ATTACHMENT,
-    receivedAt: getNow()
+    receivedAt: getNow(),
   };
 
   try {

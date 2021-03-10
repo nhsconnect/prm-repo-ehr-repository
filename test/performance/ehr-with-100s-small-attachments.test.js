@@ -12,14 +12,14 @@ async function sendAttachment(id, conversationId, attachmentMessageIds) {
       attributes: {
         conversationId,
         messageType: 'attachment',
-        attachmentMessageIds
-      }
-    }
+        attachmentMessageIds,
+      },
+    },
   };
 
   const response = await axios.post(`${process.env.SERVICE_URL}/messages`, attachment, {
     adapter,
-    headers
+    headers,
   });
   // Assert 201 for each attachment
   expect(response.status).toEqual(201);
@@ -39,14 +39,14 @@ async function sendEhrExtract(
         conversationId,
         nhsNumber,
         messageType: 'ehrExtract',
-        attachmentMessageIds: ehrExtractAttachments
-      }
-    }
+        attachmentMessageIds: ehrExtractAttachments,
+      },
+    },
   };
 
   const ehrResponse = await axios.post(`${process.env.SERVICE_URL}/messages`, ehrExtract, {
     adapter,
-    headers
+    headers,
   });
 
   expect(ehrResponse.status).toEqual(201);
@@ -97,7 +97,7 @@ const testPerformance = async (
     `${process.env.SERVICE_URL}/patients/${nhsNumber}/health-records/${conversationId}`,
     {
       headers,
-      adapter
+      adapter,
     }
   );
 

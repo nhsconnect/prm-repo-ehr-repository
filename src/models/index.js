@@ -43,7 +43,7 @@ class ModelFactory {
       this.db[model.name] = model;
     }
 
-    Object.keys(this.db).forEach(modelName => {
+    Object.keys(this.db).forEach((modelName) => {
       if (this.db[modelName].associate) {
         this.db[modelName].associate(this.db);
       }

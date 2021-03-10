@@ -8,12 +8,12 @@ import { getNow } from '../time';
 export const HealthRecordStatus = {
   COMPLETE: 'complete',
   PENDING: 'pending',
-  NOT_FOUND: 'notFound'
+  NOT_FOUND: 'notFound',
 };
 
 Object.freeze(HealthRecordStatus);
 
-export const getHealthRecordStatus = async conversationId => {
+export const getHealthRecordStatus = async (conversationId) => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   try {
     const healthRecord = await HealthRecord.findByPk(conversationId);
@@ -32,7 +32,7 @@ export const getHealthRecordStatus = async conversationId => {
   }
 };
 
-export const updateHealthRecordCompleteness = async conversationId => {
+export const updateHealthRecordCompleteness = async (conversationId) => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
@@ -42,8 +42,8 @@ export const updateHealthRecordCompleteness = async conversationId => {
     const pendingMessages = await Message.findAll({
       where: {
         conversationId,
-        receivedAt: null
-      }
+        receivedAt: null,
+      },
     });
     if (pendingMessages.length === 0) {
       await HealthRecord.update(
@@ -60,7 +60,7 @@ export const updateHealthRecordCompleteness = async conversationId => {
   await t.commit();
 };
 
-export const getCurrentHealthRecordIdForPatient = async nhsNumber => {
+export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
   const Op = Sequelize.Op;
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
 
@@ -68,10 +68,10 @@ export const getCurrentHealthRecordIdForPatient = async nhsNumber => {
     where: {
       nhsNumber,
       completedAt: {
-        [Op.ne]: null
-      }
+        [Op.ne]: null,
+      },
     },
-    order: [['completedAt', 'DESC']]
+    order: [['completedAt', 'DESC']],
   });
 
   if (!healthRecords.length) {
@@ -83,27 +83,27 @@ export const getCurrentHealthRecordIdForPatient = async nhsNumber => {
   return currentHealthRecord.conversationId;
 };
 
-export const getHealthRecordMessageIds = async conversationId => {
+export const getHealthRecordMessageIds = async (conversationId) => {
   const Message = ModelFactory.getByName(messageModelName);
 
   const messages = await Message.findAll({
     where: {
-      conversationId
-    }
+      conversationId,
+    },
   });
 
   const healthRecordExtractIndex = messages.findIndex(
-    message => message.type === MessageType.EHR_EXTRACT
+    (message) => message.type === MessageType.EHR_EXTRACT
   );
   const healthRecordExtractId = messages[healthRecordExtractIndex].messageId;
 
   messages.splice(healthRecordExtractIndex, 1);
-  const attachmentIds = messages.map(message => message.messageId);
+  const attachmentIds = messages.map((message) => message.messageId);
 
   return { healthRecordExtractId, attachmentIds };
 };
 
-export const healthRecordExists = async conversationId => {
+export const healthRecordExists = async (conversationId) => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   try {
     const healthRecord = await HealthRecord.findByPk(conversationId);

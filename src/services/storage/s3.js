@@ -12,7 +12,7 @@ export default class S3Service {
 
     this.parameters = {
       Bucket: config.awsS3BucketName,
-      Key: filename
+      Key: filename,
     };
   }
 
@@ -21,7 +21,7 @@ export default class S3Service {
       type: 's3',
       bucketName: config.awsS3BucketName,
       available: true,
-      writable: false
+      writable: false,
     };
 
     const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -29,14 +29,14 @@ export default class S3Service {
       .then(() =>
         this.save(date)
           .then(() => ({ ...result, writable: true }))
-          .catch(err => ({ ...result, error: err }))
+          .catch((err) => ({ ...result, error: err }))
       )
-      .catch(err => ({ ...result, error: err, available: false }));
+      .catch((err) => ({ ...result, error: err, available: false }));
   }
 
   save(data) {
     return new Promise((resolve, reject) => {
-      this.s3.putObject({ ...this.parameters, Body: data }, err => {
+      this.s3.putObject({ ...this.parameters, Body: data }, (err) => {
         if (err) return reject(err);
         resolve();
       });
@@ -46,7 +46,7 @@ export default class S3Service {
   getPresignedUrl(operation) {
     const params = {
       ...this.parameters,
-      Expires: URL_EXPIRY_TIME
+      Expires: URL_EXPIRY_TIME,
     };
 
     if (operation === 'putObject') {
@@ -60,9 +60,9 @@ export default class S3Service {
     return new Promise((resolve, reject) => {
       this.s3.headBucket(
         {
-          Bucket: config.awsS3BucketName
+          Bucket: config.awsS3BucketName,
         },
-        err => {
+        (err) => {
           if (err) reject(err);
           resolve(true);
         }
@@ -77,7 +77,7 @@ export default class S3Service {
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
       endpoint: new Endpoint(config.localstackUrl),
-      s3ForcePathStyle: true
+      s3ForcePathStyle: true,
     };
   }
 }

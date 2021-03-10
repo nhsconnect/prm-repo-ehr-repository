@@ -3,12 +3,8 @@ import { param } from 'express-validator';
 import { logError, logInfo } from '../../middleware/logging';
 
 export const messageLocationControllerValidation = [
-  param('conversationId')
-    .isUUID()
-    .withMessage("'conversationId' provided is not a UUID"),
-  param('messageId')
-    .isUUID()
-    .withMessage("'messageId' provided is not a UUID")
+  param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),
+  param('messageId').isUUID().withMessage("'messageId' provided is not a UUID"),
 ];
 
 export const messageLocationController = async (req, res) => {

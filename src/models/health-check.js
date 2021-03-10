@@ -3,25 +3,25 @@ import getParameters from './parameters';
 export const modelName = 'HealthCheck';
 const tableName = 'health_checks';
 
-const model = dataType => ({
+const model = (dataType) => ({
   id: {
     type: dataType.UUID,
     primaryKey: true,
-    defaultValue: dataType.UUIDV4
+    defaultValue: dataType.UUIDV4,
   },
   created_at: {
     type: dataType.DATE,
-    allowNull: false
+    allowNull: false,
   },
   updated_at: {
     type: dataType.DATE,
-    allowNull: false
+    allowNull: false,
   },
-  deleted_at: dataType.DATE
+  deleted_at: dataType.DATE,
 });
 
 export default (sequelize, DataTypes) => {
   return sequelize.define(modelName, model(DataTypes), {
-    ...getParameters(tableName)
+    ...getParameters(tableName),
   });
 };

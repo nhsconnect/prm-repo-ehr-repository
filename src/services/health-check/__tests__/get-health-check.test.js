@@ -16,7 +16,7 @@ describe('getHealthCheck', () => {
 
     S3.mockImplementation(() => ({
       putObject: mockPutObject,
-      headBucket: mockHeadBucket
+      headBucket: mockHeadBucket,
     }));
   });
 
@@ -25,20 +25,20 @@ describe('getHealthCheck', () => {
   });
 
   it('should return successful s3 health check if s3 succeeds', () => {
-    return getHealthCheck().then(result => {
+    return getHealthCheck().then((result) => {
       const s3 = result.details.filestore;
       expect(s3).toEqual({
         type: 's3',
         bucketName: config.awsS3BucketName,
         available: true,
-        writable: true
+        writable: true,
       });
     });
   });
 
   it('should return failed s3 health check if s3 returns an error', () => {
     mockPutObject.mockImplementation((config, callback) => callback(error));
-    return getHealthCheck().then(result => {
+    return getHealthCheck().then((result) => {
       const s3 = result.details.filestore;
 
       return expect(s3).toEqual({
@@ -46,7 +46,7 @@ describe('getHealthCheck', () => {
         bucketName: config.awsS3BucketName,
         available: true,
         writable: false,
-        error: error
+        error: error,
       });
     });
   });
@@ -54,7 +54,7 @@ describe('getHealthCheck', () => {
   it('should return available false if s3 can be connected ', () => {
     mockHeadBucket.mockImplementation((config, callback) => callback(error));
 
-    return getHealthCheck().then(result => {
+    return getHealthCheck().then((result) => {
       const s3 = result.details.filestore;
 
       return expect(s3).toEqual({
@@ -62,7 +62,7 @@ describe('getHealthCheck', () => {
         bucketName: config.awsS3BucketName,
         available: false,
         writable: false,
-        error: error
+        error: error,
       });
     });
   });
@@ -70,14 +70,14 @@ describe('getHealthCheck', () => {
   it('should return failed db health check if there is an unknown error', () => {
     ModelFactory._overrideConfig('host', 'something');
 
-    return getHealthCheck().then(result => {
+    return getHealthCheck().then((result) => {
       const db = result.details['database'];
 
       return expect(db).toEqual({
         type: 'postgresql',
         connection: false,
         writable: false,
-        error: 'Unknown error (Error Code: ENOTFOUND)'
+        error: 'Unknown error (Error Code: ENOTFOUND)',
       });
     });
   });

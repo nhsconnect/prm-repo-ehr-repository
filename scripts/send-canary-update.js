@@ -12,7 +12,7 @@ if (message) {
           title: `${process.env.NHS_SERVICE}`,
           subtitle: 'Canary',
           imageUrl:
-            'https://imageog.flaticon.com/icons/png/512/185/185862.png?size=1200x630f&pad=10,10,10,10&ext=png&bg=FFFFFFFF'
+            'https://imageog.flaticon.com/icons/png/512/185/185862.png?size=1200x630f&pad=10,10,10,10&ext=png&bg=FFFFFFFF',
         },
         sections: [
           {
@@ -20,20 +20,20 @@ if (message) {
               {
                 keyValue: {
                   topLabel: 'Updates Available',
-                  content: message
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
+                  content: message,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
   };
 
   const options = {
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   };
 
   console.log('Sending message to Google Hangout group');

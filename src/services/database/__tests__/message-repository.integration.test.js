@@ -3,7 +3,7 @@ import {
   updateAttachmentAndCreateItsParts,
   createEhrExtract,
   attachmentExists,
-  createAttachmentPart
+  createAttachmentPart,
 } from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
@@ -75,7 +75,7 @@ describe('messageRepository', () => {
         messageId: 'not-a-valid-message-id',
         conversationId,
         nhsNumber,
-        attachmentMessageIds: []
+        attachmentMessageIds: [],
       };
 
       try {
@@ -98,7 +98,7 @@ describe('messageRepository', () => {
         conversationId,
         type: ehrExtractType,
         nhsNumber: 'not-valid',
-        attachmentMessageIds: []
+        attachmentMessageIds: [],
       };
 
       try {
@@ -124,13 +124,13 @@ describe('messageRepository', () => {
         conversationId,
         messageId: ehrMessageId,
         type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date()
+        receivedAt: new Date(),
       });
       await Message.create({
         conversationId,
         messageId: attachmentMessageId,
         type: MessageType.ATTACHMENT,
-        receivedAt: null
+        receivedAt: null,
       });
       await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, []);
       const attachment = await Message.findByPk(attachmentMessageId);
@@ -159,16 +159,16 @@ describe('messageRepository', () => {
         conversationId,
         messageId: ehrMessageId,
         type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date()
+        receivedAt: new Date(),
       });
       await Message.create({
         conversationId,
         messageId: attachmentMessageId,
         type: MessageType.ATTACHMENT,
-        receivedAt: null
+        receivedAt: null,
       });
       await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, [
-        attachmentRemainingPartId
+        attachmentRemainingPartId,
       ]);
       const attachmentRemainingPart = await Message.findByPk(attachmentRemainingPartId);
 
@@ -188,24 +188,24 @@ describe('messageRepository', () => {
         conversationId,
         messageId: ehrMessageId,
         type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date()
+        receivedAt: new Date(),
       });
       await Message.create({
         conversationId,
         messageId: attachmentMessageId,
         type: MessageType.ATTACHMENT,
-        receivedAt: null
+        receivedAt: null,
       });
       await Message.create({
         conversationId,
         messageId: attachmentRemainingPartId,
         type: MessageType.ATTACHMENT,
         receivedAt: new Date(),
-        parentId: null
+        parentId: null,
       });
 
       await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, [
-        attachmentRemainingPartId
+        attachmentRemainingPartId,
       ]);
 
       const attachmentRemainingPart = await Message.findByPk(attachmentRemainingPartId);
@@ -222,7 +222,7 @@ describe('messageRepository', () => {
         conversationId,
         messageId: messageId,
         type: MessageType.ATTACHMENT,
-        receivedAt: null
+        receivedAt: null,
       });
 
       expect(await attachmentExists(messageId)).toBe(true);

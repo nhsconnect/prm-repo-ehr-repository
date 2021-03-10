@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 import app from '../../../app';
 import {
   getCurrentHealthRecordIdForPatient,
-  getHealthRecordMessageIds
+  getHealthRecordMessageIds,
 } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
 import { logError, logInfo } from '../../../middleware/logging';
@@ -14,12 +14,12 @@ jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../services/storage/get-signed-url');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
 
 describe('patientDetailsController', () => {
   initializeConfig.mockReturnValue({
-    ehrRepoAuthKeys: 'correct-key'
+    ehrRepoAuthKeys: 'correct-key',
   });
 
   const authorizationKeys = 'correct-key';
@@ -34,7 +34,7 @@ describe('patientDetailsController', () => {
       getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
       getHealthRecordMessageIds.mockResolvedValue({
         healthRecordExtractId: messageId,
-        attachmentIds: []
+        attachmentIds: [],
       });
       getSignedUrl.mockResolvedValue(presignedUrl);
 
@@ -62,7 +62,7 @@ describe('patientDetailsController', () => {
       getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
       getHealthRecordMessageIds.mockResolvedValue({
         healthRecordExtractId: healthRecordExtractId,
-        attachmentIds: [attachmentId]
+        attachmentIds: [attachmentId],
       });
       when(getSignedUrl)
         .calledWith(conversationId, healthRecordExtractId, 'getObject')

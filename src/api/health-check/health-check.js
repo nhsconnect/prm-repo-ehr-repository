@@ -6,7 +6,7 @@ export const healthCheck = express.Router();
 
 healthCheck.get('/', (req, res, next) => {
   getHealthCheck()
-    .then(status => {
+    .then((status) => {
       if (
         status.details.filestore.writable &&
         status.details.database.writable &&
@@ -19,7 +19,7 @@ healthCheck.get('/', (req, res, next) => {
         res.status(503).json(status);
       }
     })
-    .catch(err => {
+    .catch((err) => {
       logError('Health check error', err);
       next(err);
     });

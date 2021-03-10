@@ -5,11 +5,11 @@ import {
   updateAttachmentAndCreateItsParts,
   createEhrExtract,
   createAttachmentPart,
-  attachmentExists
+  attachmentExists,
 } from '../../../services/database/message-repository';
 import {
   updateHealthRecordCompleteness,
-  healthRecordExists
+  healthRecordExists,
 } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
 import { logError } from '../../../middleware/logging';
@@ -19,12 +19,12 @@ jest.mock('../../../services/database/message-repository');
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
 
 describe('storeMessageController', () => {
   initializeConfig.mockReturnValue({
-    ehrRepoAuthKeys: 'correct-key'
+    ehrRepoAuthKeys: 'correct-key',
   });
 
   const authorizationKeys = 'correct-key';
@@ -45,9 +45,9 @@ describe('storeMessageController', () => {
             conversationId,
             messageType: MessageType.EHR_EXTRACT,
             nhsNumber,
-            attachmentMessageIds
-          }
-        }
+            attachmentMessageIds,
+          },
+        },
       };
     });
 
@@ -82,7 +82,7 @@ describe('storeMessageController', () => {
       requestBody.data.attributes = {
         messageType: MessageType.ATTACHMENT,
         conversationId,
-        attachmentMessageIds: [attachmentPartId]
+        attachmentMessageIds: [attachmentPartId],
       };
 
       attachmentExists.mockResolvedValueOnce(true);
@@ -95,7 +95,7 @@ describe('storeMessageController', () => {
       expect(res.status).toBe(201);
       expect(createEhrExtract).not.toHaveBeenCalled();
       expect(updateAttachmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
-        attachmentPartId
+        attachmentPartId,
       ]);
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
@@ -106,7 +106,7 @@ describe('storeMessageController', () => {
       requestBody.data.attributes = {
         messageType: MessageType.ATTACHMENT,
         conversationId,
-        attachmentMessageIds: []
+        attachmentMessageIds: [],
       };
 
       attachmentExists.mockResolvedValueOnce(false);
@@ -133,9 +133,9 @@ describe('storeMessageController', () => {
           conversationId,
           messageType: MessageType.EHR_EXTRACT,
           nhsNumber,
-          attachmentMessageIds
-        }
-      }
+          attachmentMessageIds,
+        },
+      },
     };
     it('should return a 503 when message cannot be stored in the database', async () => {
       createEhrExtract.mockRejectedValueOnce({ error: 'db is down' });
@@ -157,12 +157,12 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            conversationId: 'not-a-uuid'
-          }
-        }
+            conversationId: 'not-a-uuid',
+          },
+        },
       };
       const errorMessage = {
-        'data.attributes.conversationId': "'conversationId' provided is not a UUID"
+        'data.attributes.conversationId': "'conversationId' provided is not a UUID",
       };
 
       const res = await request(app)
@@ -177,8 +177,8 @@ describe('storeMessageController', () => {
     it('should return 422 and an error message when messageId is not a UUID', async () => {
       const requestBody = {
         data: {
-          id: 'not-a-uuid'
-        }
+          id: 'not-a-uuid',
+        },
       };
       const errorMessage = { 'data.id': "'id' provided is not a UUID" };
 
@@ -194,8 +194,8 @@ describe('storeMessageController', () => {
     it('should return 422 and an error message when type is not messages', async () => {
       const requestBody = {
         data: {
-          type: 'not-messages'
-        }
+          type: 'not-messages',
+        },
       };
       const errorMessage = { 'data.type': 'Invalid value' };
 
@@ -216,9 +216,9 @@ describe('storeMessageController', () => {
           attributes: {
             conversationId: uuid(),
             nhsNumber: 'not-an-nhs-number',
-            messageType: 'ehrExtract'
-          }
-        }
+            messageType: 'ehrExtract',
+          },
+        },
       };
       const errorMessage = { 'data.attributes.nhsNumber': "'nhsNumber' provided is not numeric" };
 
@@ -236,12 +236,12 @@ describe('storeMessageController', () => {
         data: {
           attributes: {
             nhsNumber: '1234567890987654',
-            messageType: 'ehrExtract'
-          }
-        }
+            messageType: 'ehrExtract',
+          },
+        },
       };
       const errorMessage = {
-        'data.attributes.nhsNumber': "'nhsNumber' provided is not 10 characters"
+        'data.attributes.nhsNumber': "'nhsNumber' provided is not 10 characters",
       };
 
       const res = await request(app)
@@ -257,13 +257,13 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            messageType: 'not-a-message-type'
-          }
-        }
+            messageType: 'not-a-message-type',
+          },
+        },
       };
       const errorMessage = {
         'data.attributes.messageType':
-          "'messageType' provided is not one of the following: ehrExtract, attachment"
+          "'messageType' provided is not one of the following: ehrExtract, attachment",
       };
 
       const res = await request(app)
@@ -284,9 +284,9 @@ describe('storeMessageController', () => {
             conversationId: uuid(),
             nhsNumber: '1234567890',
             messageType: 'ehrExtract',
-            attachmentMessageIds: []
-          }
-        }
+            attachmentMessageIds: [],
+          },
+        },
       };
 
       const res = await request(app)
@@ -301,13 +301,13 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            messageType: 'ehrExtract'
-          }
-        }
+            messageType: 'ehrExtract',
+          },
+        },
       };
 
       const errorMessage = {
-        'data.attributes.nhsNumber': "'nhsNumber' is required for messageType ehrExtract"
+        'data.attributes.nhsNumber': "'nhsNumber' is required for messageType ehrExtract",
       };
 
       const res = await request(app)
@@ -328,9 +328,9 @@ describe('storeMessageController', () => {
             conversationId: uuid(),
             nhsNumber: '1234567890',
             messageType: 'ehrExtract',
-            attachmentMessageIds: []
-          }
-        }
+            attachmentMessageIds: [],
+          },
+        },
       };
       const res = await request(app)
         .post('/messages')
@@ -345,13 +345,13 @@ describe('storeMessageController', () => {
         data: {
           attributes: {
             nhsNumber: '1234567890',
-            messageType: 'attachment'
-          }
-        }
+            messageType: 'attachment',
+          },
+        },
       };
 
       const errorMessage = {
-        'data.attributes.nhsNumber': "'nhsNumber' should be empty for messageType attachment"
+        'data.attributes.nhsNumber': "'nhsNumber' should be empty for messageType attachment",
       };
 
       const res = await request(app)
@@ -371,9 +371,9 @@ describe('storeMessageController', () => {
           attributes: {
             conversationId: uuid(),
             messageType: 'attachment',
-            attachmentMessageIds: []
-          }
-        }
+            attachmentMessageIds: [],
+          },
+        },
       };
 
       const res = await request(app)
@@ -388,13 +388,13 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            attachmentMessageIds: ['not-a-uuid']
-          }
-        }
+            attachmentMessageIds: ['not-a-uuid'],
+          },
+        },
       };
 
       const errorMessage = {
-        'data.attributes.attachmentMessageIds[0]': "'attachmentMessageIds' should be UUIDs"
+        'data.attributes.attachmentMessageIds[0]': "'attachmentMessageIds' should be UUIDs",
       };
 
       const res = await request(app)
@@ -410,13 +410,13 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            attachmentMessageIds: 'not-an-array'
-          }
-        }
+            attachmentMessageIds: 'not-an-array',
+          },
+        },
       };
 
       const errorMessage = {
-        'data.attributes.attachmentMessageIds': "'attachmentMessageIds' should be an array"
+        'data.attributes.attachmentMessageIds': "'attachmentMessageIds' should be an array",
       };
 
       const res = await request(app)
@@ -437,15 +437,13 @@ describe('storeMessageController', () => {
         attributes: {
           conversationId: uuid(),
           nhsNumber: '1234567890',
-          messageType: 'ehrExtract'
-        }
-      }
+          messageType: 'ehrExtract',
+        },
+      },
     };
 
     it('should return 401 when authentication keys are missing', async () => {
-      const res = await request(app)
-        .post('/messages')
-        .send(requestBody);
+      const res = await request(app).post('/messages').send(requestBody);
 
       expect(res.status).toBe(401);
     });

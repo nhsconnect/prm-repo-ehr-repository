@@ -15,23 +15,20 @@ describe('GET /health', () => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase()));
     });
 
-    it('should return HTTP status code 200', done => {
-      request(app)
-        .get('/health')
-        .expect(200)
-        .end(done);
+    it('should return HTTP status code 200', (done) => {
+      request(app).get('/health').expect(200).end(done);
     });
 
-    it('should return details of the response from getHealthCheck', done => {
+    it('should return details of the response from getHealthCheck', (done) => {
       request(app)
         .get('/health')
-        .expect(res => {
+        .expect((res) => {
           expect(res.body).toEqual(expectedHealthCheckBase());
         })
         .end(done);
     });
 
-    it('should call health check service with no parameters', done => {
+    it('should call health check service with no parameters', (done) => {
       request(app)
         .get('/health')
         .expect(() => {
@@ -40,7 +37,7 @@ describe('GET /health', () => {
         .end(done);
     });
 
-    it('should call logInfo with result when all dependencies are ok', done => {
+    it('should call logInfo with result when all dependencies are ok', (done) => {
       request(app)
         .get('/health')
         .expect(() => {
@@ -55,23 +52,20 @@ describe('GET /health', () => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(false)));
     });
 
-    it('should return 503 status if s3 writable is false', done => {
-      request(app)
-        .get('/health')
-        .expect(503)
-        .end(done);
+    it('should return 503 status if s3 writable is false', (done) => {
+      request(app).get('/health').expect(503).end(done);
     });
 
-    it('should return details of the response from getHealthCheck when s3 writable is false', done => {
+    it('should return details of the response from getHealthCheck when s3 writable is false', (done) => {
       request(app)
         .get('/health')
-        .expect(res => {
+        .expect((res) => {
           expect(res.body).toEqual(expectedHealthCheckBase(false));
         })
         .end(done);
     });
 
-    it('should call logError with the health check result if s3 writable is false', done => {
+    it('should call logError with the health check result if s3 writable is false', (done) => {
       request(app)
         .get('/health')
         .expect(() => {
@@ -89,23 +83,20 @@ describe('GET /health', () => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(true, true, false)));
     });
 
-    it('should return 503 status if db writable is false', done => {
-      request(app)
-        .get('/health')
-        .expect(503)
-        .end(done);
+    it('should return 503 status if db writable is false', (done) => {
+      request(app).get('/health').expect(503).end(done);
     });
 
-    it('should return details of the response from getHealthCheck when the database writable is false', done => {
+    it('should return details of the response from getHealthCheck when the database writable is false', (done) => {
       request(app)
         .get('/health')
-        .expect(res => {
+        .expect((res) => {
           expect(res.body).toEqual(expectedHealthCheckBase(true, true, false));
         })
         .end(done);
     });
 
-    it('should call logError with the health check result if db writable is false', done => {
+    it('should call logError with the health check result if db writable is false', (done) => {
       request(app)
         .get('/health')
         .expect(() => {
@@ -123,23 +114,20 @@ describe('GET /health', () => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(true, false)));
     });
 
-    it('should return 503 status if s3 available is false', done => {
-      request(app)
-        .get('/health')
-        .expect(503)
-        .end(done);
+    it('should return 503 status if s3 available is false', (done) => {
+      request(app).get('/health').expect(503).end(done);
     });
 
-    it('should return details of the response from getHealthCheck when the s3 available is false', done => {
+    it('should return details of the response from getHealthCheck when the s3 available is false', (done) => {
       request(app)
         .get('/health')
-        .expect(res => {
+        .expect((res) => {
           expect(res.body).toEqual(expectedHealthCheckBase(true, false));
         })
         .end(done);
     });
 
-    it('should call logError with the health check result if s3 available is false', done => {
+    it('should call logError with the health check result if s3 available is false', (done) => {
       request(app)
         .get('/health')
         .expect(() => {
@@ -159,14 +147,11 @@ describe('GET /health', () => {
       );
     });
 
-    it('should return 503 if both s3 and db are not writable', done => {
-      request(app)
-        .get('/health')
-        .expect(503)
-        .end(done);
+    it('should return 503 if both s3 and db are not writable', (done) => {
+      request(app).get('/health').expect(503).end(done);
     });
 
-    it('should call logError with the health check result if both s3 and db are not writable', done => {
+    it('should call logError with the health check result if both s3 and db are not writable', (done) => {
       request(app)
         .get('/health')
         .expect(() => {
@@ -184,14 +169,11 @@ describe('GET /health', () => {
       getHealthCheck.mockRejectedValue(Error('some-error'));
     });
 
-    it('should return 500 if getHealthCheck if it cannot provide a health check', done => {
-      request(app)
-        .get('/health')
-        .expect(500)
-        .end(done);
+    it('should return 500 if getHealthCheck if it cannot provide a health check', (done) => {
+      request(app).get('/health').expect(500).end(done);
     });
 
-    it('should logError if getHealthCheck throws an error', done => {
+    it('should logError if getHealthCheck throws an error', (done) => {
       request(app)
         .get('/health')
         .expect(() => {
@@ -201,7 +183,7 @@ describe('GET /health', () => {
         .end(done);
     });
 
-    it('should update the log event for any unexpected error', done => {
+    it('should update the log event for any unexpected error', (done) => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(false)));
 
       request(app)
@@ -221,12 +203,12 @@ describe('GET /health', () => {
 const expectedS3Base = (isWritable, isConnected) => {
   const s3Base = {
     available: isConnected,
-    writable: isWritable
+    writable: isWritable,
   };
   return !isWritable
     ? {
         ...s3Base,
-        error: mockErrorResponse
+        error: mockErrorResponse,
       }
     : s3Base;
 };
@@ -239,20 +221,20 @@ const expectedHealthCheckBase = (
 ) => ({
   details: {
     filestore: expectedS3Base(s3_writable, s3_connected),
-    database: getExpectedDatabase(db_writable, db_connected)
-  }
+    database: getExpectedDatabase(db_writable, db_connected),
+  },
 });
 
 const getExpectedDatabase = (isWritable, isConnected) => {
   const baseConf = {
     connection: isConnected,
-    writable: isWritable
+    writable: isWritable,
   };
 
   return !isWritable
     ? {
         ...baseConf,
-        error: mockErrorResponse
+        error: mockErrorResponse,
       }
     : baseConf;
 };

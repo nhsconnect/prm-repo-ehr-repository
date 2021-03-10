@@ -3,17 +3,17 @@ import traverse from 'traverse';
 import cloneDeep from 'lodash.clonedeep';
 import { initializeConfig } from './index';
 
-export const obfuscateSecrets = format(info => {
+export const obfuscateSecrets = format((info) => {
   const OBFUSCATED_VALUE = '********';
   const SECRET_KEYS = ['passcode', 'data', 'authorization'];
   const updated = cloneDeep(info);
-  traverse(updated).forEach(function() {
+  traverse(updated).forEach(function () {
     if (SECRET_KEYS.includes(this.key)) this.update(OBFUSCATED_VALUE);
   });
   return updated;
 });
 
-export const addCommonFields = format(info => {
+export const addCommonFields = format((info) => {
   const config = initializeConfig();
   const nhsEnvironment = config.nhsEnvironment;
   const updated = cloneDeep(info);
@@ -30,7 +30,7 @@ export const options = {
     addCommonFields(),
     format.json()
   ),
-  transports: [new transports.Console({ handleExceptions: true })]
+  transports: [new transports.Console({ handleExceptions: true })],
 };
 
 export const logger = createLogger(options);
@@ -41,7 +41,7 @@ export const addCorrelationId = format((info, { correlationId }) => {
   updated['correlationId'] = correlationId;
   return updated;
 });
-export const createIdLogger = correlationId => {
+export const createIdLogger = (correlationId) => {
   const options = {
     ...options,
     format: format.combine(
@@ -49,7 +49,7 @@ export const createIdLogger = correlationId => {
       addCorrelationId({ correlationId }),
       format.timestamp(),
       format.json()
-    )
+    ),
   };
   return createLogger(options);
 };

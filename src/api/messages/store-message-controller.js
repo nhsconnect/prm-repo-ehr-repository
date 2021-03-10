@@ -4,19 +4,17 @@ import {
   updateAttachmentAndCreateItsParts,
   createEhrExtract,
   attachmentExists,
-  createAttachmentPart
+  createAttachmentPart,
 } from '../../services/database/message-repository';
 import { logError, logWarning } from '../../middleware/logging';
 import {
   updateHealthRecordCompleteness,
-  healthRecordExists
+  healthRecordExists,
 } from '../../services/database/health-record-repository';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
-  body('data.id')
-    .isUUID()
-    .withMessage("'id' provided is not a UUID"),
+  body('data.id').isUUID().withMessage("'id' provided is not a UUID"),
   body('data.attributes.conversationId')
     .isUUID()
     .withMessage("'conversationId' provided is not a UUID"),
@@ -42,7 +40,7 @@ export const storeMessageControllerValidation = [
     .withMessage("'attachmentMessageIds' should be UUIDs"),
   body('data.attributes.attachmentMessageIds')
     .isArray()
-    .withMessage("'attachmentMessageIds' should be an array")
+    .withMessage("'attachmentMessageIds' should be an array"),
 ];
 
 export const storeMessageController = async (req, res) => {
@@ -59,7 +57,7 @@ export const storeMessageController = async (req, res) => {
         messageId: id,
         conversationId: attributes.conversationId,
         nhsNumber: attributes.nhsNumber,
-        attachmentMessageIds: attributes.attachmentMessageIds
+        attachmentMessageIds: attributes.attachmentMessageIds,
       });
     }
     if (attributes.messageType === MessageType.ATTACHMENT) {

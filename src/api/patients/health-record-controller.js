@@ -1,18 +1,16 @@
 import { param } from 'express-validator';
 import {
   getHealthRecordStatus,
-  HealthRecordStatus
+  HealthRecordStatus,
 } from '../../services/database/health-record-repository';
 
 export const healthRecordControllerValidation = [
-  param('conversationId')
-    .isUUID()
-    .withMessage("'conversationId' provided is not a UUID"),
+  param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),
   param('nhsNumber')
     .isNumeric()
     .withMessage("'nhsNumber' provided is not numeric")
     .isLength({ min: 10, max: 10 })
-    .withMessage("'nhsNumber' provided is not 10 characters")
+    .withMessage("'nhsNumber' provided is not 10 characters"),
 ];
 
 export const healthRecordController = async (req, res) => {

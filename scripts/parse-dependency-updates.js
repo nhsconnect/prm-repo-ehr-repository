@@ -2,26 +2,26 @@
 
 const updateRegexPattern = '^.*:(.*)@(.*):.*@(.*):.*@(.*)$';
 
-const extractDependencyUpdatesFromList = listOfUpdates =>
-  listOfUpdates.filter(item => isUpdate(item));
+const extractDependencyUpdatesFromList = (listOfUpdates) =>
+  listOfUpdates.filter((item) => isUpdate(item));
 
-const isUpdate = updateString => updateString.split(':').length > 1;
+const isUpdate = (updateString) => updateString.split(':').length > 1;
 
-const fromString = updateString => {
+const fromString = (updateString) => {
   const matcher = updateString.match(updateRegexPattern);
 
   return {
     package: matcher[1],
     wantedVersion: matcher[2],
     currentVersion: matcher[3],
-    latestVersion: matcher[4]
+    latestVersion: matcher[4],
   };
 };
 
-const getAllUpdates = listOfUpdates =>
-  extractDependencyUpdatesFromList(listOfUpdates).map(update => fromString(update));
+const getAllUpdates = (listOfUpdates) =>
+  extractDependencyUpdatesFromList(listOfUpdates).map((update) => fromString(update));
 
-const getAllUpdatesText = listOfUpdates => {
+const getAllUpdatesText = (listOfUpdates) => {
   const allUpdates = getAllUpdates(listOfUpdates);
   return allUpdates.reduce(
     (acc, item) =>
@@ -36,7 +36,7 @@ module.exports = {
   isUpdate,
   fromString,
   getAllUpdates,
-  getAllUpdatesText
+  getAllUpdatesText,
 };
 
 console.log(getAllUpdates(process.argv));

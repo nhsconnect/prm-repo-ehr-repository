@@ -9,9 +9,9 @@ export const checkDbHealth = () => {
     .then(() => ({
       type: 'postgresql',
       connection: true,
-      writable: true
+      writable: true,
     }))
-    .catch(err => {
+    .catch((err) => {
       if (err.parent && err.parent.code) {
         return parseHealthCheckError(err.parent.code);
       }
@@ -20,12 +20,12 @@ export const checkDbHealth = () => {
         type: 'postgresql',
         connection: false,
         writable: false,
-        error: `Sequelize error (Message: ${err.errors[0].message})`
+        error: `Sequelize error (Message: ${err.errors[0].message})`,
       };
     });
 };
 
-const parseHealthCheckError = code => {
+const parseHealthCheckError = (code) => {
   switch (code) {
     case ERROR_CODES.INVALID_USER_PASSWORD:
     case ERROR_CODES.INVALID_CREDENTIALS:
@@ -33,7 +33,7 @@ const parseHealthCheckError = code => {
         type: 'postgresql',
         connection: true,
         writable: false,
-        error: `Authorization error (Error Code: ${code})`
+        error: `Authorization error (Error Code: ${code})`,
       };
     case ERROR_CODES.CONNECTION_REFUSED:
     case ERROR_CODES.INVALID_DATABASE:
@@ -41,14 +41,14 @@ const parseHealthCheckError = code => {
         type: 'postgresql',
         connection: false,
         writable: false,
-        error: `Connection error (Error Code: ${code})`
+        error: `Connection error (Error Code: ${code})`,
       };
     default:
       return {
         type: 'postgresql',
         connection: false,
         writable: false,
-        error: `Unknown error (Error Code: ${code})`
+        error: `Unknown error (Error Code: ${code})`,
       };
   }
 };

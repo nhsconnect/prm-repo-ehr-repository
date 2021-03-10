@@ -17,8 +17,8 @@ export function getHealthCheck() {
       nhsEnvironment: config.nhsEnvironment,
       details: {
         filestore: s3,
-        database: db
-      }
+        database: db,
+      },
     };
   });
 }

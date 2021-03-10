@@ -8,11 +8,11 @@ describe('db', () => {
 
   describe('checkDbHealth', () => {
     it('should return the db health', () => {
-      return checkDbHealth().then(value => {
+      return checkDbHealth().then((value) => {
         expect(value).toEqual({
           type: 'postgresql',
           connection: true,
-          writable: true
+          writable: true,
         });
       });
     });

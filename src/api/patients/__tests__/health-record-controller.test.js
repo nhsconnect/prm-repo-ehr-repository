@@ -3,18 +3,18 @@ import { v4 as uuid } from 'uuid';
 import app from '../../../app';
 import {
   getHealthRecordStatus,
-  HealthRecordStatus
+  HealthRecordStatus,
 } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
 
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } })
+  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
 
 describe('healthRecordController', () => {
   initializeConfig.mockReturnValue({
-    ehrRepoAuthKeys: 'correct-key'
+    ehrRepoAuthKeys: 'correct-key',
   });
 
   const authorizationKeys = 'correct-key';

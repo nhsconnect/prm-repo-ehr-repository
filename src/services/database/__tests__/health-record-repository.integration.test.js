@@ -5,7 +5,7 @@ import {
   HealthRecordStatus,
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds,
-  healthRecordExists
+  healthRecordExists,
 } from '../health-record-repository';
 import ModelFactory from '../../../models';
 import { modelName as healthRecordModelName } from '../../../models/health-record';
@@ -75,7 +75,7 @@ describe('healthRecordRepository', () => {
         conversationId,
         messageId,
         type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date()
+        receivedAt: new Date(),
       });
 
       await updateHealthRecordCompleteness(conversationId);
@@ -95,13 +95,13 @@ describe('healthRecordRepository', () => {
         conversationId,
         messageId,
         type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date()
+        receivedAt: new Date(),
       });
       await Message.create({
         conversationId,
         messageId: attachmentId,
         type: MessageType.ATTACHMENT,
-        receivedAt: null
+        receivedAt: null,
       });
 
       await updateHealthRecordCompleteness(conversationId);
@@ -131,17 +131,17 @@ describe('healthRecordRepository', () => {
       await HealthRecord.create({
         conversationId: previousHealthRecordConversationId,
         nhsNumber,
-        completedAt: new Date()
+        completedAt: new Date(),
       });
       await HealthRecord.create({
         conversationId: incompleteHealthRecordConversationId,
         nhsNumber,
-        completedAt: null
+        completedAt: null,
       });
       await HealthRecord.create({
         conversationId: currentHealthRecordConversationId,
         nhsNumber,
-        completedAt: new Date()
+        completedAt: new Date(),
       });
 
       const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
@@ -156,7 +156,7 @@ describe('healthRecordRepository', () => {
       await HealthRecord.create({
         conversationId: incompleteHealthRecordConversationId,
         nhsNumber,
-        completedAt: null
+        completedAt: null,
       });
 
       const currentHealthRecordId = await getCurrentHealthRecordIdForPatient(nhsNumber);
@@ -181,7 +181,7 @@ describe('healthRecordRepository', () => {
         messageId,
         conversationId,
         type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date()
+        receivedAt: new Date(),
       });
       const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
         conversationId
@@ -200,7 +200,7 @@ describe('healthRecordRepository', () => {
         messageId,
         conversationId,
         type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date()
+        receivedAt: new Date(),
       });
 
       await Message.create({
@@ -208,7 +208,7 @@ describe('healthRecordRepository', () => {
         conversationId,
         type: MessageType.ATTACHMENT,
         receivedAt: new Date(),
-        parentId: messageId
+        parentId: messageId,
       });
       const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
         conversationId
@@ -228,7 +228,7 @@ describe('healthRecordRepository', () => {
         messageId,
         conversationId,
         type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date()
+        receivedAt: new Date(),
       });
 
       await Message.create({
@@ -236,7 +236,7 @@ describe('healthRecordRepository', () => {
         conversationId,
         type: MessageType.ATTACHMENT,
         receivedAt: new Date(),
-        parentId: messageId
+        parentId: messageId,
       });
 
       await Message.create({
@@ -244,7 +244,7 @@ describe('healthRecordRepository', () => {
         conversationId,
         type: MessageType.ATTACHMENT,
         receivedAt: new Date(),
-        parentId: attachmentId
+        parentId: attachmentId,
       });
 
       const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
@@ -269,7 +269,7 @@ describe('healthRecordRepository', () => {
 
       await HealthRecord.create({
         conversationId,
-        nhsNumber
+        nhsNumber,
       });
       const result = await healthRecordExists(conversationId);
       expect(result).toEqual(true);

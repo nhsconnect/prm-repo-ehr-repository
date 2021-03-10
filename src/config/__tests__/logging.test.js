@@ -6,8 +6,8 @@ jest.mock('winston', () => ({
     log: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
-    warn: jest.fn()
-  }))
+    warn: jest.fn(),
+  })),
 }));
 
 describe('logging', () => {
@@ -17,24 +17,24 @@ describe('logging', () => {
 
     it('should replace top level data key value with obfuscated values', () => {
       const obfuscatedObject = formatter.transform({
-        data: 'secret-payload'
+        data: 'secret-payload',
       });
 
       expect(obfuscatedObject).toStrictEqual(
         expect.objectContaining({
-          data: obfuscatedString
+          data: obfuscatedString,
         })
       );
     });
 
     it('should replace top level passcode key value with obfuscated values', () => {
       const obfuscatedObject = formatter.transform({
-        passcode: '123456789'
+        passcode: '123456789',
       });
 
       expect(obfuscatedObject).toStrictEqual(
         expect.objectContaining({
-          passcode: obfuscatedString
+          passcode: obfuscatedString,
         })
       );
     });
@@ -42,15 +42,15 @@ describe('logging', () => {
     it('should replace nested passcode key value with obfuscated values', () => {
       const obfuscatedObject = formatter.transform({
         nested: {
-          passcode: '123456789'
-        }
+          passcode: '123456789',
+        },
       });
 
       expect(obfuscatedObject).toStrictEqual(
         expect.objectContaining({
           nested: {
-            passcode: obfuscatedString
-          }
+            passcode: obfuscatedString,
+          },
         })
       );
     });
@@ -58,15 +58,15 @@ describe('logging', () => {
     it('should replace nested passcode key value with obfuscated values', () => {
       const obfuscatedObject = formatter.transform({
         nested: {
-          data: 'some-secret-data'
-        }
+          data: 'some-secret-data',
+        },
       });
 
       expect(obfuscatedObject).toStrictEqual(
         expect.objectContaining({
           nested: {
-            data: obfuscatedString
-          }
+            data: obfuscatedString,
+          },
         })
       );
     });
@@ -84,11 +84,11 @@ describe('logging', () => {
             ssl: true,
             connectHeaders: {
               login: 'abcdefg',
-              authorization: '1234567'
-            }
-          }
+              authorization: '1234567',
+            },
+          },
         },
-        [messageSymbol]: 'some-symbol-message'
+        [messageSymbol]: 'some-symbol-message',
       });
 
       expect(result).toEqual({
@@ -100,11 +100,11 @@ describe('logging', () => {
             ssl: true,
             connectHeaders: {
               login: 'abcdefg',
-              authorization: '********'
-            }
-          }
+              authorization: '********',
+            },
+          },
         },
-        [messageSymbol]: 'some-symbol-message'
+        [messageSymbol]: 'some-symbol-message',
       });
     });
   });
@@ -132,10 +132,10 @@ describe('logging', () => {
             ssl: true,
             connectHeaders: {
               login: 'abcdefg',
-              authorization: '1234567'
-            }
-          }
-        }
+              authorization: '1234567',
+            },
+          },
+        },
       });
       const messageSymbol = Object.getOwnPropertySymbols(result)[0];
 
