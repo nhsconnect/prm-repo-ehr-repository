@@ -22,6 +22,8 @@ export const addCommonFields = format((info) => {
 
   if (currentSpan) {
     updated['traceId'] = currentSpan.context().traceId;
+    updated['conversationId'] = currentSpan.context().conversationId;
+    updated['messageId'] = currentSpan.context().messageId;
   }
 
   updated.level = updated.level.toUpperCase();
@@ -41,22 +43,3 @@ export const options = {
 };
 
 export const logger = createLogger(options);
-
-// The code below may be useful for the traceability story
-export const addCorrelationId = format((info, { correlationId }) => {
-  const updated = cloneDeep(info);
-  updated['correlationId'] = correlationId;
-  return updated;
-});
-export const createIdLogger = (correlationId) => {
-  const options = {
-    ...options,
-    format: format.combine(
-      obfuscateSecrets(),
-      addCorrelationId({ correlationId }),
-      format.timestamp(),
-      format.json()
-    ),
-  };
-  return createLogger(options);
-};
