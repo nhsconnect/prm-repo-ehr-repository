@@ -2,7 +2,7 @@ import Sequelize from 'sequelize';
 import ModelFactory from '../../models';
 import { modelName as healthRecordModelName } from '../../models/health-record';
 import { MessageType, modelName as messageModelName } from '../../models/message';
-import { logError } from '../../middleware/logging';
+import { logError, logInfo } from '../../middleware/logging';
 import { getNow } from '../time';
 
 export const HealthRecordStatus = {
@@ -18,8 +18,11 @@ export const getHealthRecordStatus = async (conversationId) => {
   try {
     const healthRecord = await HealthRecord.findByPk(conversationId);
     if (!healthRecord) {
+      logInfo('Health Record not found');
       return HealthRecordStatus.NOT_FOUND;
     }
+
+    logInfo('Health Record retrieved from the database');
 
     if (healthRecord.completedAt) {
       return HealthRecordStatus.COMPLETE;

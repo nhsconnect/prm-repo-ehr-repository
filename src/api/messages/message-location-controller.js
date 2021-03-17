@@ -1,6 +1,7 @@
 import { getSignedUrl } from '../../services/storage';
 import { param } from 'express-validator';
 import { logError, logInfo } from '../../middleware/logging';
+import { setCurrentSpanAttributes } from '../../config/tracing';
 
 export const messageLocationControllerValidation = [
   param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),
@@ -9,6 +10,7 @@ export const messageLocationControllerValidation = [
 
 export const messageLocationController = async (req, res) => {
   const { conversationId, messageId } = req.params;
+  setCurrentSpanAttributes({ conversationId, messageId });
   const operation = 'putObject';
 
   try {

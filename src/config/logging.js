@@ -22,8 +22,8 @@ export const addCommonFields = format((info) => {
 
   if (currentSpan) {
     updated['traceId'] = currentSpan.context().traceId;
-    updated['conversationId'] = currentSpan.context().conversationId;
-    updated['messageId'] = currentSpan.context().messageId;
+    updated['conversationId'] = currentSpan.attributes.conversationId;
+    updated['messageId'] = currentSpan.attributes.messageId;
   }
 
   updated.level = updated.level.toUpperCase();

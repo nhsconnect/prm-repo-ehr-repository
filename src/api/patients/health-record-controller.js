@@ -3,6 +3,7 @@ import {
   getHealthRecordStatus,
   HealthRecordStatus,
 } from '../../services/database/health-record-repository';
+import { setCurrentSpanAttributes } from '../../config/tracing';
 
 export const healthRecordControllerValidation = [
   param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),
@@ -15,6 +16,8 @@ export const healthRecordControllerValidation = [
 
 export const healthRecordController = async (req, res) => {
   try {
+    setCurrentSpanAttributes({ conversationId: req.params.conversationId });
+
     const status = await getHealthRecordStatus(req.params.conversationId);
     switch (status) {
       case HealthRecordStatus.COMPLETE:

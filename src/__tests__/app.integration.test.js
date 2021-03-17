@@ -6,8 +6,6 @@ import ModelFactory from '../models';
 import { MessageType, modelName as messageModelName } from '../models/message';
 import { modelName as healthRecordModelName } from '../models/health-record';
 
-jest.mock('../middleware/logging');
-
 describe('app', () => {
   const config = initializeConfig();
   const updatedConfig = { ...config, ehrRepoAuthKeys: 'correct-key' };

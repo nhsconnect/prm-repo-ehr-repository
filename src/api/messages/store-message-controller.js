@@ -11,6 +11,7 @@ import {
   updateHealthRecordCompleteness,
   healthRecordExists,
 } from '../../services/database/health-record-repository';
+import { setCurrentSpanAttributes } from '../../config/tracing';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
@@ -45,6 +46,7 @@ export const storeMessageControllerValidation = [
 
 export const storeMessageController = async (req, res) => {
   const { id, attributes } = req.body.data;
+  setCurrentSpanAttributes({ conversationId: attributes.conversationId, messageId: id });
 
   try {
     if (attributes.messageType === MessageType.EHR_EXTRACT) {
