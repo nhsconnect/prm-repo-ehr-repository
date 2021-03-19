@@ -5,6 +5,7 @@ import {
 } from '../../services/database/health-record-repository';
 import { logError, logInfo } from '../../middleware/logging';
 import getSignedUrl from '../../services/storage/get-signed-url';
+import { setCurrentSpanAttributes } from '../../config/tracing';
 
 export const patientDetailsValidation = [
   param('nhsNumber')
@@ -25,6 +26,7 @@ export const patientDetailsController = async (req, res) => {
       res.sendStatus(404);
       return;
     }
+    setCurrentSpanAttributes({ conversationId: currentHealthRecordId });
     const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
       currentHealthRecordId
     );

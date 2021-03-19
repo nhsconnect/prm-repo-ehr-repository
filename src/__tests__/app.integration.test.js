@@ -2,6 +2,8 @@ import request from 'supertest';
 import { v4 as uuid, v4 } from 'uuid';
 import app from '../app';
 import { initializeConfig } from '../config';
+import { logger } from '../config/logging';
+import { expectStructuredLogToContain, transportSpy } from '../__builders__/logging-helper';
 import ModelFactory from '../models';
 import { MessageType, modelName as messageModelName } from '../models/message';
 import { modelName as healthRecordModelName } from '../models/health-record';
@@ -13,6 +15,7 @@ describe('app', () => {
 
   beforeEach(() => {
     process.env.AUTHORIZATION_KEYS = authorizationKeys;
+    logger.add(transportSpy);
   });
 
   afterEach(() => {
@@ -33,6 +36,11 @@ describe('app', () => {
       expect(res.text).toContain(
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
       );
+      expectStructuredLogToContain(transportSpy, {
+        messageId,
+        conversationId,
+        traceId: expect.anything(),
+      });
     });
   });
 
@@ -65,6 +73,7 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(recordRes.status).toEqual(200);
+      expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
     it('should return 404 when health record is not complete', async () => {
@@ -96,6 +105,7 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(recordRes.status).toEqual(404);
+      expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
     it('should return 404 when health record is not found', async () => {
@@ -107,6 +117,7 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(recordRes.status).toEqual(404);
+      expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
   });
 
@@ -184,6 +195,7 @@ describe('app', () => {
       expect(patientRes.body.data.links.attachments[1]).toContain(
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${attachmentPartId}`
       );
+      expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
     it('should return a 404 if no complete health record is found', async () => {
@@ -215,6 +227,7 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(404);
+      expectStructuredLogToContain(transportSpy, { traceId: expect.anything() });
     });
   });
 
@@ -274,6 +287,11 @@ describe('app', () => {
       expect(healthRecord.nhsNumber).toBe(nhsNumber);
       expect(healthRecord.completedAt).not.toBeNull();
       expect(res.status).toBe(201);
+      expectStructuredLogToContain(transportSpy, {
+        messageId,
+        conversationId,
+        traceId: expect.anything(),
+      });
     });
 
     it('should save health record with attachments in the database and return 201', async () => {
@@ -292,6 +310,11 @@ describe('app', () => {
       expect(attachmentMessage.parentId).toBe(messageId);
       expect(healthRecord.completedAt).toBeNull();
       expect(res.status).toBe(201);
+      expectStructuredLogToContain(transportSpy, {
+        messageId,
+        conversationId,
+        traceId: expect.anything(),
+      });
     });
 
     it('should create large attachment parts messages in the database and return 201', async () => {
@@ -320,26 +343,36 @@ describe('app', () => {
       expect(restOfAttachmentMessage.receivedAt).toBeNull();
       expect(healthRecord.completedAt).toBeNull();
       expect(attachmentRes.status).toBe(201);
+      expectStructuredLogToContain(transportSpy, {
+        messageId: firstPartOfLargeAttachmentId,
+        conversationId,
+        traceId: expect.anything(),
+      });
     });
 
     it('should update database for attachments and return 201 when all attachments have been received', async () => {
-      const attachment = uuid();
+      const attachmentId = uuid();
       await request(app)
         .post(`/messages`)
-        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachment]))
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachmentId]))
         .set('Authorization', authorizationKeys);
 
       const attachmentRes = await request(app)
         .post(`/messages`)
-        .send(createReqBodyForAttachment(attachment, conversationId))
+        .send(createReqBodyForAttachment(attachmentId, conversationId))
         .set('Authorization', authorizationKeys);
 
-      const attachmentMessage = await Message.findByPk(attachment);
+      const attachmentMessage = await Message.findByPk(attachmentId);
       const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(attachmentMessage.receivedAt).not.toBeNull();
       expect(healthRecord.completedAt).not.toBeNull();
       expect(attachmentRes.status).toBe(201);
+      expectStructuredLogToContain(transportSpy, {
+        messageId: attachmentId,
+        conversationId,
+        traceId: expect.anything(),
+      });
     });
 
     it('should update database when attachment part arrives before first attachment part', async () => {
@@ -362,6 +395,11 @@ describe('app', () => {
       expect(attachmentPartMessage.receivedAt).not.toBeNull();
       expect(healthRecord.completedAt).toBeNull();
       expect(res.status).toBe(201);
+      expectStructuredLogToContain(transportSpy, {
+        messageId: attachmentPartId,
+        conversationId,
+        traceId: expect.anything(),
+      });
     });
   });
 });
