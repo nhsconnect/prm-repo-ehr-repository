@@ -10,6 +10,81 @@ data "aws_route53_zone" "environment_public_zone" {
   zone_id = data.aws_ssm_parameter.environment_public_zone_id.value
 }
 
+data "aws_ssm_parameter" "private_subnets" {
+  name = "/repo/${var.environment}/output/prm-deductions-infra/deductions-core-private-subnets"
+}
+
+resource "aws_alb" "alb-internal" {
+  name            = "${var.environment}-${var.component_name}-alb-int"
+  subnets         = split(",", data.aws_ssm_parameter.private_subnets.value)
+  security_groups = [aws_security_group.core-alb-internal-sg.id]
+  internal        = true
+
+  tags = {
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_alb_listener" "int-alb-listener-http" {
+  load_balancer_arn = aws_alb.alb-internal.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Error"
+      status_code  = "501"
+    }
+  }
+}
+
+resource "aws_alb_listener" "int-alb-listener-https" {
+  load_balancer_arn = aws_alb.alb-internal.arn
+  port              = "443"
+  protocol          = "HTTPS"
+
+  ssl_policy      = "ELBSecurityPolicy-TLS-1-2-2017-01"
+  certificate_arn = aws_acm_certificate_validation.ehr-repo-cert-validation.certificate_arn
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Error"
+      status_code  = "501"
+    }
+  }
+}
+
+resource "aws_alb_listener_rule" "alb-internal-check-listener-rule" {
+  listener_arn = aws_alb_listener.int-alb-listener-http.arn
+  priority     = 200
+
+  action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "ALB Alive and reachable"
+      status_code  = "200"
+    }
+  }
+
+  condition {
+    host_header {
+      values = ["${var.environment}.alb.patient-deductions.nhs.uk"]
+    }
+  }
+
+  depends_on = [aws_alb_listener.int-alb-listener-http]
+}
+
+
 resource "aws_alb_target_group" "internal-alb-tg" {
   name        = "${var.environment}-${var.component_name}-int-tg"
   port        = 3000
@@ -33,7 +108,7 @@ resource "aws_alb_target_group" "internal-alb-tg" {
 }
 
 resource "aws_alb_listener_rule" "int-alb-http-listener-rule" {
-  listener_arn = data.aws_ssm_parameter.deductions_core_int_alb_httpl_arn.value
+  listener_arn = aws_alb_listener.int-alb-listener-http.arn
   priority     = 100
 
   action {
@@ -54,7 +129,7 @@ resource "aws_alb_listener_rule" "int-alb-http-listener-rule" {
 }
 
 resource "aws_alb_listener_rule" "int-alb-https-listener-rule" {
-  listener_arn = data.aws_ssm_parameter.deductions_core_int_alb_httpsl_arn.value
+  listener_arn = aws_alb_listener.int-alb-listener-https.arn
   priority     = 101
 
   action {
@@ -67,4 +142,78 @@ resource "aws_alb_listener_rule" "int-alb-https-listener-rule" {
       values = [local.domain]
     }
   }
+}
+
+resource "aws_security_group" "core-alb-internal-sg" {
+  name        = "${var.environment}-${var.component_name}-alb-internal-sg"
+  description = "controls access to the ALB"
+  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  ingress {
+    description = "Allow deductions private subnet to access Core internal ALB"
+    protocol    = "tcp"
+    from_port   = 80
+    to_port     = 80
+    cidr_blocks = [var.allowed_cidr]
+  }
+
+  ingress {
+    description = "Allow deductions private subnet to access Core internal ALB"
+    protocol    = "tcp"
+    from_port   = 443
+    to_port     = 443
+    cidr_blocks = [var.allowed_cidr]
+  }
+
+  egress {
+    description = "Allow All Outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.environment}-${var.component_name}-alb-internal-sg"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "deductions_core_internal_alb_dns" {
+  name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-internal-alb-dns"
+  type = "String"
+  value = aws_alb.alb-internal.dns_name
+  tags = {
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "deductions_core_int_alb_httpl_arn" {
+  name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-int-alb-httpl-arn"
+  type = "String"
+  value = aws_alb_listener.int-alb-listener-http.arn
+  tags = {
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "deductions_core_int_alb_httpsl_arn" {
+  name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-int-alb-httpsl-arn"
+  type = "String"
+  value = aws_alb_listener.int-alb-listener-https.arn
+  tags = {
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_route53_record" "alb-r53-record" {
+  zone_id = data.aws_ssm_parameter.private_zone_id.value
+  name    = "${var.environment}.alb"
+  type    = "CNAME"
+  ttl     = "300"
+  records = [aws_alb.alb-internal.dns_name]
 }

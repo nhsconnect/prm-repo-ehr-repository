@@ -9,7 +9,6 @@ variable "repo_name" {
 }
 
 variable "node_env" {}
-
 variable "environment" {}
 
 variable "component_name" {}
@@ -19,6 +18,8 @@ variable "task_image_tag" {}
 variable "task_cpu" {}
 variable "task_memory" {}
 variable "port" {}
+variable "allowed_cidr" {}
+variable "database_subnets" {}
 
 variable "service_desired_count" {}
 

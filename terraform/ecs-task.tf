@@ -7,7 +7,7 @@ locals {
     { name = "NODE_ENV", value = var.node_env },
     { name = "NHS_ENVIRONMENT", value = var.environment },
     { name = "DATABASE_NAME", value = var.database_name },
-    { name = "DATABASE_HOST", value = data.aws_ssm_parameter.rds_endpoint.value },
+    { name = "DATABASE_HOST", value = aws_rds_cluster.db-cluster.endpoint },
     { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
   ]
   secret_environment_variables = [
@@ -45,5 +45,45 @@ resource "aws_ecs_task_definition" "task" {
   tags = {
     Environment = var.environment
     CreatedBy = var.repo_name
+  }
+}
+
+resource "aws_security_group" "ecs-tasks-sg" {
+  name        = "${var.environment}-${var.component_name}-ecs-tasks-sg"
+  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  ingress {
+    description     = "Allow traffic from public and internal ALB to ehr-repo service"
+    protocol        = "tcp"
+    from_port       = "3000"
+    to_port         = "3000"
+    security_groups = [
+      # aws_security_group.core-alb-sg.id,
+      aws_security_group.core-alb-internal-sg.id
+    ]
+  }
+
+  egress {
+    description = "Allow All Outbound"
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.environment}-${var.component_name}-ecs-tasks-sg"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "deductions_core_ecs_tasks_sg_id" {
+  name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-ecs-tasks-sg-id"
+  type = "String"
+  value = aws_security_group.ecs-tasks-sg.id
+  tags = {
+    CreatedBy   = var.repo_name
+    Environment = var.environment
   }
 }

@@ -89,15 +89,22 @@ function get_aws_ssm_secret {
 
 function tf_plan {
   operation=$1
+  certs=$2
   cd terraform
 
   COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-8)
   IMAGE_TAG=${COMMIT_HASH}
+  TARGET=""
+
+  if [[ "${certs}" == "true" ]]; then
+    TARGET="-target=aws_acm_certificate.ehr-repo-cert"
+  fi
+
 
   terraform init -reconfigure -backend-config key=${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate
   terraform get # modules
   if [[ "${operation}" == "create" ]]; then
-    terraform plan -var task_image_tag=$IMAGE_TAG -var-file=$NHS_ENVIRONMENT.tfvars -out="nhs_deployment.tfplan"
+    terraform plan -var task_image_tag=$IMAGE_TAG -var-file=$NHS_ENVIRONMENT.tfvars $TARGET -out="nhs_deployment.tfplan"
   elif [[ "${operation}" == "destroy" ]]; then
     terraform plan -var task_image_tag=$IMAGE_TAG -var-file=$NHS_ENVIRONMENT.tfvars -out="nhs_deployment.tfplan" -destroy
   else
@@ -310,6 +317,13 @@ case "${command}" in
   tf)
       check_env
       dojo -c Dojofile-infra "bash"
+      ;;
+  _tf_plan_certs)
+      tf_plan "$2" true
+      ;;
+  tf_plan_certs)
+      check_env
+      dojo -c Dojofile-infra "./tasks _tf_plan_certs $2"
       ;;
   _tf_plan)
       tf_plan "$2"
