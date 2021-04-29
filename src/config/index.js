@@ -9,5 +9,4 @@ export const initializeConfig = () => ({
   localstackUrl: process.env.LOCALSTACK_URL,
   sequelize: sequelizeConfig,
   nhsEnvironment: process.env.NHS_ENVIRONMENT || 'local',
-  ehrRepoServiceUrl: process.env.EHR_REPO_SERVICE_URL,
 });

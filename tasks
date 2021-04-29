@@ -32,7 +32,7 @@ function configure_service_url {
   if [[ -z "${NHS_ENVIRONMENT}" ]]; then
     export SERVICE_URL=http://${NHS_SERVICE}:3000
   else
-    export SERVICE_URL=https://${NHS_ENVIRONMENT}.${NHS_SERVICE}.patient-deductions.nhs.uk
+    export SERVICE_URL=https://${NHS_SERVICE}.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk
   fi
 }
 

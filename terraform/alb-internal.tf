@@ -1,3 +1,15 @@
+locals {
+  domain = trimsuffix("${var.dns_name}.${data.aws_route53_zone.environment_public_zone.name}", ".")
+}
+
+data "aws_ssm_parameter" "environment_public_zone_id" {
+  name = "/repo/${var.environment}/output/prm-deductions-infra/environment-public-zone-id"
+}
+
+data "aws_route53_zone" "environment_public_zone" {
+  zone_id = data.aws_ssm_parameter.environment_public_zone_id.value
+}
+
 resource "aws_alb_target_group" "internal-alb-tg" {
   name        = "${var.environment}-${var.component_name}-int-tg"
   port        = 3000
@@ -35,8 +47,9 @@ resource "aws_alb_listener_rule" "int-alb-http-listener-rule" {
   }
 
   condition {
-    field  = "host-header"
-    values = ["${var.environment}.${var.dns_name}.patient-deductions.nhs.uk"]
+    host_header {
+      values = [local.domain]
+    }
   }
 }
 
@@ -50,7 +63,8 @@ resource "aws_alb_listener_rule" "int-alb-https-listener-rule" {
   }
 
   condition {
-    field  = "host-header"
-    values = ["${var.environment}.${var.dns_name}.patient-deductions.nhs.uk"]
+    host_header {
+      values = [local.domain]
+    }
   }
 }
