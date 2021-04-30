@@ -57,9 +57,13 @@ resource "aws_ssm_parameter" "rds_endpoint" {
   }
 }
 
+data "aws_ssm_parameter" "database_subnets" {
+  name = "/repo/${var.environment}/output/prm-deductions-infra/deductions-core-database-subnets"
+}
+
 resource "aws_db_subnet_group" "db-cluster-subnet-group" {
   name       = "${var.environment}-ehr-db-subnet-group"
-  subnet_ids = var.database_subnets
+  subnet_ids = split(",", data.aws_ssm_parameter.database_subnets.value)
 
   tags = {
     Name = "${var.environment}-ehr-db-subnet-group"

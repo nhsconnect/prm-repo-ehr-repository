@@ -3,7 +3,6 @@ component_name       = "ehr-repo"
 dns_name             = "ehr-repo"
 repo_name            = "prm-deductions-ehr-repository"
 allowed_cidr         = "10.20.0.0/16" // deductions_private_cidr
-database_subnets = ["10.25.111.0/24", "10.25.112.0/24"]
 
 node_env             = "prod"
 database_name        = "deductions_db"

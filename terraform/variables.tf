@@ -19,7 +19,6 @@ variable "task_cpu" {}
 variable "task_memory" {}
 variable "port" {}
 variable "allowed_cidr" {}
-variable "database_subnets" {}
 
 variable "service_desired_count" {}
 

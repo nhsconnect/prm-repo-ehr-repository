@@ -39,7 +39,7 @@ resource "aws_route53_record" "ehr-repo-cert-validation-record" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = data.aws_ssm_parameter.root_zone_id.value
+  zone_id         = data.aws_ssm_parameter.environment_public_zone_id.value
 }
 
 resource "aws_acm_certificate_validation" "ehr-repo-cert-validation" {
