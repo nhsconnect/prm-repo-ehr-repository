@@ -306,6 +306,14 @@ case "${command}" in
       get_latest_commit_hash
       dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
+  sanity_check)
+      dojo "./tasks _sanity_check"
+      ;;
+  _sanity_check)
+      check_env
+      nslookup ${NHS_ENVIRONMENT}.alb.patient-deductions.nhs.uk
+      curl -i --fail "http://${NHS_ENVIRONMENT}.alb.patient-deductions.nhs.uk"
+      ;;
   _drop_db)
       drop_db
       ;;

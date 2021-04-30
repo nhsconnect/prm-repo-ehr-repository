@@ -3,6 +3,8 @@ common:
   deploy_job: &deploy_job
     resources:
       - docker
+      - deductions-private
+      - dev
     tasks:
       - exec:
           command: /bin/bash
@@ -29,6 +31,11 @@ common:
           arguments:
             - -c
             - ./tasks wait_ecs
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks sanity_check
 pipelines:
   "prm-deductions-ehr-repository.dev":
     group: deductions
