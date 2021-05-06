@@ -9,6 +9,11 @@ common:
           command: /bin/bash
           arguments:
             - -c
+            - ./tasks generate_authorization_keys
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
             - ./tasks tf_plan_certs create
       - exec:
           command: /bin/bash

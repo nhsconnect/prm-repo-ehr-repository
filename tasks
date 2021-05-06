@@ -145,6 +145,26 @@ function get_db_credentials {
   export DATABASE_NAME="deductions_db"
 }
 
+function generate_authorization_keys {
+  check_env
+  secret_id="/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-authorization-keys"
+  value=$(openssl rand -base64 24  | tr -d "/@\'+")
+  set +e
+  aws ssm get-parameter --region $AWS_DEFAULT_REGION --name $secret_id | jq -r ".Parameter.Value" > /dev/null
+  if [[ $? == 0 ]]; then
+    echo "Authorization keys already exist"
+  else
+    set -e
+    echo "Authorization keys do not exist. Creating..."
+    aws ssm put-parameter \
+     --region $AWS_DEFAULT_REGION \
+     --name "$secret_id" \
+     --type SecureString \
+     --overwrite \
+     --value "$value"
+  fi
+}
+
 
 function drop_db {
   PGPASSWORD="${DATABASE_PASSWORD}" dropdb --host="${DATABASE_HOST}" --username="${DATABASE_USER}" $DATABASE_NAME
@@ -321,6 +341,12 @@ case "${command}" in
       check_env
       get_db_credentials
       dojo -c Dojofile-infra "./tasks _drop_db"
+      ;;
+  _generate_authorization_keys)
+      generate_authorization_keys
+      ;;
+  generate_authorization_keys)
+      dojo -c Dojofile-infra "./tasks _generate_authorization_keys"
       ;;
   tf)
       check_env
