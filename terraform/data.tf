@@ -17,9 +17,9 @@ data "aws_ssm_parameter" "authorization_keys" {
 }
 
 data "aws_ssm_parameter" "db-username" {
-  name = "/repo/${var.environment}/user-input/db-username"
+  name = "/repo/${var.environment}/user-input/ehr-repo-db-username"
 }
 
 data "aws_ssm_parameter" "db-password" {
-  name = "/repo/${var.environment}/user-input/db-password"
+  name = "/repo/${var.environment}/user-input/ehr-repo-db-password"
 }

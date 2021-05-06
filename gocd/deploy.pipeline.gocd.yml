@@ -9,7 +9,7 @@ common:
           command: /bin/bash
           arguments:
             - -c
-            - ./tasks generate_authorization_keys
+            - ./tasks create_secrets
       - exec:
           command: /bin/bash
           arguments:

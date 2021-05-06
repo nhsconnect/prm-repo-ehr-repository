@@ -139,23 +139,27 @@ function configure_hangout_webhook {
 }
 
 function get_db_credentials {
-  export DATABASE_PASSWORD=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/db-password")
-  export DATABASE_USER=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/db-username")
+  export DATABASE_PASSWORD=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
+  export DATABASE_USER=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
   export DATABASE_HOST=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-infra/core-rds-endpoint")
   export DATABASE_NAME="deductions_db"
 }
 
-function generate_authorization_keys {
-  check_env
-  secret_id="/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-authorization-keys"
-  value=$(openssl rand -base64 24  | tr -d "/@\'+")
+function drop_db {
+  PGPASSWORD="${DATABASE_PASSWORD}" dropdb --host="${DATABASE_HOST}" --username="${DATABASE_USER}" $DATABASE_NAME
+  echo "Database $DATABASE_NAME was dropped successfully"
+}
+
+function create_secret_ssm_param {
+  secret_id="$1"
+  value="$2"
   set +e
-  aws ssm get-parameter --region $AWS_DEFAULT_REGION --name $secret_id | jq -r ".Parameter.Value" > /dev/null
+  aws ssm get-parameter --region $AWS_DEFAULT_REGION --name "$secret_id" | jq -r ".Parameter.Value" > /dev/null
   if [[ $? == 0 ]]; then
-    echo "Authorization keys already exist"
+    echo "Secret at $secret_id already exists"
   else
     set -e
-    echo "Authorization keys do not exist. Creating..."
+    echo "Secret does not exists. Creating $secret_id"
     aws ssm put-parameter \
      --region $AWS_DEFAULT_REGION \
      --name "$secret_id" \
@@ -165,10 +169,9 @@ function generate_authorization_keys {
   fi
 }
 
-
-function drop_db {
-  PGPASSWORD="${DATABASE_PASSWORD}" dropdb --host="${DATABASE_HOST}" --username="${DATABASE_USER}" $DATABASE_NAME
-  echo "Database $DATABASE_NAME was dropped successfully"
+function generate_secret_ssm_param {
+  value=$(openssl rand -base64 24  | tr -d "/@\'+")
+  create_secret_ssm_param "$1" "$value"
 }
 
 ############################
@@ -342,11 +345,14 @@ case "${command}" in
       get_db_credentials
       dojo -c Dojofile-infra "./tasks _drop_db"
       ;;
-  _generate_authorization_keys)
-      generate_authorization_keys
+  _create_secrets)
+      generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username"
+      generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password"
+      generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-authorization-keys"
       ;;
-  generate_authorization_keys)
-      dojo -c Dojofile-infra "./tasks _generate_authorization_keys"
+  create_secrets)
+      check_env
+      dojo -c Dojofile-infra "./tasks _create_secrets"
       ;;
   tf)
       check_env
