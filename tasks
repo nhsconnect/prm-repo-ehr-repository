@@ -175,9 +175,12 @@ function generate_secret_ssm_param {
 }
 
 function generate_username_ssm_param {
+  set +e
   value=$(< /dev/urandom tr -dc a-z | head -c12)
+  set -e
   create_secret_ssm_param "$1" "$value"
 }
+
 
 ############################
 # Docker Related Functions #
