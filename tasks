@@ -131,7 +131,7 @@ function send_canary_update_message {
 }
 
 function configure_hangout_webhook {
-  export GOOGLE_CHAT_CANARY_WEBHOOK=$(get_aws_ssm_secret "/repo/prod/user-input/gocd-google-chat-canary-webhook")
+  export GOOGLE_CHAT_CANARY_WEBHOOK=$(get_aws_ssm_secret "/repo/prod/user-input/external/gocd-google-chat-canary-webhook")
   if [ -z "${GOOGLE_CHAT_CANARY_WEBHOOK}" ]; then
     echo "Unable to obtain GOOGLE_CHAT_CANARY_WEBHOOK from AWS"
     exit 5
