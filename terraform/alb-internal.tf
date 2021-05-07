@@ -209,11 +209,3 @@ resource "aws_ssm_parameter" "deductions_core_int_alb_httpsl_arn" {
     Environment = var.environment
   }
 }
-
-resource "aws_route53_record" "alb-r53-record" {
-  zone_id = data.aws_ssm_parameter.private_zone_id.value
-  name    = "${var.environment}.alb"
-  type    = "CNAME"
-  ttl     = "300"
-  records = [aws_alb.alb-internal.dns_name]
-}

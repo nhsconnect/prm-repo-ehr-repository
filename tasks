@@ -334,8 +334,8 @@ case "${command}" in
       ;;
   _sanity_check)
       check_env
-      nslookup ${NHS_ENVIRONMENT}.alb.patient-deductions.nhs.uk
-      curl -i --fail "http://${NHS_ENVIRONMENT}.alb.patient-deductions.nhs.uk"
+      nslookup ehr-repo.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk
+      curl -i --fail "http://ehr-repo.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk"
       ;;
   _drop_db)
       drop_db
