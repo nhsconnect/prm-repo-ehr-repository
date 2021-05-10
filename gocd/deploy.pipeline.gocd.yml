@@ -35,11 +35,6 @@ common:
           arguments:
             - -c
             - ./tasks wait_ecs
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks sanity_check
 pipelines:
   "prm-deductions-ehr-repository.dev":
     group: deductions
@@ -70,6 +65,11 @@ pipelines:
                 - deductions-private
                 - dev
               tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks sanity_check
                 - exec:
                     command: /bin/bash
                     arguments:
@@ -105,6 +105,11 @@ pipelines:
                 - deductions-private
                 - test
               tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks sanity_check
                 - exec:
                     command: /bin/bash
                     arguments:
