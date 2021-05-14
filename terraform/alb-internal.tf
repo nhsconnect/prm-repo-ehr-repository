@@ -158,11 +158,12 @@ resource "aws_security_group" "core-alb-internal-sg" {
   }
 
   ingress {
-    description = "Allow deductions private subnet to access Core internal ALB"
+    description = "Allow deductions private subnet to access core internal ALB"
     protocol    = "tcp"
     from_port   = 443
     to_port     = 443
-    cidr_blocks = [var.allowed_cidr]
+    // TODO: Move to a separate, GoCD dedicated security group
+    cidr_blocks = [var.allowed_cidr, data.aws_ssm_parameter.gocd_cidr_block.value]
   }
 
   egress {
@@ -208,4 +209,8 @@ resource "aws_ssm_parameter" "deductions_core_int_alb_httpsl_arn" {
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
+}
+
+data "aws_ssm_parameter" "gocd_cidr_block" {
+  name = "/repo/prod/output/prm-gocd-infra/gocd-cidr-block"
 }
