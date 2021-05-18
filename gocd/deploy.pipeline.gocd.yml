@@ -2,8 +2,7 @@ format_version: 4
 common:
   deploy_job: &deploy_job
     resources:
-      - deductions-private
-      - dev
+      - docker
     tasks:
       - exec:
           command: /bin/bash
@@ -62,8 +61,7 @@ pipelines:
           jobs:
             test:
               resources:
-                - deductions-private
-                - dev
+                - docker
               tasks:
                 - exec:
                     command: /bin/bash
@@ -102,8 +100,7 @@ pipelines:
           jobs:
             test:
               resources:
-                - deductions-private
-                - test
+                - docker
               tasks:
                 - exec:
                     command: /bin/bash
@@ -120,8 +117,7 @@ pipelines:
           jobs:
             test:
               resources:
-                - deductions-private
-                - test
+                - docker
               tasks:
                 - exec:
                     command: /bin/bash
