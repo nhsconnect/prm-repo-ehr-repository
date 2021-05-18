@@ -48,7 +48,7 @@ pipelines:
         stage: test_docker
       base_infra:
         pipeline: prm-deductions-infra
-        stage: check_dev
+        stage: wait_dns_dev
     environment_variables:
       NHS_ENVIRONMENT: dev
     stages:
@@ -84,7 +84,7 @@ pipelines:
           - docs/**/*.*
       base_infra:
         pipeline: prm-deductions-infra
-        stage: check_test
+        stage: wait_dns_test
       dev_env:
         pipeline: prm-deductions-ehr-repository.dev
         stage: functional
