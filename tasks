@@ -343,7 +343,7 @@ case "${command}" in
   _sanity_check)
       check_env
       nslookup ehr-repo.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk
-      curl -i --fail "http://ehr-repo.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk"
+      curl -i --fail "https://ehr-repo.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk/health"
       ;;
   _drop_db)
       drop_db
