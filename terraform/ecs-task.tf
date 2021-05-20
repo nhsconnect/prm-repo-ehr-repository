@@ -12,6 +12,7 @@ locals {
   ]
   secret_environment_variables = [
     { name = "AUTHORIZATION_KEYS", valueFrom = data.aws_ssm_parameter.authorization_keys.arn },
+    { name = "E2E_TEST_AUTHORIZATION_KEYS_FOR_EHR_REPO", valueFrom = data.aws_ssm_parameter.e2e_test_authorization_keys_for_ehr_repo.arn },
     { name = "DATABASE_USER", valueFrom = data.aws_ssm_parameter.db-username.arn },
     { name = "DATABASE_PASSWORD", valueFrom = data.aws_ssm_parameter.db-password.arn }
   ]

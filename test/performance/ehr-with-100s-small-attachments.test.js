@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 
-const headers = { Authorization: process.env.AUTHORIZATION_KEYS };
+const headers = { Authorization: process.env.E2E_TEST_AUTHORIZATION_KEYS_FOR_EHR_REPO };
 
 async function sendAttachment(id, conversationId, attachmentMessageIds) {
   const attachment = {
