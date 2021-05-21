@@ -8,11 +8,11 @@ import { healthCheck } from './api/health-check/health-check';
 import { options } from './config/logging';
 import * as logging from './middleware/logging';
 import swaggerDocument from './swagger.json';
-import { initializeConfig } from "./config";
+import { initializeConfig } from './config';
 
 const config = initializeConfig();
 
-console.log("API KEY for e2e loaded: ", config.apiKeyForE2eTest !== 'auth-key')
+console.log('API KEY for e2e loaded: ', config.apiKeyForE2eTest !== 'auth-key');
 httpContext.enable();
 
 const app = express();

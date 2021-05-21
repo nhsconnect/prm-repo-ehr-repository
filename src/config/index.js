@@ -9,5 +9,5 @@ export const initializeConfig = () => ({
   localstackUrl: process.env.LOCALSTACK_URL,
   sequelize: sequelizeConfig,
   nhsEnvironment: process.env.NHS_ENVIRONMENT || 'local',
-  apiKeyForE2eTest: process.env.API_KEY_FOR_E2E_TEST || 'auth-key'
+  apiKeyForE2eTest: process.env.API_KEY_FOR_E2E_TEST || 'auth-key',
 });
