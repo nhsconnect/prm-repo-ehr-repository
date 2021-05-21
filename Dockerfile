@@ -2,8 +2,16 @@ FROM node:12.14.1-alpine
 
 # Add root CA from deductions team to trusted certificates
 RUN apk update && \
-    apk add --no-cache openssl ca-certificates bash tini postgresql-client && \
+    apk add --no-cache openssl ca-certificates bash tini postgresql-client jq && \
     rm -rf /var/cache/apk/*
+
+RUN apk add --no-cache \
+        python3 \
+        py3-pip \
+    && pip3 install --upgrade pip \
+    && pip3 install \
+        awscli \
+    && rm -rf /var/cache/apk/*
 
 COPY ./certs/deductions.crt /usr/local/share/ca-certificates/deductions.crt
 RUN update-ca-certificates
@@ -28,6 +36,7 @@ COPY database/      /app/database
 COPY build/config/database.js /app/src/config/
 COPY .sequelizerc   /app/
 
+COPY scripts/load-api-keys.sh /app/scripts/load-api-keys.sh
 # Migration script
 COPY scripts/migrate-db.sh /usr/bin/run-ehr-server
 

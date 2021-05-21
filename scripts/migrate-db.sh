@@ -38,6 +38,9 @@ else
   jsonPrettify "DB migration completed." INFO
 fi
 
+jsonPrettify "Loading API Keys" INFO
+source ./scripts/load-api-keys.sh
+
 jsonPrettify "Starting node.js server" INFO
 set -e
 exec node build/server.js
