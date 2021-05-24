@@ -14,7 +14,7 @@ jest.mock('../../../config', () => ({
 
 describe('healthRecordController', () => {
   initializeConfig.mockReturnValue({
-    ehrRepoAuthKeys: 'correct-key',
+    consumerApiKeys: { TEST_USER: 'correct-key' },
   });
 
   const authorizationKeys = 'correct-key';

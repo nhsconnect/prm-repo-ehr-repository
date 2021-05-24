@@ -1,14 +1,14 @@
 import { initializeConfig } from '../config';
 
 export const authenticateRequest = (req, res, next) => {
-  const config = initializeConfig();
-  if (!config.ehrRepoAuthKeys) {
+  const { consumerApiKeys } = initializeConfig();
+  if (Object.keys(consumerApiKeys).length === 0) {
     res.status(412).json({
       error: `Server-side Authorization keys have not been set, cannot authenticate`,
     });
     return;
   }
-  const validAuthorizationKeys = config.ehrRepoAuthKeys;
+  const validAuthorizationKeys = Object.values(consumerApiKeys);
 
   const authorizationKey = req.get('Authorization');
 
@@ -19,7 +19,7 @@ export const authenticateRequest = (req, res, next) => {
     return;
   }
 
-  if (validAuthorizationKeys !== authorizationKey) {
+  if (!validAuthorizationKeys.includes(authorizationKey)) {
     res.status(403).json({
       error: `Authorization header is provided but not valid`,
     });

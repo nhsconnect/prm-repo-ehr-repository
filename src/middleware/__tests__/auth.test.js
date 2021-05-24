@@ -17,7 +17,7 @@ describe('auth', () => {
 
   describe('authenticated successfully', () => {
     it('should return HTTP 200 when correctly authenticated', async () => {
-      initializeConfig.mockReturnValue({ ehrRepoAuthKeys: 'correct-key' });
+      initializeConfig.mockReturnValueOnce({ consumerApiKeys: { E2E_TEST: 'correct-key' } });
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', 'correct-key');
@@ -27,7 +27,7 @@ describe('auth', () => {
 
   describe('AUTHORIZATION_KEYS environment variables not provided', () => {
     it('should return 412 if AUTHORIZATION_KEYS have not been set', async () => {
-      initializeConfig.mockReturnValue({});
+      initializeConfig.mockReturnValueOnce({ consumerApiKeys: {} });
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', 'correct-key');
@@ -35,6 +35,7 @@ describe('auth', () => {
     });
 
     it('should return an explicit error message in the body if AUTHORIZATION_KEYS have not been set', async () => {
+      initializeConfig.mockReturnValueOnce({ consumerApiKeys: {} });
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', 'correct-key');
@@ -48,13 +49,13 @@ describe('auth', () => {
 
   describe('Authorization header not provided', () => {
     it('should return HTTP 401 when no authorization header provided', async () => {
-      initializeConfig.mockReturnValue({ ehrRepoAuthKeys: 'correct-key' });
+      initializeConfig.mockReturnValueOnce({ consumerApiKeys: { TEST_USER: 'correct-key' } });
       const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
       expect(res.status).toBe(401);
     });
 
     it('should return an explicit error message in the body when no authorization header provided', async () => {
-      initializeConfig.mockReturnValue({ ehrRepoAuthKeys: 'correct-key' });
+      initializeConfig.mockReturnValueOnce({ consumerApiKeys: { TEST_USER: 'correct-key' } });
       const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
       expect(res.body).toEqual({
         error: 'The request (/messages) requires a valid Authorization header to be set',
@@ -64,6 +65,7 @@ describe('auth', () => {
 
   describe('incorrect Authorisation header value provided ', () => {
     it('should return HTTP 403 when authorization key is incorrect', async () => {
+      initializeConfig.mockReturnValueOnce({ consumerApiKeys: { TEST_USER: 'correct-key' } });
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', 'incorrect-key');
@@ -71,6 +73,7 @@ describe('auth', () => {
     });
 
     it('should return an explicit error message in the body when authorization key is incorrect', async () => {
+      initializeConfig.mockReturnValueOnce({ consumerApiKeys: { TEST_USER: 'correct-key' } });
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', 'incorrect-key');
@@ -79,32 +82,6 @@ describe('auth', () => {
           error: 'Authorization header is provided but not valid',
         })
       );
-    });
-  });
-
-  describe('should only authenticate with exact value of the auth key', () => {
-    it('should return HTTP 403 when authorization key is incorrect', async () => {
-      initializeConfig.mockReturnValue({ ehrRepoAuthKeys: 'correct-key' });
-      const res = await request(app)
-        .get(`/messages/${conversationId}/${messageId}`)
-        .set('Authorization', 'co');
-      expect(res.status).toBe(403);
-    });
-
-    it('should return HTTP 403 when authorization key is partial string', async () => {
-      initializeConfig.mockReturnValue({ ehrRepoAuthKeys: 'correct-key,other-key' });
-      const res = await request(app)
-        .get(`/messages/${conversationId}/${messageId}`)
-        .set('Authorization', 'correct-key');
-      expect(res.status).toBe(403);
-    });
-
-    it('should return HTTP 302 and be successful when authorization keys have a comma but are one string ', async () => {
-      initializeConfig.mockReturnValue({ ehrRepoAuthKeys: 'correct-key,other-key' });
-      const res = await request(app)
-        .get(`/messages/${conversationId}/${messageId}`)
-        .set('Authorization', 'correct-key,other-key');
-      expect(res.status).toBe(200);
     });
   });
 });

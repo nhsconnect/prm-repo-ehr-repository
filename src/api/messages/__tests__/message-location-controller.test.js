@@ -13,7 +13,7 @@ jest.mock('../../../config', () => ({
 
 describe('messageLocationController', () => {
   initializeConfig.mockReturnValue({
-    ehrRepoAuthKeys: 'correct-key',
+    consumerApiKeys: { TEST_USER: 'correct-key' },
   });
 
   const authorizationKeys = 'correct-key';

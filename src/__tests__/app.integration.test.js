@@ -10,17 +10,16 @@ import { modelName as healthRecordModelName } from '../models/health-record';
 
 describe('app', () => {
   const config = initializeConfig();
-  const updatedConfig = { ...config, ehrRepoAuthKeys: 'correct-key' };
-  const authorizationKeys = updatedConfig.ehrRepoAuthKeys;
+  const authorizationKeys = 'correct-key';
 
   beforeEach(() => {
-    process.env.AUTHORIZATION_KEYS = authorizationKeys;
+    process.env.API_KEY_FOR_TEST_USER = authorizationKeys;
     logger.add(transportSpy);
   });
 
   afterEach(() => {
-    if (process.env.AUTHORIZATION_KEYS) {
-      delete process.env.AUTHORIZATION_KEYS;
+    if (process.env.API_KEY_FOR_TEST_USER) {
+      delete process.env.API_KEY_FOR_TEST_USER;
     }
   });
 
