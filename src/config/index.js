@@ -14,12 +14,12 @@ export const initializeConfig = () => ({
 });
 
 const loadConsumerKeys = () => {
-  const consumerObjectKeys = {};
+  const consumerApiKeys = {};
   Object.keys(process.env).forEach((envVarName) => {
     if (envVarName.startsWith('API_KEY_FOR_')) {
       const consumerName = envVarName.split('API_KEY_FOR_')[1];
-      consumerObjectKeys[consumerName] = process.env[envVarName];
+      consumerApiKeys[consumerName] = process.env[envVarName];
     }
   });
-  return consumerObjectKeys;
+  return consumerApiKeys;
 };
