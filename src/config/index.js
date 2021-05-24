@@ -10,4 +10,16 @@ export const initializeConfig = () => ({
   sequelize: sequelizeConfig,
   nhsEnvironment: process.env.NHS_ENVIRONMENT || 'local',
   apiKeyForE2eTest: process.env.API_KEY_FOR_E2E_TEST || 'auth-key',
+  consumerApiKeys: loadConsumerKeys(),
 });
+
+const loadConsumerKeys = () => {
+  const consumerObjectKeys = {};
+  Object.keys(process.env).forEach((envVarName) => {
+    if (envVarName.startsWith('API_KEY_FOR_')) {
+      const consumerName = envVarName.split('API_KEY_FOR_')[1];
+      consumerObjectKeys[consumerName] = process.env[envVarName];
+    }
+  });
+  return consumerObjectKeys;
+};
