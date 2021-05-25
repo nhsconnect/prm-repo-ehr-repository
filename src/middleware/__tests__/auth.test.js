@@ -25,8 +25,8 @@ describe('auth', () => {
     });
   });
 
-  describe('AUTHORIZATION_KEYS environment variables not provided', () => {
-    it('should return 412 if AUTHORIZATION_KEYS have not been set', async () => {
+  describe('Authorization key environment variables not provided', () => {
+    it('should return 412 if auth keys have not been set', async () => {
       initializeConfig.mockReturnValueOnce({ consumerApiKeys: {} });
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
@@ -34,7 +34,7 @@ describe('auth', () => {
       expect(res.status).toBe(412);
     });
 
-    it('should return an explicit error message in the body if AUTHORIZATION_KEYS have not been set', async () => {
+    it('should return an explicit error message in the body if authorization keys have not been set', async () => {
       initializeConfig.mockReturnValueOnce({ consumerApiKeys: {} });
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)

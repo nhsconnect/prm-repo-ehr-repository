@@ -12,10 +12,6 @@ data "aws_ssm_parameter" "private_zone_id" {
   name = "/repo/${var.environment}/output/prm-deductions-infra/private-root-zone-id"
 }
 
-data "aws_ssm_parameter" "authorization_keys" {
-  name = "/repo/${var.environment}/user-input/ehr-repo-authorization-keys"
-}
-
 data "aws_ssm_parameter" "e2e_test_authorization_keys_for_ehr_repo" {
   name = "/repo/${var.environment}/user-input/api-keys/ehr-repo/e2e-test"
 }
