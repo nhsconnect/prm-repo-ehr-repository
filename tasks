@@ -9,6 +9,14 @@ set -Eeo pipefail
 AWS_DEFAULT_REGION=eu-west-2
 IMAGE_REPO_NAME=deductions/ehr-repo
 export NHS_SERVICE=ehr-repo
+AWS_HELPERS_FILE="utils/aws-helpers"
+
+mkdir -p utils
+if [[ ! -f $AWS_HELPERS_FILE ]];then
+  wget --quiet -O $AWS_HELPERS_FILE https://raw.githubusercontent.com/nhsconnect/prm-deductions-support-infra/master/utils/aws-helpers
+fi
+chmod +x $AWS_HELPERS_FILE
+source $AWS_HELPERS_FILE
 
 ####################################
 # Instance (Environment) Variables #
@@ -383,6 +391,10 @@ case "${command}" in
   tf_apply)
       check_env
       dojo -c Dojofile-infra "./tasks _tf_apply"
+      ;;
+  promote_docker_image)
+      check_env
+      promote_docker_image
       ;;
   _wait_ecs)
       aws ecs wait services-stable \

@@ -119,3 +119,6 @@ dist
 *.dojo
 /terraform/nhs_deployment.tfplan
 /terraform/tf-out.json
+
+# Imported utilities
+/utils/aws-helper
