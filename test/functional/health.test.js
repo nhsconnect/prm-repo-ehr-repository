@@ -2,7 +2,7 @@ import axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 
 describe('GET /health', () => {
-  it('should return true for all dependencies', async (done) => {
+  it('should return true for all dependencies', async () => {
     const res = await axios.get(`${process.env.SERVICE_URL}/health`, { adapter });
 
     expect(res.data).toEqual(
@@ -21,6 +21,5 @@ describe('GET /health', () => {
         }),
       })
     );
-    done();
   });
 });
