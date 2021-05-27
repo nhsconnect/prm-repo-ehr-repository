@@ -34,38 +34,6 @@ common:
           arguments:
             - -c
             - ./tasks wait_ecs
-  common_stages: &common_stages
-    - promote_docker_image:
-        resources:
-          - docker
-        clean_workspace: true
-        tasks:
-          - exec:
-              command: /bin/bash
-              arguments:
-                - -c
-                - ./tasks promote_docker_image
-    - deploy:
-        clean_workspace: true
-        jobs:
-          deploy: *deploy_job
-    - functional:
-        clean_workspace: true
-        jobs:
-          test:
-            resources:
-              - docker
-            tasks:
-              - exec:
-                  command: /bin/bash
-                  arguments:
-                    - -c
-                    - ./tasks sanity_check
-              - exec:
-                  command: /bin/bash
-                  arguments:
-                    - -c
-                    - ./tasks test_functional
 pipelines:
   "prm-deductions-ehr-repository.dev":
     group: deductions
@@ -83,7 +51,38 @@ pipelines:
         stage: wait_dns_dev
     environment_variables:
       NHS_ENVIRONMENT: dev
-    stages: *common_stages
+    stages:
+      - promote_docker_image:
+          resources:
+            - docker
+          clean_workspace: true
+          tasks:
+            - exec:
+                command: /bin/bash
+                arguments:
+                  - -c
+                  - ./tasks promote_docker_image
+      - deploy:
+          clean_workspace: true
+          jobs:
+            deploy: *deploy_job
+      - functional:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks sanity_check
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_functional
 
   "prm-deductions-ehr-repository.test":
     group: deductions
