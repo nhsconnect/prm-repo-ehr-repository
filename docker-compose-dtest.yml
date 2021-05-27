@@ -4,7 +4,7 @@ services:
     links:
       - ehr-repo:ehr-repo
   ehr-repo:
-    image: ${REPOSITORY_URI}:${COMMIT_HASH}
+    image: ${REPOSITORY_URI}:${IMAGE_TAG}
     links:
       - db:db
       - localstack:localstack

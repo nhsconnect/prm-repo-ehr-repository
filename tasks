@@ -99,14 +99,12 @@ function tf_plan {
   certs=$2
   cd terraform
 
-  COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-8)
-  IMAGE_TAG=${COMMIT_HASH}
+  set_image_tag
   TARGET=""
 
   if [[ "${certs}" == "true" ]]; then
     TARGET="-target=aws_acm_certificate.ehr-repo-cert"
   fi
-
 
   terraform init -reconfigure -backend-config key=${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate
   terraform get # modules
@@ -204,14 +202,13 @@ function configure_docker_repository_uri {
   export REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/$IMAGE_REPO_NAME
 }
 
-function get_latest_commit_hash {
-  export COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-8)
+function set_image_tag() {
+  export IMAGE_TAG=$(git rev-parse HEAD | cut -c 1-8)
 }
 
-function build_docker_image {
-  echo Build started on `date`
-  get_latest_commit_hash
-  IMAGE_TAG=${COMMIT_HASH}
+function build_docker_image() {
+  echo Build started on $(date)
+  set_image_tag
   echo Building the Docker image...
   docker build -t $REPOSITORY_URI:latest -t $REPOSITORY_URI:$IMAGE_TAG .
   echo Build completed on `date`
@@ -335,12 +332,12 @@ case "${command}" in
   test_docker)
       configure_local_envs
       configure_docker_repository_uri
-      get_latest_commit_hash
+      set_image_tag
       dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
   test_docker_local)
       configure_local_envs
-      get_latest_commit_hash
+      set_image_tag
       dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
   sanity_check)
@@ -394,7 +391,8 @@ case "${command}" in
       ;;
   promote_docker_image)
       check_env
-      promote_docker_image
+      set_image_tag
+      promote_docker_image "$IMAGE_REPO_NAME:$IMAGE_TAG" "$NHS_ENVIRONMENT"
       ;;
   _wait_ecs)
       aws ecs wait services-stable \
