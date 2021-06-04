@@ -163,7 +163,7 @@ resource "aws_security_group" "core-alb-internal-sg" {
     from_port   = 443
     to_port     = 443
     // TODO: Move to a separate, GoCD dedicated security group
-    cidr_blocks = [var.allowed_cidr, data.aws_ssm_parameter.gocd_cidr_block.value]
+    cidr_blocks = [var.allowed_cidr, var.gocd_cidr_block]
   }
 
   egress {
@@ -209,8 +209,4 @@ resource "aws_ssm_parameter" "deductions_core_int_alb_httpsl_arn" {
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
-}
-
-data "aws_ssm_parameter" "gocd_cidr_block" {
-  name = "/repo/prod/output/prm-gocd-infra/gocd-cidr-block"
 }

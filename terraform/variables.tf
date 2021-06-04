@@ -27,3 +27,7 @@ variable "alb_deregistration_delay" {}
 variable "database_name" {
   type = string
 }
+
+variable "gocd_cidr_block" {
+  default = "10.1.0.0/16"
+}

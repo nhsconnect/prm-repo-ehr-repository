@@ -95,10 +95,23 @@ function get_aws_ssm_secret {
 # Terraform Functions #
 #######################
 
+function tf_init {
+  check_env
+  #  Condition [ $NHS_ENVIRONMENT == "test" ] is required as test environment infrastructure is deployed in CI AWS account
+  [ $NHS_ENVIRONMENT == "ci" ] || [ $NHS_ENVIRONMENT == "dev" ] || [ $NHS_ENVIRONMENT == "test" ] && bucket_env_infix="" || bucket_env_infix="$NHS_ENVIRONMENT-"
+
+  cd terraform
+
+  terraform init -reconfigure \
+    -backend-config key="${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate" \
+    -backend-config bucket="prm-deductions-${bucket_env_infix}terraform-state" \
+    -backend-config dynamodb_table="prm-deductions-${bucket_env_infix}terraform-table" \
+    -backend-config region=${AWS_DEFAULT_REGION}
+}
+
 function tf_plan {
   operation=$1
   certs=$2
-  cd terraform
 
   set_image_tag
   TARGET=""
@@ -107,7 +120,7 @@ function tf_plan {
     TARGET="-target=aws_acm_certificate.ehr-repo-cert"
   fi
 
-  terraform init -reconfigure -backend-config key=${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate
+  tf_init
   terraform get # modules
   if [[ "${operation}" == "create" ]]; then
     terraform plan -var task_image_tag=$IMAGE_TAG -var-file=$NHS_ENVIRONMENT.tfvars $TARGET -out="nhs_deployment.tfplan"
@@ -120,8 +133,7 @@ function tf_plan {
 }
 
 function tf_apply {
-  cd terraform
-  terraform init -backend-config key=${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate
+  tf_init
   terraform get # modules
   terraform apply nhs_deployment.tfplan
   terraform output -json > tf-out.json
@@ -360,6 +372,7 @@ case "${command}" in
   _create_secrets)
       generate_username_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username"
       generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password"
+      generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/api-keys/${NHS_SERVICE}/e2e-test"
       ;;
   create_secrets)
       check_env
