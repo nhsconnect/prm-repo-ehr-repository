@@ -98,7 +98,7 @@ function get_aws_ssm_secret {
 function tf_init {
   check_env
   #  Condition [ $NHS_ENVIRONMENT == "test" ] is required as test environment infrastructure is deployed in CI AWS account
-  [ $NHS_ENVIRONMENT == "ci" ] || [ $NHS_ENVIRONMENT == "dev" ] || [ $NHS_ENVIRONMENT == "test" ] && bucket_env_infix="" || bucket_env_infix="$NHS_ENVIRONMENT-"
+  [ $NHS_ENVIRONMENT == "ci" ] || [ $NHS_ENVIRONMENT == "dev" ] || [ $NHS_ENVIRONMENT == "test" ] &&  bucket_env_infix=""  || bucket_env_infix="$NHS_ENVIRONMENT-"
 
   cd terraform
 
