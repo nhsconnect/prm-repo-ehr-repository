@@ -10,7 +10,7 @@ AWS_DEFAULT_REGION=eu-west-2
 IMAGE_REPO_NAME=deductions/ehr-repo
 export NHS_SERVICE=ehr-repo
 AWS_HELPERS_FILE="utils/aws-helpers"
-AWS_HELPERS_VERSION=0.1.2
+AWS_HELPERS_VERSION=0.2.0
 
 mkdir -p utils
 if [[ ! -f $AWS_HELPERS_FILE ]];then
@@ -417,6 +417,9 @@ case "${command}" in
   wait_ecs)
       check_env
       dojo -c Dojofile-infra "./tasks _wait_ecs"
+      ;;
+  assume_environment_role)
+      assume_environment_role $NHS_ENVIRONMENT
       ;;
   *)
       echo "Invalid command: '${command}'"
