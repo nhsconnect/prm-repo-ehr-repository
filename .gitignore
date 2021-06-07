@@ -122,3 +122,5 @@ dist
 
 # Imported utilities
 /utils/aws-helper
+
+outdated-dependencies.txt

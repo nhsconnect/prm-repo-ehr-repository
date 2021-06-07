@@ -1,7 +1,7 @@
 import { createLogger, format, transports } from 'winston';
 import traverse from 'traverse';
 import cloneDeep from 'lodash.clonedeep';
-import { context, getSpan } from '@opentelemetry/api';
+import { context, trace } from '@opentelemetry/api';
 import { initializeConfig } from './index';
 
 export const obfuscateSecrets = format((info) => {
@@ -18,10 +18,10 @@ export const addCommonFields = format((info) => {
   const config = initializeConfig();
   const nhsEnvironment = config.nhsEnvironment;
   const updated = cloneDeep(info);
-  const currentSpan = getSpan(context.active());
+  const currentSpan = trace.getSpan(context.active());
 
   if (currentSpan) {
-    updated['traceId'] = currentSpan.context().traceId;
+    updated['traceId'] = currentSpan.spanContext().traceId;
     updated['conversationId'] = currentSpan.attributes.conversationId;
     updated['messageId'] = currentSpan.attributes.messageId;
   }
