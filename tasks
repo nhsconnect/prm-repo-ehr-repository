@@ -10,7 +10,7 @@ AWS_DEFAULT_REGION=eu-west-2
 IMAGE_REPO_NAME=deductions/ehr-repo
 export NHS_SERVICE=ehr-repo
 AWS_HELPERS_FILE="utils/aws-helpers"
-AWS_HELPERS_VERSION=0.2.0
+AWS_HELPERS_VERSION=0.2.1
 
 mkdir -p utils
 if [[ ! -f $AWS_HELPERS_FILE ]];then
@@ -98,7 +98,7 @@ function get_aws_ssm_secret {
 function tf_init {
   check_env
   #  Condition [ $NHS_ENVIRONMENT == "test" ] is required as test environment infrastructure is deployed in CI AWS account
-  [ $NHS_ENVIRONMENT == "ci" ] || [ $NHS_ENVIRONMENT == "dev" ] || [ $NHS_ENVIRONMENT == "test" ] &&  bucket_env_infix=""  || bucket_env_infix="$NHS_ENVIRONMENT-"
+  [ $NHS_ENVIRONMENT == "ci" ] || [ $NHS_ENVIRONMENT == "test" ] &&  bucket_env_infix=""  || bucket_env_infix="$NHS_ENVIRONMENT-"
 
   cd terraform
 
@@ -383,6 +383,7 @@ case "${command}" in
       dojo -c Dojofile-infra "bash"
       ;;
   _tf_plan_certs)
+      _assume_environment_role $NHS_ENVIRONMENT
       tf_plan "$2" true
       ;;
   tf_plan_certs)
@@ -390,6 +391,7 @@ case "${command}" in
       dojo -c Dojofile-infra "./tasks _tf_plan_certs $2"
       ;;
   _tf_plan)
+      _assume_environment_role $NHS_ENVIRONMENT
       tf_plan "$2"
       ;;
   tf_plan)
@@ -397,6 +399,7 @@ case "${command}" in
       dojo -c Dojofile-infra "./tasks _tf_plan $2"
       ;;
   _tf_apply)
+      _assume_environment_role $NHS_ENVIRONMENT
       tf_apply
       ;;
   tf_apply)
@@ -417,9 +420,6 @@ case "${command}" in
   wait_ecs)
       check_env
       dojo -c Dojofile-infra "./tasks _wait_ecs"
-      ;;
-  assume_environment_role)
-      assume_environment_role $NHS_ENVIRONMENT
       ;;
   *)
       echo "Invalid command: '${command}'"

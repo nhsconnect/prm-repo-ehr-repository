@@ -7,7 +7,8 @@ allowed_cidr         = "10.20.0.0/16" // deductions_private_cidr
 node_env             = "prod"
 database_name        = "deductions_db"
 
-s3_bucket_name       = "dev-ehr-repo-bucket"
+//PRMT-2130 temp should be removed when all infrastructure is destroyed in ci account
+s3_bucket_name       = "dev-ehr-repo-bucket-temp"
 
 task_cpu    = 256
 task_memory = 512
