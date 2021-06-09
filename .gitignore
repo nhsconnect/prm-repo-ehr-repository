@@ -121,6 +121,6 @@ dist
 /terraform/tf-out.json
 
 # Imported utilities
-/utils/aws-helper
+/utils/aws-helpers
 
 outdated-dependencies.txt
