@@ -1,4 +1,5 @@
 import { initializeConfig } from '../config';
+import { logInfo, logWarning } from './logging';
 
 export const authenticateRequest = (req, res, next) => {
   const { consumerApiKeys } = initializeConfig();
@@ -20,11 +21,26 @@ export const authenticateRequest = (req, res, next) => {
   }
 
   if (!validAuthorizationKeys.includes(authorizationKey)) {
+    logWarning(
+      `Unsuccessful Request: ${req.method} ${
+        req.originalUrl
+      }, API Key: ******${authorizationKey.slice(-3)}`
+    );
     res.status(403).json({
       error: `Authorization header is provided but not valid`,
     });
     return;
   }
 
+  const consumerName = getConsumer(consumerApiKeys, authorizationKey);
+  logInfo(`Consumer: ${consumerName}, Request: ${req.method} ${req.originalUrl}`);
+
   next();
+};
+
+const getConsumer = (consumerApiKeys, authorizationKey) => {
+  const consumer = Object.keys(consumerApiKeys).filter(
+    (consumer) => consumerApiKeys[consumer] === authorizationKey
+  );
+  return consumer.toString().replace(/,/g, '/');
 };
