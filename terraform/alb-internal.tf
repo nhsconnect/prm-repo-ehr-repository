@@ -181,6 +181,77 @@ resource "aws_security_group" "core-alb-internal-sg" {
   }
 }
 
+resource "aws_security_group" "service_to_ehr_repo" {
+  name        = "${var.environment}-service-to-${var.component_name}"
+  description = "controls access from repo services to ehr-repo"
+  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  tags = {
+    Name = "${var.environment}-service-to-${var.component_name}-sg"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "service_to_ehr_repo" {
+  name = "/repo/${var.environment}/output/${var.repo_name}/service-to-ehr-repo-sg-id"
+  type = "String"
+  value = aws_security_group.service_to_ehr_repo.id
+  tags = {
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_security_group" "vpn_to_ehr_repo" {
+  name        = "${var.environment}-vpn-to-${var.component_name}"
+  description = "controls access from vpn to ehr-repo"
+  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  ingress {
+    description = "Allow vpn to access EHR Repo ALB"
+    protocol    = "tcp"
+    from_port   = 443
+    to_port     = 443
+    security_groups = [data.aws_ssm_parameter.vpn_sg_id.value]
+  }
+
+  tags = {
+    Name = "${var.environment}-vpn-to-${var.component_name}-sg"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_security_group" "gocd_to_ehr_repo" {
+  name        = "${var.environment}-gocd-to-${var.component_name}"
+  description = "controls access from gocd to ehr-repo"
+  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  ingress {
+    description = "Allow gocd to access EHR Repo ALB"
+    protocol    = "tcp"
+    from_port   = 443
+    to_port     = 443
+    security_groups = [data.aws_ssm_parameter.gocd_sg_id.value]
+  }
+
+  tags = {
+    Name = "${var.environment}-gocd-to-${var.component_name}-sg"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+data "aws_ssm_parameter" "vpn_sg_id" {
+  name = "/repo/${var.environment}/output/prm-deductions-infra/vpn-sg-id"
+}
+
+data "aws_ssm_parameter" "gocd_sg_id" {
+  name = "/repo/prod/user-input/external/gocd-agent-sg-id"
+}
+
+
 resource "aws_ssm_parameter" "deductions_core_internal_alb_dns" {
   name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-internal-alb-dns"
   type = "String"
