@@ -153,6 +153,14 @@ resource "aws_security_group" "service_to_ehr_repo" {
   description = "controls access from repo services to ehr-repo"
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
+  egress {
+    description = "Allow All Outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name = "${var.environment}-service-to-${var.component_name}-sg"
     CreatedBy   = var.repo_name
@@ -183,6 +191,14 @@ resource "aws_security_group" "vpn_to_ehr_repo" {
     security_groups = [data.aws_ssm_parameter.vpn_sg_id.value]
   }
 
+  egress {
+    description = "Allow All Outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name = "${var.environment}-vpn-to-${var.component_name}-sg"
     CreatedBy   = var.repo_name
@@ -201,6 +217,14 @@ resource "aws_security_group" "gocd_to_ehr_repo" {
     from_port   = 443
     to_port     = 443
     security_groups = [data.aws_ssm_parameter.gocd_sg_id.value]
+  }
+
+  egress {
+    description = "Allow All Outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
