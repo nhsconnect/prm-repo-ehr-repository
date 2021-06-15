@@ -17,7 +17,11 @@ data "aws_ssm_parameter" "private_subnets" {
 resource "aws_alb" "alb-internal" {
   name            = "${var.environment}-${var.component_name}-alb-int"
   subnets         = split(",", data.aws_ssm_parameter.private_subnets.value)
-  security_groups = [aws_security_group.core-alb-internal-sg.id]
+  security_groups = [
+    aws_security_group.service_to_ehr_repo.id,
+    aws_security_group.vpn_to_ehr_repo.id,
+    aws_security_group.gocd_to_ehr_repo.id
+  ]
   internal        = true
 
   tags = {
@@ -141,43 +145,6 @@ resource "aws_alb_listener_rule" "int-alb-https-listener-rule" {
     host_header {
       values = [local.domain]
     }
-  }
-}
-
-resource "aws_security_group" "core-alb-internal-sg" {
-  name        = "${var.environment}-${var.component_name}-alb-internal-sg"
-  description = "controls access to the ALB"
-  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
-
-  ingress {
-    description = "Allow deductions private subnet to access Core internal ALB"
-    protocol    = "tcp"
-    from_port   = 80
-    to_port     = 80
-    cidr_blocks = [var.allowed_cidr]
-  }
-
-  ingress {
-    description = "Allow deductions private subnet to access core internal ALB"
-    protocol    = "tcp"
-    from_port   = 443
-    to_port     = 443
-    // TODO: Move to a separate, GoCD dedicated security group
-    cidr_blocks = [var.allowed_cidr, var.gocd_cidr_block]
-  }
-
-  egress {
-    description = "Allow All Outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.environment}-${var.component_name}-alb-internal-sg"
-    CreatedBy   = var.repo_name
-    Environment = var.environment
   }
 }
 

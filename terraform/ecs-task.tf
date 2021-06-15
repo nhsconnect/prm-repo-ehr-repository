@@ -58,8 +58,9 @@ resource "aws_security_group" "ecs-tasks-sg" {
     from_port       = "3000"
     to_port         = "3000"
     security_groups = [
-      # aws_security_group.core-alb-sg.id,
-      aws_security_group.core-alb-internal-sg.id
+      aws_security_group.service_to_ehr_repo.id,
+      aws_security_group.vpn_to_ehr_repo.id,
+      aws_security_group.gocd_to_ehr_repo.id
     ]
   }
 
