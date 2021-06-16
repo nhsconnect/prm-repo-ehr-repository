@@ -18,6 +18,7 @@ resource "aws_alb" "alb-internal" {
   name            = "${var.environment}-${var.component_name}-alb-int"
   subnets         = split(",", data.aws_ssm_parameter.private_subnets.value)
   security_groups = [
+    aws_security_group.alb_to_ehr_repo_ecs.id,
     aws_security_group.service_to_ehr_repo.id,
     aws_security_group.vpn_to_ehr_repo.id,
     aws_security_group.gocd_to_ehr_repo.id
@@ -148,18 +149,30 @@ resource "aws_alb_listener_rule" "int-alb-https-listener-rule" {
   }
 }
 
+resource "aws_security_group" "alb_to_ehr_repo_ecs" {
+  name        = "${var.environment}-alb-to-${var.component_name}-ecr"
+  description = "Allows EHR Repo ALB connections to EHR Repo component task"
+  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  egress {
+    description = "Allow outbound connections to EHR Repo ECS Task"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    security_groups = [aws_security_group.ecs-tasks-sg.id]
+  }
+
+  tags = {
+    Name = "${var.environment}-alb-to-${var.component_name}-ecr"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
 resource "aws_security_group" "service_to_ehr_repo" {
   name        = "${var.environment}-service-to-${var.component_name}"
   description = "controls access from repo services to ehr-repo"
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
-
-  egress {
-    description = "Allow All Outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   tags = {
     Name = "${var.environment}-service-to-${var.component_name}-sg"
@@ -191,14 +204,6 @@ resource "aws_security_group" "vpn_to_ehr_repo" {
     security_groups = [data.aws_ssm_parameter.vpn_sg_id.value]
   }
 
-  egress {
-    description = "Allow All Outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = {
     Name = "${var.environment}-vpn-to-${var.component_name}-sg"
     CreatedBy   = var.repo_name
@@ -217,14 +222,6 @@ resource "aws_security_group" "gocd_to_ehr_repo" {
     from_port   = 443
     to_port     = 443
     security_groups = [data.aws_ssm_parameter.gocd_sg_id.value]
-  }
-
-  egress {
-    description = "Allow All Outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
