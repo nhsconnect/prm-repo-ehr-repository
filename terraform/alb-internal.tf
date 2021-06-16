@@ -236,7 +236,7 @@ data "aws_ssm_parameter" "vpn_sg_id" {
 }
 
 data "aws_ssm_parameter" "gocd_sg_id" {
-  name = "/repo/prod/user-input/external/gocd-agent-sg-id"
+  name = "/repo/${var.environment}/user-input/external/gocd-agent-sg-id"
 }
 
 
