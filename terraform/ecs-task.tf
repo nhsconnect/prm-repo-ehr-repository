@@ -53,14 +53,12 @@ resource "aws_security_group" "ecs-tasks-sg" {
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   ingress {
-    description     = "Allow traffic from public and internal ALB to ehr-repo service"
+    description     = "Allow traffic from internal ALB of EHR Repo"
     protocol        = "tcp"
     from_port       = "3000"
     to_port         = "3000"
     security_groups = [
-      aws_security_group.service_to_ehr_repo.id,
-      aws_security_group.vpn_to_ehr_repo.id,
-      aws_security_group.gocd_to_ehr_repo.id
+      aws_security_group.ehr_repo_alb.id
     ]
   }
 

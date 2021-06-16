@@ -18,6 +18,7 @@ resource "aws_alb" "alb-internal" {
   name            = "${var.environment}-${var.component_name}-alb-int"
   subnets         = split(",", data.aws_ssm_parameter.private_subnets.value)
   security_groups = [
+    aws_security_group.ehr_repo_alb.id,
     aws_security_group.alb_to_ehr_repo_ecs.id,
     aws_security_group.service_to_ehr_repo.id,
     aws_security_group.vpn_to_ehr_repo.id,
@@ -146,6 +147,19 @@ resource "aws_alb_listener_rule" "int-alb-https-listener-rule" {
     host_header {
       values = [local.domain]
     }
+  }
+}
+
+# Exists to be referred by the ECS task of EHR Repo
+resource "aws_security_group" "ehr_repo_alb" {
+  name        = "${var.environment}-alb-${var.component_name}"
+  description = "EHR Repo ALB security group"
+  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  tags = {
+    Name = "${var.environment}-alb-${var.component_name}"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
   }
 }
 
