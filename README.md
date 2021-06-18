@@ -6,7 +6,9 @@ This is a component of the solution to validate that the GP2GP process can be us
 
 ## Prerequisites
 
-- Node 12.x
+- [Node](https://nodejs.org/en/download/package-manager/#nvm) - version 14.x
+- [Docker](https://docs.docker.com/install/)
+- [kudulab/dojo](https://github.com/kudulab/dojo#installation)
 
 ## Set up
 
