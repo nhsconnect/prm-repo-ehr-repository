@@ -185,7 +185,7 @@ function tf_apply {
 function tf_apply_db_roles {
   tf_init_db_roles
   terraform get # modules
-  terraform apply "${NHS_ENVIRONMENT}-db-roles.tfplan"
+  terraform apply --parallelism=1 "${NHS_ENVIRONMENT}-db-roles.tfplan"
   terraform output -json > tf-out-db-roles.json
 }
 
@@ -485,6 +485,19 @@ case "${command}" in
       check_env
       set_image_tag
       promote_docker_image "$IMAGE_REPO_NAME:$IMAGE_TAG" "$NHS_ENVIRONMENT"
+      ;;
+  _grant_db_permissions)
+      check_env
+      _assume_environment_role $NHS_ENVIRONMENT
+      db_host=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
+      db_username=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
+      db_password=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
+      db_name=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-name")
+      export PGPASSWORD=$db_password
+      psql -h $db_host -U $db_username -d $db_name -f scripts/grant-db-permissions.sql
+      ;;
+  grant_db_permissions)
+      dojo "./tasks _grant_db_permissions"
       ;;
   _wait_ecs)
       _assume_environment_role $NHS_ENVIRONMENT

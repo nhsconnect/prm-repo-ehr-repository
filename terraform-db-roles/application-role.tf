@@ -1,3 +1,6 @@
+# We need to grant permissions to DB tables after migrations ran at least once.
+# See ./tasks grant_db_permissions
+
 resource "postgresql_role" "application_role" {
   name     = "application_role"
 }
@@ -8,14 +11,6 @@ resource "postgresql_grant" "application_role_schema_usage_grant" {
   schema      = "public"
   object_type = "schema"
   privileges  = ["USAGE"]
-}
-
-resource "postgresql_grant" "application_role_table_read_write_grant" {
-  database    = var.db_name
-  role        = postgresql_role.application_role.name
-  schema      = "public"
-  object_type = "table"
-  privileges  = ["SELECT","UPDATE","DELETE","INSERT"]
 }
 
 resource "postgresql_role" "application_user" {
