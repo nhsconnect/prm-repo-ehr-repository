@@ -422,7 +422,6 @@ case "${command}" in
   _create_secrets)
       generate_username_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username"
       generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password"
-      generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/api-keys/${NHS_SERVICE}/e2e-test"
       ;;
   create_secrets)
       check_env
