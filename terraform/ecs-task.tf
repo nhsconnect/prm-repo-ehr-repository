@@ -9,7 +9,7 @@ locals {
     { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
     { name = "DATABASE_NAME", value = aws_rds_cluster.db-cluster.database_name },
     { name = "DATABASE_HOST", value = aws_rds_cluster.db-cluster.endpoint },
-    { name = "DATABASE_USER", valueFrom = var.application_database_user },
+    { name = "DATABASE_USER", value = var.application_database_user },
     { name = "USE_AWS_RDS_CREDENTIALS", value = "true" },
     { name = "AWS_REGION", value = var.region },
     { name = "SKIP_DB_MIGRATION", value = "true" },
