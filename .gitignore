@@ -115,10 +115,16 @@ dist
 
 # TernJS port file
 .tern-port
-/terraform/.terraform/
-*.dojo
+
+# Local .terraform directories
+**/.terraform/*
 /terraform/nhs_deployment.tfplan
 /terraform/tf-out.json
+/terraform/.terraform.lock.hcl
+/terraform-db-roles/.terraform.lock.hcl
+/terraform-db-roles/*.tfplan
+
+*.dojo
 
 # Imported utilities
 /utils/aws-helpers

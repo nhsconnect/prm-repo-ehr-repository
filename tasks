@@ -109,6 +109,20 @@ function tf_init {
     -backend-config region=${AWS_DEFAULT_REGION}
 }
 
+function tf_init_db_roles {
+  check_env
+  #  Condition [ $NHS_ENVIRONMENT == "test" ] is required as test environment infrastructure is deployed in CI AWS account
+  [ $NHS_ENVIRONMENT == "ci" ] || [ $NHS_ENVIRONMENT == "test" ] &&  bucket_env_infix=""  || bucket_env_infix="$NHS_ENVIRONMENT-"
+
+  cd terraform-db-roles
+
+  terraform init -reconfigure \
+    -backend-config key="${NHS_SERVICE}-${NHS_ENVIRONMENT}-db-roles/terraform.tfstate" \
+    -backend-config bucket="prm-deductions-${bucket_env_infix}terraform-state" \
+    -backend-config dynamodb_table="prm-deductions-${bucket_env_infix}terraform-table" \
+    -backend-config region=${AWS_DEFAULT_REGION}
+}
+
 function tf_plan {
   operation=$1
   certs=$2
@@ -132,11 +146,37 @@ function tf_plan {
   fi
 }
 
+function tf_plan_db_roles {
+  operation=$1
+  db_host=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
+  db_username=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
+  db_password=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
+  db_name=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-name")
+
+  tf_init_db_roles
+  terraform get # modules
+  if [[ "${operation}" == "create" ]]; then
+    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="${NHS_ENVIRONMENT}-db-roles.tfplan"
+  elif [[ "${operation}" == "destroy" ]]; then
+    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="${NHS_ENVIRONMENT}-db-roles.tfplan" -destroy
+  else
+    echo "Unknown operation (should be create or destroy), got: ${operation}"
+    exit 1
+  fi
+}
+
 function tf_apply {
   tf_init
   terraform get # modules
   terraform apply nhs_deployment.tfplan
   terraform output -json > tf-out.json
+}
+
+function tf_apply_db_roles {
+  tf_init_db_roles
+  terraform get # modules
+  terraform apply "${NHS_ENVIRONMENT}-db-roles.tfplan"
+  terraform output -json > tf-out-db-roles.json
 }
 
 ####################
@@ -159,7 +199,7 @@ function configure_hangout_webhook {
 function get_db_credentials {
   export DATABASE_PASSWORD=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
   export DATABASE_USER=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
-  export DATABASE_HOST=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-infra/core-rds-endpoint")
+  export DATABASE_HOST=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
   export DATABASE_NAME="deductions_db"
 }
 
@@ -394,6 +434,14 @@ case "${command}" in
       _assume_environment_role $NHS_ENVIRONMENT
       tf_plan "$2"
       ;;
+  _tf_plan_db_roles)
+      _assume_environment_role $NHS_ENVIRONMENT
+      tf_plan_db_roles "$2"
+      ;;
+  tf_plan_db_roles)
+      check_env
+      dojo -c Dojofile-infra "./tasks _tf_plan_db_roles $2"
+      ;;
   tf_plan)
       check_env
       dojo -c Dojofile-infra "./tasks _tf_plan $2"
@@ -405,6 +453,14 @@ case "${command}" in
   tf_apply)
       check_env
       dojo -c Dojofile-infra "./tasks _tf_apply"
+      ;;
+  _tf_apply_db_roles)
+      _assume_environment_role $NHS_ENVIRONMENT
+      tf_apply_db_roles
+      ;;
+  tf_apply_db_roles)
+      check_env
+      dojo -c Dojofile-infra "./tasks _tf_apply_db_roles"
       ;;
   promote_docker_image)
       check_env

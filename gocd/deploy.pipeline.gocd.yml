@@ -33,6 +33,16 @@ common:
           command: /bin/bash
           arguments:
             - -c
+            - ./tasks tf_plan_db_roles create
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_apply_db_roles
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
             - ./tasks wait_ecs
 pipelines:
   "prm-deductions-ehr-repository.dev":
