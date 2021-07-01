@@ -43,6 +43,11 @@ common:
           command: /bin/bash
           arguments:
             - -c
+            - ./tasks run_db_migrations
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
             - ./tasks wait_ecs
 pipelines:
   "prm-deductions-ehr-repository.dev":

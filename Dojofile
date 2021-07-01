@@ -1,1 +1,1 @@
-DOJO_DOCKER_IMAGE="nhsdev/node-dojo:ed3ed1746dea92cb5a4b3cc25428efe2c0f5ed0f"
+DOJO_DOCKER_IMAGE="nhsdev/node-dojo:d0e32287252e193866996b09c92bdc270afd8aab"

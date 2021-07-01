@@ -31,3 +31,8 @@ variable "database_name" {
 variable "gocd_cidr_block" {
   default = "10.1.0.0/16"
 }
+
+variable "application_database_user" {
+  default = "application_user"
+  description = "Needs to match with the user created in db-roles tf plan"
+}

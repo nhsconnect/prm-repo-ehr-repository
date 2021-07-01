@@ -66,8 +66,18 @@ function configure_local_envs {
   export S3_BUCKET_NAME=test-bucket
   export LOCALSTACK_URL=http://localstack:4572
   export REPOSITORY_URI=$IMAGE_REPO_NAME
+  export SKIP_DB_MIGRATION=false
   export NODE_ENV=local
   configure_service_url
+}
+
+function configure_db_migration_envs {
+  export SKIP_DB_MIGRATION=false
+  export DATABASE_HOST=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
+  export DATABASE_USER=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-migration-user")
+  export DATABASE_NAME=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-name")
+  export DATABASE_PASSWORD="$(aws rds generate-db-auth-token --hostname $DATABASE_HOST --port 5432 --region $AWS_DEFAULT_REGION --username $DATABASE_USER)"
+  export USE_SSL_FOR_DB="true"
 }
 
 function get_aws_account_id {
@@ -461,6 +471,16 @@ case "${command}" in
   tf_apply_db_roles)
       check_env
       dojo -c Dojofile-infra "./tasks _tf_apply_db_roles"
+      ;;
+  _run_db_migrations)
+      _assume_environment_role $NHS_ENVIRONMENT
+      configure_db_migration_envs
+      npm install
+      scripts/migrate-db.sh
+      ;;
+  run_db_migrations)
+      check_env
+      dojo -c Dojofile "./tasks _run_db_migrations"
       ;;
   promote_docker_image)
       check_env

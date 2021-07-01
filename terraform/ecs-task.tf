@@ -6,14 +6,17 @@ locals {
   environment_variables = [
     { name = "NODE_ENV", value = var.node_env },
     { name = "NHS_ENVIRONMENT", value = var.environment },
-    { name = "DATABASE_NAME", value = var.database_name },
-    { name = "DATABASE_HOST", value = aws_rds_cluster.db-cluster.endpoint },
     { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
+    { name = "DATABASE_NAME", value = aws_rds_cluster.db-cluster.database_name },
+    { name = "DATABASE_HOST", value = aws_rds_cluster.db-cluster.endpoint },
+    { name = "DATABASE_USER", valueFrom = var.application_database_user },
+    { name = "USE_AWS_RDS_CREDENTIALS", value = "true" },
+    { name = "AWS_REGION", value = var.region },
+    { name = "SKIP_DB_MIGRATION", value = "true" },
+    { name = "USE_SSL_FOR_DB", value = "true" }
   ]
   secret_environment_variables = [
-    { name = "E2E_TEST_AUTHORIZATION_KEYS_FOR_EHR_REPO", valueFrom = data.aws_ssm_parameter.e2e_test_authorization_keys_for_ehr_repo.arn },
-    { name = "DATABASE_USER", valueFrom = data.aws_ssm_parameter.db-username.arn },
-    { name = "DATABASE_PASSWORD", valueFrom = data.aws_ssm_parameter.db-password.arn }
+    { name = "E2E_TEST_AUTHORIZATION_KEYS_FOR_EHR_REPO", valueFrom = data.aws_ssm_parameter.e2e_test_authorization_keys_for_ehr_repo.arn }
   ]
 }
 

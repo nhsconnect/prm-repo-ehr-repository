@@ -1,3 +1,5 @@
+const use_ssl = process.env.USE_SSL_FOR_DB === 'true';
+
 const sequelizeConfig = {
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
@@ -6,5 +8,11 @@ const sequelizeConfig = {
   dialect: 'postgres',
   logging: false,
 };
+
+if (use_ssl) {
+  sequelizeConfig.ssl = use_ssl;
+  sequelizeConfig.native = use_ssl;
+  sequelizeConfig.dialectOptions = { ssl: 'require' };
+}
 
 module.exports = sequelizeConfig;

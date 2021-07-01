@@ -13,12 +13,15 @@ RUN apk add --no-cache \
         awscli \
     && rm -rf /var/cache/apk/*
 
+# Install sequelize postgress native dependencies
+RUN apk add --no-cache postgresql-dev g++ make
+
 COPY ./certs/deductions.crt /usr/local/share/ca-certificates/deductions.crt
 RUN update-ca-certificates
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/deductions.crt
 
 ENV AUTHORIZATION_KEYS="auth-key-1" \
-  EHR_REPO_SKIP_MIGRATION=false \
+  SKIP_DB_MIGRATION="" \
   NODE_ENV="prod" \
   NHS_ENVIRONMENT="" \
   S3_BUCKET_NAME="" \
@@ -37,8 +40,9 @@ COPY build/config/database.js /app/src/config/
 COPY .sequelizerc   /app/
 
 COPY scripts/load-api-keys.sh /app/scripts/load-api-keys.sh
-# Migration script
-COPY scripts/migrate-db.sh /usr/bin/run-ehr-server
+COPY scripts/load-rds-credentials.sh /app/scripts/load-rds-credentials.sh
+COPY scripts/migrate-db.sh /app/scripts/migrate-db.sh
+COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server
 
 RUN npm install
 
