@@ -9,7 +9,6 @@ function jsonPrettify {
   echo "{message: $1, level: $2, timestamp: `timestamp`, service: ${NHS_SERVICE}, environment: ${NHS_ENVIRONMENT} } "
 }
 
-source ./scripts/load-rds-credentials.sh
 
 jsonPrettify "Running DB migrations" INFO
 source ./scripts/migrate-db.sh
