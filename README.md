@@ -2,7 +2,8 @@
 
 A Proof of Concept implementation of how the Health Records of Patients that are not registered with a GP Practice could be stored digitally.
 
-This is a component of the solution to validate that the GP2GP process can be used to preserve the Health Records of Patients that are deducted(no longer registered with a GP Practice). If successful this would allow their health record to be preserved in a digital format replacing the current practice of printing and storing the record.
+This is a component of the solution to validate that the GP2GP process can be used to preserve the Health Records of Patients that are deducted(no longer registered with a GP Practice). 
+If successful this would allow their health record to be preserved in a digital format replacing the current practice of printing and storing the record.
 
 ## Prerequisites
 
@@ -17,22 +18,35 @@ brew install postgresql
 
 ## Set up
 
-Run `npm install` to install all node dependencies.
+To replicate the ci environment, we use `dojo` that allows us to work with the codebase without installing any dependencies locally.
+Please see the `./tasks` file that includes all the tasks you can use to configure and run the app and the tests.
 
-Add a .env file in the project root directory with the following environment variables
+If you would like to run the app locally outside `dojo`, you need to:
+1. Run `npm install` to install all node dependencies as per `package.json`.
+2. Set up the env variables and/or copy them into your IDE configurations (`Run -> Edit Configurations ->Environment Variables` in IntelliJ):
 ```
-NODE_ENV=local
-DATABASE_NAME=deductions_test
-DATABASE_USER=deductions_user
-DATABASE_PASSWORD=secret
-DATABASE_HOST=127.0.0.1
-S3_BUCKET_NAME=test-bucket
-LOCALSTACK_URL=http://localhost:4572
+- `NHS_ENVIRONMENT` - should be set to current environment in which the container is deployed. The name must also exist in the `database.json` file.
+- `S3_BUCKET_NAME` - the name of S3 bucket to store the EHR fragments in.
+- `DATABASE_USER` - username for the database
+- `DATABASE_PASSWORD` - password to the database
+- `DATABASE_NAME` - name of the database on server.
+- `DATABASE_HOST` - database server hostname to connect with.
+- `LOCALSTACK_URL` - (Test) the location of localstack, only used for tests
 ```
 
 ## Running the tests
 
-To run the tests locally, you can use the following.
+Run the unit tests with
+
+by entering the `dojo` container and running `./tasks _test_unit`
+or on your machine with `npm run test:unit`
+
+Run the integration tests within a Dojo container
+
+1. Run `dojo -c Dojofile-itest` which will spin up the testing container
+2. Run `./tasks _test_integration`
+
+You can also run them with `npm run test:integration` but that will require some additional manual set-up:
 
 ```bash
 # Brings up the local test environment
@@ -54,11 +68,21 @@ npm test
 sequelize-cli db:migrate:undo:all # Undoes the migration to leave clean env
 ```
 
-To run them before commit in dojo.
+#Run the coverage tests (unit test and integration test)
 
-```bash
-./tasks test_unit
-```
+By entering the `dojo` container and running `./tasks _test_coverage`
+
+or run `npm run test:coverage` on your machine
+
+You don't have to enter the dojo container every time, you can also just run any task in your terminal:
+For example:
+
+`./tasks test_coverage`
+
+`./tasks test_unit`
+
+`./tasks dep` - to run audit
+
 
 ## Start the app locally
 
@@ -89,53 +113,19 @@ Docker image can be build locally with
 ./tasks build_docker_local
 ```
 
-## Environment variables
+### Swagger
 
-Image is configurable by environment variables:
+The swagger documentation for the app can be found at `http://localhost:3000/swagger`. To update it, change the
+`src/swagger.json` file. You can use the editor `https://editor.swagger.io/` which will validate your changes.
 
-- `NHS_ENVIRONMENT` - should be set to current environment in which the container is deployed. The name must also exist in the `database.json` file.
-- `S3_BUCKET_NAME` - the name of S3 bucket to store the EHR fragments in.
-- `DATABASE_USER` - username for the database
-- `DATABASE_PASSWORD` - password to the database
-- `DATABASE_NAME` - name of the database on server.
-- `DATABASE_HOST` - database server hostname to connect with.
-- `LOCALSTACK_URL` - (Test) the location of localstack, only used for tests
+## Access to AWS from CLI
 
-## Access to AWS
+In order to get sufficient access to work with terraform or AWS CLI, follow this [page](
+https://gpitbjss.atlassian.net/wiki/spaces/TW/pages/11286020174/How+to+set+up+access+to+AWS+from+CLI)
 
-In order to get sufficient access to work with terraform or AWS CLI:
+As a note, this set-up is based on the README of assume-role [tool](https://github.com/remind101/assume-role)
 
-Make sure to unset the AWS variables:
-```
-unset AWS_ACCESS_KEY_ID
-unset AWS_SECRET_ACCESS_KEY
-unset AWS_SESSION_TOKEN
-```
-
-As a note, the following set-up is based on the README of assume-role [tool](https://github.com/remind101/assume-role)
-
-Set up a profile for each role you would like to assume in `~/.aws/config`, for example:
-
-```
-[profile default]
-region = eu-west-2
-output = json
-
-[profile admin]
-region = eu-west-2
-role_arn = <role-arn>
-mfa_serial = <mfa-arn>
-source_profile = default
-```
-
-The `source_profile` needs to match your profile in `~/.aws/credentials`.
-```
-[default]
-aws_access_key_id = <your-aws-access-key-id>
-aws_secret_access_key = <your-aws-secret-access-key>
-```
-
-## Assume role with elevated permissions 
+## Assume role with elevated permissions
 
 ### Install `assume-role` locally:
 `brew install remind101/formulae/assume-role`
@@ -147,7 +137,9 @@ Run the following command with the profile configured in your `~/.aws/config`:
 ### Run `assume-role` with dojo:
 Run the following command with the profile configured in your `~/.aws/config`:
 
-`eval $(dojo "echo <mfa-code> | assume-role admin"`
+`eval $(dojo "echo <mfa-code> | assume-role dev"`
+or
+`assume-role dev [here choose one of the options from your config: ci/dev/test]`
 
 Run the following command to confirm the role was assumed correctly:
 
@@ -161,20 +153,3 @@ terraform apply
 ```
 
 If your session expires, exit the container to drop the temporary credentials and run dojo again.
-
-
-## AWS SSM Parameters Design Principles
-
-When creating the new ssm keys, please follow the agreed convention as per the design specified below:
-
-* all parts of the keys are lower case
-* the words are separated by dashes (`kebab case`)
-* `env` is optional
-  
-### Design:
-Please follow this design to ensure the ssm keys are easy to maintain and navigate through:
-
-| Type               | Design                                  | Example                                               |
-| -------------------| ----------------------------------------| ------------------------------------------------------|
-| **User-specified** |`/repo/<env>?/user-input/`               | `/repo/${var.environment}/user-input/db-username`     |
-| **Auto-generated** |`/repo/<env>?/output/<name-of-git-repo>/`| `/repo/output/prm-deductions-base-infra/root-zone-id` |

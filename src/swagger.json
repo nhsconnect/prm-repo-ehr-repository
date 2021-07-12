@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Service to handle generation of URLs for upload/download from S3",
+    "description": "Service to handle digital health record storage",
     "version": "1.0.0",
     "title": "EHR Repository"
   },
