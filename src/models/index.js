@@ -4,7 +4,6 @@ import * as models from './models';
 import { Signer } from 'aws-sdk/clients/rds';
 import AWS from 'aws-sdk';
 import { logError, logInfo } from '../middleware/logging';
-import util from 'util';
 
 class ModelFactory {
   constructor() {
