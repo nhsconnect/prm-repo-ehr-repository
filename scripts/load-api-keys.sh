@@ -8,8 +8,16 @@ do
   value=$(aws ssm get-parameter --region ${AWS_DEFAULT_REGION} --with-decryption --name "${key}" | jq -r .Parameter.Value)
   # Splits ssm path to get consumer name
   IFS='/' read -ra ADDR <<< "${key}"
-  # Replaces with dashes from consumer name with underscores for env variable
-  consumerName="${ADDR[6]//-/_}"
+
+  # Checks for if for user or service and replaces with dashes from consumer name with underscores for env variable
+  if [[ $key  =~ "api-key-user" ]]; then
+   consumerName="${ADDR[7]//-/_}"
+   consumerName="${consumerName//./_}"
+  else
+   consumerName="${ADDR[6]//-/_}"
+  fi
+
   capitalizedConsumerName=$(echo ${consumerName} | tr [:lower:] [:upper:])
   export API_KEY_FOR_${capitalizedConsumerName}="${value}"
+  echo Created api key API_KEY_FOR_${capitalizedConsumerName} for $key
 done
