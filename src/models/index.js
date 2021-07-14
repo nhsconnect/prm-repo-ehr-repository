@@ -57,8 +57,21 @@ class ModelFactory {
     if (this.base_config.use_rds_credentials) {
       this.sequelize.beforeConnect(async (config) => {
         logInfo('Obtaining new RDS DB Auth token');
-        const getAuthTokenAsync = util.promisify(signer.getAuthToken);
-        config.password = await getAuthTokenAsync();
+        const getAuthTokenAsync = () =>
+          new Promise((resolve, reject) => {
+            signer.getAuthToken((err, token) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(token);
+              }
+            });
+          });
+        try {
+          config.password = await getAuthTokenAsync();
+        } catch (err) {
+          console.log('Error: ', err);
+        }
       });
     }
 
