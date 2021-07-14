@@ -4,6 +4,7 @@ import * as models from './models';
 import { Signer } from 'aws-sdk/clients/rds';
 import AWS from 'aws-sdk';
 import { logError, logInfo } from '../middleware/logging';
+import util from 'util';
 
 class ModelFactory {
   constructor() {
@@ -54,9 +55,10 @@ class ModelFactory {
     );
 
     if (this.base_config.use_rds_credentials) {
-      this.sequelize.beforeConnect((config) => {
+      this.sequelize.beforeConnect(async (config) => {
         logInfo('Obtaining new RDS DB Auth token');
-        config.password = signer.getAuthToken();
+        const getAuthTokenAsync = util.promisify(signer.getAuthToken);
+        config.password = await getAuthTokenAsync();
       });
     }
 
