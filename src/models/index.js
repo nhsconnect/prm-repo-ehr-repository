@@ -52,11 +52,6 @@ class ModelFactory {
             }
           });
         });
-
-      logInfo('Obtaining first RDS DB Auth token');
-
-      //do we need this here?
-      this.base_config.password = signer.getAuthToken();
     }
 
     this.sequelize = new Sequelize(
