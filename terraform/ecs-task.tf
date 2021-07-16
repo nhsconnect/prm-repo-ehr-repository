@@ -15,9 +15,6 @@ locals {
     { name = "SKIP_DB_MIGRATION", value = "true" },
     { name = "USE_SSL_FOR_DB", value = "true" }
   ]
-  secret_environment_variables = [
-    { name = "E2E_TEST_AUTHORIZATION_KEYS_FOR_EHR_REPO", valueFrom = data.aws_ssm_parameter.e2e_test_authorization_keys_for_ehr_repo.arn }
-  ]
 }
 
 resource "aws_ecs_task_definition" "task" {
@@ -41,8 +38,7 @@ resource "aws_ecs_task_definition" "task" {
     host_port             = var.port,
     log_region            = var.region,
     log_group             = local.task_log_group,
-    environment_variables = jsonencode(local.environment_variables),
-    secrets               = jsonencode(local.secret_environment_variables)
+    environment_variables = jsonencode(local.environment_variables)
   })
 
   tags = {
