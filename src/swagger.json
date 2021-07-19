@@ -36,7 +36,7 @@
     "/patients/{nhsNumber}/health-records/{conversationId}": {
       "get": {
         "tags": [],
-        "summary": "Gets health record status through the associated conversation id",
+        "summary": "Retrieves patient's health record status through the associated conversation id",
         "consumes": [
           "application/json"
         ],
@@ -88,7 +88,7 @@
     "/patients/{nhsNumber}": {
       "get": {
         "tags": [],
-        "summary": "Retrieve current patient health record",
+        "summary": "Retrieves the current patient's health record",
         "consumes": [
           "application/json"
         ],
@@ -136,7 +136,7 @@
     "/messages/{conversationId}/{messageId}": {
       "get": {
         "tags": [],
-        "summary": "Gets pre-signed url from s3",
+        "summary": "Retrieves the location of the EHR",
         "consumes": [
           "application/json"
         ],
@@ -187,7 +187,7 @@
     "/messages": {
       "post": {
         "tags": [],
-        "summary": "Store Health Record Messages in DB",
+        "summary": "Stores Health Record Messages in DB and updates the HR completeness status",
         "consumes": [
           "application/json"
         ],
