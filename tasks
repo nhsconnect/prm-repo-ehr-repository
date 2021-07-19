@@ -86,7 +86,7 @@ function get_aws_account_id {
 
 function configure_aws_service_e2e_test_auth_keys_for_ehr_repo {
     check_env
-    get_aws_account_id
+    assume_environment_role $NHS_ENVIRONMENT
     parameter_name="/repo/${NHS_ENVIRONMENT}/user-input/api-keys/${NHS_SERVICE}/e2e-test"
     export E2E_TEST_AUTHORIZATION_KEYS_FOR_EHR_REPO=$(get_aws_ssm_secret ${parameter_name})
 }
