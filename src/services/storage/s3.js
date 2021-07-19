@@ -71,7 +71,12 @@ export default class S3Service {
   }
 
   _get_config() {
-    if (config.nhsEnvironment === 'dev' || config.nhsEnvironment === 'test') return {};
+    if (
+      config.nhsEnvironment === 'dev' ||
+      config.nhsEnvironment === 'test' ||
+      config.nhsEnvironment === 'pre-prod'
+    )
+      return {};
 
     return {
       accessKeyId: 'test-access-key',
