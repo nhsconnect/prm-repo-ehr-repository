@@ -13,7 +13,8 @@ locals {
     { name = "USE_AWS_RDS_CREDENTIALS", value = "true" },
     { name = "AWS_REGION", value = var.region },
     { name = "SKIP_DB_MIGRATION", value = "true" },
-    { name = "USE_SSL_FOR_DB", value = "true" }
+    { name = "USE_SSL_FOR_DB", value = "true" },
+    { name = "LOG_LEVEL", value = var.log_level }
   ]
 }
 

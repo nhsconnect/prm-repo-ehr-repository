@@ -16,3 +16,5 @@ port        = 3000
 service_desired_count = "2"
 
 alb_deregistration_delay = 15
+
+log_level = "info"
