@@ -295,4 +295,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_http_errors" {
   threshold                 = "1"
   alarm_description         = "This metric monitors number of 5xx http status codes associated with ${var.repo_name}"
   treat_missing_data        = "notBreaching"
+  dimensions                = {
+    LoadBalancer = aws_alb.alb-internal.arn_suffix
+  }
 }
