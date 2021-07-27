@@ -17,6 +17,15 @@ export const patientDetailsValidation = [
 
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
+
+  //only for testing purposes
+  const FAILING_NHS_NUMBER = '9691234567';
+  if (nhsNumber === FAILING_NHS_NUMBER) {
+    logError('Using NHS number that causes deliberate failure');
+    res.sendStatus(503);
+    return;
+  }
+
   const getOperation = 'getObject';
 
   try {
