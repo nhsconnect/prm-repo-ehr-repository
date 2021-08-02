@@ -1,39 +1,3 @@
-resource "aws_security_group" "db-sg" {
-  name        = "ehr-db-sg"
-  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
-
-  ingress {
-    description     = "Allow traffic from ehr-repo to the db"
-    protocol        = "tcp"
-    from_port       = "5432"
-    to_port         = "5432"
-    security_groups = [aws_security_group.ecs-tasks-sg.id]
-  }
-
-  ingress {
-    description     = "Allow traffic from GoCD agent to the db"
-    protocol        = "tcp"
-    from_port       = "5432"
-    to_port         = "5432"
-    security_groups = [data.aws_ssm_parameter.gocd_sg_id.value]
-  }
-
-  # Should be conditional in pre-prod/prod environments
-  ingress {
-    description     = "Allow traffic from VPN to the db"
-    protocol        = "tcp"
-    from_port       = "5432"
-    to_port         = "5432"
-    security_groups = [data.aws_ssm_parameter.vpn_sg_id.value]
-  }
-
-  tags = {
-    Name = "db-sg"
-    CreatedBy   = var.repo_name
-    Environment = var.environment
-  }
-}
-
 resource "aws_rds_cluster" "db-cluster" {
   cluster_identifier      = "${var.environment}-ehr-db-cluster"
   engine                  = "aurora-postgresql"
@@ -42,7 +6,11 @@ resource "aws_rds_cluster" "db-cluster" {
   master_password         = data.aws_ssm_parameter.db-password.value
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
-  vpc_security_group_ids  = [aws_security_group.db-sg.id]
+  vpc_security_group_ids  = [
+    aws_security_group.ehr_repo_to_db_sg.id,
+    aws_security_group.gocd_to_db_sg.id,
+    aws_security_group.vpn_to_db_sg.id
+  ]
   apply_immediately       = true
   db_subnet_group_name    = aws_db_subnet_group.db-cluster-subnet-group.name
   skip_final_snapshot = true
@@ -118,4 +86,64 @@ resource "aws_rds_cluster_instance" "ehr-db-instances" {
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
+}
+
+resource "aws_security_group" "ehr_repo_to_db_sg" {
+  name        = "${var.environment}-ehr-db-sg"
+  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  ingress {
+    description     = "Allow traffic from ehr-repo to the db"
+    protocol        = "tcp"
+    from_port       = "5432"
+    to_port         = "5432"
+    security_groups = [aws_security_group.ecs-tasks-sg.id]
+  }
+
+  tags = {
+    Name = "db-sg"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_security_group" "gocd_to_db_sg" {
+  name = "${var.environment}-gocd-to-db-sg"
+  vpc_id = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  ingress {
+    description     = "Allow traffic from GoCD agent to the db"
+    protocol        = "tcp"
+    from_port       = "5432"
+    to_port         = "5432"
+    security_groups = [data.aws_ssm_parameter.gocd_sg_id.value]
+  }
+
+  tags = {
+    Name = "${var.environment}-gocd-to-db-sg"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_security_group" "vpn_to_db_sg" {
+  name = "${var.environment}-vpn-to-db-sg"
+  vpc_id = data.aws_ssm_parameter.deductions_core_vpc_id.value
+
+  tags = {
+    Name = "${var.environment}-vpn-to-db-sg"
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_security_group_rule" "vpn_to_db_sg" {
+  count       = var.grant_access_through_vpn ? 1 : 0
+  type        = "ingress"
+  description = "Allow traffic from VPN to the db"
+  protocol    = "tcp"
+  from_port   = 5432
+  to_port     = 5432
+  source_security_group_id = data.aws_ssm_parameter.vpn_sg_id.value
+  security_group_id = aws_security_group.vpn_to_db_sg.id
 }
