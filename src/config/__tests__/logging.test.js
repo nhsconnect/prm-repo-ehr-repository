@@ -86,7 +86,7 @@ describe('logging', () => {
               login: 'abcdefg',
               authorization: '1234567',
               Authorization: '1234567',
-              apiKey: '1234567'
+              apiKey: '1234567',
             },
           },
         },
@@ -104,7 +104,7 @@ describe('logging', () => {
               login: 'abcdefg',
               authorization: '********',
               Authorization: '********',
-              apiKey: '********'
+              apiKey: '********',
             },
           },
         },
@@ -138,7 +138,7 @@ describe('logging', () => {
               login: 'abcdefg',
               authorization: '1234567',
               Authorization: '1234567',
-              apiKey: '1234567'
+              apiKey: '1234567',
             },
           },
         },
