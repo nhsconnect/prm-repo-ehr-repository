@@ -6,7 +6,7 @@ import { initializeConfig } from './index';
 
 export const obfuscateSecrets = format((info) => {
   const OBFUSCATED_VALUE = '********';
-  const SECRET_KEYS = ['passcode', 'data', 'authorization'];
+  const SECRET_KEYS = ['passcode', 'data', 'authorization', 'Authorization', 'apiKey'];
   const updated = cloneDeep(info);
   traverse(updated).forEach(function () {
     if (SECRET_KEYS.includes(this.key)) this.update(OBFUSCATED_VALUE);
