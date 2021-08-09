@@ -41,23 +41,9 @@ data "aws_iam_policy_document" "ehr-repo-s3" {
 data "aws_iam_policy_document" "ecr_policy_doc" {
   statement {
     actions = [
-      "ecr:DescribeImages",
-      "ecr:GetRepositoryPolicy",
-      "ecr:GetAuthorizationToken",
-      "ecr:GetRegistryPolicy",
-      "ecr:DescribeImageScanFindings",
-      "ecr:GetLifecyclePolicyPreview",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:DescribeRegistry",
-      "ecr:GetAuthorizationToken",
-      "ecr:ListTagsForResource",
-      "ecr:ListImages",
-      "ecr:BatchGetImage",
-      "ecr:DescribeImages",
-      "ecr:DescribeRepositories",
       "ecr:BatchCheckLayerAvailability",
-      "ecr:GetRepositoryPolicy",
-      "ecr:GetLifecyclePolicy"
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage"
     ]
     resources = [
       "arn:aws:ecr:${var.region}:${local.account_id}:repository/deductions/${var.component_name}"
@@ -77,12 +63,7 @@ data "aws_iam_policy_document" "ecr_policy_doc" {
 data "aws_iam_policy_document" "logs_policy_doc" {
   statement {
     actions = [
-      "logs:ListTagsLogGroup",
       "logs:CreateLogStream",
-      "logs:DescribeLogGroups",
-      "logs:DescribeLogStreams",
-      "logs:GetLogEvents",
-      "logs:GetLogGroupFields",
       "logs:PutLogEvents"
     ]
 
