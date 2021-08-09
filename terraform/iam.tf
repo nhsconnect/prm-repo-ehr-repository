@@ -87,7 +87,7 @@ data "aws_iam_policy_document" "logs_policy_doc" {
     ]
 
     resources = [
-      "arn:aws:logs:eu-west-2:327778747031:log-group:/nhs/deductions/test-327778747031/ehr-repo:*"
+      "arn:aws:logs:${var.region}:${local.account_id}:log-group:/nhs/deductions/${var.environment}-${local.account_id}/${var.component_name}:*"
     ]
   }
 }
