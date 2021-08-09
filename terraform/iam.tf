@@ -41,9 +41,24 @@ data "aws_iam_policy_document" "ehr-repo-s3" {
 data "aws_iam_policy_document" "ecr_policy_doc" {
   statement {
     actions = [
-      "ecr:*"
+      "ecr:DescribeImages",
+      "ecr:GetRepositoryPolicy",
+      "ecr:GetAuthorizationToken",
+      "ecr:GetRegistryPolicy",
+      "ecr:DescribeImageScanFindings",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:DescribeRegistry",
+      "ecr:GetAuthorizationToken",
+      "ecr:ListTagsForResource",
+      "ecr:ListImages",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetRepositoryPolicy",
+      "ecr:GetLifecyclePolicy"
     ]
-
     resources = [
       "arn:aws:ecr:${var.region}:${local.account_id}:repository/deductions/${var.component_name}"
     ]
@@ -62,11 +77,17 @@ data "aws_iam_policy_document" "ecr_policy_doc" {
 data "aws_iam_policy_document" "logs_policy_doc" {
   statement {
     actions = [
-      "logs:*"
+      "logs:ListTagsLogGroup",
+      "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:GetLogEvents",
+      "logs:GetLogGroupFields",
+      "logs:PutLogEvents"
     ]
 
     resources = [
-      "*"
+      "arn:aws:logs:eu-west-2:327778747031:log-group:/nhs/deductions/test-327778747031/ehr-repo:*"
     ]
   }
 }
@@ -104,7 +125,7 @@ resource "aws_iam_role_policy_attachment" "ehr-logs" {
 data "aws_iam_policy_document" "ssm_policy_doc" {
   statement {
     actions = [
-      "ssm:*"
+      "ssm:Get*"
     ]
 
     resources = [
