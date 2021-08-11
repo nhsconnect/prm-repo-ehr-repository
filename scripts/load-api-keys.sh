@@ -2,14 +2,6 @@
 AWS_DEFAULT_REGION=eu-west-2
 NHS_SERVICE=ehr-repo
 
-timestamp() {
-  date +"%Y-%m-%d %H:%M:%S"
-}
-
-function jsonPrettify {
-  echo "{message: $1, level: $2, timestamp: `timestamp`, service: ${NHS_SERVICE}, environment: ${NHS_ENVIRONMENT} } "
-}
-
 # Iterates through all api keys in ssm for producer
 for key in $(aws ssm get-parameters-by-path --region ${AWS_DEFAULT_REGION} --path "/repo/${NHS_ENVIRONMENT}/user-input/api-keys/ehr-repo/" --recursive | jq -r '.Parameters[].Name')
 do
@@ -28,5 +20,4 @@ do
 
   capitalizedConsumerName=$(echo ${consumerName} | tr [:lower:] [:upper:])
   export API_KEY_FOR_${capitalizedConsumerName}="${value}"
-  jsonPrettify "Created api key API_KEY_FOR_${capitalizedConsumerName}" INFO
 done
