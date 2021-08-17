@@ -16,6 +16,11 @@ In order to run npm install locally on your host (outside of dojo), you'll need 
 brew install postgresql
 ```
 
+### AWS helpers
+
+This repository imports shared AWS helpers from [prm-deductions-support-infra](https://github.com/nhsconnect/prm-deductions-support-infra/).
+They can be found `utils` directory after running any task from `tasks` file.
+
 ## Set up
 
 To replicate the ci environment, we use `dojo` that allows us to work with the codebase without installing any dependencies locally.
@@ -68,7 +73,7 @@ npm test
 sequelize-cli db:migrate:undo:all # Undoes the migration to leave clean env
 ```
 
-#Run the coverage tests (unit test and integration test)
+## Run the coverage tests (unit test and integration test)
 
 By entering the `dojo` container and running `./tasks _test_coverage`
 
@@ -105,7 +110,7 @@ Run a development server with `npm run start:local`.
 dojo -c Dojofile-dtest
 ```
 
-# Docker
+## Docker
 
 Docker image can be build locally with
 
