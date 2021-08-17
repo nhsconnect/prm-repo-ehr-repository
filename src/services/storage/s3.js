@@ -71,18 +71,15 @@ export default class S3Service {
   }
 
   _get_config() {
-    if (
-      config.nhsEnvironment === 'dev' ||
-      config.nhsEnvironment === 'test' ||
-      config.nhsEnvironment === 'pre-prod'
-    )
-      return {};
+    if (config.nhsEnvironment === 'local') {
+      return {
+        accessKeyId: 'test-access-key',
+        secretAccessKey: 'test-secret-key',
+        endpoint: new Endpoint(config.localstackUrl),
+        s3ForcePathStyle: true,
+      };
+    }
 
-    return {
-      accessKeyId: 'test-access-key',
-      secretAccessKey: 'test-secret-key',
-      endpoint: new Endpoint(config.localstackUrl),
-      s3ForcePathStyle: true,
-    };
+    return {};
   }
 }
