@@ -89,7 +89,7 @@ resource "aws_rds_cluster_instance" "ehr-db-instances" {
 }
 
 resource "aws_security_group" "ehr_repo_to_db_sg" {
-  name        = "${var.environment}-ehr-db-sg"
+  name        = "${var.environment}-ehr-repo-ecs-to-ehr-repo-db-sg"
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   ingress {
@@ -101,14 +101,14 @@ resource "aws_security_group" "ehr_repo_to_db_sg" {
   }
 
   tags = {
-    Name = "db-sg"
+    Name = "${var.environment}-ehr-repo-ecs-to-ehr-repo-db-sg"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
 }
 
 resource "aws_security_group" "gocd_to_db_sg" {
-  name = "${var.environment}-gocd-to-db-sg"
+  name = "${var.environment}-gocd-to-ehr-repo-db-sg"
   vpc_id = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   ingress {
@@ -120,18 +120,18 @@ resource "aws_security_group" "gocd_to_db_sg" {
   }
 
   tags = {
-    Name = "${var.environment}-gocd-to-db-sg"
+    Name = "${var.environment}-gocd-to-ehr-repo-db-sg"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
 }
 
 resource "aws_security_group" "vpn_to_db_sg" {
-  name = "${var.environment}-vpn-to-db-sg"
+  name = "${var.environment}-vpn-to-ehr-repo-db-sg"
   vpc_id = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   tags = {
-    Name = "${var.environment}-vpn-to-db-sg"
+    Name = "${var.environment}-vpn-to-ehr-repo-db-sg"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
