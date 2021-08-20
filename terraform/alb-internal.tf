@@ -53,7 +53,7 @@ resource "aws_alb_listener" "int-alb-listener-https" {
   port              = "443"
   protocol          = "HTTPS"
 
-  ssl_policy      = "ELBSecurityPolicy-TLS-1-2-2017-01"
+  ssl_policy      = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
   certificate_arn = aws_acm_certificate_validation.ehr-repo-cert-validation.certificate_arn
 
   default_action {
