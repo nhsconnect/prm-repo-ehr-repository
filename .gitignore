@@ -127,6 +127,6 @@ dist
 *.dojo
 
 # Imported utilities
-/utils/aws-helpers
+/utils/*/aws-helpers
 
 outdated-dependencies.txt
