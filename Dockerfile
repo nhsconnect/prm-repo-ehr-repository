@@ -49,3 +49,5 @@ EXPOSE 3000
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["/usr/bin/run-ehr-server"]
+
+USER node
