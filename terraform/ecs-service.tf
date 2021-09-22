@@ -1,6 +1,6 @@
 locals {
   ecs_cluster_id    = aws_ecs_cluster.ecs-cluster.id
-  ecs_tasks_sg_id   = aws_security_group.ecs-tasks-sg.id
+  ecs_tasks_sg_ids   = var.allow_vpn_to_ecs_tasks ? [aws_security_group.ecs-tasks-sg.id, aws_security_group.vpn_to_ehr_repo_ecs.id] : [aws_security_group.ecs-tasks-sg.id]
   private_subnets   = split(",", data.aws_ssm_parameter.private_subnets.value)
   # public_alb_tg_arn = data.aws_ssm_parameter.deductions_core_ehr_repo_public_alb_tg_arn.value
   internal_alb_tg_arn = aws_alb_target_group.internal-alb-tg.arn
@@ -14,7 +14,7 @@ resource "aws_ecs_service" "ecs-service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    security_groups = [local.ecs_tasks_sg_id]
+    security_groups = local.ecs_tasks_sg_ids
     subnets         = local.private_subnets
   }
 

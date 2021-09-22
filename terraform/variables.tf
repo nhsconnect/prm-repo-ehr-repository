@@ -43,3 +43,4 @@ variable "log_level" {
 }
 
 variable "grant_access_through_vpn" {}
+variable "allow_vpn_to_ecs_tasks" { default=false }
