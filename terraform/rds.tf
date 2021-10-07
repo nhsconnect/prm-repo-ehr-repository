@@ -17,6 +17,7 @@ resource "aws_rds_cluster" "db-cluster" {
   storage_encrypted       = true
   kms_key_id              = aws_kms_key.ehr-repo-key.arn
   iam_database_authentication_enabled  = true
+  deletion_protection = var.enable_rds_cluster_deletion_protection
 
   tags = {
     CreatedBy   = var.repo_name
@@ -82,6 +83,7 @@ resource "aws_rds_cluster_instance" "ehr-db-instances" {
   instance_class        = "db.t3.medium"
   engine                = "aurora-postgresql"
   db_subnet_group_name  = aws_db_subnet_group.db-cluster-subnet-group.name
+
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
