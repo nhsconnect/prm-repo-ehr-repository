@@ -123,15 +123,12 @@ function tf_init {
 
 function tf_init_db_roles {
   check_env
-  #  Condition [ $NHS_ENVIRONMENT == "test" ] is required as test environment infrastructure is deployed in CI AWS account
-  [ $NHS_ENVIRONMENT == "ci" ] || [ $NHS_ENVIRONMENT == "test" ] &&  bucket_env_infix=""  || bucket_env_infix="$NHS_ENVIRONMENT-"
-
   cd terraform-db-roles
 
   terraform init -reconfigure \
     -backend-config key="${NHS_SERVICE}-${NHS_ENVIRONMENT}-db-roles/terraform.tfstate" \
-    -backend-config bucket="prm-deductions-${bucket_env_infix}terraform-state" \
-    -backend-config dynamodb_table="prm-deductions-${bucket_env_infix}terraform-table" \
+    -backend-config bucket="prm-deductions-${NHS_ENVIRONMENT}-terraform-state" \
+    -backend-config dynamodb_table="prm-deductions-${NHS_ENVIRONMENT}-terraform-table" \
     -backend-config region=${AWS_DEFAULT_REGION}
 }
 
