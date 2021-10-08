@@ -9,7 +9,7 @@ set -Eeo pipefail
 AWS_DEFAULT_REGION=eu-west-2
 IMAGE_REPO_NAME=deductions/ehr-repo
 export NHS_SERVICE=ehr-repo
-AWS_HELPERS_VERSION=0.2.9
+AWS_HELPERS_VERSION=0.2.10
 echo "AWS helper scripts version: $AWS_HELPERS_VERSION"
 
 # Do not change the file name as the aws helper scripts depend on it
@@ -111,15 +111,13 @@ function get_aws_ssm_secret {
 
 function tf_init {
   check_env
-  #  Condition [ $NHS_ENVIRONMENT == "test" ] is required as test environment infrastructure is deployed in CI AWS account
-  [ $NHS_ENVIRONMENT == "ci" ] || [ $NHS_ENVIRONMENT == "test" ] &&  bucket_env_infix=""  || bucket_env_infix="$NHS_ENVIRONMENT-"
 
   cd terraform
 
   terraform init -reconfigure \
     -backend-config key="${NHS_SERVICE}-${NHS_ENVIRONMENT}/terraform.tfstate" \
-    -backend-config bucket="prm-deductions-${bucket_env_infix}terraform-state" \
-    -backend-config dynamodb_table="prm-deductions-${bucket_env_infix}terraform-table" \
+    -backend-config bucket="prm-deductions-${NHS_ENVIRONMENT}-terraform-state" \
+    -backend-config dynamodb_table="prm-deductions-${NHS_ENVIRONMENT}-terraform-table" \
     -backend-config region=${AWS_DEFAULT_REGION}
 }
 

@@ -123,6 +123,7 @@ dist
 /terraform/.terraform.lock.hcl
 /terraform-db-roles/.terraform.lock.hcl
 /terraform-db-roles/*.tfplan
+/terraform/errored.tfstate
 
 *.dojo
 
