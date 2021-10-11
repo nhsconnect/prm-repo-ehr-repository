@@ -18,6 +18,7 @@ resource "aws_rds_cluster" "db-cluster" {
   kms_key_id              = aws_kms_key.ehr-repo-key.arn
   iam_database_authentication_enabled  = true
   deletion_protection = var.enable_rds_cluster_deletion_protection
+  db_cluster_parameter_group_name = data.aws_ssm_parameter.repo_databases_parameter_group_name.value
 
   tags = {
     CreatedBy   = var.repo_name
@@ -149,3 +150,8 @@ resource "aws_security_group_rule" "vpn_to_db_sg" {
   source_security_group_id = data.aws_ssm_parameter.vpn_sg_id.value
   security_group_id = aws_security_group.vpn_to_db_sg.id
 }
+
+data "aws_ssm_parameter" "repo_databases_parameter_group_name" {
+  name = "/repo/${var.environment}/output/prm-deductions-infra/repo-databases-parameter-group-name"
+}
+
