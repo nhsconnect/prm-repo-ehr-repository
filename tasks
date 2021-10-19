@@ -284,10 +284,17 @@ command="$1"
 case "${command}" in
   _dep)
       npm install
-      npm audit
+      npm run check-audit
       ;;
   dep)
       dojo "./tasks _dep"
+      ;;
+  _fix_dep)
+      npm install
+      npm run resolve-audit
+      ;;
+  fix_dep)
+      dojo "./tasks _fix_dep"
       ;;
   _list_outdated)
       npm install

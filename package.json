@@ -4,6 +4,8 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
+    "check-audit": "check-audit",
+    "resolve-audit": "resolve-audit",
     "lint": "eslint src/ test/ scripts/",
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run lint:fix && npm run test:unit",
@@ -61,6 +63,7 @@
     "express-winston": "^4.2.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
+    "npm-audit-resolver": "^2.3.1",
     "pg": "^8.7.1",
     "pg-hstore": "^2.3.4",
     "pg-native": "^3.0.0",
