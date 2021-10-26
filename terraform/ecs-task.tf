@@ -79,6 +79,7 @@ resource "aws_security_group" "ecs-tasks-sg" {
 
 
 resource "aws_security_group" "vpn_to_ehr_repo_ecs" {
+  count       = var.allow_vpn_to_ecs_tasks ? 1 : 0
   name        = "${var.environment}-vpn-to-${var.component_name}-ecs"
   description = "controls access from vpn to ehr-repo ecs task"
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value

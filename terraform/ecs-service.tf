@@ -1,6 +1,6 @@
 locals {
   ecs_cluster_id    = aws_ecs_cluster.ecs-cluster.id
-  ecs_tasks_sg_ids   = var.allow_vpn_to_ecs_tasks ? [aws_security_group.ecs-tasks-sg.id, aws_security_group.vpn_to_ehr_repo_ecs.id] : [aws_security_group.ecs-tasks-sg.id]
+  ecs_tasks_sg_ids  = var.allow_vpn_to_ecs_tasks ? [aws_security_group.ecs-tasks-sg.id, aws_security_group.vpn_to_ehr_repo_ecs[0].id] : [aws_security_group.ecs-tasks-sg.id]
   private_subnets   = split(",", data.aws_ssm_parameter.private_subnets.value)
   # public_alb_tg_arn = data.aws_ssm_parameter.deductions_core_ehr_repo_public_alb_tg_arn.value
   internal_alb_tg_arn = aws_alb_target_group.internal-alb-tg.arn
