@@ -97,7 +97,7 @@ pipelines:
       - plan:
           clean_workspace: true
           jobs:
-            deploy: *plan_job
+            plan: *plan_job
       - deploy:
           clean_workspace: true
           jobs:
@@ -150,7 +150,7 @@ pipelines:
       - plan:
           clean_workspace: true
           jobs:
-            deploy: *plan_job
+            plan: *plan_job
       - deploy:
           clean_workspace: true
           jobs:
@@ -214,7 +214,7 @@ pipelines:
                   - ./tasks promote_docker_image
       - plan:
           jobs:
-            deploy: *plan_job
+            plan: *plan_job
       - deploy:
           jobs:
             deploy: *deploy_job
@@ -277,7 +277,7 @@ pipelines:
                   - ./tasks promote_docker_image
       - plan:
           jobs:
-            deploy: *plan_job
+            plan: *plan_job
       - deploy:
           approval:
             type: manual
