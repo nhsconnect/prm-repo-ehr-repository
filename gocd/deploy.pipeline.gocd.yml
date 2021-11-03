@@ -1,6 +1,6 @@
 format_version: 4
 common:
-  deploy_job: &deploy_job
+  plan_job: &plan_job
     resources:
       - docker
     tasks:
@@ -18,22 +18,25 @@ common:
           command: /bin/bash
           arguments:
             - -c
-            - ./tasks tf_apply
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
             - ./tasks tf_plan create
       - exec:
           command: /bin/bash
           arguments:
             - -c
-            - ./tasks tf_apply
+            - ./tasks tf_plan_db_roles create
+  deploy_job: &deploy_job
+    resources:
+      - docker
       - exec:
           command: /bin/bash
           arguments:
             - -c
-            - ./tasks tf_plan_db_roles create
+            - ./tasks tf_apply_certs
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_apply
       - exec:
           command: /bin/bash
           arguments:
@@ -89,6 +92,10 @@ pipelines:
                 arguments:
                   - -c
                   - ./tasks promote_docker_image
+      - plan:
+          clean_workspace: true
+          jobs:
+            deploy: *plan_job
       - deploy:
           clean_workspace: true
           jobs:
@@ -138,6 +145,10 @@ pipelines:
                   arguments:
                     - -c
                     - ./tasks promote_docker_image
+      - plan:
+          clean_workspace: true
+          jobs:
+            deploy: *plan_job
       - deploy:
           clean_workspace: true
           jobs:
@@ -199,6 +210,10 @@ pipelines:
                 arguments:
                   - -c
                   - ./tasks promote_docker_image
+      - plan:
+          clean_workspace: true
+          jobs:
+            deploy: *plan_job
       - deploy:
           clean_workspace: true
           jobs:
