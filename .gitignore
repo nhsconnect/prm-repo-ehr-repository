@@ -118,7 +118,7 @@ dist
 
 # Local .terraform directories
 **/.terraform/*
-/terraform/nhs_deployment.tfplan
+/terraform/*.tfplan
 /terraform/tf-out.json
 /terraform/.terraform.lock.hcl
 /terraform-db-roles/.terraform.lock.hcl
