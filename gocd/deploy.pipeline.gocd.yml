@@ -1,32 +1,34 @@
 format_version: 4
 common:
-#  plan_job: &plan_job
-#    resources:
-#      - docker
-#      - exec:
-#          command: /bin/bash
-#          arguments:
-#            - -c
-#            - ./tasks create_secrets
-#      - exec:
-#          command: /bin/bash
-#          arguments:
-#            - -c
-#            - ./tasks tf_plan_certs create
-#      - exec:
-#          command: /bin/bash
-#          arguments:
-#            - -c
-#            - ./tasks tf_plan create
-#      - exec:
-#          command: /bin/bash
-#          arguments:
-#            - -c
-#            - ./tasks tf_plan_db_roles create
+  plan_job: &plan_job
+    resources:
+      - docker
+    tasks:
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks create_secrets
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_plan_certs create
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_plan create
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_plan_db_roles create
 
   deploy_job: &deploy_job
     resources:
       - docker
+    tasks:
       - exec:
           command: /bin/bash
           arguments:
@@ -92,10 +94,10 @@ pipelines:
                 arguments:
                   - -c
                   - ./tasks promote_docker_image
-#      - plan:
-#          clean_workspace: true
-#          jobs:
-#            deploy: *plan_job
+      - plan:
+          clean_workspace: true
+          jobs:
+            deploy: *plan_job
       - deploy:
           clean_workspace: true
           jobs:
@@ -145,10 +147,10 @@ pipelines:
                   arguments:
                     - -c
                     - ./tasks promote_docker_image
-#      - plan:
-#          clean_workspace: true
-#          jobs:
-#            deploy: *plan_job
+      - plan:
+          clean_workspace: true
+          jobs:
+            deploy: *plan_job
       - deploy:
           clean_workspace: true
           jobs:
@@ -210,9 +212,9 @@ pipelines:
                 arguments:
                   - -c
                   - ./tasks promote_docker_image
-#      - plan:
-#          jobs:
-#            deploy: *plan_job
+      - plan:
+          jobs:
+            deploy: *plan_job
       - deploy:
           jobs:
             deploy: *deploy_job
