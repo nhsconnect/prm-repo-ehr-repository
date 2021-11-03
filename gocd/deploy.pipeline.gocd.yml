@@ -2,7 +2,7 @@ format_version: 4
 common:
   plan_job: &plan_job
     resources:
-      - docker
+    - docker
     - exec:
         command: /bin/bash
         arguments:
