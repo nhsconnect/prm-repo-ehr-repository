@@ -247,3 +247,69 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test_performance
+
+  "prm-deductions-ehr-repository.prod":
+    group: deductions
+    label_template: "${git[:8]}"
+    materials:
+      git:
+        type: configrepo
+        blacklist:
+          - docs/**/*.*
+      base_infra:
+        pipeline: prm-deductions-infra
+        stage: deploy_pre_prod
+      test_env:
+        pipeline: prm-deductions-ehr-repository.test
+        stage: functional
+    environment_variables:
+      NHS_ENVIRONMENT: prod
+    stages:
+      - promote_docker_image:
+          resources:
+            - docker
+          clean_workspace: true
+          tasks:
+            - exec:
+                command: /bin/bash
+                arguments:
+                  - -c
+                  - ./tasks promote_docker_image
+      - plan:
+          jobs:
+            deploy: *plan_job
+      - deploy:
+          approval:
+            type: manual
+            allow_only_on_success: true
+          jobs:
+            deploy: *deploy_job
+      - functional:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks sanity_check
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_functional
+      - performance:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_performance
