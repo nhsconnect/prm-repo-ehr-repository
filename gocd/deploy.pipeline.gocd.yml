@@ -35,38 +35,30 @@ common:
             - -c
             - ./tasks tf_plan_db_roles create
 
-  deploy_job: &deploy_job
+  plan_db_job: &plan_db_job
+    resources:
+      - docker
+    artifacts:
+      - build:
+          source: terraform-db-roles/db-roles.tfplan
+          destination: terraform-db-roles/
+    tasks:
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_plan_db_roles create
+
+  deploy_db_job: &deploy_db_job
     resources:
       - docker
     tasks:
       - fetch:
           stage: plan
           job: plan
-          source: terraform/certs_deployment.tfplan
-          destination: terraform/
-          is_file: yes
-      - fetch:
-          stage: plan
-          job: plan
-          source: terraform/deployment.tfplan
-          destination: terraform/
-          is_file: yes
-      - fetch:
-          stage: plan
-          job: plan
           source: terraform-db-roles/db-roles.tfplan
           destination: terraform-db-roles/
           is_file: yes
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_apply_certs
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_apply
       - exec:
           command: /bin/bash
           arguments:
@@ -94,6 +86,33 @@ common:
           arguments:
             - -c
             - ./tasks wait_ecs
+
+  deploy_job: &deploy_job
+    resources:
+      - docker
+    tasks:
+      - fetch:
+          stage: plan
+          job: plan
+          source: terraform/certs_deployment.tfplan
+          destination: terraform/
+          is_file: yes
+      - fetch:
+          stage: plan
+          job: plan
+          source: terraform/deployment.tfplan
+          destination: terraform/
+          is_file: yes
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_apply_certs
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_apply
 pipelines:
   "prm-deductions-ehr-repository.dev":
     group: deductions
@@ -130,6 +149,14 @@ pipelines:
           clean_workspace: true
           jobs:
             deploy: *deploy_job
+      - plan_db:
+          clean_workspace: true
+          jobs:
+            plan_db: *plan_db_job
+      - deploy_db:
+          clean_workspace: true
+          jobs:
+            deploy_db: *deploy_db_job
       - functional:
           clean_workspace: true
           jobs:
@@ -183,6 +210,14 @@ pipelines:
           clean_workspace: true
           jobs:
             deploy: *deploy_job
+      - plan_db:
+          clean_workspace: true
+          jobs:
+            plan_db: *plan_db_job
+      - deploy_db:
+          clean_workspace: true
+          jobs:
+            deploy_db: *deploy_db_job
       - functional:
           clean_workspace: true
           jobs:
@@ -246,6 +281,14 @@ pipelines:
       - deploy:
           jobs:
             deploy: *deploy_job
+      - plan_db:
+          clean_workspace: true
+          jobs:
+            plan_db: *plan_db_job
+      - deploy_db:
+          clean_workspace: true
+          jobs:
+            deploy_db: *deploy_db_job
       - functional:
           clean_workspace: true
           jobs:
@@ -312,6 +355,17 @@ pipelines:
             allow_only_on_success: true
           jobs:
             deploy: *deploy_job
+      - plan_db:
+          clean_workspace: true
+          jobs:
+            plan_db: *plan_db_job
+      - deploy_db:
+          clean_workspace: true
+          approval:
+            type: manual
+            allow_only_on_success: true
+          jobs:
+            deploy_db: *deploy_db_job
       - functional:
           clean_workspace: true
           jobs:
