@@ -10,9 +10,6 @@ common:
       - build:
           source: terraform/certs_deployment.tfplan
           destination: terraform/
-      - build:
-          source: terraform-db-roles/db-roles.tfplan
-          destination: terraform-db-roles/
     tasks:
       - exec:
           command: /bin/bash
@@ -29,12 +26,6 @@ common:
           arguments:
             - -c
             - ./tasks tf_plan create
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_plan_db_roles create
-
   plan_db_job: &plan_db_job
     resources:
       - docker
@@ -48,7 +39,6 @@ common:
           arguments:
             - -c
             - ./tasks tf_plan_db_roles create
-
   deploy_db_job: &deploy_db_job
     resources:
       - docker
