@@ -462,12 +462,12 @@ case "${command}" in
       dojo -c Dojofile-infra "./tasks _tf_plan_certs $2"
       ;;
   _tf_apply_certs)
-      _assume_environment_role $NHS_ENVIRONMENT true
+      _assume_environment_role $NHS_ENVIRONMENT
       tf_apply_certs
       ;;
   tf_apply_certs)
       check_env
-      dojo "./tasks _tf_apply_certs"
+      dojo -c Dojofile-infra "./tasks _tf_apply_certs"
       ;;
   _tf_plan)
       _assume_environment_role $NHS_ENVIRONMENT
