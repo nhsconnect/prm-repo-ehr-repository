@@ -176,9 +176,9 @@ function tf_plan_db_roles {
   tf_init_db_roles
   terraform get # modules
   if [[ "${operation}" == "create" ]]; then
-    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="${NHS_ENVIRONMENT}-db-roles.tfplan"
+    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="db-roles.tfplan"
   elif [[ "${operation}" == "destroy" ]]; then
-    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="${NHS_ENVIRONMENT}-db-roles.tfplan" -destroy
+    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="db-roles.tfplan" -destroy
   else
     echo "Unknown operation (should be create or destroy), got: ${operation}"
     exit 1
@@ -200,8 +200,7 @@ function tf_apply_certs {
 function tf_apply_db_roles {
   tf_init_db_roles
   terraform get # modules
-  terraform apply --parallelism=1 "${NHS_ENVIRONMENT}-db-roles.tfplan"
-  terraform output -json > tf-out-db-roles.json
+  terraform apply --parallelism=1 "db-roles.tfplan"
 }
 
 ####################

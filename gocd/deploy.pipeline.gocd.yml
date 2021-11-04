@@ -3,6 +3,16 @@ common:
   plan_job: &plan_job
     resources:
       - docker
+    artifacts:
+      - build:
+          source: terraform/deployment.tfplan
+          destination: terraform/
+      - build:
+          source: terraform/certs_deployment.tfplan
+          destination: terraform/
+      - build:
+          source: terraform-db-roles/db-roles.tfplan
+          destination: terraform-db-roles/
     tasks:
       - exec:
           command: /bin/bash
@@ -29,6 +39,24 @@ common:
     resources:
       - docker
     tasks:
+      - fetch:
+          stage: plan
+          job: plan
+          source: terraform/certs_deployment.tfplan
+          destination: terraform/
+          is_file: yes
+      - fetch:
+          stage: plan
+          job: plan
+          source: terraform/deployment.tfplan
+          destination: terraform/
+          is_file: yes
+      - fetch:
+          stage: plan
+          job: plan
+          source: terraform-db-roles/db-roles.tfplan
+          destination: terraform-db-roles/
+          is_file: yes
       - exec:
           command: /bin/bash
           arguments:
