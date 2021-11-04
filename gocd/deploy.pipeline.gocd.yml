@@ -44,8 +44,8 @@ common:
       - docker
     tasks:
       - fetch:
-          stage: plan
-          job: plan
+          stage: plan_db
+          job: plan_db
           source: terraform-db-roles/db-roles.tfplan
           destination: terraform-db-roles/
           is_file: yes
