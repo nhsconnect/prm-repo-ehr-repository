@@ -329,15 +329,3 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test_functional
-      - performance:
-          clean_workspace: true
-          jobs:
-            test:
-              resources:
-                - docker
-              tasks:
-                - exec:
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks test_performance
