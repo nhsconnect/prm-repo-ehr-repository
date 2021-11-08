@@ -336,8 +336,8 @@ pipelines:
       base_infra:
         pipeline: prm-deductions-infra
         stage: deploy_pre_prod
-      test_env:
-        pipeline: prm-deductions-ehr-repository.test
+      pre_prod_env:
+        pipeline: prm-deductions-ehr-repository.pre-prod
         stage: functional
     environment_variables:
       NHS_ENVIRONMENT: prod
