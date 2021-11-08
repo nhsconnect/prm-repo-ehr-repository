@@ -1,32 +1,67 @@
 format_version: 4
 common:
-  plan_job: &plan_job
+  plan_certs: &plan_certs
+    resources:
+      - docker
+      artifacts:
+        - build:
+            source: terraform/certs_deployment.tfplan
+            destination: terraform/
+      tasks:
+        - exec:
+            command: /bin/bash
+            arguments:
+              - -c
+              - ./tasks create_secrets
+        - exec:
+            command: /bin/bash
+            arguments:
+              - -c
+              - ./tasks tf_plan_certs create
+  deploy_certs: &deploy_certs
+    resources:
+      - docker
+    tasks:
+      - fetch:
+          stage: plan_certs
+          job: plan
+          source: terraform/certs_deployment.tfplan
+          destination: terraform/
+          is_file: yes
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_apply_certs
+  plan: &plan
     resources:
       - docker
     artifacts:
       - build:
           source: terraform/deployment.tfplan
           destination: terraform/
-      - build:
-          source: terraform/certs_deployment.tfplan
-          destination: terraform/
     tasks:
       - exec:
           command: /bin/bash
           arguments:
             - -c
-            - ./tasks create_secrets
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_plan_certs create
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
             - ./tasks tf_plan create
-  plan_db_job: &plan_db_job
+  deploy: &deploy
+    resources:
+      - docker
+    tasks:
+      - fetch:
+          stage: plan
+          job: plan
+          source: terraform/deployment.tfplan
+          destination: terraform/
+          is_file: yes
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_apply
+  plan_db: &plan_db
     resources:
       - docker
     artifacts:
@@ -39,7 +74,7 @@ common:
           arguments:
             - -c
             - ./tasks tf_plan_db_roles create
-  deploy_db_job: &deploy_db_job
+  deploy_db: &deploy_db
     resources:
       - docker
     tasks:
@@ -76,33 +111,6 @@ common:
           arguments:
             - -c
             - ./tasks wait_ecs
-
-  deploy_job: &deploy_job
-    resources:
-      - docker
-    tasks:
-      - fetch:
-          stage: plan
-          job: plan
-          source: terraform/certs_deployment.tfplan
-          destination: terraform/
-          is_file: yes
-      - fetch:
-          stage: plan
-          job: plan
-          source: terraform/deployment.tfplan
-          destination: terraform/
-          is_file: yes
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_apply_certs
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_apply
 pipelines:
   "prm-deductions-ehr-repository.dev":
     group: deductions
@@ -131,22 +139,30 @@ pipelines:
                 arguments:
                   - -c
                   - ./tasks promote_docker_image
+      - plan_certs:
+          clean_workspace: true
+          jobs:
+            plan: *plan_certs
+      - deploy_certs:
+          clean_workspace: true
+          jobs:
+            deploy: *deploy_certs
       - plan:
           clean_workspace: true
           jobs:
-            plan: *plan_job
+            plan: *plan
       - deploy:
           clean_workspace: true
           jobs:
-            deploy: *deploy_job
+            deploy: *deploy
       - plan_db:
           clean_workspace: true
           jobs:
-            plan_db: *plan_db_job
+            plan_db: *plan_db
       - deploy_db:
           clean_workspace: true
           jobs:
-            deploy_db: *deploy_db_job
+            deploy_db: *deploy_db
       - functional:
           clean_workspace: true
           jobs:
@@ -164,7 +180,6 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test_functional
-
   "prm-deductions-ehr-repository.test":
     group: deductions
     label_template: "${git[:8]}"
@@ -192,22 +207,30 @@ pipelines:
                   arguments:
                     - -c
                     - ./tasks promote_docker_image
+      - plan_certs:
+          clean_workspace: true
+          jobs:
+            plan: *plan_certs
+      - deploy_certs:
+          clean_workspace: true
+          jobs:
+            deploy: *deploy_certs
       - plan:
           clean_workspace: true
           jobs:
-            plan: *plan_job
+            plan: *plan
       - deploy:
           clean_workspace: true
           jobs:
-            deploy: *deploy_job
+            deploy: *deploy
       - plan_db:
           clean_workspace: true
           jobs:
-            plan_db: *plan_db_job
+            plan_db: *plan_db
       - deploy_db:
           clean_workspace: true
           jobs:
-            deploy_db: *deploy_db_job
+            deploy_db: *deploy_db
       - functional:
           clean_workspace: true
           jobs:
@@ -237,7 +260,6 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test_performance
-
   "prm-deductions-ehr-repository.pre-prod":
     group: deductions
     label_template: "${git[:8]}"
@@ -265,20 +287,30 @@ pipelines:
                 arguments:
                   - -c
                   - ./tasks promote_docker_image
+      - plan_certs:
+          clean_workspace: true
+          jobs:
+            plan: *plan_certs
+      - deploy_certs:
+          clean_workspace: true
+          jobs:
+            deploy: *deploy_certs
       - plan:
+          clean_workspace: true
           jobs:
-            plan: *plan_job
+            plan: *plan
       - deploy:
+          clean_workspace: true
           jobs:
-            deploy: *deploy_job
+            deploy: *deploy
       - plan_db:
           clean_workspace: true
           jobs:
-            plan_db: *plan_db_job
+            plan_db: *plan_db
       - deploy_db:
           clean_workspace: true
           jobs:
-            deploy_db: *deploy_db_job
+            deploy_db: *deploy_db
       - functional:
           clean_workspace: true
           jobs:
@@ -308,7 +340,6 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test_performance
-
   "prm-deductions-ehr-repository.prod":
     group: deductions
     label_template: "${git[:8]}"
@@ -336,26 +367,39 @@ pipelines:
                 arguments:
                   - -c
                   - ./tasks promote_docker_image
-      - plan:
+      - plan_certs:
+          clean_workspace: true
           jobs:
-            plan: *plan_job
+            plan: *plan_certs
+      - deploy_certs:
+          approval:
+            type: manual
+            allow_only_on_success: true
+          clean_workspace: true
+          jobs:
+            deploy: *deploy_certs
+      - plan:
+          clean_workspace: true
+          jobs:
+            plan: *plan
       - deploy:
           approval:
             type: manual
             allow_only_on_success: true
+          clean_workspace: true
           jobs:
-            deploy: *deploy_job
+            deploy: *deploy
       - plan_db:
           clean_workspace: true
           jobs:
-            plan_db: *plan_db_job
+            plan_db: *plan_db
       - deploy_db:
-          clean_workspace: true
           approval:
             type: manual
             allow_only_on_success: true
+          clean_workspace: true
           jobs:
-            deploy_db: *deploy_db_job
+            deploy_db: *deploy_db
       - functional:
           clean_workspace: true
           jobs:

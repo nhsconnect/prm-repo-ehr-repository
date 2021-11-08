@@ -448,9 +448,13 @@ case "${command}" in
       check_env
       dojo -c Dojofile-infra "./tasks _create_secrets"
       ;;
+  _tf)
+      tf_init
+      bash
+      ;;
   tf)
       check_env
-      dojo -c Dojofile-infra "bash"
+      dojo -c Dojofile-infra "./tasks _tf"
       ;;
   _tf_plan_certs)
       _assume_environment_role $NHS_ENVIRONMENT
