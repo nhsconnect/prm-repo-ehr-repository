@@ -380,14 +380,6 @@ case "${command}" in
       configure_local_envs
       dojo -c Dojofile-itest "./tasks _test_integration"
       ;;
-  _test_functional)
-      npm install
-      npm run test:functional
-      ;;
-  test_functional)
-      configure_service_url
-      dojo "./tasks _test_functional"
-      ;;
   _test_performance)
       npm install
       npm run test:performance

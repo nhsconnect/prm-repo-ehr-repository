@@ -11,7 +11,6 @@
     "test": "npm run lint:fix && npm run test:unit",
     "test:unit": "jest \"src/(?!(.*\\integration.test\\.js))\" --setupFiles dotenv/config",
     "test:integration": "jest \"src/.*\\integration.test\\.js\" --detectOpenHandles --forceExit --setupFiles dotenv/config",
-    "test:functional": "jest test/functional/*",
     "test:performance": "jest test/performance/*",
     "test:docker": "jest test/docker/*",
     "test:watch": "jest \"src/(?!(.*\\integration.test\\.js))\" --setupFiles dotenv/config --watch",

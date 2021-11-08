@@ -175,11 +175,6 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks sanity_check
-                - exec:
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks test_functional
   "prm-deductions-ehr-repository.test":
     group: deductions
     label_template: "${git[:8]}"
@@ -243,11 +238,6 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks sanity_check
-                - exec:
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks test_functional
       - performance:
           clean_workspace: true
           jobs:
@@ -323,11 +313,6 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks sanity_check
-                - exec:
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks test_functional
       - performance:
           clean_workspace: true
           jobs:
@@ -412,8 +397,3 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks sanity_check
-                - exec:
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks test_functional
