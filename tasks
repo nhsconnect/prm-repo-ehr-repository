@@ -41,11 +41,20 @@ function check_nhs_service {
   fi
 }
 
-function configure_service_url {
-  if [[ -z "${NHS_ENVIRONMENT}" ]]; then
-    export SERVICE_URL=http://${NHS_SERVICE}:3000
+function configure_domain_infix {
+  if [[ "${NHS_ENVIRONMENT}" == "prod" ]]; then
+    export DOMAIN_INFIX="prod"
   else
-    export SERVICE_URL=https://${NHS_SERVICE}.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk
+    export DOMAIN_INFIX="${NHS_ENVIRONMENT}.non-prod"
+  fi
+}
+
+function configure_service_url {
+  configure_domain_infix
+  if [[ -z "${NHS_ENVIRONMENT}" ]]; then
+    export SERVICE_URL="http://${NHS_SERVICE}:3000"
+  else
+    export SERVICE_URL="https://${NHS_SERVICE}.${DOMAIN_INFIX}.patient-deductions.nhs.uk"
   fi
 }
 
@@ -427,9 +436,10 @@ case "${command}" in
       dojo "./tasks _sanity_check"
       ;;
   _sanity_check)
+      configure_domain_infix
       check_env
-      nslookup ehr-repo.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk
-      curl -i --fail "https://ehr-repo.${NHS_ENVIRONMENT}.non-prod.patient-deductions.nhs.uk/health"
+      nslookup "ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk"
+      curl -i --fail "https://ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk/health"
       ;;
   _drop_db)
       drop_db
