@@ -3,21 +3,21 @@ common:
   plan_certs: &plan_certs
     resources:
       - docker
-      artifacts:
-        - build:
-            source: terraform/certs_deployment.tfplan
-            destination: terraform/
-      tasks:
-        - exec:
-            command: /bin/bash
-            arguments:
-              - -c
-              - ./tasks create_secrets
-        - exec:
-            command: /bin/bash
-            arguments:
-              - -c
-              - ./tasks tf_plan_certs create
+    artifacts:
+      - build:
+          source: terraform/certs_deployment.tfplan
+          destination: terraform/
+    tasks:
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks create_secrets
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_plan_certs create
   deploy_certs: &deploy_certs
     resources:
       - docker
