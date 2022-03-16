@@ -1,4 +1,4 @@
-FROM node:14.17.1-alpine
+FROM node:14.19.0-alpine
 
 # Add root CA from deductions team to trusted certificates
 RUN apk update && \
