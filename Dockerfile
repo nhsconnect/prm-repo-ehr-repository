@@ -2,7 +2,7 @@ FROM node:14.19.0-alpine
 
 # Add root CA from deductions team to trusted certificates
 RUN apk update && \
-    apk add --no-cache openssl ca-certificates bash tini postgresql-client jq && \
+    apk add --no-cache openssl ca-certificates bash tini postgresql-client && \
     rm -rf /var/cache/apk/*
 
 RUN apk add --no-cache \
