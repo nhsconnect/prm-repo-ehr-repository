@@ -63,11 +63,19 @@ resource "aws_security_group" "ecs-tasks-sg" {
   }
 
   egress {
-    description = "Allow All Outbound"
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound HTTPS traffic in vpc"
+    protocol    = "tcp"
+    from_port   = 443
+    to_port     = 443
+    cidr_blocks = [data.aws_vpc.private_vpc.cidr_block]
+  }
+
+  egress {
+    description     = "Allow outbound HTTPS traffic to s3"
+    protocol        = "tcp"
+    from_port       = 443
+    to_port         = 443
+    prefix_list_ids = [data.aws_ssm_parameter.s3_prefix_list_id.value]
   }
 
   tags = {
@@ -75,6 +83,14 @@ resource "aws_security_group" "ecs-tasks-sg" {
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
+}
+
+data "aws_vpc" "private_vpc" {
+  id = data.aws_ssm_parameter.deductions_core_vpc_id.value
+}
+
+data "aws_ssm_parameter" "s3_prefix_list_id" {
+  name = "/repo/${var.environment}/output/prm-deductions-infra/deductions-core/s3-prefix-list-id"
 }
 
 
