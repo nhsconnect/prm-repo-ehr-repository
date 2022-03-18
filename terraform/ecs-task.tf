@@ -63,6 +63,14 @@ resource "aws_security_group" "ecs-tasks-sg" {
   }
 
   egress {
+    description     = "Allow traffic outbound traffic to alb"
+    protocol        = "tcp"
+    from_port       = "3000"
+    to_port         = "3000"
+    cidr_blocks = [data.aws_vpc.private_vpc.cidr_block]
+  }
+
+  egress {
     description = "Allow all outbound HTTPS traffic in vpc"
     protocol    = "tcp"
     from_port   = 443
