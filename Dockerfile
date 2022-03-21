@@ -40,7 +40,6 @@ COPY build/config/database.js /app/src/config/
 COPY .sequelizerc   /app/
 
 COPY scripts/load-api-keys.sh /app/scripts/load-api-keys.sh
-COPY scripts/migrate-db.sh /app/scripts/migrate-db.sh
 COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server
 
 RUN npm install

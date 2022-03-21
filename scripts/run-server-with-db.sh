@@ -9,9 +9,7 @@ function jsonPrettify {
   echo "{message: $1, level: $2, timestamp: `timestamp`, service: ${NHS_SERVICE}, environment: ${NHS_ENVIRONMENT} } "
 }
 
-
-jsonPrettify "Running DB migrations" INFO
-source ./scripts/migrate-db.sh
+jsonPrettify "Skipping DB migrations, expecting them to have been run prior to app startup" INFO
 
 jsonPrettify "Loading API Keys" INFO
 source ./scripts/load-api-keys.sh
