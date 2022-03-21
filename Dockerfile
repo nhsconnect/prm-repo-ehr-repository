@@ -42,7 +42,11 @@ COPY .sequelizerc   /app/
 COPY scripts/load-api-keys.sh /app/scripts/load-api-keys.sh
 COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server
 
-RUN npm install
+RUN npm install --production
+
+#RUN rm -rf /root/.npm /root/.cache \
+#    /usr/local/lib/node_modules/npm /usr/local/bin/npm
+
 
 EXPOSE 3000
 
