@@ -410,6 +410,7 @@ case "${command}" in
       ;;
   _test_docker)
       npm install
+      ./scripts/migrate-db.sh
       node scripts/wait-for-localstack.js
       npm run test:docker
       ;;
@@ -418,6 +419,11 @@ case "${command}" in
       configure_docker_repository_uri
       set_image_tag
       dojo -c Dojofile-dtest "./tasks _test_docker"
+      ;;
+  test_docker_local_shell)
+      configure_local_envs
+      set_image_tag
+      dojo -c Dojofile-dtest
       ;;
   test_docker_local)
       configure_local_envs
