@@ -63,19 +63,27 @@ resource "aws_security_group" "ecs-tasks-sg" {
   }
 
   egress {
-    description     = "Allow traffic outbound traffic to alb"
-    protocol        = "tcp"
-    from_port       = "3000"
-    to_port         = "3000"
+    description = "Allow All Outbound in deductions-private vpc"
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
     cidr_blocks = [data.aws_vpc.private_vpc.cidr_block]
   }
 
   egress {
-    description = "Allow all outbound HTTPS traffic in vpc"
-    protocol    = "tcp"
-    from_port   = 443
-    to_port     = 443
-    cidr_blocks = [data.aws_vpc.private_vpc.cidr_block]
+    description = "Allow All Outbound in deductions-core vpc"
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = [data.aws_vpc.deductions_core_vpc.cidr_block]
+  }
+
+  egress {
+    description = "Allow All Outbound in mhs vpc"
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = [data.aws_vpc.mhs.cidr_block]
   }
 
   egress {
@@ -93,8 +101,19 @@ resource "aws_security_group" "ecs-tasks-sg" {
   }
 }
 
-data "aws_vpc" "private_vpc" {
+data "aws_vpc" "deductions_core_vpc" {
   id = data.aws_ssm_parameter.deductions_core_vpc_id.value
+}
+
+data "aws_vpc" "private_vpc" {
+  id = data.aws_ssm_parameter.deductions_private_vpc_id.value
+}
+
+data "aws_vpc" "mhs" {
+  filter {
+    name = "tag:Name"
+    values = ["${var.environment}-repo-mhs-vpc"]
+  }
 }
 
 data "aws_ssm_parameter" "s3_prefix_list_id" {
