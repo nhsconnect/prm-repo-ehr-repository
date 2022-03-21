@@ -29,6 +29,7 @@ resource "aws_rds_cluster" "db-cluster" {
 
 resource "aws_kms_key" "ehr-repo-key" {
   description             = "EHR repository KMS key in ${var.environment} environment"
+  enable_key_rotation = true
   tags = {
     Name = "${var.environment}-ehr-repo-db"
     CreatedBy   = var.repo_name
