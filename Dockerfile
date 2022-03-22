@@ -1,8 +1,8 @@
-FROM node:14.19.0-alpine
+FROM node:14.19.0-alpine AS builder
 
-# Add root CA from deductions team to trusted certificates
+# install python and postgres native requirements
 RUN apk update && \
-    apk add --no-cache openssl ca-certificates bash tini postgresql-client && \
+    apk add --no-cache bash tini postgresql-client && \
     rm -rf /var/cache/apk/*
 
 RUN apk add --no-cache \
@@ -16,8 +16,46 @@ RUN apk add --no-cache \
 # Install sequelize postgress native dependencies
 RUN apk add --no-cache postgresql-dev g++ make
 
+COPY package*.json /app/
+
+WORKDIR /app
+
+RUN npm ci --only=production
+
+# production app image
+FROM alpine:3.15
+
+# take just node without npm (including npx) or yarn
+COPY --from=builder /usr/local/bin/node /usr/local/bin
+
+# take native-install node modules
+COPY --from=builder /app /app
+
+# install python and postgres native requirements (again, as per builder)
+# add root CA from deductions team to trusted certificates
+RUN apk update && \
+    apk add --no-cache openssl ca-certificates bash tini postgresql-client && \
+    rm -rf /var/cache/apk/*
+
+RUN apk add --no-cache \
+        python3 \
+        py3-pip \
+    && pip3 install --upgrade pip \
+    && pip3 install \
+        awscli \
+    && rm -rf /var/cache/apk/*
+
+COPY build/                   /app/build
+COPY database/                /app/database
+COPY build/config/database.js /app/src/config/
+COPY .sequelizerc             /app/
+
+COPY scripts/load-api-keys.sh      /app/scripts/load-api-keys.sh
+COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server
+
 COPY ./certs/deductions.crt /usr/local/share/ca-certificates/deductions.crt
 RUN update-ca-certificates
+
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/deductions.crt
 
 ENV AUTHORIZATION_KEYS="auth-key-1" \
@@ -33,24 +71,12 @@ ENV AUTHORIZATION_KEYS="auth-key-1" \
 
 WORKDIR /app
 
-COPY package*.json  /app/
-COPY build/         /app/build
-COPY database/      /app/database
-COPY build/config/database.js /app/src/config/
-COPY .sequelizerc   /app/
-
-COPY scripts/load-api-keys.sh /app/scripts/load-api-keys.sh
-COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server
-
-RUN npm install --production
-
-#RUN rm -rf /root/.npm /root/.cache \
-#    /usr/local/lib/node_modules/npm /usr/local/bin/npm
-
-
 EXPOSE 3000
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["/usr/bin/run-ehr-server"]
+
+RUN addgroup -g 1000 node \
+    && adduser -u 1000 -G node -s /bin/sh -D node
 
 USER node
