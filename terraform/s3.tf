@@ -36,6 +36,12 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
             "aws:SecureTransport": "false"
           }
         }
+      },
+      {
+        Effect: "Deny",
+        Principal: "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/NHSDAdminRole*",
+        Action: "s3:*",
+        Resource: "${aws_s3_bucket.ehr-repo-bucket.arn}/*",
       }
     ]
   })
