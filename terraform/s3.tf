@@ -43,7 +43,10 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
           "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/NHSDAdminRole"
         },
         Action: "s3:*",
-        Resource: "${aws_s3_bucket.ehr-repo-bucket.arn}/*"
+        Resource: [
+          "${aws_s3_bucket.ehr-repo-bucket.arn}",
+          "${aws_s3_bucket.ehr-repo-bucket.arn}/*"
+        ]
       }
     ]
   })
