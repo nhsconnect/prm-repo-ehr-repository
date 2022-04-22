@@ -53,7 +53,6 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
 }
 
 resource "aws_s3_bucket" "ehr_repo_log_bucket" {
-  count = var.is_restricted_account ? 1 : 0
   bucket        = var.s3_log_bucket_name
   acl           = "private"
   force_destroy = true
@@ -77,7 +76,6 @@ resource "aws_s3_bucket" "ehr_repo_log_bucket" {
 }
 
 resource "aws_s3_bucket_logging" "ehr_logging" {
-  count = var.is_restricted_account ? 1 : 0
   bucket = aws_s3_bucket.ehr-repo-bucket.id
 
   target_bucket = aws_s3_bucket.ehr_repo_log_bucket[0].id

@@ -9,7 +9,6 @@ database_name        = "deductions_db"
 
 s3_bucket_name       = "pre-prod-ehr-repo-bucket"
 s3_log_bucket_name   = "pre-prod-ehr-repo-log-bucket"
-is_restricted_account= true
 
 task_cpu    = 256
 task_memory = 512
