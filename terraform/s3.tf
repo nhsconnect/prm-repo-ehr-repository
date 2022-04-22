@@ -92,7 +92,7 @@ resource "aws_s3_bucket_policy" "ehr_repo_log_bucket_policy" {
         Principal:  {
           "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/RepoDeveloper"
         },
-        Action: "s3:Get*",
+        Action: ["s3:Get*","s3:ListBucket"],
         Resource: [
           "${aws_s3_bucket.ehr_repo_log_bucket.arn}",
           "${aws_s3_bucket.ehr_repo_log_bucket.arn}/*"
