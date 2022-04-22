@@ -14,6 +14,7 @@ variable "environment" {}
 variable "component_name" {}
 variable "dns_name" {}
 variable "s3_bucket_name" {}
+variable "s3_log_bucket_name" {}
 variable "task_image_tag" {}
 variable "task_cpu" {}
 variable "task_memory" {}
@@ -45,3 +46,7 @@ variable "log_level" {
 variable "grant_access_through_vpn" {}
 variable "allow_vpn_to_ecs_tasks" { default=false }
 variable "enable_rds_cluster_deletion_protection" {}
+
+variable "is_restricted_account" {
+  default = false
+}
