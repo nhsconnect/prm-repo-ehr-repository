@@ -19,3 +19,5 @@ alb_deregistration_delay = 15
 
 grant_access_through_vpn = true
 enable_rds_cluster_deletion_protection = false
+
+is_restricted_account= true
