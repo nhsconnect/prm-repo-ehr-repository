@@ -78,7 +78,28 @@ resource "aws_s3_bucket" "ehr_repo_log_bucket" {
 resource "aws_s3_bucket_logging" "ehr_logging" {
   bucket = aws_s3_bucket.ehr-repo-bucket.id
 
-  target_bucket = aws_s3_bucket.ehr_repo_log_bucket[0].id
+  target_bucket = aws_s3_bucket.ehr_repo_log_bucket.id
   target_prefix = "log/"
 }
+
+resource "aws_s3_bucket_policy" "ehr_repo_log_bucket_policy" {
+  count = var.is_restricted_account ? 1 : 0
+  bucket = aws_s3_bucket.ehr_repo_log_bucket.id
+  policy = jsonencode({
+    "Statement": [
+      {
+        Effect: "Allow",
+        Principal:  {
+          "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/RepoDeveloper"
+        },
+        Action: "s3:Get*",
+        Resource: [
+          "${aws_s3_bucket.ehr_repo_log_bucket.arn}",
+          "${aws_s3_bucket.ehr_repo_log_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
 
