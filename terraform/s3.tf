@@ -15,6 +15,11 @@ resource "aws_s3_bucket" "ehr-repo-bucket" {
     }
   }
 
+  logging {
+    target_bucket = aws_s3_bucket.ehr_repo_log_bucket.id
+    target_prefix = "log/"
+  }
+
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
@@ -73,13 +78,6 @@ resource "aws_s3_bucket" "ehr_repo_log_bucket" {
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
-}
-
-resource "aws_s3_bucket_logging" "ehr_logging" {
-  bucket = aws_s3_bucket.ehr-repo-bucket.id
-
-  target_bucket = aws_s3_bucket.ehr_repo_log_bucket.id
-  target_prefix = "log/"
 }
 
 resource "aws_s3_bucket_policy" "ehr_repo_log_bucket_policy" {
