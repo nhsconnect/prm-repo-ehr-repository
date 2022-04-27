@@ -2,7 +2,6 @@ environment          = "test"
 component_name       = "ehr-repo"
 dns_name             = "ehr-repo"
 repo_name            = "prm-deductions-ehr-repository"
-allowed_cidr         = "10.21.0.0/16" // deductions_private_cidr
 
 node_env             = "prod"
 database_name        = "deductions_db"
