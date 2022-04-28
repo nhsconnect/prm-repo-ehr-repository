@@ -49,3 +49,7 @@ variable "enable_rds_cluster_deletion_protection" {}
 variable "is_restricted_account" {
   default = false
 }
+
+variable "db_instance_number" {
+  default = 1
+}
