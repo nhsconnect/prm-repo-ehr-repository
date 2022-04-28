@@ -80,7 +80,7 @@ resource "aws_db_subnet_group" "db-cluster-subnet-group" {
 }
 
 resource "aws_rds_cluster_instance" "ehr-db-instances" {
-  count                 = 1
+  count                 = 3
   identifier            = "${var.environment}-ehr-db-instance-${count.index}"
   cluster_identifier    = aws_rds_cluster.db-cluster.id
   instance_class        = "db.t3.medium"
