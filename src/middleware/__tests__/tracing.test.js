@@ -12,4 +12,17 @@ describe('tracing middleware', () => {
       expect(attributes.traceId).toMatch(/^[0-9a-fA-F-]{36}$/);
     });
   });
+
+  it('should set traceId to the traceId provided in the header', () => {
+    let req = {
+      headers: {
+        traceid: 'testtraceid'
+      }
+    };
+    startRequest(() => {
+      middleware(req, {}, () => {});
+      const attributes = getCurrentSpanAttributes();
+      expect(attributes.traceId).toBe('testtraceid');
+    });
+  });
 });
