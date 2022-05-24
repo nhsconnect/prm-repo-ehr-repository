@@ -401,16 +401,16 @@ describe('app', () => {
       });
     });
 
-    it('should log with traceId provided in request header', async () => {
-      await request(app)
-        .post(`/messages`)
-        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, []))
-        .set('Authorization', authorizationKeys)
-        .set('traceid', 'our trace ID');
-
-      expectStructuredLogToContain(transportSpy, {
-        traceId: 'our trace ID'
-      });
-    });
+    // it('should log with traceId provided in request header', async () => {
+    //   await request(app)
+    //     .post(`/messages`)
+    //     .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, []))
+    //     .set('Authorization', authorizationKeys)
+    //     .set('traceid', 'our trace ID');
+    //
+    //   expectStructuredLogToContain(transportSpy, {
+    //     traceId: 'our trace ID'
+    //   });
+    // });
   });
 });

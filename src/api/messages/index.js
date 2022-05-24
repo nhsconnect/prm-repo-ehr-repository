@@ -9,8 +9,11 @@ import {
   storeMessageController,
   storeMessageControllerValidation,
 } from './store-message-controller';
+import * as tracing from '../../middleware/tracing';
 
 export const messages = express.Router();
+
+messages.use(tracing.middleware);
 
 messages.get(
   '/:conversationId/:messageId',
