@@ -1,6 +1,5 @@
 import { logger } from '../config/logging';
-import { tracer } from '../config/tracing';
-import { context, trace } from '@opentelemetry/api';
+import { startRequest } from '../config/tracing';
 
 export const logError = (status, error) => logger.error(status, { error });
 
@@ -11,10 +10,7 @@ export const logInfo = (status) => logger.info(status);
 export const logDebug = (status) => logger.debug(status);
 
 export const middleware = (req, res, next) => {
-  const span = tracer.startSpan('inboundRequestSpan', context.active());
-  context.with(trace.setSpan(context.active(), span), () => {
-    next();
-  });
+  const span = startRequest(next);
 
   res.on('finish', () => {
     eventFinished(req, res);
