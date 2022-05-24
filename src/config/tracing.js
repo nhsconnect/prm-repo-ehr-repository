@@ -26,7 +26,11 @@ export const setCurrentSpanAttributes = (attributes) => {
 };
 
 export function getCurrentSpanAttributes() {
-  return trace.getSpan(context.active())?.attributes;
+  const currentSpan = trace.getSpan(context.active());
+  if (currentSpan) {
+    return currentSpan.attributes;
+  }
+  return undefined;
 }
 
 export function startRequest(next) {
