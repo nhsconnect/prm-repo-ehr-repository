@@ -10,11 +10,10 @@ export const logInfo = (status) => logger.info(status);
 export const logDebug = (status) => logger.debug(status);
 
 export const middleware = (req, res, next) => {
-  const span = startRequest(next);
+  startRequest(next);
 
   res.on('finish', () => {
     eventFinished(req, res);
-    span.end();
   });
 };
 

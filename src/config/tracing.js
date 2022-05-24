@@ -1,42 +1,26 @@
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-import { context, propagation, trace } from '@opentelemetry/api';
-import { W3CTraceContextPropagator } from '@opentelemetry/core';
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { AsyncLocalStorage } from 'async_hooks';
 
-const tracerProvider = new NodeTracerProvider({});
-
-propagation.setGlobalPropagator(new W3CTraceContextPropagator());
-
-tracerProvider.register();
-registerInstrumentations({
-  tracerProvider: tracerProvider,
-  instrumentations: [new HttpInstrumentation()],
-});
+const asyncLocalStorage = new AsyncLocalStorage();
 
 console.log('Tracing initialised');
 
-export const tracer = tracerProvider.getTracer('ehr-repo-tracer');
-
 export const setCurrentSpanAttributes = (attributes) => {
-  const currentSpan = trace.getSpan(context.active());
-  if (currentSpan) {
-    currentSpan.setAttributes(attributes);
+  let store = asyncLocalStorage.getStore();
+  if (!store) {
+    store = {};
   }
+  for (const [key, value] of Object.entries(attributes)) {
+    store[key] = value;
+  }
+  asyncLocalStorage.enterWith(store);
 };
 
 export function getCurrentSpanAttributes() {
-  const currentSpan = trace.getSpan(context.active());
-  if (currentSpan) {
-    return currentSpan.attributes;
-  }
-  return undefined;
+  return asyncLocalStorage.getStore();
 }
 
-export function startRequest(next) {
-  const span = tracer.startSpan('inboundRequestSpan', context.active());
-  context.with(trace.setSpan(context.active(), span), () => {
-    next();
+export function startRequest(requestHandler) {
+  asyncLocalStorage.run({}, () => {
+    requestHandler();
   });
-  return span;
 }
