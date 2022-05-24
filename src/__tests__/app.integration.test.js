@@ -409,7 +409,7 @@ describe('app', () => {
         .set('traceid', 'our trace ID');
 
       expectStructuredLogToContain(transportSpy, {
-        traceId: 'our trace ID'
+        traceId: 'our trace ID',
       });
     });
   });

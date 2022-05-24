@@ -4,7 +4,7 @@ import { middleware } from '../tracing';
 describe('tracing middleware', () => {
   it('should generate traceId if none is provided', () => {
     let req = {
-      headers: {}
+      headers: {},
     };
     startRequest(() => {
       middleware(req, {}, () => {});
@@ -16,8 +16,8 @@ describe('tracing middleware', () => {
   it('should set traceId to the traceId provided in the header', () => {
     let req = {
       headers: {
-        traceid: 'testtraceid'
-      }
+        traceid: 'testtraceid',
+      },
     };
     startRequest(() => {
       middleware(req, {}, () => {});

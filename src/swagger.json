@@ -11,9 +11,7 @@
       "get": {
         "tags": [],
         "summary": "Check filestore and database is available",
-        "consumes": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
         "responses": {
           "200": {
             "description": "Successfully return health check report"
@@ -37,9 +35,7 @@
       "get": {
         "tags": [],
         "summary": "Retrieves patient's health record status through the associated conversation id",
-        "consumes": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
         "parameters": [
           {
             "in": "path",
@@ -76,7 +72,6 @@
           "503": {
             "description": "Failed to get health record status"
           }
-
         },
         "security": [
           {
@@ -89,9 +84,7 @@
       "get": {
         "tags": [],
         "summary": "Retrieves the current patient's health record",
-        "consumes": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
         "parameters": [
           {
             "in": "path",
@@ -137,9 +130,7 @@
       "get": {
         "tags": [],
         "summary": "Retrieves the location of the EHR",
-        "consumes": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
         "parameters": [
           {
             "in": "path",
@@ -188,9 +179,7 @@
       "post": {
         "tags": [],
         "summary": "Stores Health Record Messages in DB and updates the HR completeness status",
-        "consumes": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
         "parameters": [
           {
             "in": "body",
@@ -227,7 +216,7 @@
         ]
       }
     }
-    },
+  },
   "securityDefinitions": {
     "api_key": {
       "type": "apiKey",
@@ -245,9 +234,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": [
-                "patients"
-              ]
+              "enum": ["patients"]
             },
             "id": {
               "type": "string"
@@ -309,7 +296,7 @@
           }
         }
       },
-      "required": ["type", "id", "attributes","conversationId", "messageType"]
+      "required": ["type", "id", "attributes", "conversationId", "messageType"]
     },
     "ValidationErrors": {
       "type": "object",
