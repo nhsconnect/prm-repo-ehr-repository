@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "ehr-repo-bucket" {
   bucket        = var.s3_bucket_name
   acl           = "private"
-  force_destroy = true
+  force_destroy = false
 
   server_side_encryption_configuration {
     rule {
