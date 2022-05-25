@@ -30,16 +30,16 @@ resource "aws_s3_bucket_versioning" "ehr_repo_bucket_versioning" {
   }
 }
 
-resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_object_lock" {
-  bucket = aws_s3_bucket.ehr-repo-bucket.bucket
-
-  rule {
-    default_retention {
-      mode = "COMPLIANCE"
-      years = 5000 # Never expires
-    }
-  }
-}
+#resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_object_lock" {
+#  bucket = aws_s3_bucket.ehr-repo-bucket.bucket
+#
+#  rule {
+#    default_retention {
+#      mode = "COMPLIANCE"
+#      years = 5000 # Never expires
+#    }
+#  }
+#}
 
 resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
 
