@@ -14,6 +14,7 @@ variable "environment" {}
 variable "component_name" {}
 variable "dns_name" {}
 variable "s3_bucket_name" {}
+variable "s3_prev_bucket_name" {}
 variable "s3_log_bucket_name" {}
 variable "task_image_tag" {}
 variable "task_cpu" {}

@@ -6,7 +6,8 @@ repo_name            = "prm-deductions-ehr-repository"
 node_env             = "prod"
 database_name        = "deductions_db"
 
-s3_bucket_name       = "test-ehr-repo-bucket"
+s3_bucket_name       = "test-ehr-repo"
+s3_prev_bucket_name  = "test-ehr-repo-bucket"
 s3_log_bucket_name   = "test-ehr-repo-log-bucket"
 
 task_cpu    = 256
