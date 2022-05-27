@@ -10,7 +10,10 @@ resource "aws_s3_bucket" "ehr-repo-bucket" {
       }
     }
   }
-
+  logging {
+    target_bucket = aws_s3_bucket.ehr_repo_log_bucket.id
+    target_prefix = "prev_log/"
+  }
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
