@@ -1,5 +1,5 @@
-# REFERENCE TO PREV BUCKET (no object lock) - TO BE EMPTIED AND DELETED
-resource "aws_s3_bucket" "ehr-repo-bucket" {
+# Bucket with object lock to be emptied and deleted
+resource "aws_s3_bucket" "ehr_repo_bucket" {
   bucket        = var.s3_prev_bucket_name
   acl           = "private"
   force_destroy = true
@@ -10,20 +10,27 @@ resource "aws_s3_bucket" "ehr-repo-bucket" {
       }
     }
   }
-  logging {
-    target_bucket = aws_s3_bucket.ehr_repo_log_bucket.id
-    target_prefix = "prev_log/"
-  }
+
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
 }
 
-# NEW BUCKET FROM SCRATCH (with object lock)
-resource "aws_s3_bucket" "ehr_repo_bucket" {
+resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_object_lock" {
+  bucket = aws_s3_bucket.ehr_repo_bucket.bucket
+  rule {
+    default_retention {
+      mode = "GOVERNANCE"
+      days = 1
+      #      years = 100 # Max value for this property
+    }
+  }
+}
+
+# actual bucket used
+resource "aws_s3_bucket" "ehr-repo-bucket" {
   bucket        = var.s3_bucket_name
-  object_lock_enabled = true
   acl           = "private"
   force_destroy = true
   server_side_encryption_configuration {
@@ -43,26 +50,24 @@ resource "aws_s3_bucket" "ehr_repo_bucket" {
   }
 }
 
-resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_object_lock" {
-  bucket = aws_s3_bucket.ehr_repo_bucket.bucket
-  rule {
-    default_retention {
-      mode = "GOVERNANCE"
-      days = 10
-#      years = 100 # Max value for this property
-    }
+resource "aws_s3_bucket_versioning" "ehr_repo_bucket_versioning" {
+  bucket = aws_s3_bucket.ehr-repo-bucket.bucket
+
+  versioning_configuration {
+    # To be re-enabled when introducing object lock
+    status = "Suspended"
   }
 }
 
 resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
-  bucket = aws_s3_bucket.ehr_repo_bucket.id
+  bucket = aws_s3_bucket.ehr-repo-bucket.id
   policy = jsonencode({
     "Statement": [
       {
         Effect: "Deny",
         Principal: "*",
         Action: "s3:*",
-        Resource: "${aws_s3_bucket.ehr_repo_bucket.arn}/*",
+        Resource: "${aws_s3_bucket.ehr-repo-bucket.arn}/*",
         Condition: {
           Bool: {
             "aws:SecureTransport": "false"
@@ -76,8 +81,8 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
         },
         Action: "s3:*",
         Resource: [
-          "${aws_s3_bucket.ehr_repo_bucket.arn}",
-          "${aws_s3_bucket.ehr_repo_bucket.arn}/*"
+          "${aws_s3_bucket.ehr-repo-bucket.arn}",
+          "${aws_s3_bucket.ehr-repo-bucket.arn}/*"
         ]
       }
     ]
