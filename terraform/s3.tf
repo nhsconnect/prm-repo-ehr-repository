@@ -1,38 +1,6 @@
-# Bucket with object lock to be emptied and deleted
-resource "aws_s3_bucket" "ehr_repo_bucket" {
-  bucket        = var.s3_prev_bucket_name
-  acl           = "private"
-  force_destroy = true
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
-  tags = {
-    CreatedBy   = var.repo_name
-    Environment = var.environment
-  }
-}
-
-resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_object_lock" {
-  bucket = aws_s3_bucket.ehr_repo_bucket.bucket
-  rule {
-    default_retention {
-      mode = "GOVERNANCE"
-      days = 1
-      #      years = 100 # Max value for this property
-    }
-  }
-}
-
-# actual bucket used
 resource "aws_s3_bucket" "ehr-repo-bucket" {
   bucket        = var.s3_bucket_name
   acl           = "private"
-  force_destroy = true
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
