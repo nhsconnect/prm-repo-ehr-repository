@@ -1,4 +1,4 @@
-# REFERENCE TO PREV BUCKET - TO BE EMPTIED AND DELETED
+# REFERENCE TO PREV BUCKET (no object lock) - TO BE EMPTIED AND DELETED
 resource "aws_s3_bucket" "ehr-repo-bucket" {
   bucket        = var.s3_prev_bucket_name
   acl           = "private"
@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "ehr-repo-bucket" {
   }
 }
 
-# NEW BUCKET FROM SCRATCH
+# NEW BUCKET FROM SCRATCH (with object lock)
 resource "aws_s3_bucket" "ehr_repo_bucket" {
   bucket        = var.s3_bucket_name
   object_lock_enabled = true
@@ -45,10 +45,11 @@ resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_object_lock" {
   rule {
     default_retention {
       mode = "GOVERNANCE"
-      years = 100 # Never expires
+      years = 100 # Max value for this property
     }
   }
 }
+
 resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
   bucket = aws_s3_bucket.ehr_repo_bucket.id
   policy = jsonencode({
@@ -78,6 +79,7 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
     ]
   })
 }
+
 resource "aws_s3_bucket" "ehr_repo_log_bucket" {
   bucket        = var.s3_log_bucket_name
   acl           = "private"
@@ -97,6 +99,7 @@ resource "aws_s3_bucket" "ehr_repo_log_bucket" {
     Environment = var.environment
   }
 }
+
 resource "aws_s3_bucket_policy" "ehr_repo_log_bucket_policy" {
   count = var.is_restricted_account ? 1 : 0
   bucket = aws_s3_bucket.ehr_repo_log_bucket.id
