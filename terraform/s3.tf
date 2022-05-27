@@ -45,7 +45,8 @@ resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_object_lock" {
   rule {
     default_retention {
       mode = "GOVERNANCE"
-      years = 100 # Max value for this property
+      days = 10
+#      years = 100 # Max value for this property
     }
   }
 }
