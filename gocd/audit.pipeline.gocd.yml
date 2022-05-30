@@ -1,7 +1,7 @@
 format_version: 4
 pipelines:
-  'prm-deductions-ehr-repository.audit':
-    group: deductions-audit
+  ehr-repository.audit:
+    group: repo-audit
     label_template: '${git[:8]}'
     materials:
       git:
