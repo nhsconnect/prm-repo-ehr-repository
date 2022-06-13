@@ -37,6 +37,11 @@ resource "aws_kms_key" "ehr-repo-key" {
   }
 }
 
+resource "aws_kms_alias" "ehr_repo_encryption" {
+  name          = "alias/ehr-repo-encryption-kms-key"
+  target_key_id = aws_kms_key.ehr-repo-key.id
+}
+
 resource "aws_ssm_parameter" "db_host" {
   name = "/repo/${var.environment}/output/${var.repo_name}/db-host"
   type = "String"
