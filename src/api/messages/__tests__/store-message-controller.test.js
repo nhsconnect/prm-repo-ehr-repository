@@ -10,6 +10,7 @@ import {
 import {
   updateHealthRecordCompleteness,
   healthRecordExists,
+  getHealthRecordStatus,
 } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
 import { logError } from '../../../middleware/logging';
@@ -51,7 +52,8 @@ describe('storeMessageController', () => {
       };
     });
 
-    it('should return a 201 when message has successfully been stored in database', async () => {
+    it('should return a 201 and health record status when message has successfully been stored in database', async () => {
+      getHealthRecordStatus.mockResolvedValueOnce('complete');
       const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds };
       const res = await request(app)
         .post('/messages')
@@ -59,8 +61,10 @@ describe('storeMessageController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
+      expect(res.body).toEqual({ healthRecordStatus: 'complete' });
       expect(createEhrExtract).toHaveBeenCalledWith(ehrExtract);
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
+      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
     });
 
     it('should return a 409 when conversationId already exists', async () => {

@@ -10,6 +10,7 @@ import { logError, logWarning } from '../../middleware/logging';
 import {
   updateHealthRecordCompleteness,
   healthRecordExists,
+  getHealthRecordStatus,
 } from '../../services/database/health-record-repository';
 import { setCurrentSpanAttributes } from '../../config/tracing';
 
@@ -46,40 +47,39 @@ export const storeMessageControllerValidation = [
 
 export const storeMessageController = async (req, res) => {
   const { id, attributes } = req.body.data;
-  setCurrentSpanAttributes({ conversationId: attributes.conversationId, messageId: id });
+  const { conversationId, messageType, nhsNumber, attachmentMessageIds } = attributes;
+  setCurrentSpanAttributes({ conversationId, messageId: id });
 
   try {
-    if (attributes.messageType === MessageType.EHR_EXTRACT) {
-      if (await healthRecordExists(attributes.conversationId)) {
+    if (messageType === MessageType.EHR_EXTRACT) {
+      if (await healthRecordExists(conversationId)) {
         logWarning(`Duplicated ehrExtract message ${id}`);
         res.sendStatus(409);
         return;
       }
       await createEhrExtract({
         messageId: id,
-        conversationId: attributes.conversationId,
-        nhsNumber: attributes.nhsNumber,
-        attachmentMessageIds: attributes.attachmentMessageIds,
+        conversationId,
+        nhsNumber,
+        attachmentMessageIds,
       });
     }
-    if (attributes.messageType === MessageType.ATTACHMENT) {
+    if (messageType === MessageType.ATTACHMENT) {
       if (await attachmentExists(id)) {
-        await updateAttachmentAndCreateItsParts(
-          id,
-          attributes.conversationId,
-          attributes.attachmentMessageIds
-        );
+        await updateAttachmentAndCreateItsParts(id, conversationId, attachmentMessageIds);
       } else {
         logWarning(
           `Attachment message ${id} did not arrive in order. Attachment parts: ${JSON.stringify(
-            attributes.attachmentMessageIds
+            attachmentMessageIds
           )}`
         );
-        await createAttachmentPart(id, attributes.conversationId);
+        await createAttachmentPart(id, conversationId);
       }
     }
-    await updateHealthRecordCompleteness(attributes.conversationId);
-    res.sendStatus(201);
+    await updateHealthRecordCompleteness(conversationId);
+    const healthRecordStatus = await getHealthRecordStatus(conversationId);
+
+    res.status(201).json({ healthRecordStatus });
   } catch (e) {
     logError('Returned 503 due to error while saving message', e);
     res.sendStatus(503);
