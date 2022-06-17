@@ -6,7 +6,7 @@ import {
   attachmentExists,
   createAttachmentPart,
 } from '../../services/database/message-repository';
-import { logError, logWarning } from '../../middleware/logging';
+import {logError, logInfo, logWarning} from '../../middleware/logging';
 import {
   updateHealthRecordCompleteness,
   healthRecordExists,
@@ -79,6 +79,7 @@ export const storeMessageController = async (req, res) => {
     await updateHealthRecordCompleteness(conversationId);
     const healthRecordStatus = await getHealthRecordStatus(conversationId);
 
+    logInfo('Health record status for attachments: ' + healthRecordStatus);
     res.status(201).json({ healthRecordStatus });
   } catch (e) {
     logError('Returned 503 due to error while saving message', e);
