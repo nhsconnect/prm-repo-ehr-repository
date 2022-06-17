@@ -6,7 +6,7 @@ import {
   attachmentExists,
   createAttachmentPart,
 } from '../../services/database/message-repository';
-import {logError, logInfo, logWarning} from '../../middleware/logging';
+import { logError, logInfo, logWarning } from '../../middleware/logging';
 import {
   updateHealthRecordCompleteness,
   healthRecordExists,
