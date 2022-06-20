@@ -44,6 +44,11 @@ resource "aws_ecs_service" "ecs-service" {
 resource "aws_ecs_cluster" "ecs-cluster" {
   name = "${var.environment}-${var.component_name}-ecs-cluster"
 
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
