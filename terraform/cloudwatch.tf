@@ -1,6 +1,6 @@
 locals {
   error_logs_metric_name              = "ErrorCountInLogs"
-  ehr_repo_service_metric_namespace = "ehr-repo"
+  ehr_repo_service_metric_namespace = "EhrRepo"
 }
 
 resource "aws_cloudwatch_log_group" "log-group" {
