@@ -113,7 +113,7 @@ common:
             - ./tasks wait_ecs
 pipelines:
   "prm-deductions-ehr-repository.dev":
-    group: deductions
+    group: repository
     label_template: "${git[:8]}"
     materials:
       git:
@@ -176,7 +176,7 @@ pipelines:
                       - -c
                       - ./tasks sanity_check
   "prm-deductions-ehr-repository.test":
-    group: deductions
+    group: repository
     label_template: "${git[:8]}"
     materials:
       git:
@@ -251,7 +251,7 @@ pipelines:
                       - -c
                       - ./tasks test_performance
   "prm-deductions-ehr-repository.pre-prod":
-    group: deductions
+    group: repository
     label_template: "${git[:8]}"
     materials:
       git:
@@ -326,7 +326,7 @@ pipelines:
                       - -c
                       - ./tasks test_performance
   "prm-deductions-ehr-repository.prod":
-    group: deductions
+    group: repository
     label_template: "${git[:8]}"
     materials:
       git:
