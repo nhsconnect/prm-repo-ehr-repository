@@ -23,3 +23,26 @@ resource "aws_cloudwatch_log_metric_filter" "log_metric_filter" {
     default_value = 0
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "healthy_host_count" {
+  alarm_name                = "${var.repo_name} service down"
+  comparison_operator       = "LessThanThreshold"
+  evaluation_periods        = "1"
+  metric_name               = "HealthyHostCount"
+  namespace                 = "AWS/ApplicationELB"
+  period                    = "60"
+  statistic                 = "Average"
+  threshold                 = "1"
+  alarm_description         = "This metric monitors the health of ${var.repo_name}"
+  treat_missing_data        = "breaching"
+  datapoints_to_alarm       = "1"
+  dimensions                = {
+    TargetGroup = aws_alb_target_group.internal-alb-tg.arn_suffix
+    LoadBalancer = aws_alb.alb-internal.arn_suffix
+  }
+  alarm_actions             = [data.aws_sns_topic.alarm_notifications.arn]
+}
+
+data "aws_sns_topic" "alarm_notifications" {
+  name = "${var.environment}-alarm-notifications-sns-topic"
+}
