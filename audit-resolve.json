@@ -13,6 +13,16 @@
       "decision": "ignore",
       "madeAt": 1657117660538,
       "expiresAt": 1659709240734
+    },
+    "1080969|sequelize>moment": {
+      "decision": "ignore",
+      "madeAt": 1657293329508,
+      "expiresAt": 1659885282630
+    },
+    "1080969|sequelize>moment-timezone>moment": {
+      "decision": "ignore",
+      "madeAt": 1657293329509,
+      "expiresAt": 1659885282630
     }
   },
   "rules": {},
