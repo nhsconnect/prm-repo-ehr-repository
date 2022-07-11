@@ -15,7 +15,7 @@ jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
 
-describe('patientDeleteController', () => {
+describe('deleteEhrController', () => {
   initializeConfig.mockReturnValue({
     consumerApiKeys: { TEST_USER: 'correct-key' },
   });

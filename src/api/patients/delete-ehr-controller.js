@@ -1,7 +1,7 @@
 import { param } from 'express-validator';
 import { logError, logInfo } from '../../middleware/logging';
 
-export const patientDeleteValidation = [
+export const deleteEhrValidation = [
   param('nhsNumber')
     .isNumeric()
     .withMessage("'nhsNumber' provided is not numeric")
@@ -9,7 +9,7 @@ export const patientDeleteValidation = [
     .withMessage("'nhsNumber' provided is not 10 characters"),
 ];
 
-export const patientDeleteController = async (req, res) => {
+export const deleteEhrController = async (req, res) => {
   const { nhsNumber } = req.params;
   logInfo('delete endpoint has been called!');
 
