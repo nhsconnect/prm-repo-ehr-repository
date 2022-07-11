@@ -6,6 +6,7 @@ import {
 import { validate } from '../../middleware/validation';
 import { authenticateRequest } from '../../middleware/auth';
 import { patientDetailsController, patientDetailsValidation } from './patient-details-controller';
+import { patientDeleteController, patientDeleteValidation } from './patient-delete-controller';
 import * as tracing from '../../middleware/tracing';
 
 export const patients = express.Router();
@@ -26,4 +27,12 @@ patients.get(
   patientDetailsValidation,
   validate,
   patientDetailsController
+);
+
+patients.delete(
+  '/:nhsNumber',
+  authenticateRequest,
+  patientDeleteValidation,
+  validate,
+  patientDeleteController
 );
