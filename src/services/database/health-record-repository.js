@@ -86,6 +86,14 @@ export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
   return currentHealthRecord.conversationId;
 };
 
+// TODO: this eslint line will go
+// eslint-disable-next-line no-unused-vars
+export const deleteHealthRecordForPatient = async (nhsNumber) => {
+  // Awesome stuff coming here
+
+  return 'TBC';
+};
+
 export const getHealthRecordMessageIds = async (conversationId) => {
   const Message = ModelFactory.getByName(messageModelName);
 

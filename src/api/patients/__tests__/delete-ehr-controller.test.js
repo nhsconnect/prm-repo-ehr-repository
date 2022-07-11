@@ -1,12 +1,7 @@
 import request from 'supertest';
-import { v4 as uuid } from 'uuid';
 import app from '../../../app';
-import {
-  getCurrentHealthRecordIdForPatient,
-  getHealthRecordMessageIds,
-} from '../../../services/database/health-record-repository';
+import { deleteHealthRecordForPatient } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
-import getSignedUrl from '../../../services/storage/get-signed-url';
 
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
@@ -25,22 +20,15 @@ describe('deleteEhrController', () => {
   describe('success', () => {
     it('should return 200 when controller invoked correctly', async () => {
       const nhsNumber = '1234567890';
-      const conversationId = uuid();
-      const messageId = uuid();
-      const presignedUrl = 'test-url';
 
-      getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
-      getHealthRecordMessageIds.mockResolvedValue({
-        healthRecordExtractId: messageId,
-        attachmentIds: [],
-      });
-      getSignedUrl.mockResolvedValue(presignedUrl);
+      deleteHealthRecordForPatient.mockResolvedValue('TBC');
 
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(200);
+      expect(deleteHealthRecordForPatient).toHaveBeenCalledWith(nhsNumber);
     });
   });
 

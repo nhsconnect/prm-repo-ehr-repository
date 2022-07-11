@@ -1,6 +1,6 @@
 import { param } from 'express-validator';
 import { logError, logInfo } from '../../middleware/logging';
-
+import { deleteHealthRecordForPatient } from '../../services/database/health-record-repository';
 export const deleteEhrValidation = [
   param('nhsNumber')
     .isNumeric()
@@ -11,7 +11,11 @@ export const deleteEhrValidation = [
 
 export const deleteEhrController = async (req, res) => {
   const { nhsNumber } = req.params;
-  logInfo('delete endpoint has been called!');
+
+  //TODO:
+  // - set deleted-at in health_record table
+  // - set deleted-at in messages table
+  // - all in a transaction https://sequelize.org/docs/v6/other-topics/transactions/
 
   try {
     const responseBody = {
@@ -21,9 +25,12 @@ export const deleteEhrController = async (req, res) => {
       },
     };
 
+    await deleteHealthRecordForPatient(nhsNumber);
+
+    logInfo('EHR record deleted successfully');
     res.status(200).json(responseBody);
   } catch (err) {
-    logError('Could not retrieve patient health record', err);
+    logError('Could not delete EHR record', err);
     res.sendStatus(503);
   }
 };
