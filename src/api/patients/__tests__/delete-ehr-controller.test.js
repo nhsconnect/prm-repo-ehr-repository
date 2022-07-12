@@ -66,7 +66,7 @@ describe('deleteEhrController', () => {
       const errorMessage = { nhsNumber: "'nhsNumber' provided is not numeric" };
 
       const res = await request(app)
-        .get(`/patients/${invalidNhsNumber}`)
+        .delete(`/patients/${invalidNhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
@@ -78,7 +78,7 @@ describe('deleteEhrController', () => {
       const errorMessage = { nhsNumber: "'nhsNumber' provided is not 10 characters" };
 
       const res = await request(app)
-        .get(`/patients/${invalidNhsNumber}`)
+        .delete(`/patients/${invalidNhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(422);
