@@ -3,6 +3,7 @@ import app from '../../../app';
 import { deleteHealthRecordForPatient } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
 import { logError } from '../../../middleware/logging';
+import { v4 as uuid } from 'uuid';
 
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
@@ -21,7 +22,8 @@ describe('deleteEhrController', () => {
 
   describe('success', () => {
     it('should return 200 when controller invoked correctly', async () => {
-      deleteHealthRecordForPatient.mockResolvedValue('TBC');
+      const conversationId = uuid();
+      deleteHealthRecordForPatient.mockResolvedValue(conversationId);
 
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
@@ -29,6 +31,9 @@ describe('deleteEhrController', () => {
 
       expect(res.status).toBe(200);
       expect(deleteHealthRecordForPatient).toHaveBeenCalledWith(nhsNumber);
+      expect(res.body.data.id).toEqual(nhsNumber);
+      expect(res.body.data.type).toEqual('patients');
+      expect(res.body.data.conversationId).toEqual(conversationId);
     });
   });
 
@@ -41,6 +46,16 @@ describe('deleteEhrController', () => {
 
       expect(res.status).toEqual(503);
       expect(logError).toHaveBeenCalledWith('Could not delete EHR record', {});
+    });
+
+    it('should return a 404 when record is not found', async () => {
+      deleteHealthRecordForPatient.mockResolvedValue(undefined);
+      const res = await request(app)
+        .delete(`/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toEqual(404);
+      expect(logError).toHaveBeenCalledWith('Could not find EHR record');
     });
   });
 

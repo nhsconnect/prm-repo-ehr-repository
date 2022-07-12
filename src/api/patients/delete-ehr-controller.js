@@ -12,22 +12,24 @@ export const deleteEhrValidation = [
 export const deleteEhrController = async (req, res) => {
   const { nhsNumber } = req.params;
 
-  //TODO:
-  // - set deleted-at in health_record table
-  // - set deleted-at in messages table
-  // - all in a transaction https://sequelize.org/docs/v6/other-topics/transactions/
-
   try {
+    const conversationId = await deleteHealthRecordForPatient(nhsNumber);
+    if (!conversationId) {
+      logError('Could not find EHR record');
+      res.sendStatus(404);
+      return;
+    }
+
+    logInfo('EHR record deleted successfully');
+
     const responseBody = {
       data: {
         type: 'patients',
         id: nhsNumber,
+        conversationId,
       },
     };
 
-    await deleteHealthRecordForPatient(nhsNumber);
-
-    logInfo('EHR record deleted successfully');
     res.status(200).json(responseBody);
   } catch (err) {
     logError('Could not delete EHR record', err);
