@@ -14,15 +14,15 @@
       "madeAt": 1657117660538,
       "expiresAt": 1659709240734
     },
-    "1080969|sequelize>moment": {
+    "1081008|sequelize>moment": {
       "decision": "ignore",
-      "madeAt": 1657293329508,
-      "expiresAt": 1659885282630
+      "madeAt": 1657622138600,
+      "expiresAt": 1660214096604
     },
-    "1080969|sequelize>moment-timezone>moment": {
+    "1081008|sequelize>moment-timezone>moment": {
       "decision": "ignore",
-      "madeAt": 1657293329509,
-      "expiresAt": 1659885282630
+      "madeAt": 1657622138601,
+      "expiresAt": 1660214096604
     }
   },
   "rules": {},
