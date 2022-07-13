@@ -88,7 +88,7 @@ export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
 
 export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-  // const Message = ModelFactory.getByName(messageModelName);
+  const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
   const t = await sequelize.transaction();
 
@@ -100,24 +100,10 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
       return undefined;
     }
 
-    await HealthRecord.update(
-      { completedAt: getNow(), deletedAt: getNow() },
-      { where: { nhsNumber }, transaction: t }
-    );
+    await HealthRecord.update({ deletedAt: getNow() }, { where: { nhsNumber }, transaction: t });
+    // for multiple conversation ids, we need to loop here
+    await Message.update({ deletedAt: getNow() }, { where: { conversationId }, transaction: t });
 
-    // const messages = await Message.findAll({
-    //   where: {
-    //     conversationId,
-    //     receivedAt: null,
-    //   },
-    // });
-    // if (messages.length === 0) {
-    //   await Message.update(
-    //       { completedAt: getNow() },
-    //       { deletedAt: getNow() },
-    //       { where: { conversationId }, transaction: t }
-    //   );
-    // }
     await t.commit();
     return conversationId;
   } catch (err) {

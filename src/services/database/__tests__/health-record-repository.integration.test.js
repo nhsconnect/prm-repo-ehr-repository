@@ -289,30 +289,27 @@ describe('healthRecordRepository', () => {
 
   describe('markHealthRecordAsDeletedForPatient', () => {
     it('should return conversation id for the patient marked as deleted', async () => {
-      // TODO: set deleted-at in messages table
+      // TODO: try to assert that deleted_at was set in both tables (messages, health-record)
+
       const nhsNumber = '9898989898';
-      // const messageId = uuid();
+      const messageId = uuid();
       const conversationId = uuid();
 
       await HealthRecord.create({
-        conversationId: conversationId,
+        conversationId,
         nhsNumber,
         completedAt: new Date(),
       });
 
-      // const justCreated = await HealthRecord.findAll({
-      //   where: { nhsNumber },
-      // });
-      // console.log('justCreated ', justCreated);
+      await Message.create({
+        conversationId,
+        messageId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date(),
+      });
 
       const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
-
       expect(result).toEqual(conversationId);
-      // const markedAsDeleted = await HealthRecord.findAll({
-      //   where: { nhsNumber },
-      // });
-      // console.log('markedAsDeleted ', markedAsDeleted);
-      // expect(markedAsDeleted[0].deletedAt).toBeDefined();
     });
   });
 });
