@@ -22,8 +22,8 @@ describe('deleteEhrController', () => {
 
   describe('success', () => {
     it('should return 200 when controller invoked correctly', async () => {
-      const conversationId = uuid();
-      markHealthRecordAsDeletedForPatient.mockResolvedValue(conversationId);
+      const conversationIds = [uuid()];
+      markHealthRecordAsDeletedForPatient.mockResolvedValue(conversationIds);
 
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
@@ -33,7 +33,7 @@ describe('deleteEhrController', () => {
       expect(markHealthRecordAsDeletedForPatient).toHaveBeenCalledWith(nhsNumber);
       expect(res.body.data.id).toEqual(nhsNumber);
       expect(res.body.data.type).toEqual('patients');
-      expect(res.body.data.conversationId).toEqual(conversationId);
+      expect(res.body.data.conversationIds).toEqual(conversationIds);
     });
   });
 

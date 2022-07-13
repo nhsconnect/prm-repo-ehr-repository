@@ -93,19 +93,21 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
   const t = await sequelize.transaction();
 
   try {
-    //TODO: pick N conversation Ids?
-    const conversationId = await getCurrentHealthRecordIdForPatient(nhsNumber);
-    if (!conversationId) {
+    const conversationIds = await getCurrentHealthRecordIdForPatient(nhsNumber);
+    if (!conversationIds) {
       await t.rollback();
-      return undefined;
+      return [];
     }
 
     await HealthRecord.update({ deletedAt: getNow() }, { where: { nhsNumber }, transaction: t });
-    // for multiple conversation ids, we need to loop here
-    await Message.update({ deletedAt: getNow() }, { where: { conversationId }, transaction: t });
+
+    conversationIds.forEach(
+      async (conversationId) =>
+        await Message.update({ deletedAt: getNow() }, { where: { conversationId }, transaction: t })
+    );
 
     await t.commit();
-    return conversationId;
+    return conversationIds;
   } catch (err) {
     logError('Failed to mark health record as deleted', err);
     await t.rollback();

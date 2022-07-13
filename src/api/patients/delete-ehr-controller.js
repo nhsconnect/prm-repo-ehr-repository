@@ -13,8 +13,8 @@ export const deleteEhrController = async (req, res) => {
   const { nhsNumber } = req.params;
 
   try {
-    const conversationId = await markHealthRecordAsDeletedForPatient(nhsNumber);
-    if (!conversationId) {
+    const conversationIds = await markHealthRecordAsDeletedForPatient(nhsNumber);
+    if (!conversationIds || conversationIds.length === 0) {
       logError('Could not find EHR record');
       res.sendStatus(404);
       return;
@@ -26,7 +26,7 @@ export const deleteEhrController = async (req, res) => {
       data: {
         type: 'patients',
         id: nhsNumber,
-        conversationId,
+        conversationIds,
       },
     };
 
