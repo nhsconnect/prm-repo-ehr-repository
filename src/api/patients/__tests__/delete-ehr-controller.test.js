@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../../../app';
-import { deleteHealthRecordForPatient } from '../../../services/database/health-record-repository';
+import { markHealthRecordAsDeletedForPatient } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
 import { logError } from '../../../middleware/logging';
 import { v4 as uuid } from 'uuid';
@@ -23,14 +23,14 @@ describe('deleteEhrController', () => {
   describe('success', () => {
     it('should return 200 when controller invoked correctly', async () => {
       const conversationId = uuid();
-      deleteHealthRecordForPatient.mockResolvedValue(conversationId);
+      markHealthRecordAsDeletedForPatient.mockResolvedValue(conversationId);
 
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(200);
-      expect(deleteHealthRecordForPatient).toHaveBeenCalledWith(nhsNumber);
+      expect(markHealthRecordAsDeletedForPatient).toHaveBeenCalledWith(nhsNumber);
       expect(res.body.data.id).toEqual(nhsNumber);
       expect(res.body.data.type).toEqual('patients');
       expect(res.body.data.conversationId).toEqual(conversationId);
@@ -39,7 +39,7 @@ describe('deleteEhrController', () => {
 
   describe('failure', () => {
     it('should return a 503 when an unexpected server error occurs', async () => {
-      deleteHealthRecordForPatient.mockRejectedValue({});
+      markHealthRecordAsDeletedForPatient.mockRejectedValue({});
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
@@ -49,7 +49,7 @@ describe('deleteEhrController', () => {
     });
 
     it('should return a 404 when record is not found', async () => {
-      deleteHealthRecordForPatient.mockResolvedValue(undefined);
+      markHealthRecordAsDeletedForPatient.mockResolvedValue(undefined);
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);

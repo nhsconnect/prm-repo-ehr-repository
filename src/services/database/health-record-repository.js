@@ -86,12 +86,46 @@ export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
   return currentHealthRecord.conversationId;
 };
 
-// TODO: this eslint line will go
-// eslint-disable-next-line no-unused-vars
-export const deleteHealthRecordForPatient = async (nhsNumber) => {
-  // Awesome stuff coming here
+export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
+  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+  // const Message = ModelFactory.getByName(messageModelName);
+  const sequelize = ModelFactory.sequelize;
+  const t = await sequelize.transaction();
 
-  return 'TBC';
+  try {
+    //TODO: pick N conversation Ids?
+    const conversationId = await getCurrentHealthRecordIdForPatient(nhsNumber);
+    if (!conversationId) {
+      await t.rollback();
+      return undefined;
+    }
+
+    await HealthRecord.update(
+      { completedAt: getNow(), deletedAt: getNow() },
+      { where: { nhsNumber }, transaction: t }
+    );
+
+    // const messages = await Message.findAll({
+    //   where: {
+    //     conversationId,
+    //     receivedAt: null,
+    //   },
+    // });
+    // if (messages.length === 0) {
+    //   await Message.update(
+    //       { completedAt: getNow() },
+    //       { deletedAt: getNow() },
+    //       { where: { conversationId }, transaction: t }
+    //   );
+    // }
+    await t.commit();
+    logInfo('Health record marked as deleted');
+    return conversationId;
+  } catch (err) {
+    logError('Failed to mark health record as deleted', err);
+    await t.rollback();
+    throw err;
+  }
 };
 
 export const getHealthRecordMessageIds = async (conversationId) => {

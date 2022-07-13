@@ -6,6 +6,7 @@ import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds,
   healthRecordExists,
+  markHealthRecordAsDeletedForPatient,
 } from '../health-record-repository';
 import ModelFactory from '../../../models';
 import { modelName as healthRecordModelName } from '../../../models/health-record';
@@ -283,6 +284,35 @@ describe('healthRecordRepository', () => {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Querying database for health record failed', err);
       }
+    });
+  });
+
+  describe('markHealthRecordAsDeletedForPatient', () => {
+    it('should return conversation id for the patient marked as deleted', async () => {
+      // TODO: set deleted-at in messages table
+      const nhsNumber = '9898989898';
+      // const messageId = uuid();
+      const conversationId = uuid();
+
+      await HealthRecord.create({
+        conversationId: conversationId,
+        nhsNumber,
+        completedAt: new Date(),
+      });
+
+      // const justCreated = await HealthRecord.findAll({
+      //   where: { nhsNumber },
+      // });
+      // console.log('justCreated ', justCreated);
+
+      const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
+
+      expect(result).toEqual(conversationId);
+      // const markedAsDeleted = await HealthRecord.findAll({
+      //   where: { nhsNumber },
+      // });
+      // console.log('markedAsDeleted ', markedAsDeleted);
+      // expect(markedAsDeleted[0].deletedAt).toBeDefined();
     });
   });
 });

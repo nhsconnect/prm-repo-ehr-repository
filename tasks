@@ -90,7 +90,7 @@ function prepare_local_envs_for_ide {
           printenv | grep "SERVICE_URL"
   )
 
-  echo "Paste these env vars to your Intelij run template:"
+  echo "Paste these env vars to your IntelliJ run template:"
   echo $envs | tr ' ' ';'
 }
 
