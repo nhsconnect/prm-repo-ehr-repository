@@ -45,7 +45,7 @@ describe('deleteEhrController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(503);
-      expect(logError).toHaveBeenCalledWith('Could not delete EHR record', {});
+      expect(logError).toHaveBeenCalledWith('Could not mark as deleted EHR record', {});
     });
 
     it('should return a 404 when record is not found', async () => {

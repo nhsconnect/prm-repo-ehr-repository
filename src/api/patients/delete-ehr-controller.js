@@ -20,7 +20,7 @@ export const deleteEhrController = async (req, res) => {
       return;
     }
 
-    logInfo('EHR record deleted successfully');
+    logInfo('EHR record marked as deleted successfully');
 
     const responseBody = {
       data: {
@@ -32,7 +32,7 @@ export const deleteEhrController = async (req, res) => {
 
     res.status(200).json(responseBody);
   } catch (err) {
-    logError('Could not delete EHR record', err);
+    logError('Could not mark as deleted EHR record', err);
     res.sendStatus(503);
   }
 };

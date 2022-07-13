@@ -119,7 +119,6 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
     //   );
     // }
     await t.commit();
-    logInfo('Health record marked as deleted');
     return conversationId;
   } catch (err) {
     logError('Failed to mark health record as deleted', err);
