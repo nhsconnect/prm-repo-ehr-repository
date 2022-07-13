@@ -292,18 +292,11 @@ describe('healthRecordRepository', () => {
       const nhsNumber = '9898989898';
       const messageId = uuid();
       const conversationId = uuid();
-
       await HealthRecord.create({
         conversationId,
         nhsNumber,
         completedAt: new Date(),
       });
-
-      // const justCreated = await HealthRecord.findAll({
-      //   where: { nhsNumber },
-      // });
-      // console.log('justCreated ', justCreated);
-
       await Message.create({
         conversationId,
         messageId,
@@ -311,22 +304,11 @@ describe('healthRecordRepository', () => {
         receivedAt: new Date(),
       });
 
-      // const healthRecordMakedAsDeleted = await HealthRecord.findAll({
-      //   where: { nhsNumber },
-      // });
-      //
-      // const messagesMakedAsDeleted = await Message.findAll({
-      //   where: { conversationId },
-      // });
-
       const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
 
-      // console.log('hr', healthRecordMakedAsDeleted);
-      // console.log('m', messagesMakedAsDeleted);
-
+      const healthRecordStatusAfterwards = await getHealthRecordStatus(conversationId);
       expect(result).toEqual([conversationId]);
-      // expect(healthRecordMakedAsDeleted[0].deletedAt).not.toBeNull();
-      // expect(messagesMakedAsDeleted[0].deletedAt).not.toBeNull();
+      expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.NOT_FOUND);
     });
   });
 });
