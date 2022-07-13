@@ -90,24 +90,36 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
+  const Op = Sequelize.Op;
   const t = await sequelize.transaction();
 
   try {
-    const conversationIds = await getCurrentHealthRecordIdForPatient(nhsNumber);
-    if (!conversationIds) {
+    const healthRecords = await HealthRecord.findAll({
+      where: {
+        nhsNumber,
+        completedAt: {
+          [Op.ne]: null,
+        },
+      },
+      transaction: t,
+    });
+
+    if (!healthRecords || healthRecords.length === 0) {
       await t.rollback();
       return [];
     }
 
     await HealthRecord.update({ deletedAt: getNow() }, { where: { nhsNumber }, transaction: t });
 
-    conversationIds.forEach(
-      async (conversationId) =>
-        await Message.update({ deletedAt: getNow() }, { where: { conversationId }, transaction: t })
-    );
+    for (const hr of healthRecords) {
+      await Message.update(
+        { deletedAt: getNow() },
+        { where: { conversationId: hr.conversationId }, transaction: t }
+      );
+    }
 
     await t.commit();
-    return conversationIds;
+    return healthRecords.map((hr) => hr.conversationId);
   } catch (err) {
     logError('Failed to mark health record as deleted', err);
     await t.rollback();
