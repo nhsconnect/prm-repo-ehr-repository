@@ -306,12 +306,12 @@ describe('healthRecordRepository', () => {
 
       const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
 
-      const healthRecordMakedAsDeleted = await HealthRecord.findAll({
+      const healthRecordMarkedAsDeleted = await HealthRecord.findAll({
         where: { nhsNumber },
         paranoid: false,
       });
 
-      const messagesMakedAsDeleted = await Message.findAll({
+      const messagesMarkedAsDeleted = await Message.findAll({
         where: { conversationId },
         paranoid: false,
       });
@@ -320,8 +320,8 @@ describe('healthRecordRepository', () => {
 
       expect(result).toEqual([conversationId]);
       expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.NOT_FOUND);
-      expect(healthRecordMakedAsDeleted[0].deletedAt).not.toBeNull();
-      expect(messagesMakedAsDeleted[0].deletedAt).not.toBeNull();
+      expect(healthRecordMarkedAsDeleted[0].deletedAt).not.toBeNull();
+      expect(messagesMarkedAsDeleted[0].deletedAt).not.toBeNull();
     });
   });
 });
