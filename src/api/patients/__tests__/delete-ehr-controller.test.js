@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../../../app';
 import { markHealthRecordAsDeletedForPatient } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
-import { logError } from '../../../middleware/logging';
+import { logError, logWarning } from '../../../middleware/logging';
 import { v4 as uuid } from 'uuid';
 
 jest.mock('../../../services/database/health-record-repository');
@@ -55,7 +55,7 @@ describe('deleteEhrController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(404);
-      expect(logError).toHaveBeenCalledWith('Could not find EHR record');
+      expect(logWarning).toHaveBeenCalledWith('Could not find EHR record');
     });
   });
 

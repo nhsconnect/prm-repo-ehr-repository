@@ -1,5 +1,5 @@
 import { param } from 'express-validator';
-import { logError, logInfo } from '../../middleware/logging';
+import { logError, logInfo, logWarning } from '../../middleware/logging';
 import { markHealthRecordAsDeletedForPatient } from '../../services/database/health-record-repository';
 export const deleteEhrValidation = [
   param('nhsNumber')
@@ -15,7 +15,7 @@ export const deleteEhrController = async (req, res) => {
   try {
     const conversationIds = await markHealthRecordAsDeletedForPatient(nhsNumber);
     if (!conversationIds || conversationIds.length === 0) {
-      logError('Could not find EHR record');
+      logWarning('Could not find EHR record');
       res.sendStatus(404);
       return;
     }
