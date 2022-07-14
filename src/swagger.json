@@ -141,7 +141,7 @@
           "200": {
             "description": "Successful",
             "schema": {
-              "$ref": "#/definitions/PatientDetails"
+              "$ref": "#/definitions/DeletedPatientDetails"
             }
           },
           "401": {
@@ -295,6 +295,30 @@
                     "type": "string"
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "DeletedPatientDetails": {
+      "type": "object",
+      "description": "Returns conversationIds for deleted patient",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["patients"]
+            },
+            "id": {
+              "type": "string"
+            },
+            "conversationIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
               }
             }
           }
