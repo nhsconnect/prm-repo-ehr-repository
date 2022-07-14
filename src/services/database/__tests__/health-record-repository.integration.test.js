@@ -288,10 +288,7 @@ describe('healthRecordRepository', () => {
   });
 
   describe('markHealthRecordAsDeletedForPatient', () => {
-    it('should return conversation id for the patient marked as deleted', async () => {
-      const nhsNumber = '9898989898';
-      const messageId = uuid();
-      const conversationId = uuid();
+    async function createHealthRecordAndMessage(nhsNumber, conversationId, messageId) {
       await HealthRecord.create({
         conversationId,
         nhsNumber,
@@ -303,6 +300,14 @@ describe('healthRecordRepository', () => {
         type: MessageType.EHR_EXTRACT,
         receivedAt: new Date(),
       });
+    }
+
+    it('should return conversation id for the patient marked as deleted', async () => {
+      const nhsNumber = '9898989898';
+      const messageId = uuid();
+      const conversationId = uuid();
+
+      await createHealthRecordAndMessage(nhsNumber, conversationId, messageId);
 
       const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
 
@@ -322,6 +327,33 @@ describe('healthRecordRepository', () => {
       expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.NOT_FOUND);
       expect(healthRecordMarkedAsDeleted[0].deletedAt).not.toBeNull();
       expect(messagesMarkedAsDeleted[0].deletedAt).not.toBeNull();
+    });
+
+    it('should return conversation id for the patient marked as deleted when the patient has several health records', async () => {
+      const nhsNumber = '6767676767';
+      const firstMessageId = uuid();
+      const secondMessageId = uuid();
+      const firstConversationId = uuid();
+      const secondConversationId = uuid();
+
+      await createHealthRecordAndMessage(nhsNumber, firstConversationId, firstMessageId);
+      await createHealthRecordAndMessage(nhsNumber, secondConversationId, secondMessageId);
+
+      const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
+
+      const healthRecordMarkedAsDeleted = await HealthRecord.findAll({
+        where: { nhsNumber },
+        paranoid: false,
+      });
+
+      const messagesMarkedAsDeleted = await Message.findAll({
+        where: { conversationId: [firstConversationId, secondConversationId] },
+        paranoid: false,
+      });
+
+      expect(result).toEqual([firstConversationId, secondConversationId]);
+      expect(healthRecordMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
+      expect(messagesMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
     });
   });
 });
