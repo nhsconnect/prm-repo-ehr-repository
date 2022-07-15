@@ -41,6 +41,7 @@ resource "aws_cloudwatch_metric_alarm" "healthy_host_count" {
     LoadBalancer = aws_alb.alb-internal.arn_suffix
   }
   alarm_actions             = [data.aws_sns_topic.alarm_notifications.arn]
+  ok_actions                = [data.aws_sns_topic.alarm_notifications.arn]
 }
 
 data "aws_sns_topic" "alarm_notifications" {
