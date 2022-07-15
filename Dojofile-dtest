@@ -1,3 +1,3 @@
-DOJO_DOCKER_IMAGE="nhsdev/node-dojo:17b3c0e88420d155ab86b6bb6d1fce7956a2ba18"
+DOJO_DOCKER_IMAGE="nhsdev/node-dojo:8e09efbc43734d450e365afac7429a8a6c606188"
 DOJO_DRIVER=docker-compose
 DOJO_DOCKER_COMPOSE_FILE=docker-compose-dtest.yml

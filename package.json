@@ -40,7 +40,7 @@
     "jest-when": "^3.5.1",
     "nodemon": "^2.0.19",
     "npm-audit-resolver": "^2.3.1",
-    "npm-force-resolutions": "0.0.10",
+    "npm-force-resolutions": "^0.0.10",
     "prettier": "^2.6.0",
     "sequelize-cli": "^6.4.1",
     "supertest": "^6.2.2",
