@@ -9,7 +9,6 @@ import {
 import { logError, logInfo, logWarning } from '../../middleware/logging';
 import {
   updateHealthRecordCompleteness,
-  healthRecordExists,
   getHealthRecordStatus,
 } from '../../services/database/health-record-repository';
 import { setCurrentSpanAttributes } from '../../config/tracing';
@@ -52,11 +51,6 @@ export const storeMessageController = async (req, res) => {
 
   try {
     if (messageType === MessageType.EHR_EXTRACT) {
-      if (await healthRecordExists(conversationId)) {
-        logWarning(`Duplicated ehrExtract message ${id}`);
-        res.sendStatus(409);
-        return;
-      }
       await createEhrExtract({
         messageId: id,
         conversationId,

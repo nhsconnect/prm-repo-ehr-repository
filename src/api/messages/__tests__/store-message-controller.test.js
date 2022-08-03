@@ -9,7 +9,6 @@ import {
 } from '../../../services/database/message-repository';
 import {
   updateHealthRecordCompleteness,
-  healthRecordExists,
   getHealthRecordStatus,
 } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
@@ -65,20 +64,6 @@ describe('storeMessageController', () => {
       expect(createEhrExtract).toHaveBeenCalledWith(ehrExtract);
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
       expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
-    });
-
-    it('should return a 409 when conversationId already exists', async () => {
-      healthRecordExists.mockResolvedValueOnce(true);
-
-      const res = await request(app)
-        .post('/messages')
-        .send(requestBody)
-        .set('Authorization', authorizationKeys);
-
-      expect(res.status).toBe(409);
-      expect(healthRecordExists).toHaveBeenCalledWith(conversationId);
-      expect(createEhrExtract).not.toHaveBeenCalled();
-      expect(updateHealthRecordCompleteness).not.toHaveBeenCalled();
     });
 
     it('should update receivedAt for given attachment and store its parts', async () => {
