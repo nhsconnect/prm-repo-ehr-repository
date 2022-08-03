@@ -54,7 +54,6 @@ export const storeMessageController = async (req, res) => {
     if (messageType === MessageType.EHR_EXTRACT) {
       if (await healthRecordExists(conversationId)) {
         logWarning(`Duplicated ehrExtract message ${id}`);
-        // update db
         res.sendStatus(409);
         return;
       }
