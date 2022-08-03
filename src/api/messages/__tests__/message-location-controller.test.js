@@ -4,8 +4,10 @@ import { getSignedUrl } from '../../../services/storage';
 import { v4 as uuid } from 'uuid';
 import { logError, logInfo } from '../../../middleware/logging';
 import { initializeConfig } from '../../../config';
+import { healthRecordExists } from '../../../services/database/health-record-repository';
 
 jest.mock('../../../services/storage');
+jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
@@ -36,6 +38,22 @@ describe('messageLocationController', () => {
     });
   });
 
+  describe('conflict', () => {
+    const conversationId = uuid();
+    const messageId = uuid();
+
+    it('should return a 409 when ehr already exists', async () => {
+      healthRecordExists.mockResolvedValueOnce(true);
+
+      const res = await request(app)
+        .get(`/messages/${conversationId}/${messageId}`)
+        .set('Authorization', authorizationKeys);
+
+      expect(res.status).toBe(409);
+      expect(getSignedUrl).not.toHaveBeenCalled();
+    });
+  });
+
   describe('error', () => {
     const conversationId = uuid();
     const messageId = uuid();
@@ -43,6 +61,7 @@ describe('messageLocationController', () => {
     it('should return a 503 when getSignedUrl promise is rejected', async () => {
       const error = new Error('error');
       getSignedUrl.mockRejectedValueOnce(error);
+      healthRecordExists.mockResolvedValueOnce(false);
 
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)

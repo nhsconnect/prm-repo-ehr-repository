@@ -3,8 +3,10 @@ import app from '../../app';
 import { v4 as uuid } from 'uuid';
 import { initializeConfig } from '../../config';
 import { logInfo, logWarning } from '../logging';
+import { healthRecordExists } from '../../services/database/health-record-repository';
 
 jest.mock('../logging');
+jest.mock('../../services/database/health-record-repository');
 jest.mock('../../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
@@ -25,6 +27,8 @@ describe('auth', () => {
 
   describe('Authenticated successfully', () => {
     it('should return HTTP 200 when correctly authenticated', async () => {
+      healthRecordExists.mockResolvedValueOnce(false);
+
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', 'correct-key');
