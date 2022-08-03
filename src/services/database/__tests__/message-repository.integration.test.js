@@ -4,6 +4,7 @@ import {
   createEhrExtract,
   attachmentExists,
   createAttachmentPart,
+  updateEhrExtract,
 } from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
@@ -270,6 +271,29 @@ describe('messageRepository', () => {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Creating attachment database entry failed', err);
       }
+    });
+  });
+
+  describe('updateEhrExtract', () => {
+    it('should update received at for existing message id', async () => {
+      const oldReceivedAt = new Date('August 19, 2015 23:15:30');
+      const conversationId = uuid();
+      const ehrMessageId = uuid();
+      await HealthRecord.create({ conversationId, nhsNumber });
+      await Message.create({
+        conversationId,
+        messageId: ehrMessageId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: oldReceivedAt,
+      });
+
+      await updateEhrExtract(ehrMessageId);
+
+      const ehrExtractCoreMessage = await Message.findByPk(ehrMessageId);
+
+      expect(ehrExtractCoreMessage.receivedAt).not.toEqual(oldReceivedAt);
+      expect(ehrExtractCoreMessage.conversationId).toEqual(conversationId);
+      expect(ehrExtractCoreMessage.type).toEqual(MessageType.EHR_EXTRACT);
     });
   });
 });
