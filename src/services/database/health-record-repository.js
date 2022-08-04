@@ -147,12 +147,15 @@ export const getHealthRecordMessageIds = async (conversationId) => {
   return { healthRecordExtractId, attachmentIds };
 };
 
-export const healthRecordExists = async (conversationId) => {
-  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+export const messageAlreadyReceived = async (messageId) => {
+  const Message = ModelFactory.getByName(messageModelName);
   try {
-    const healthRecord = await HealthRecord.findByPk(conversationId);
+    const message = await Message.findByPk(messageId);
 
-    return !!healthRecord;
+    if (!message) {
+      return false;
+    }
+    return message.receivedAt !== null;
   } catch (e) {
     logError('Querying database for health record failed', e);
     throw e;

@@ -2,7 +2,7 @@ import { getSignedUrl } from '../../services/storage';
 import { param } from 'express-validator';
 import { logError, logInfo } from '../../middleware/logging';
 import { setCurrentSpanAttributes } from '../../config/tracing';
-import { healthRecordExists } from '../../services/database/health-record-repository';
+import { messageAlreadyReceived } from '../../services/database/health-record-repository';
 
 export const messageLocationControllerValidation = [
   param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),
@@ -15,7 +15,7 @@ export const messageLocationController = async (req, res) => {
   const operation = 'putObject';
 
   try {
-    if (await healthRecordExists(conversationId)) {
+    if (await messageAlreadyReceived(conversationId)) {
       res.sendStatus(409);
       return;
     }

@@ -5,7 +5,7 @@ import {
   HealthRecordStatus,
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds,
-  healthRecordExists,
+  messageAlreadyReceived,
   markHealthRecordAsDeletedForPatient,
 } from '../health-record-repository';
 import ModelFactory from '../../../models';
@@ -258,28 +258,37 @@ describe('healthRecordRepository', () => {
   });
 
   describe('healthRecordExists', () => {
-    it("should return false if 'conversationId' is not found in db", async () => {
-      const conversationId = uuid();
-      const result = await healthRecordExists(conversationId);
+    it("should return false if 'messageId' is not found in db", async () => {
+      const messageId = uuid();
+      const result = await messageAlreadyReceived(messageId);
       expect(result).toEqual(false);
     });
 
-    it("should return true if 'conversationId' is found in db", async () => {
+    it("should return true if 'messageId' is found in db", async () => {
       const conversationId = uuid();
+      const messageId = uuid();
       const nhsNumber = '9876543211';
 
       await HealthRecord.create({
         conversationId,
         nhsNumber,
       });
-      const result = await healthRecordExists(conversationId);
+
+      await Message.create({
+        messageId,
+        conversationId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date(),
+      });
+
+      const result = await messageAlreadyReceived(messageId);
       expect(result).toEqual(true);
     });
 
     it('should throw if database querying throws', async () => {
-      const conversationId = 'not-valid';
+      const messageId = 'not-valid';
       try {
-        await healthRecordExists(conversationId);
+        await messageAlreadyReceived(messageId);
       } catch (err) {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Querying database for health record failed', err);
