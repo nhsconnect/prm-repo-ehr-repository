@@ -51,6 +51,7 @@ describe('messageLocationController', () => {
 
       expect(res.status).toBe(409);
       expect(getSignedUrl).not.toHaveBeenCalled();
+      expect(messageAlreadyReceived).toHaveBeenCalledWith(messageId);
     });
   });
 

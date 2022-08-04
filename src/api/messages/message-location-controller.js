@@ -15,7 +15,7 @@ export const messageLocationController = async (req, res) => {
   const operation = 'putObject';
 
   try {
-    if (await messageAlreadyReceived(conversationId)) {
+    if (await messageAlreadyReceived(messageId)) {
       res.sendStatus(409);
       return;
     }
