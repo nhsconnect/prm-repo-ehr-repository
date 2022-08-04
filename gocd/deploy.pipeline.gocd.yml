@@ -189,6 +189,9 @@ pipelines:
       dev_env:
         pipeline: prm-deductions-ehr-repository.dev
         stage: functional
+      e2e:
+        pipeline: continuity-e2e-tests.dev
+        stage: test
     environment_variables:
       NHS_ENVIRONMENT: test
     stages:
@@ -264,6 +267,9 @@ pipelines:
       test_env:
         pipeline: prm-deductions-ehr-repository.test
         stage: functional
+      e2e:
+        pipeline: continuity-e2e-tests.test
+        stage: test
     environment_variables:
       NHS_ENVIRONMENT: pre-prod
     stages:
