@@ -16,7 +16,7 @@ export const messageLocationController = async (req, res) => {
 
   try {
     if (await messageAlreadyReceived(messageId)) {
-      logInfo("DUPLICATE: Message Id: " + messageId + " already received in the database");
+      logInfo('DUPLICATE: Message Id: ' + messageId + ' already received in the database');
       res.sendStatus(409);
       return;
     }
