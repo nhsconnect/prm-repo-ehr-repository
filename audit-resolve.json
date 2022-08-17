@@ -6,13 +6,11 @@
     },
     "1080829|pg-native": {
       "decision": "ignore",
-      "madeAt": 1657117652940,
-      "expiresAt": 1659709240734
+      "madeAt": 1660754215442
     },
     "1080830|pg-native>libpq": {
       "decision": "ignore",
-      "madeAt": 1657117660538,
-      "expiresAt": 1659709240734
+      "madeAt": 1660754220996
     }
   },
   "rules": {},
