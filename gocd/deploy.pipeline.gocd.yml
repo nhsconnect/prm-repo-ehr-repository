@@ -253,6 +253,84 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks test_performance
+  "prm-deductions-ehr-repository.perf":
+    group: repository
+    label_template: "${git[:8]}"
+    materials:
+      git:
+        type: configrepo
+        blacklist:
+          - docs/**/*.*
+      base_infra:
+        pipeline: prm-deductions-infra
+        stage: deploy_perf
+      test_env:
+        pipeline: prm-deductions-ehr-repository.test
+        stage: functional
+      e2e:
+        pipeline: continuity-e2e-tests.test
+        stage: test
+    environment_variables:
+      NHS_ENVIRONMENT: perf
+    stages:
+      - promote_docker_image:
+          resources:
+            - docker
+          clean_workspace: true
+          tasks:
+            - exec:
+                command: /bin/bash
+                arguments:
+                  - -c
+                  - ./tasks promote_docker_image
+      - plan_certs:
+          clean_workspace: true
+          jobs:
+            plan: *plan_certs
+      - deploy_certs:
+          clean_workspace: true
+          jobs:
+            deploy: *deploy_certs
+      - plan:
+          clean_workspace: true
+          jobs:
+            plan: *plan
+      - deploy:
+          clean_workspace: true
+          jobs:
+            deploy: *deploy
+      - plan_db:
+          clean_workspace: true
+          jobs:
+            plan_db: *plan_db
+      - deploy_db:
+          clean_workspace: true
+          jobs:
+            deploy_db: *deploy_db
+      - functional:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks sanity_check
+      - performance:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_performance
   "prm-deductions-ehr-repository.pre-prod":
     group: repository
     label_template: "${git[:8]}"
