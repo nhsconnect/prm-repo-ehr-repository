@@ -58,7 +58,7 @@
     "lodash.merge": "^4.6.2",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",
-    "pg-native": "^3.0.0",
+    "pg-native": "^3.0.1",
     "sequelize": "^6.17.0",
     "swagger-ui-express": "^4.3.0",
     "traverse": "^0.6.6",
