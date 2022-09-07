@@ -10,7 +10,7 @@ resource "aws_s3_bucket" "ehr-repo-bucket" {
   }
   logging {
     target_bucket = aws_s3_bucket.ehr_repo_log_bucket.id
-    target_prefix = "log/"
+    target_prefix = "ehr-repo-access-log/"
   }
   tags = {
     CreatedBy   = var.repo_name
