@@ -58,7 +58,7 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
 }
 
 resource "aws_s3_bucket" "ehr_repo_log_bucket" {
-  bucket        = var.s3_log_bucket_name
+  bucket        = "${var.environment}-${var.component_name}-access-logs"
   acl           = "private"
   force_destroy = true
   versioning {

@@ -8,7 +8,6 @@ database_name        = "deductions_db"
 
 s3_bucket_name       = "pre-prod-ehr-repo-bucket"
 s3_prev_bucket_name  = "pre-prod-ehr-repo"
-s3_log_bucket_name   = "pre-prod-ehr-repo-log-bucket"
 
 task_cpu    = 256
 task_memory = 512
