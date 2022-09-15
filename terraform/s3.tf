@@ -1,3 +1,8 @@
+locals {
+  ehr_repo_bucket_access_logs_prefix = "ehr-repo-access-log/"
+}
+
+//TODO: Rename to ehr_repo_health_record_data
 resource "aws_s3_bucket" "ehr-repo-bucket" {
   bucket        = var.s3_bucket_name
   acl           = "private"
@@ -9,8 +14,8 @@ resource "aws_s3_bucket" "ehr-repo-bucket" {
     }
   }
   logging {
-    target_bucket = aws_s3_bucket.ehr_repo_log_bucket.id
-    target_prefix = "ehr-repo-access-log/"
+    target_bucket = aws_s3_bucket.ehr_repo_access_logs.id
+    target_prefix = local.ehr_repo_bucket_access_logs_prefix
   }
   tags = {
     CreatedBy   = var.repo_name
@@ -57,7 +62,7 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
   })
 }
 
-resource "aws_s3_bucket" "ehr_repo_log_bucket" {
+resource "aws_s3_bucket" "ehr_repo_access_logs" {
   bucket        = "${var.environment}-${var.component_name}-access-logs"
   acl           = "private"
   force_destroy = true
@@ -77,9 +82,9 @@ resource "aws_s3_bucket" "ehr_repo_log_bucket" {
   }
 }
 
-resource "aws_s3_bucket_policy" "ehr_repo_log_bucket_policy" {
+resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_policy" {
   count = var.is_restricted_account ? 1 : 0
-  bucket = aws_s3_bucket.ehr_repo_log_bucket.id
+  bucket = aws_s3_bucket.ehr_repo_access_logs.id
   policy = jsonencode({
     "Statement": [
       {
@@ -89,9 +94,35 @@ resource "aws_s3_bucket_policy" "ehr_repo_log_bucket_policy" {
         },
         Action: ["s3:Get*","s3:ListBucket"],
         Resource: [
-          "${aws_s3_bucket.ehr_repo_log_bucket.arn}",
-          "${aws_s3_bucket.ehr_repo_log_bucket.arn}/*"
+          "${aws_s3_bucket.ehr_repo_access_logs.arn}",
+          "${aws_s3_bucket.ehr_repo_access_logs.arn}/*"
         ]
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy" {
+  bucket        = aws_s3_bucket.ehr_repo_access_logs.id
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "S3ServerAccessLogsPolicy",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "logging.s3.amazonaws.com"
+        },
+        "Action": "s3:PutObject",
+        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}"
+        "Condition": {
+          "ArnLike": {
+            "aws:SourceArn": aws_s3_bucket.ehr-repo-bucket.arn
+          },
+          "StringEquals": {
+            "aws:SourceAccount": local.account_id
+          }
+        }
       }
     ]
   })
