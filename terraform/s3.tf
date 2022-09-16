@@ -116,14 +116,6 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
         },
         "Action": "s3:PutObject",
         "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"
-        "Condition": {
-          "ArnLike": {
-            "aws:SourceArn": aws_s3_bucket.ehr-repo-bucket.arn
-          },
-          "StringEquals": {
-            "aws:SourceAccount": local.account_id
-          }
-        }
       }
     ]
   })
