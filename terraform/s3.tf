@@ -1,8 +1,9 @@
 locals {
-  ehr_repo_bucket_access_logs_prefix = "ehr-repo-access-log/"
+  ehr_repo_bucket_access_logs_prefix = "s3-access-log/"
 }
 
 //TODO: Rename to ehr_repo_health_record_data
+// Upgrade terraform version to latest
 resource "aws_s3_bucket" "ehr-repo-bucket" {
   bucket        = var.s3_bucket_name
   acl           = "private"
@@ -114,7 +115,7 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
           "Service": "logging.s3.amazonaws.com"
         },
         "Action": "s3:PutObject",
-        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}"
+        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"
         "Condition": {
           "ArnLike": {
             "aws:SourceArn": aws_s3_bucket.ehr-repo-bucket.arn
