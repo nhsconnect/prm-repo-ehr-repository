@@ -6,7 +6,8 @@ resource "aws_rds_cluster" "db-cluster" {
   master_password         = data.aws_ssm_parameter.db-password.value
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
-  engine_version          = "11"
+  allow_major_version_upgrade = true
+  engine_version          = "13.7"
   vpc_security_group_ids  = [
     aws_security_group.ehr_repo_to_db_sg.id,
     aws_security_group.gocd_to_db_sg.id,
@@ -159,6 +160,6 @@ resource "aws_security_group_rule" "vpn_to_db_sg" {
 }
 
 data "aws_ssm_parameter" "repo_databases_parameter_group_name" {
-  name = "/repo/${var.environment}/output/prm-deductions-infra/repo-databases-parameter-group-name"
+  name = "/repo/${var.environment}/output/prm-deductions-infra/repo-databases-parameter-group-name-version-13"
 }
 
