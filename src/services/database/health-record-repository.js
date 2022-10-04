@@ -64,26 +64,32 @@ export const updateHealthRecordCompleteness = async (conversationId) => {
 };
 
 export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
-  const Op = Sequelize.Op;
-  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+  try {
+    const Op = Sequelize.Op;
+    const HealthRecord = ModelFactory.getByName(healthRecordModelName);
 
-  const healthRecords = await HealthRecord.findAll({
-    where: {
-      nhsNumber,
-      completedAt: {
-        [Op.ne]: null,
+    const healthRecords = await HealthRecord.findAll({
+      where: {
+        nhsNumber,
+        completedAt: {
+          [Op.ne]: null,
+        },
       },
-    },
-    order: [['completedAt', 'DESC']],
-  });
+      order: [['completedAt', 'DESC']],
+    });
 
-  if (!healthRecords.length) {
-    return undefined;
+    if (!healthRecords.length) {
+      return undefined;
+    }
+
+    const currentHealthRecord = healthRecords[0];
+
+    return currentHealthRecord.conversationId;
+  } catch (e) {
+    let error = { message: 'Error retrieving health record from database', error: e.message };
+    logError(error);
+    throw error;
   }
-
-  const currentHealthRecord = healthRecords[0];
-
-  return currentHealthRecord.conversationId;
 };
 
 export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {

@@ -2,7 +2,8 @@
   "env": {
     "node": true,
     "es6": true,
-    "jest": true
+    "jest": true,
+    "jasmine": true
   },
   "extends": [
     "eslint:recommended",

@@ -365,4 +365,36 @@ describe('healthRecordRepository', () => {
       expect(messagesMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
     });
   });
+
+  xdescribe('handling of getCurrentHealthRecordIdForPatient errors', () => {
+    describe('cannot connect', () => {
+      beforeAll(async () => {
+        await ModelFactory.sequelize.close();
+      });
+
+      it('should log the error', async () => {
+        try {
+          await getCurrentHealthRecordIdForPatient('bob');
+          fail('should have thrown');
+        } catch (e) {
+          expect(logError).toHaveBeenCalledWith({
+            message: 'Error retrieving health record from database',
+            error:
+              'ConnectionManager.getConnection was called after the connection manager was closed!',
+          });
+        }
+      });
+
+      it('should reject the promise when we cannot connect to database', async () => {
+        const recordPromise = getCurrentHealthRecordIdForPatient('bob');
+
+        return expect(recordPromise).rejects.toEqual(
+          expect.objectContaining({
+            error:
+              'ConnectionManager.getConnection was called after the connection manager was closed!',
+          })
+        );
+      });
+    });
+  });
 });
