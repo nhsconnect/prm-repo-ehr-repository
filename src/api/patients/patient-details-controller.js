@@ -35,7 +35,9 @@ export const patientDetailsController = async (req, res) => {
       res.sendStatus(404);
       return;
     }
+    logInfo('Putting conversation ID into log context');
     setCurrentSpanAttributes({ conversationId: currentHealthRecordId });
+    logInfo('Getting message ids');
     const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
       currentHealthRecordId
     );

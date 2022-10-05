@@ -97,13 +97,15 @@ describe('patientDetailsController', () => {
     });
 
     it('should return a 503 when cannot get patient health record from database', async () => {
-      getCurrentHealthRecordIdForPatient.mockRejectedValue({});
+      getCurrentHealthRecordIdForPatient.mockRejectedValue({ bob: 'cheese' });
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(503);
-      expect(logError).toHaveBeenCalledWith('Could not retrieve patient health record', {});
+      expect(logError).toHaveBeenCalledWith('Could not retrieve patient health record', {
+        bob: 'cheese',
+      });
     });
   });
 

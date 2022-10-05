@@ -136,20 +136,26 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
 export const getHealthRecordMessageIds = async (conversationId) => {
   const Message = ModelFactory.getByName(messageModelName);
 
+  logInfo('finding messages for conversation id ' + conversationId);
   const messages = await Message.findAll({
     where: {
       conversationId,
     },
   });
 
+  logInfo('finding which message by index is the core in ' + messages.length + ' messages');
   const healthRecordExtractIndex = messages.findIndex(
     (message) => message.type === MessageType.EHR_EXTRACT
   );
+  logInfo('core message index is ' + healthRecordExtractIndex);
   const healthRecordExtractId = messages[healthRecordExtractIndex].messageId;
 
+  logInfo('splicing');
   messages.splice(healthRecordExtractIndex, 1);
+  logInfo('mapping');
   const attachmentIds = messages.map((message) => message.messageId);
 
+  logInfo('getHealthRecordMessageIds done');
   return { healthRecordExtractId, attachmentIds };
 };
 
