@@ -99,38 +99,32 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
   const Op = Sequelize.Op;
   const t = await sequelize.transaction();
 
-  try {
-    const healthRecords = await HealthRecord.findAll({
-      where: {
-        nhsNumber,
-        completedAt: {
-          [Op.ne]: null,
-        },
+  const healthRecords = await HealthRecord.findAll({
+    where: {
+      nhsNumber,
+      completedAt: {
+        [Op.ne]: null,
       },
-      transaction: t,
-    });
+    },
+    transaction: t,
+  });
 
-    if (!healthRecords || healthRecords.length === 0) {
-      await t.rollback();
-      return [];
-    }
-
-    await HealthRecord.update({ deletedAt: getNow() }, { where: { nhsNumber }, transaction: t });
-
-    for (const hr of healthRecords) {
-      await Message.update(
-        { deletedAt: getNow() },
-        { where: { conversationId: hr.conversationId }, transaction: t }
-      );
-    }
-
-    await t.commit();
-    return healthRecords.map((hr) => hr.conversationId);
-  } catch (err) {
-    logError('Failed to mark health record as deleted', err);
+  if (!healthRecords || healthRecords.length === 0) {
     await t.rollback();
-    throw err;
+    return [];
   }
+
+  await HealthRecord.update({ deletedAt: getNow() }, { where: { nhsNumber }, transaction: t });
+
+  for (const hr of healthRecords) {
+    await Message.update(
+      { deletedAt: getNow() },
+      { where: { conversationId: hr.conversationId }, transaction: t }
+    );
+  }
+
+  await t.commit();
+  return healthRecords.map((hr) => hr.conversationId);
 };
 
 export const getHealthRecordMessageIds = async (conversationId) => {
@@ -143,6 +137,10 @@ export const getHealthRecordMessageIds = async (conversationId) => {
     },
   });
 
+  if (messages.length === 0) {
+    throw new Error('There were no undeleted messages associated with conversation id');
+  }
+
   logInfo('finding which message by index is the core in ' + messages.length + ' messages');
   const healthRecordExtractIndex = messages.findIndex(
     (message) => message.type === MessageType.EHR_EXTRACT
@@ -150,12 +148,9 @@ export const getHealthRecordMessageIds = async (conversationId) => {
   logInfo('core message index is ' + healthRecordExtractIndex);
   const healthRecordExtractId = messages[healthRecordExtractIndex].messageId;
 
-  logInfo('splicing');
   messages.splice(healthRecordExtractIndex, 1);
-  logInfo('mapping');
   const attachmentIds = messages.map((message) => message.messageId);
 
-  logInfo('getHealthRecordMessageIds done');
   return { healthRecordExtractId, attachmentIds };
 };
 

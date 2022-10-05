@@ -173,7 +173,27 @@ describe('healthRecordRepository', () => {
     });
   });
 
-  describe('getHealthRecordExtractMessageId', () => {
+  describe('getHealthRecordMessageIds', () => {
+    it('should throw a meaningful error if there are no undeleted messages associated with conversation id', async () => {
+      const conversationId = uuid();
+      await Message.create({
+        messageId: uuid(),
+        conversationId,
+        type: MessageType.EHR_EXTRACT,
+        receivedAt: new Date(),
+        deletedAt: new Date(), // nb magical sequelize "paranoid" deletion
+      });
+
+      try {
+        await getHealthRecordMessageIds(conversationId);
+        fail('should have thrown');
+      } catch (e) {
+        expect(e.message).toEqual(
+          'There were no undeleted messages associated with conversation id'
+        );
+      }
+    });
+
     it('should return health record extract message id given a conversation id for a small health record', async () => {
       const messageId = uuid();
       const conversationId = uuid();
@@ -363,38 +383,6 @@ describe('healthRecordRepository', () => {
       expect(result).toEqual([firstConversationId, secondConversationId]);
       expect(healthRecordMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
       expect(messagesMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
-    });
-  });
-
-  xdescribe('handling of getCurrentHealthRecordIdForPatient errors', () => {
-    describe('cannot connect', () => {
-      beforeAll(async () => {
-        await ModelFactory.sequelize.close();
-      });
-
-      it('should log the error', async () => {
-        try {
-          await getCurrentHealthRecordIdForPatient('bob');
-          fail('should have thrown');
-        } catch (e) {
-          expect(logError).toHaveBeenCalledWith({
-            message: 'Error retrieving health record from database',
-            error:
-              'ConnectionManager.getConnection was called after the connection manager was closed!',
-          });
-        }
-      });
-
-      it('should reject the promise when we cannot connect to database', async () => {
-        const recordPromise = getCurrentHealthRecordIdForPatient('bob');
-
-        return expect(recordPromise).rejects.toEqual(
-          expect.objectContaining({
-            error:
-              'ConnectionManager.getConnection was called after the connection manager was closed!',
-          })
-        );
-      });
     });
   });
 });
