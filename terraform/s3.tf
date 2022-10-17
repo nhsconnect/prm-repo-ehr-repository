@@ -97,7 +97,12 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
         Resource: [
           "${aws_s3_bucket.ehr_repo_access_logs.arn}",
           "${aws_s3_bucket.ehr_repo_access_logs.arn}/*"
-        ]
+        ],
+        Condition: {
+          Bool: {
+            "aws:SecureTransport": "false"
+          }
+        }
       }
     ]
   })
@@ -115,7 +120,12 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
           "Service": "logging.s3.amazonaws.com"
         },
         "Action": "s3:PutObject",
-        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"
+        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*",
+        Condition: {
+          Bool: {
+            "aws:SecureTransport": "false"
+          }
+        }
       }
     ]
   })
