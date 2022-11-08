@@ -8,12 +8,19 @@ import { healthCheck } from './api/health-check/health-check';
 import { options } from './config/logging';
 import * as logging from './middleware/logging';
 import swaggerDocument from './swagger.json';
+import helmet from 'helmet';
 
 httpContext.enable();
 
 const app = express();
 
 app.use(express.json());
+// Sets "Strict-Transport-Security: max-age=31536000; includeSubDomains"
+app.use(
+  helmet.hsts({
+    maxAge: 31536000,
+  })
+);
 app.use(requestLogger(options));
 
 app.use('/patients', logging.middleware, patients);
