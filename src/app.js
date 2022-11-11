@@ -9,6 +9,7 @@ import { options } from './config/logging';
 import * as logging from './middleware/logging';
 import swaggerDocument from './swagger.json';
 import helmet from 'helmet';
+import { rateLimiter } from './middleware/rateLimiter';
 
 httpContext.enable();
 
@@ -22,7 +23,7 @@ app.use(
   })
 );
 app.use(requestLogger(options));
-
+app.use(rateLimiter);
 app.use('/patients', logging.middleware, patients);
 app.use('/messages', logging.middleware, messages);
 app.use('/health', logging.middleware, healthCheck);
