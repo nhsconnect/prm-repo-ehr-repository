@@ -2,14 +2,22 @@ import app from '../../../app';
 import request from 'supertest';
 import { getHealthCheck } from '../../../services/health-check/get-health-check';
 import { logInfo, logError } from '../../../middleware/logging';
+import apicache from 'apicache';
 
 jest.mock('../../../config/logging');
 jest.mock('../../../services/health-check/get-health-check');
 jest.mock('../../../middleware/logging');
+jest.mock('apicache', () => ({
+  ...jest.requireActual('apicache'),
+}));
 
 const mockErrorResponse = 'some-error';
 
 describe('GET /health', () => {
+  beforeAll(() => {
+    apicache.options({ enabled: false });
+  });
+
   describe('all dependencies are available', () => {
     beforeEach(() => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase()));

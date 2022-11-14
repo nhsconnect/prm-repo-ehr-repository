@@ -53,3 +53,7 @@ variable "is_restricted_account" {
 variable "db_instance_number" {
   default = 1
 }
+
+variable "apicache" {
+  default = "1 minutes"
+}

@@ -10,10 +10,12 @@ import * as logging from './middleware/logging';
 import swaggerDocument from './swagger.json';
 import helmet from 'helmet';
 import { rateLimiter } from './middleware/rateLimiter';
+import apicache from 'apicache';
 
 httpContext.enable();
 
 const app = express();
+let cache = apicache.middleware;
 
 app.use(express.json());
 // Sets "Strict-Transport-Security: max-age=31536000; includeSubDomains"
@@ -24,6 +26,7 @@ app.use(
 );
 app.use(requestLogger(options));
 app.use(rateLimiter);
+app.use(cache(process.env.API_CACHE));
 app.use('/patients', logging.middleware, patients);
 app.use('/messages', logging.middleware, messages);
 app.use('/health', logging.middleware, healthCheck);
