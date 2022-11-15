@@ -4,7 +4,6 @@ import { markHealthRecordAsDeletedForPatient } from '../../../services/database/
 import { initializeConfig } from '../../../config';
 import { logError, logWarning } from '../../../middleware/logging';
 import { v4 as uuid } from 'uuid';
-import apicache from 'apicache';
 
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
@@ -12,15 +11,8 @@ jest.mock('../../../services/storage/get-signed-url');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
-jest.mock('apicache', () => ({
-  ...jest.requireActual('apicache'),
-}));
 
 describe('deleteEhrController', () => {
-  beforeAll(() => {
-    apicache.options({ enabled: false });
-  });
-
   initializeConfig.mockReturnValue({
     consumerApiKeys: { TEST_USER: 'correct-key' },
   });

@@ -4,7 +4,6 @@ import { v4 as uuid } from 'uuid';
 import { initializeConfig } from '../../config';
 import { logInfo, logWarning } from '../logging';
 import { messageAlreadyReceived } from '../../services/database/health-record-repository';
-import apicache from 'apicache';
 
 jest.mock('../logging');
 jest.mock('../../services/database/health-record-repository');
@@ -21,15 +20,8 @@ jest.mock('../../config', () => ({
     },
   }),
 }));
-jest.mock('apicache', () => ({
-  ...jest.requireActual('apicache'),
-}));
 
 describe('auth', () => {
-  beforeAll(() => {
-    apicache.options({ enabled: false });
-  });
-
   const conversationId = uuid();
   const messageId = uuid();
 

@@ -14,8 +14,7 @@ locals {
     { name = "AWS_REGION", value = var.region },
     { name = "SKIP_DB_MIGRATION", value = "true" },
     { name = "USE_SSL_FOR_DB", value = "true" },
-    { name = "LOG_LEVEL", value = var.log_level },
-    { name = "API_CACHE", value = var.apicache }
+    { name = "LOG_LEVEL", value = var.log_level }
   ]
 }
 

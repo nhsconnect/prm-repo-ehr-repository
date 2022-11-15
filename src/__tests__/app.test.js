@@ -1,19 +1,11 @@
 import request from 'supertest';
 import app from '../app';
-import apicache from 'apicache';
 
 jest.mock('../middleware/logging');
 jest.mock('../middleware/auth');
 jest.mock('../services/health-check/get-health-check');
-jest.mock('apicache', () => ({
-  ...jest.requireActual('apicache'),
-}));
 
 describe('app', () => {
-  beforeAll(() => {
-    apicache.options({ enabled: false });
-  });
-
   describe('GET /', () => {
     it('should return a 404 status code', (done) => {
       request(app).get('/').expect(404).end(done);

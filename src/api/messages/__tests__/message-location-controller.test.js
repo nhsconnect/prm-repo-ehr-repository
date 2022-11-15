@@ -5,7 +5,6 @@ import { v4 as uuid } from 'uuid';
 import { logError, logInfo } from '../../../middleware/logging';
 import { initializeConfig } from '../../../config';
 import { messageAlreadyReceived } from '../../../services/database/health-record-repository';
-import apicache from 'apicache';
 
 jest.mock('../../../services/storage');
 jest.mock('../../../services/database/health-record-repository');
@@ -13,15 +12,8 @@ jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
-jest.mock('apicache', () => ({
-  ...jest.requireActual('apicache'),
-}));
 
 describe('messageLocationController', () => {
-  beforeAll(() => {
-    apicache.options({ enabled: false });
-  });
-
   initializeConfig.mockReturnValue({
     consumerApiKeys: { TEST_USER: 'correct-key' },
   });

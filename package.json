@@ -48,7 +48,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.17.8",
-    "apicache": "^1.6.3",
     "async-local-storage": "^2.3.1",
     "aws-sdk": "^2.1099.0",
     "dayjs": "^1.11.0",

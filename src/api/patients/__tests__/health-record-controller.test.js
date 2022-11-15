@@ -6,21 +6,13 @@ import {
   HealthRecordStatus,
 } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
-import apicache from 'apicache';
 
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
-jest.mock('apicache', () => ({
-  ...jest.requireActual('apicache'),
-}));
 
 describe('healthRecordController', () => {
-  beforeAll(() => {
-    apicache.options({ enabled: false });
-  });
-
   initializeConfig.mockReturnValue({
     consumerApiKeys: { TEST_USER: 'correct-key' },
   });

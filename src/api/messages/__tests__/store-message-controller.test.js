@@ -14,7 +14,6 @@ import {
 import { initializeConfig } from '../../../config';
 import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/message';
-import apicache from 'apicache';
 
 jest.mock('../../../services/database/message-repository');
 jest.mock('../../../services/database/health-record-repository');
@@ -22,15 +21,8 @@ jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
-jest.mock('apicache', () => ({
-  ...jest.requireActual('apicache'),
-}));
 
 describe('storeMessageController', () => {
-  beforeAll(() => {
-    apicache.options({ enabled: false });
-  });
-
   initializeConfig.mockReturnValue({
     consumerApiKeys: { TEST_USER: 'correct-key' },
   });

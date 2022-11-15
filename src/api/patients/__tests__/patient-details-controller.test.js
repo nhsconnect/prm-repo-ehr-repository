@@ -9,7 +9,6 @@ import {
 import { initializeConfig } from '../../../config';
 import { logError, logInfo } from '../../../middleware/logging';
 import getSignedUrl from '../../../services/storage/get-signed-url';
-import apicache from 'apicache';
 
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../middleware/logging');
@@ -17,15 +16,8 @@ jest.mock('../../../services/storage/get-signed-url');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
 }));
-jest.mock('apicache', () => ({
-  ...jest.requireActual('apicache'),
-}));
 
 describe('patientDetailsController', () => {
-  beforeAll(() => {
-    apicache.options({ enabled: false });
-  });
-
   initializeConfig.mockReturnValue({
     consumerApiKeys: { TEST_USER: 'correct-key' },
   });
