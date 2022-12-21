@@ -21,8 +21,7 @@
     "start:nodemon": "nodemon --exec npm run start:local",
     "db:wait": "babel-node scripts/wait-for-postgres.js",
     "db:migrate": "npm run db:wait && sequelize-cli db:migrate",
-    "db:teardown": "sequelize-cli db:migrate:undo:all",
-    "preinstall": "npm install npm-force-resolutions && npm-force-resolutions"
+    "db:teardown": "sequelize-cli db:migrate:undo:all"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.6",
@@ -40,10 +39,9 @@
     "jest-when": "^3.5.1",
     "nodemon": "^2.0.19",
     "npm-audit-resolver": "^2.3.1",
-    "npm-force-resolutions": "^0.0.10",
     "prettier": "^2.6.0",
     "sequelize-cli": "^6.4.1",
-    "supertest": "^6.2.2",
+    "supertest": "^6.3.3",
     "typescript": "^4.6.2"
   },
   "dependencies": {
@@ -71,8 +69,7 @@
     "clearMocks": true,
     "automock": false
   },
-  "resolutions": {
-    "ansi-regex": "5.0.1",
+  "overrides": {
     "moment": "2.29.4"
   }
 }
