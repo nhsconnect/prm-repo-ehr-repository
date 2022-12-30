@@ -70,6 +70,7 @@
     "automock": false
   },
   "overrides": {
-    "moment": "2.29.4"
+    "moment": "2.29.4",
+    "json5": "2.2.2"
   }
 }
