@@ -1,4 +1,4 @@
-FROM node:14.19.0-alpine AS builder
+FROM node:16.19.0-alpine AS builder
 
 # install python and postgres native requirements
 RUN apk update && \
@@ -20,10 +20,10 @@ COPY package*.json /app/
 
 WORKDIR /app
 
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # production app image
-FROM alpine:3.15
+FROM alpine:3.17
 
 # take just node without npm (including npx) or yarn
 COPY --from=builder /usr/local/bin/node /usr/local/bin
