@@ -13,8 +13,12 @@ const sequelizeConfig = {
 
 if (use_ssl) {
   sequelizeConfig.ssl = use_ssl;
-  sequelizeConfig.native = use_ssl;
-  sequelizeConfig.dialectOptions = { ssl: 'require' };
+  sequelizeConfig.dialectOptions = {
+    // see https://node-postgres.com/features/ssl
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  };
 }
 
 module.exports = sequelizeConfig;
