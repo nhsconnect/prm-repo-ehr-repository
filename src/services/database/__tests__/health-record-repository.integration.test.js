@@ -204,11 +204,9 @@ describe('healthRecordRepository', () => {
         type: MessageType.EHR_EXTRACT,
         receivedAt: new Date(),
       });
-      const { healthRecordExtractId, fragmentMessageIds } = await getHealthRecordMessageIds(
-        conversationId
-      );
+      const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
 
-      expect(healthRecordExtractId).toEqual(messageId);
+      expect(coreMessageId).toEqual(messageId);
       expect(fragmentMessageIds).toEqual([]);
     });
 
@@ -231,11 +229,9 @@ describe('healthRecordRepository', () => {
         receivedAt: new Date(),
         parentId: messageId,
       });
-      const { healthRecordExtractId, fragmentMessageIds } = await getHealthRecordMessageIds(
-        conversationId
-      );
+      const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
 
-      expect(healthRecordExtractId).toEqual(messageId);
+      expect(coreMessageId).toEqual(messageId);
       expect(fragmentMessageIds).toEqual([attachmentId]);
     });
 
@@ -268,11 +264,9 @@ describe('healthRecordRepository', () => {
         parentId: attachmentId,
       });
 
-      const { healthRecordExtractId, fragmentMessageIds } = await getHealthRecordMessageIds(
-        conversationId
-      );
+      const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
 
-      expect(healthRecordExtractId).toEqual(messageId);
+      expect(coreMessageId).toEqual(messageId);
       expect(fragmentMessageIds).toEqual([attachmentId, attachmentPartId]);
     });
   });

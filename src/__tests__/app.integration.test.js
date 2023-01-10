@@ -185,15 +185,12 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(patientRes.status).toEqual(200);
-      expect(patientRes.body.data.links.healthRecordExtract).toContain(
+      expect(patientRes.body.coreMessageUrl).toContain(
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${healthRecordExtractId}`
       );
-      expect(patientRes.body.data.links.attachments[0]).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${attachmentId}`
-      );
-      expect(patientRes.body.data.links.attachments[1]).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${attachmentPartId}`
-      );
+      expect(patientRes.body.fragmentMessageIds[0]).toEqual(attachmentId);
+      expect(patientRes.body.fragmentMessageIds[1]).toEqual(attachmentPartId);
+      expect(patientRes.body.conversationIdFromEhrIn).toEqual(conversationId);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 

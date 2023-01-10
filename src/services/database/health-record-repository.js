@@ -146,12 +146,12 @@ export const getHealthRecordMessageIds = async (conversationId) => {
     (message) => message.type === MessageType.EHR_EXTRACT
   );
   logInfo('core message index is ' + healthRecordExtractIndex);
-  const healthRecordExtractId = messages[healthRecordExtractIndex].messageId;
+  const coreMessageId = messages[healthRecordExtractIndex].messageId;
 
   messages.splice(healthRecordExtractIndex, 1);
   const fragmentMessageIds = messages.map((message) => message.messageId);
 
-  return { healthRecordExtractId, fragmentMessageIds };
+  return { coreMessageId, fragmentMessageIds };
 };
 
 export const messageAlreadyReceived = async (messageId) => {
