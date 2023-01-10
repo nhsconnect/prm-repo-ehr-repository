@@ -37,8 +37,8 @@ export const patientDetailsController = async (req, res) => {
     }
     logInfo('Putting conversation ID into log context');
     setCurrentSpanAttributes({ conversationId: currentHealthRecordId });
-    logInfo('Getting message ids');
-    const { healthRecordExtractId, attachmentIds } = await getHealthRecordMessageIds(
+    logInfo('Getting fragment message ids');
+    const { healthRecordExtractId, fragmentMessageIds } = await getHealthRecordMessageIds(
       currentHealthRecordId
     );
 
@@ -48,10 +48,15 @@ export const patientDetailsController = async (req, res) => {
       getOperation
     );
 
-    let attachmentUrls = [];
-    for (const index in attachmentIds) {
-      const url = await getSignedUrl(currentHealthRecordId, attachmentIds[index], getOperation);
-      attachmentUrls.push(url);
+    //TODO: do we need this anymore??
+    let fragmentMessageUrls = [];
+    for (const index in fragmentMessageIds) {
+      const url = await getSignedUrl(
+        currentHealthRecordId,
+        fragmentMessageIds[index],
+        getOperation
+      );
+      fragmentMessageUrls.push(url);
     }
 
     const responseBody = {
@@ -60,7 +65,8 @@ export const patientDetailsController = async (req, res) => {
         id: nhsNumber,
         links: {
           healthRecordExtract: healthRecordExtractUrl,
-          attachments: attachmentUrls,
+          //TODO: RENAME & code change
+          attachments: fragmentMessageUrls,
         },
       },
     };

@@ -34,7 +34,7 @@ describe('patientDetailsController', () => {
       getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
       getHealthRecordMessageIds.mockResolvedValue({
         healthRecordExtractId: messageId,
-        attachmentIds: [],
+        fragmentMessageIds: [],
       });
       getSignedUrl.mockResolvedValue(presignedUrl);
 
@@ -51,24 +51,24 @@ describe('patientDetailsController', () => {
       expect(res.body.data.links.attachments).toEqual([]);
     });
 
-    it('should return 200 and correct link to health record extract and attachment', async () => {
+    it('should return 200 and correct link to health record extract and fragment message IDs', async () => {
       const nhsNumber = '1234567890';
       const conversationId = uuid();
       const healthRecordExtractId = uuid();
-      const attachmentId = uuid();
+      const fragmentMessageId = uuid();
       const extractPresignedUrl = 'extract-url';
-      const attachmentPresignedUrl = 'attachment-url';
+      const fragmentMessagePresignedUrl = 'fragment-url';
 
       getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
       getHealthRecordMessageIds.mockResolvedValue({
         healthRecordExtractId: healthRecordExtractId,
-        attachmentIds: [attachmentId],
+        fragmentMessageIds: [fragmentMessageId],
       });
       when(getSignedUrl)
         .calledWith(conversationId, healthRecordExtractId, 'getObject')
         .mockResolvedValue(extractPresignedUrl)
-        .calledWith(conversationId, attachmentId, 'getObject')
-        .mockResolvedValue(attachmentPresignedUrl);
+        .calledWith(conversationId, fragmentMessageId, 'getObject')
+        .mockResolvedValue(fragmentMessagePresignedUrl);
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
@@ -77,9 +77,9 @@ describe('patientDetailsController', () => {
       expect(res.status).toBe(200);
       expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, healthRecordExtractId, 'getObject');
-      expect(getSignedUrl).toHaveBeenCalledWith(conversationId, attachmentId, 'getObject');
+      expect(getSignedUrl).toHaveBeenCalledWith(conversationId, fragmentMessageId, 'getObject');
       expect(res.body.data.links.healthRecordExtract).toEqual(extractPresignedUrl);
-      expect(res.body.data.links.attachments).toEqual([attachmentPresignedUrl]);
+      expect(res.body.data.links.attachments).toEqual([fragmentMessagePresignedUrl]);
     });
   });
 

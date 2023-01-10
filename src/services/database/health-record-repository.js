@@ -149,9 +149,9 @@ export const getHealthRecordMessageIds = async (conversationId) => {
   const healthRecordExtractId = messages[healthRecordExtractIndex].messageId;
 
   messages.splice(healthRecordExtractIndex, 1);
-  const attachmentIds = messages.map((message) => message.messageId);
+  const fragmentMessageIds = messages.map((message) => message.messageId);
 
-  return { healthRecordExtractId, attachmentIds };
+  return { healthRecordExtractId, fragmentMessageIds };
 };
 
 export const messageAlreadyReceived = async (messageId) => {
