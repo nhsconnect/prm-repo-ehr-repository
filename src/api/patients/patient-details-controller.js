@@ -17,7 +17,7 @@ export const patientDetailsValidation = [
 
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
-  const  conversationId  = req.get('conversationId');
+  const conversationId = req.get('conversationId');
   const getOperation = 'getObject';
   try {
     logInfo('Putting conversation ID into log context');
@@ -29,7 +29,6 @@ export const patientDetailsController = async (req, res) => {
       res.sendStatus(404);
       return;
     }
-
 
     logInfo('Getting fragment message ids');
     const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(

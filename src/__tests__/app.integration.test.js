@@ -7,7 +7,6 @@ import { expectStructuredLogToContain, transportSpy } from '../__builders__/logg
 import ModelFactory from '../models';
 import { MessageType, modelName as messageModelName } from '../models/message';
 import { modelName as healthRecordModelName } from '../models/health-record';
-import {UUID} from "sequelize";
 
 describe('app', () => {
   const config = initializeConfig();
@@ -143,7 +142,7 @@ describe('app', () => {
             },
           },
         })
-        .set('Authorization', authorizationKeys)
+        .set('Authorization', authorizationKeys);
       expect(messageRes.status).toEqual(201);
 
       const attachmentRes = await request(app)
@@ -181,9 +180,9 @@ describe('app', () => {
       expect(attachmentPartRes.status).toEqual(201);
       const conversationId = uuid();
       const patientRes = await request(app)
-          .get(`/patients/${nhsNumber}`)
-          .set('Authorization', authorizationKeys)
-          .set('conversationId', conversationId);
+        .get(`/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys)
+        .set('conversationId', conversationId);
 
       expect(patientRes.status).toEqual(200);
       expect(patientRes.body.coreMessageUrl).toContain(
@@ -192,21 +191,27 @@ describe('app', () => {
       expect(patientRes.body.fragmentMessageIds[0]).toEqual(attachmentId);
       expect(patientRes.body.fragmentMessageIds[1]).toEqual(attachmentPartId);
       expect(patientRes.body.conversationIdFromEhrIn).toEqual(conversationIdFromEhrIn);
-      expectStructuredLogToContain(transportSpy, { conversationId: conversationId, traceId: expect.anything() });
+      expectStructuredLogToContain(transportSpy, {
+        conversationId: conversationId,
+        traceId: expect.anything(),
+      });
     });
 
-    it('should have conversation Id in the logging context', async()=>{
+    it('should have conversation Id in the logging context', async () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
       const patientRes = await request(app)
-          .get(`/patients/${nhsNumber}`)
-          .set('Authorization', authorizationKeys)
-          .set('conversationId', conversationId);
+        .get(`/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys)
+        .set('conversationId', conversationId);
 
       expect(patientRes.status).toEqual(200);
 
-      expectStructuredLogToContain(transportSpy, { conversationId: conversationId, traceId: expect.anything() });
-    })
+      expectStructuredLogToContain(transportSpy, {
+        conversationId: conversationId,
+        traceId: expect.anything(),
+      });
+    });
 
     it('should return a 404 if no complete health record is found', async () => {
       const conversationId = uuid();
