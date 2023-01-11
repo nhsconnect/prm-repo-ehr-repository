@@ -7,6 +7,7 @@ import { expectStructuredLogToContain, transportSpy } from '../__builders__/logg
 import ModelFactory from '../models';
 import { MessageType, modelName as messageModelName } from '../models/message';
 import { modelName as healthRecordModelName } from '../models/health-record';
+import {UUID} from "sequelize";
 
 describe('app', () => {
   const config = initializeConfig();
@@ -122,7 +123,7 @@ describe('app', () => {
 
   describe('GET /patients/:nhsNumber', () => {
     it('should return 200 and patient health record link', async () => {
-      const conversationId = uuid();
+      const conversationIdFromEhrIn = uuid();
       const healthRecordExtractId = uuid();
       const attachmentId = uuid();
       const attachmentPartId = uuid();
@@ -135,15 +136,14 @@ describe('app', () => {
             id: healthRecordExtractId,
             type: 'messages',
             attributes: {
-              conversationId,
+              conversationId: conversationIdFromEhrIn,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
               attachmentMessageIds: [attachmentId],
             },
           },
         })
-        .set('Authorization', authorizationKeys);
-
+        .set('Authorization', authorizationKeys)
       expect(messageRes.status).toEqual(201);
 
       const attachmentRes = await request(app)
@@ -153,7 +153,7 @@ describe('app', () => {
             id: attachmentId,
             type: 'messages',
             attributes: {
-              conversationId,
+              conversationId: conversationIdFromEhrIn,
               messageType: MessageType.ATTACHMENT,
               attachmentMessageIds: [attachmentPartId],
             },
@@ -170,7 +170,7 @@ describe('app', () => {
             id: attachmentPartId,
             type: 'messages',
             attributes: {
-              conversationId,
+              conversationId: conversationIdFromEhrIn,
               messageType: MessageType.ATTACHMENT,
               attachmentMessageIds: [],
             },
@@ -179,20 +179,34 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(attachmentPartRes.status).toEqual(201);
-
+      const conversationId = uuid();
       const patientRes = await request(app)
-        .get(`/patients/${nhsNumber}`)
-        .set('Authorization', authorizationKeys);
+          .get(`/patients/${nhsNumber}`)
+          .set('Authorization', authorizationKeys)
+          .set('conversationId', conversationId);
 
       expect(patientRes.status).toEqual(200);
       expect(patientRes.body.coreMessageUrl).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${healthRecordExtractId}`
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationIdFromEhrIn}/${healthRecordExtractId}`
       );
       expect(patientRes.body.fragmentMessageIds[0]).toEqual(attachmentId);
       expect(patientRes.body.fragmentMessageIds[1]).toEqual(attachmentPartId);
-      expect(patientRes.body.conversationIdFromEhrIn).toEqual(conversationId);
-      expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
+      expect(patientRes.body.conversationIdFromEhrIn).toEqual(conversationIdFromEhrIn);
+      expectStructuredLogToContain(transportSpy, { conversationId: conversationId, traceId: expect.anything() });
     });
+
+    it('should have conversation Id in the logging context', async()=>{
+      const conversationId = uuid();
+      const nhsNumber = '1234567890';
+      const patientRes = await request(app)
+          .get(`/patients/${nhsNumber}`)
+          .set('Authorization', authorizationKeys)
+          .set('conversationId', conversationId);
+
+      expect(patientRes.status).toEqual(200);
+
+      expectStructuredLogToContain(transportSpy, { conversationId: conversationId, traceId: expect.anything() });
+    })
 
     it('should return a 404 if no complete health record is found', async () => {
       const conversationId = uuid();

@@ -17,9 +17,12 @@ export const patientDetailsValidation = [
 
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
+  const  conversationId  = req.get('conversationId');
   const getOperation = 'getObject';
-
   try {
+    logInfo('Putting conversation ID into log context');
+    setCurrentSpanAttributes({ conversationId: conversationId });
+    logInfo('Putting conversation ID into log context');
     const currentHealthRecordConversationId = await getCurrentHealthRecordIdForPatient(nhsNumber);
     if (!currentHealthRecordConversationId) {
       logInfo('Did not find a complete patient health record');
@@ -27,8 +30,7 @@ export const patientDetailsController = async (req, res) => {
       return;
     }
 
-    logInfo('Putting conversation ID into log context');
-    setCurrentSpanAttributes({ conversationId: currentHealthRecordConversationId });
+
     logInfo('Getting fragment message ids');
     const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(
       currentHealthRecordConversationId
