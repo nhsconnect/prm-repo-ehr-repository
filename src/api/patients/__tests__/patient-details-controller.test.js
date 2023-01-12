@@ -40,7 +40,7 @@ describe('patientDetailsController', () => {
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set('Authorization', authorizationKeys);
+        .set({'Authorization': authorizationKeys, 'conversationId': conversationId});
 
       expect(res.status).toBe(200);
       expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
@@ -68,7 +68,7 @@ describe('patientDetailsController', () => {
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set('Authorization', authorizationKeys);
+        .set({'Authorization': authorizationKeys, 'conversationId': conversationId});
 
       expect(res.status).toBe(200);
       expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
@@ -82,12 +82,13 @@ describe('patientDetailsController', () => {
 
   describe('failure', () => {
     const nhsNumber = '1234567890';
+    const conversationId = 'fake-conversationId';
 
     it('should return a 404 when no complete health record is found', async () => {
       getCurrentHealthRecordIdForPatient.mockReturnValue(undefined);
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set('Authorization', authorizationKeys);
+        .set({'Authorization': authorizationKeys, 'conversationId': conversationId});
 
       expect(res.status).toEqual(404);
       expect(logInfo).toHaveBeenCalledWith('Did not find a complete patient health record');
@@ -97,13 +98,24 @@ describe('patientDetailsController', () => {
       getCurrentHealthRecordIdForPatient.mockRejectedValue({ bob: 'cheese' });
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set('Authorization', authorizationKeys);
+        .set({'Authorization': authorizationKeys, 'conversationId': conversationId});
+
 
       expect(res.status).toEqual(503);
       expect(logError).toHaveBeenCalledWith('Could not retrieve patient health record', {
         bob: 'cheese',
       });
     });
+
+    it('should return 400 when conversation id is not passed as header', async () => {
+      getCurrentHealthRecordIdForPatient.mockReturnValue(undefined);
+      const res = await request(app)
+          .get(`/patients/${nhsNumber}`)
+          .set({'Authorization': authorizationKeys});
+
+      expect(res.status).toEqual(400);
+      expect(logError).toHaveBeenCalledWith('conversationId not passed as header');
+    })
   });
 
   describe('authentication', () => {
