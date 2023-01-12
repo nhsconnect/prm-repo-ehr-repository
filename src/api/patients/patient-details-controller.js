@@ -18,9 +18,9 @@ export const patientDetailsValidation = [
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
   const conversationId = req.get('conversationId');
-  if(!conversationId) {
-     logError('conversationId not passed as header')
-     res.sendStatus(400)
+  if (!conversationId) {
+    logError('conversationId not passed as header');
+    res.sendStatus(400);
     return;
   }
   const getOperation = 'getObject';

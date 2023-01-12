@@ -40,7 +40,7 @@ describe('patientDetailsController', () => {
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set({'Authorization': authorizationKeys, 'conversationId': conversationId});
+        .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
       expect(res.status).toBe(200);
       expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
@@ -68,7 +68,7 @@ describe('patientDetailsController', () => {
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set({'Authorization': authorizationKeys, 'conversationId': conversationId});
+        .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
       expect(res.status).toBe(200);
       expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
@@ -88,7 +88,7 @@ describe('patientDetailsController', () => {
       getCurrentHealthRecordIdForPatient.mockReturnValue(undefined);
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set({'Authorization': authorizationKeys, 'conversationId': conversationId});
+        .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
       expect(res.status).toEqual(404);
       expect(logInfo).toHaveBeenCalledWith('Did not find a complete patient health record');
@@ -98,8 +98,7 @@ describe('patientDetailsController', () => {
       getCurrentHealthRecordIdForPatient.mockRejectedValue({ bob: 'cheese' });
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set({'Authorization': authorizationKeys, 'conversationId': conversationId});
-
+        .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
       expect(res.status).toEqual(503);
       expect(logError).toHaveBeenCalledWith('Could not retrieve patient health record', {
@@ -110,12 +109,12 @@ describe('patientDetailsController', () => {
     it('should return 400 when conversation id is not passed as header', async () => {
       getCurrentHealthRecordIdForPatient.mockReturnValue(undefined);
       const res = await request(app)
-          .get(`/patients/${nhsNumber}`)
-          .set({'Authorization': authorizationKeys});
+        .get(`/patients/${nhsNumber}`)
+        .set({ Authorization: authorizationKeys });
 
       expect(res.status).toEqual(400);
       expect(logError).toHaveBeenCalledWith('conversationId not passed as header');
-    })
+    });
   });
 
   describe('authentication', () => {

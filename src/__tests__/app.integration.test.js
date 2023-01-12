@@ -239,7 +239,7 @@ describe('app', () => {
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set('Authorization', authorizationKeys);
+        .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
       expect(res.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { traceId: expect.anything() });
