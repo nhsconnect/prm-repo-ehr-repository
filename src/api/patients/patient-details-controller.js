@@ -3,7 +3,7 @@ import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds,
 } from '../../services/database/health-record-repository';
-import { logError, logInfo } from '../../middleware/logging';
+import { logError, logInfo, logWarning } from '../../middleware/logging';
 import getSignedUrl from '../../services/storage/get-signed-url';
 import { setCurrentSpanAttributes } from '../../config/tracing';
 
@@ -17,16 +17,9 @@ export const patientDetailsValidation = [
 
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
-  const conversationId = req.get('conversationId');
-  if (!conversationId) {
-    logError('conversationId not passed as header');
-    res.sendStatus(400);
-    return;
-  }
-  const getOperation = 'getObject';
+  addConversationIdToLogContext(req.get('conversationId'));
+
   try {
-    logInfo('Putting conversation ID into log context', conversationId);
-    setCurrentSpanAttributes({ conversationId: conversationId });
     const currentHealthRecordConversationId = await getCurrentHealthRecordIdForPatient(nhsNumber);
     if (!currentHealthRecordConversationId) {
       logInfo('Did not find a complete patient health record');
@@ -39,6 +32,7 @@ export const patientDetailsController = async (req, res) => {
       currentHealthRecordConversationId
     );
 
+    const getOperation = 'getObject';
     const coreMessageUrl = await getSignedUrl(
       currentHealthRecordConversationId,
       coreMessageId,
@@ -57,3 +51,12 @@ export const patientDetailsController = async (req, res) => {
     res.sendStatus(503);
   }
 };
+
+function addConversationIdToLogContext(conversationId) {
+  if (!conversationId) {
+    logWarning('conversationId not passed as header');
+  } else {
+    logInfo('Putting conversation ID into log context', conversationId);
+    setCurrentSpanAttributes({ conversationId: conversationId });
+  }
+}

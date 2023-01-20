@@ -7,7 +7,7 @@ import {
   getHealthRecordMessageIds,
 } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
-import { logError, logInfo } from '../../../middleware/logging';
+import { logError, logInfo, logWarning } from '../../../middleware/logging';
 import getSignedUrl from '../../../services/storage/get-signed-url';
 
 jest.mock('../../../services/database/health-record-repository');
@@ -78,6 +78,30 @@ describe('patientDetailsController', () => {
       expect(res.body.fragmentMessageIds).toEqual([fragmentMessageId]);
       expect(res.body.conversationIdFromEhrIn).toEqual(conversationId);
     });
+
+    it('should return 200 but log a warning when conversation id is not passed as header', async () => {
+      const nhsNumber = '1234567890';
+      const conversationId = uuid();
+      const healthRecordExtractId = uuid();
+      const fragmentMessageId = uuid();
+      const extractPresignedUrl = 'extract-url';
+
+      getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
+      getHealthRecordMessageIds.mockResolvedValue({
+        coreMessageId: healthRecordExtractId,
+        fragmentMessageIds: [fragmentMessageId],
+      });
+      when(getSignedUrl)
+        .calledWith(conversationId, healthRecordExtractId, 'getObject')
+        .mockResolvedValue(extractPresignedUrl);
+
+      const res = await request(app)
+        .get(`/patients/${nhsNumber}`)
+        .set({ Authorization: authorizationKeys });
+
+      expect(logWarning).toHaveBeenCalledWith('conversationId not passed as header');
+      expect(res.status).toEqual(200);
+    });
   });
 
   describe('failure', () => {
@@ -104,16 +128,6 @@ describe('patientDetailsController', () => {
       expect(logError).toHaveBeenCalledWith('Could not retrieve patient health record', {
         bob: 'cheese',
       });
-    });
-
-    it('should return 400 when conversation id is not passed as header', async () => {
-      getCurrentHealthRecordIdForPatient.mockReturnValue(undefined);
-      const res = await request(app)
-        .get(`/patients/${nhsNumber}`)
-        .set({ Authorization: authorizationKeys });
-
-      expect(res.status).toEqual(400);
-      expect(logError).toHaveBeenCalledWith('conversationId not passed as header');
     });
   });
 
