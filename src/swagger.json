@@ -83,7 +83,7 @@
     "/patients/{nhsNumber}": {
       "get": {
         "tags": [],
-        "summary": "Retrieves the current patient's health record",
+        "summary": "Retrieves the patient's current ehr - core url & fragment message id's",
         "consumes": ["application/json"],
         "parameters": [
           {
@@ -273,31 +273,19 @@
       "type": "object",
       "description": "Retrieves patient's current health record",
       "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "enum": ["patients"]
-            },
-            "id": {
-              "type": "string"
-            },
-            "links": {
-              "type": "object",
-              "properties": {
-                "healthRecordExtract": {
-                  "type": "string"
-                },
-                "attachments": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
+        "coreMessageUrl": {
+          "type": "string"
+        },
+        "fragmentMessageIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
           }
+        },
+        "conversationIdFromEhrIn": {
+          "type": "string",
+          "format": "uuid"
         }
       }
     },
