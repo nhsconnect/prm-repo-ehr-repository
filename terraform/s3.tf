@@ -142,7 +142,7 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_alb_to_write_access_logs_to_s3"
         "AWS": aws_alb.alb-internal.arn
       },
       "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::bucket-name/prefix/AWSLogs/your-aws-account-id/*"
+      "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"
     }
   ]
   })
