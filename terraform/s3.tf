@@ -117,10 +117,10 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
         "Sid": "S3ServerAccessLogsPolicy",
         "Effect": "Allow",
         "Principal": {
-          "Service": "logging.s3.amazonaws.com"
+          "Service": ["logging.s3.amazonaws.com","logdelivery.elasticloadbalancing.amazonaws.com"]
         },
         "Action": "s3:PutObject",
-        "Resource": ["${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*","arn:aws:elasticloadbalancing:${var.region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${aws_alb.alb-internal.id}"],
+        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*",
         Condition: {
           Bool: {
             "aws:SecureTransport": "false"
@@ -128,22 +128,5 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
         }
       }
     ]
-  })
-}
-
-resource "aws_s3_bucket_policy" "ehr_repo_permit_alb_to_write_access_logs_to_s3" {
-  bucket        = aws_s3_bucket.ehr_repo_access_logs.id
-  policy = jsonencode({
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "arn:aws:iam::${aws_alb.alb-internal.id}:root"
-      },
-      "Action": "s3:PutObject",
-      "Resource": ["${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*","arn:aws:elasticloadbalancing:${var.region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${aws_alb.alb-internal.id}"]
-    }
-  ]
   })
 }
