@@ -29,7 +29,7 @@ resource "aws_alb" "alb-internal" {
   enable_deletion_protection = true
   access_logs {
     bucket  = aws_s3_bucket.ehr_repo_access_logs.bucket
-    prefix = local.ehr_repo_bucket_access_logs_prefix
+    prefix = "s3-access-log"
     enabled = true
   }
   tags = {
