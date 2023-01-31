@@ -65,7 +65,7 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
 
 resource "aws_s3_bucket" "ehr_repo_access_logs" {
   bucket        = "${var.environment}-${var.component_name}-access-logs"
-  acl           = "log-delivery-write"
+  acl           = "private"
   force_destroy = true
   versioning {
     enabled = false
@@ -130,23 +130,10 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
       {
         "Effect": "Allow",
         "Principal": {
-          "AWS": aws_alb.alb-internal.arn
+          "AWS": "arn:aws:iam::652711504416:root"
         },
         "Action": "s3:PutObject",
-        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*",
-        Condition: {
-          Bool: {
-            "aws:SecureTransport": "false"
-          }
-        }
-      },
-      {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "delivery.logs.amazonaws.com"
-        },
-        "Action": "s3:PutObject",
-        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*",
+        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}AWSLogs/${local.account_id}/*",
         Condition: {
           Bool: {
             "aws:SecureTransport": "false"
