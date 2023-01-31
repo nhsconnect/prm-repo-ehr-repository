@@ -139,6 +139,14 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
             "aws:SecureTransport": "false"
           }
         }
+      },
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "logdelivery.elasticloadbalancing.amazonaws.com"
+        },
+        "Action": "s3:PutObject",
+        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}AWSLogs/${local.account_id}/*"
       }
     ]
   })
