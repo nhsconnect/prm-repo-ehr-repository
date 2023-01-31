@@ -130,7 +130,9 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
       {
         "Effect": "Allow",
         "Principal": {
-          "AWS": "arn:aws:iam::652711504416:root"
+          "AWS": [
+            "652711504416"
+          ]
         },
         "Action": "s3:PutObject",
         "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}AWSLogs/${local.account_id}/*",
