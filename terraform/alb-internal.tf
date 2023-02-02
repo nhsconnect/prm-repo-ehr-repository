@@ -27,11 +27,7 @@ resource "aws_alb" "alb-internal" {
   internal        = true
   drop_invalid_header_fields = true
   enable_deletion_protection = true
-  access_logs {
-    bucket  = aws_s3_bucket.ehr_repo_access_logs.bucket
-    prefix  = local.ehr_repo_bucket_access_logs_prefix
-    enabled = true
-  }
+
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
