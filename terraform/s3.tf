@@ -126,51 +126,24 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy"
             "aws:SecureTransport": "false"
           }
         }
-      },
-      {
-        "Effect": "Allow",
-        "Principal": {
-          "AWS": "arn:aws:iam::652711504416:root"
-        },
-        "Action": "s3:PutObject",
-        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}AWSLogs/${local.account_id}/*",
-        Condition: {
-          Bool: {
-            "aws:SecureTransport": "false"
-          }
-        }
-      },
-      {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "logdelivery.elasticloadbalancing.amazonaws.com"
-        },
-        "Action": "s3:PutObject",
-        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}AWSLogs/${local.account_id}/*"
-      },
-      {
-        "Sid": "AWSLogDeliveryWrite",
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "delivery.logs.amazonaws.com"
-        },
-        "Action": "s3:PutObject",
-        "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}AWSLogs/${local.account_id}/*",
-        "Condition": {
-          Bool: {
-            "aws:SecureTransport": "false"
-          }
-        }
-      },
-      {
-        "Sid": "AWSLogDeliveryAclCheck",
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "delivery.logs.amazonaws.com"
-        },
-        "Action": "s3:GetBucketAcl",
-        "Resource": aws_s3_bucket.ehr_repo_access_logs.arn
       }
     ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "ehr_repo_permit_alb_to_write_access_logs_to_s3" {
+  bucket        = aws_s3_bucket.ehr_repo_access_logs.id
+  policy = jsonencode({
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": aws_alb.alb-internal.arn
+      },
+      "Action": "s3:PutObject",
+      "Resource": "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"
+    }
+  ]
   })
 }
