@@ -16,8 +16,12 @@ variable "dns_name" {}
 variable "s3_bucket_name" {}
 variable "s3_prev_bucket_name" {}
 variable "task_image_tag" {}
-variable "task_cpu" {}
-variable "task_memory" {}
+variable "task_cpu" {
+  default = 512
+}
+variable "task_memory" {
+  default = 1024
+}
 variable "port" {}
 
 variable "service_desired_count" {}

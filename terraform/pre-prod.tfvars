@@ -9,8 +9,6 @@ database_name        = "deductions_db"
 s3_bucket_name       = "pre-prod-ehr-repo-bucket"
 s3_prev_bucket_name  = "pre-prod-ehr-repo"
 
-task_cpu    = 256
-task_memory = 512
 port        = 3000
 
 service_desired_count = "3"
