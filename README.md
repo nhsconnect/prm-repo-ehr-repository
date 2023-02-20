@@ -1,9 +1,8 @@
-# Deductions EHR Repository
+# EHR Repository
 
-A Proof of Concept implementation of how the Health Records of Patients that are not registered with a GP Practice could be stored digitally.
+A store for the Electronic Health Records (EHRs) of patients that are no longer registered with a GP Practice.
 
-This is a component of the solution to validate that the GP2GP process can be used to preserve the Health Records of Patients that are deducted(no longer registered with a GP Practice). 
-If successful this would allow their health record to be preserved in a digital format replacing the current practice of printing and storing the record.
+The stored the EHR is composed of the messages sent from its previous holder in its transfer over the GP2GP protocol.
 
 ## Prerequisites
 
