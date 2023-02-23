@@ -57,7 +57,7 @@
     "lodash.merge": "^4.6.2",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.26.0",
+    "sequelize": "^6.28.2",
     "swagger-ui-express": "^4.3.0",
     "traverse": "^0.6.6",
     "uuid": "^8.3.2",
