@@ -117,6 +117,7 @@ describe('app', () => {
 
       expect(recordRes.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
+      expectStructuredLogToContain(transportSpy, { level: "WARN" });
     });
   });
 
@@ -243,6 +244,7 @@ describe('app', () => {
 
       expect(res.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { traceId: expect.anything() });
+      expectStructuredLogToContain(transportSpy, { level: "WARN" });
     });
   });
 
