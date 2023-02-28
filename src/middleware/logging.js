@@ -24,7 +24,7 @@ export const eventFinished = (req, res) => {
 
   if (res.statusCode < 400) {
     logInfo(url, { req: reqLog, res: resLog });
-  } else if (res.statusCode == 404){
+  } else if (res.statusCode == 404) {
     logWarning(url, { req: reqLog, res: resLog });
   } else {
     logError(url, { req: reqLog, res: resLog });
