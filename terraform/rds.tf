@@ -7,7 +7,7 @@ resource "aws_rds_cluster" "db-cluster" {
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
   allow_major_version_upgrade = true
-  engine_version          = "13.7"
+  engine_version          = "13.8"
   vpc_security_group_ids  = [
     aws_security_group.ehr_repo_to_db_sg.id,
     aws_security_group.gocd_to_db_sg.id,
