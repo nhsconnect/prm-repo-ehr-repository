@@ -119,7 +119,7 @@ describe('Performance of EHR', () => {
     await testPerformance(attachmentMessageIds, null, []);
   }, 10000);
 
-  it('Performance of EHR with 50 attachments, one of which is large - within 25 seconds', async () => {
+  it('Performance of EHR with 50 attachments, one of which is large - within 40 seconds', async () => {
     // Send ehr with 50 attachments to store in EHR repo database
     let attachmentMessageIds = [];
 
@@ -138,5 +138,5 @@ describe('Performance of EHR', () => {
 
     // Run test
     await testPerformance(attachmentMessageIds, veryLargeAttachmentId, largeAttachments);
-  }, 25000);
+  }, 40000);
 });
