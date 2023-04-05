@@ -240,19 +240,6 @@ function tf_apply_db_roles {
 # Script Functions #
 ####################
 
-function send_canary_update_message {
-  check_nhs_service
-  node scripts/send-canary-update.js $(npm outdated --parseable)
-}
-
-function configure_hangout_webhook {
-  export GOOGLE_CHAT_CANARY_WEBHOOK=$(get_aws_ssm_secret "/repo/prod/user-input/external/gocd-google-chat-canary-webhook")
-  if [ -z "${GOOGLE_CHAT_CANARY_WEBHOOK}" ]; then
-    echo "Unable to obtain GOOGLE_CHAT_CANARY_WEBHOOK from AWS"
-    exit 5
-  fi
-}
-
 function get_db_credentials {
   export DATABASE_PASSWORD=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
   export DATABASE_USER=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
@@ -346,19 +333,13 @@ case "${command}" in
       ;;
   _list_outdated)
       npm install
-      npm outdated > outdated-dependencies.txt || send_canary_update_message
+      npm outdated > outdated-dependencies.txt
       ;;
   list_outdated)
-      configure_hangout_webhook
       dojo "./tasks _list_outdated"
       ;;
   update_package_json)
       dojo "npx npm-check-updates -u"
-      ;;
-  send_dead_canary_message)
-      check_nhs_service
-      configure_hangout_webhook
-      dojo "node scripts/send-canary-error.js"
       ;;
   _build)
       rm -rf build/
