@@ -14,6 +14,8 @@ httpContext.enable();
 
 const app = express();
 
+app.disable('x-powered-by');
+
 app.use(express.json());
 // Sets "Strict-Transport-Security: max-age=31536000; includeSubDomains"
 app.use(
