@@ -43,6 +43,83 @@ describe('app', () => {
     });
   });
 
+  describe('GET /fragments/:conversationId/:messageId', () => {
+    // given
+    const conversationId = v4();
+    const coreMessageId = v4();
+    const fragmentMessageId = v4();
+    const nhsNumber = '2345678901'
+
+    it('should return presigned url when the fragment record exists', async () => {
+      // setting up database
+      const coreMessageRes = await request(app)
+          .post(`/messages`)
+          .send({
+            data: {
+              id: coreMessageId,
+              type: 'messages',
+              attributes: {
+                conversationId,
+                messageType: MessageType.EHR_EXTRACT,
+                nhsNumber,
+                attachmentMessageIds: [fragmentMessageId],
+              },
+            },
+          })
+          .set('Authorization', authorizationKeys);
+
+      expect(coreMessageRes.status).toEqual(201);
+
+      const fragmentMessageRes = await request(app)
+          .post(`/messages`)
+          .send({
+            data: {
+              id: fragmentMessageId,
+              type: 'messages',
+              attributes: {
+                conversationId,
+                messageType: MessageType.ATTACHMENT,
+                nhsNumber: "",
+                attachmentMessageIds: []
+              },
+            },
+          })
+          .set('Authorization', authorizationKeys);
+
+      expect(fragmentMessageRes.status).toEqual(201);
+
+      // when
+      const res = await request(app)
+          .get(`/fragments/${conversationId}/${fragmentMessageId}`)
+          .set('Authorization', authorizationKeys);
+
+      // then
+      expect(res.status).toBe(200);
+      expect(res.text).toContain(
+          `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${fragmentMessageId}`
+      );
+      expectStructuredLogToContain(transportSpy, {
+        messageId: fragmentMessageId,
+        conversationId,
+        traceId: expect.anything(),
+      });
+    });
+
+    it('should return 404 when the fragment record is not found', async () => {
+      // given
+      const nonExistentMessageId = uuid();
+
+      // when
+      const res = await request(app)
+          .get(`/fragments/${conversationId}/${nonExistentMessageId}`)
+          .set('Authorization', authorizationKeys);
+
+      // then
+      expect(res.status).toBe(404);
+      expectStructuredLogToContain(transportSpy, {conversationId, traceId: expect.anything()});
+    })
+  })
+
   describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
     it('should return 200', async () => {
       const conversationId = uuid();
