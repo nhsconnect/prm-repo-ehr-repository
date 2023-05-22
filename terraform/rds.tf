@@ -4,7 +4,7 @@ resource "aws_rds_cluster" "db-cluster" {
   database_name           = "ehrdb"
   master_username         = data.aws_ssm_parameter.db-username.value
   master_password         = data.aws_ssm_parameter.db-password.value
-  backup_retention_period = 5
+  backup_retention_period = 7
   preferred_backup_window = "07:00-09:00"
   allow_major_version_upgrade = true
   engine_version          = "13.8"
