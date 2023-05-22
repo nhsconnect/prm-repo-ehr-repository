@@ -31,14 +31,14 @@ describe('getFragmentController', () => {
             messageAlreadyReceived.mockResolvedValueOnce(true);
             getSignedUrl.mockResolvedValue(presignedUrl);
 
-            const res = await request(app)
+            const response = await request(app)
                 .get(`/fragments/${conversationId}/${messageId}`)
                 .set('Authorization', authorizationKeys);
 
             // then
-            expect(res.status).toBe(200);
+            expect(response.status).toBe(200);
             expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'getObject');
-            expect(res.text).toEqual(presignedUrl);
+            expect(response.text).toEqual(presignedUrl);
             expect(logInfo).toHaveBeenCalledWith('Presigned URL sent successfully');
         });
     });
@@ -55,12 +55,12 @@ describe('getFragmentController', () => {
             // when
             messageAlreadyReceived.mockResolvedValueOnce(false);
 
-            const res = await request(app)
+            const response = await request(app)
                 .get(`/fragments/${conversationId}/${messageId}`)
                 .set('Authorization', authorizationKeys);
 
             // then
-            expect(res.status).toBe(404);
+            expect(response.status).toBe(404);
             expect(getSignedUrl).not.toHaveBeenCalled();
             expect(messageAlreadyReceived).toHaveBeenCalledWith(messageId);
         });
@@ -74,14 +74,14 @@ describe('getFragmentController', () => {
             messageAlreadyReceived.mockResolvedValueOnce(true);
             getSignedUrl.mockRejectedValueOnce(error);
 
-            const res = await request(app)
+            const response = await request(app)
                 .get(`/fragments/${conversationId}/${messageId}`)
                 .set('Authorization', authorizationKeys);
 
             // then
             expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'getObject');
             expect(logError).toHaveBeenCalledWith('Failed to retrieve pre-signed url', error);
-            expect(res.status).toBe(503);
+            expect(response.status).toBe(503);
         });
     });
 
@@ -93,13 +93,13 @@ describe('getFragmentController', () => {
             const expectedErrorMessage = [{ conversationId: "'conversationId' provided is not a UUID" }];
 
             // when
-            const res = await request(app)
+            const response = await request(app)
                 .get(`/fragments/${conversationId}/${messageId}`)
                 .set('Authorization', authorizationKeys);
 
             // then
-            expect(res.status).toBe(422);
-            expect(res.body).toEqual({
+            expect(response.status).toBe(422);
+            expect(response.body).toEqual({
                 errors: expectedErrorMessage,
             });
         });
@@ -111,13 +111,13 @@ describe('getFragmentController', () => {
             const errorMessage = [{ messageId: "'messageId' provided is not a UUID" }];
 
             // when
-            const res = await request(app)
+            const response = await request(app)
                 .get(`/fragments/${conversationId}/${messageId}`)
                 .set('Authorization', authorizationKeys);
 
             // then
-            expect(res.status).toBe(422);
-            expect(res.body).toEqual({
+            expect(response.status).toBe(422);
+            expect(response.body).toEqual({
                 errors: errorMessage,
             });
         });

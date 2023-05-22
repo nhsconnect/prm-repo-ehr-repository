@@ -3,7 +3,7 @@ import { authenticateRequest } from '../../middleware/auth';
 import { validate } from '../../middleware/validation';
 
 import * as tracing from '../../middleware/tracing';
-import { getFragmentController, getFragmentControllerValidation} from "./get-fragment-controller";
+import { getFragmentController, getFragmentControllerValidation } from "./get-fragment-controller";
 
 export const fragments = express.Router();
 

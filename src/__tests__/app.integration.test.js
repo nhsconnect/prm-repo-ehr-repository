@@ -28,11 +28,11 @@ describe('app', () => {
     const messageId = v4();
 
     it('should return presigned url', async () => {
-      const res = await request(app)
+      const response = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)
         .set('Authorization', authorizationKeys);
-      expect(res.status).toBe(200);
-      expect(res.text).toContain(
+      expect(response.status).toBe(200);
+      expect(response.text).toContain(
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
       );
       expectStructuredLogToContain(transportSpy, {
@@ -48,11 +48,11 @@ describe('app', () => {
     const conversationId = v4();
     const coreMessageId = v4();
     const fragmentMessageId = v4();
-    const nhsNumber = '2345678901'
+    const nhsNumber = '2345678901';
 
     it('should return presigned url when the fragment record exists', async () => {
       // setting up database
-      const coreMessageRes = await request(app)
+      const coreMessageResponse = await request(app)
           .post(`/messages`)
           .send({
             data: {
@@ -68,9 +68,9 @@ describe('app', () => {
           })
           .set('Authorization', authorizationKeys);
 
-      expect(coreMessageRes.status).toEqual(201);
+      expect(coreMessageResponse.status).toEqual(201);
 
-      const fragmentMessageRes = await request(app)
+      const fragmentMessageResponse = await request(app)
           .post(`/messages`)
           .send({
             data: {
@@ -86,16 +86,16 @@ describe('app', () => {
           })
           .set('Authorization', authorizationKeys);
 
-      expect(fragmentMessageRes.status).toEqual(201);
+      expect(fragmentMessageResponse.status).toEqual(201);
 
       // when
-      const res = await request(app)
+      const response = await request(app)
           .get(`/fragments/${conversationId}/${fragmentMessageId}`)
           .set('Authorization', authorizationKeys);
 
       // then
-      expect(res.status).toBe(200);
-      expect(res.text).toContain(
+      expect(response.status).toBe(200);
+      expect(response.text).toContain(
           `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${fragmentMessageId}`
       );
       expectStructuredLogToContain(transportSpy, {
@@ -110,12 +110,12 @@ describe('app', () => {
       const nonExistentMessageId = uuid();
 
       // when
-      const res = await request(app)
+      const response = await request(app)
           .get(`/fragments/${conversationId}/${nonExistentMessageId}`)
           .set('Authorization', authorizationKeys);
 
       // then
-      expect(res.status).toBe(404);
+      expect(response.status).toBe(404);
       expectStructuredLogToContain(transportSpy, {conversationId, traceId: expect.anything()});
     })
   })
@@ -126,7 +126,7 @@ describe('app', () => {
       const messageId = uuid();
       const nhsNumber = '1234567890';
 
-      const messageRes = await request(app)
+      const messageResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
@@ -142,13 +142,13 @@ describe('app', () => {
         })
         .set('Authorization', authorizationKeys);
 
-      expect(messageRes.status).toEqual(201);
+      expect(messageResponse.status).toEqual(201);
 
-      const recordRes = await request(app)
+      const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
-      expect(recordRes.status).toEqual(200);
+      expect(recordResponse.status).toEqual(200);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
@@ -158,7 +158,7 @@ describe('app', () => {
       const attachmentId = uuid();
       const nhsNumber = '1234567890';
 
-      const messageRes = await request(app)
+      const messageResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
@@ -174,13 +174,13 @@ describe('app', () => {
         })
         .set('Authorization', authorizationKeys);
 
-      expect(messageRes.status).toEqual(201);
+      expect(messageResponse.status).toEqual(201);
 
-      const recordRes = await request(app)
+      const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
-      expect(recordRes.status).toEqual(404);
+      expect(recordResponse.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
@@ -188,11 +188,11 @@ describe('app', () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
 
-      const recordRes = await request(app)
+      const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
-      expect(recordRes.status).toEqual(404);
+      expect(recordResponse.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
       expectStructuredLogToContain(transportSpy, { level: 'WARN' });
     });
@@ -206,7 +206,7 @@ describe('app', () => {
       const attachmentPartId = uuid();
       const nhsNumber = '1234567890';
 
-      const messageRes = await request(app)
+      const messageResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
@@ -221,7 +221,7 @@ describe('app', () => {
           },
         })
         .set('Authorization', authorizationKeys);
-      expect(messageRes.status).toEqual(201);
+      expect(messageResponse.status).toEqual(201);
 
       const attachmentRes = await request(app)
         .post(`/messages`)
@@ -238,9 +238,9 @@ describe('app', () => {
         })
         .set('Authorization', authorizationKeys);
 
-      expect(attachmentRes.status).toEqual(201);
+      expect(attachmentResponse.status).toEqual(201);
 
-      const attachmentPartRes = await request(app)
+      const attachmentPartResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
@@ -255,7 +255,7 @@ describe('app', () => {
         })
         .set('Authorization', authorizationKeys);
 
-      expect(attachmentPartRes.status).toEqual(201);
+      expect(attachmentPartResponse.status).toEqual(201);
       const conversationId = uuid();
       const patientRes = await request(app)
         .get(`/patients/${nhsNumber}`)
@@ -278,12 +278,12 @@ describe('app', () => {
     it('should have conversation Id in the logging context', async () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
-      const patientRes = await request(app)
+      const patientResponse = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys)
         .set('conversationId', conversationId);
 
-      expect(patientRes.status).toEqual(200);
+      expect(patientResponse.status).toEqual(200);
 
       expectStructuredLogToContain(transportSpy, {
         conversationId: conversationId,
@@ -297,7 +297,7 @@ describe('app', () => {
       const attachmentId = uuid();
       const nhsNumber = '1234567891';
 
-      const messageRes = await request(app)
+      const messageResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
@@ -313,13 +313,13 @@ describe('app', () => {
         })
         .set('Authorization', authorizationKeys);
 
-      expect(messageRes.status).toEqual(201);
+      expect(messageResponse.status).toEqual(201);
 
-      const res = await request(app)
+      const response = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
-      expect(res.status).toEqual(404);
+      expect(response.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { traceId: expect.anything() });
       expectStructuredLogToContain(transportSpy, { level: 'WARN' });
     });
@@ -367,7 +367,7 @@ describe('app', () => {
     });
 
     it('should save health record without attachments in the database and return 201', async () => {
-      const res = await request(app)
+      const response = await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, []))
         .set('Authorization', authorizationKeys);
@@ -380,7 +380,7 @@ describe('app', () => {
       expect(message.parentId).toBeNull();
       expect(healthRecord.nhsNumber).toBe(nhsNumber);
       expect(healthRecord.completedAt).not.toBeNull();
-      expect(res.status).toBe(201);
+      expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId,
         conversationId,
@@ -391,7 +391,7 @@ describe('app', () => {
     it('should save health record with attachments in the database and return 201', async () => {
       const attachment = uuid();
 
-      const res = await request(app)
+      const response = await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachment]))
         .set('Authorization', authorizationKeys);
@@ -403,7 +403,7 @@ describe('app', () => {
       expect(attachmentMessage.type).toBe(MessageType.ATTACHMENT);
       expect(attachmentMessage.parentId).toBe(messageId);
       expect(healthRecord.completedAt).toBeNull();
-      expect(res.status).toBe(201);
+      expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId,
         conversationId,
@@ -422,7 +422,7 @@ describe('app', () => {
         )
         .set('Authorization', authorizationKeys);
 
-      const attachmentRes = await request(app)
+      const attachmentResponse = await request(app)
         .post(`/messages`)
         .send(
           createReqBodyForAttachment(firstPartOfLargeAttachmentId, conversationId, [
@@ -436,7 +436,7 @@ describe('app', () => {
 
       expect(restOfAttachmentMessage.receivedAt).toBeNull();
       expect(healthRecord.completedAt).toBeNull();
-      expect(attachmentRes.status).toBe(201);
+      expect(attachmentResponse.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId: firstPartOfLargeAttachmentId,
         conversationId,
@@ -451,7 +451,7 @@ describe('app', () => {
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachmentId]))
         .set('Authorization', authorizationKeys);
 
-      const attachmentRes = await request(app)
+      const attachmentResponse = await request(app)
         .post(`/messages`)
         .send(createReqBodyForAttachment(attachmentId, conversationId))
         .set('Authorization', authorizationKeys);
@@ -461,7 +461,7 @@ describe('app', () => {
 
       expect(attachmentMessage.receivedAt).not.toBeNull();
       expect(healthRecord.completedAt).not.toBeNull();
-      expect(attachmentRes.status).toBe(201);
+      expect(attachmentResponse.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId: attachmentId,
         conversationId,
@@ -477,7 +477,7 @@ describe('app', () => {
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachmentId]))
         .set('Authorization', authorizationKeys);
 
-      const res = await request(app)
+      const response = await request(app)
         .post(`/messages`)
         .send(createReqBodyForAttachment(attachmentPartId, conversationId))
         .set('Authorization', authorizationKeys);
@@ -488,7 +488,7 @@ describe('app', () => {
       expect(attachmentPartMessage.conversationId).toEqual(conversationId);
       expect(attachmentPartMessage.receivedAt).not.toBeNull();
       expect(healthRecord.completedAt).toBeNull();
-      expect(res.status).toBe(201);
+      expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId: attachmentPartId,
         conversationId,
