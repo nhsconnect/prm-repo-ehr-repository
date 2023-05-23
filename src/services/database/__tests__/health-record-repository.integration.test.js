@@ -88,7 +88,7 @@ describe('healthRecordRepository', () => {
     it("should not set 'completedAt' property when there are still messages to be received", async () => {
       const conversationId = uuid();
       const messageId = uuid();
-      const attachmentId = uuid();
+      const fragmentMessageId = uuid();
       const nhsNumber = '1234567890';
 
       await HealthRecord.create({ conversationId, nhsNumber, completedAt: null });
@@ -100,7 +100,7 @@ describe('healthRecordRepository', () => {
       });
       await Message.create({
         conversationId,
-        messageId: attachmentId,
+        messageId: fragmentMessageId,
         type: MessageType.FRAGMENT,
         receivedAt: null,
       });
@@ -210,10 +210,10 @@ describe('healthRecordRepository', () => {
       expect(fragmentMessageIds).toEqual([]);
     });
 
-    it('should return health record extract message id and attachment ids given small attachment', async () => {
+    it('should return health record extract message id and fragment message ids given singular fragment', async () => {
       const messageId = uuid();
       const conversationId = uuid();
-      const attachmentId = uuid();
+      const fragmentMessageId = uuid();
 
       await Message.create({
         messageId,
@@ -223,7 +223,7 @@ describe('healthRecordRepository', () => {
       });
 
       await Message.create({
-        messageId: attachmentId,
+        messageId: fragmentMessageId,
         conversationId,
         type: MessageType.FRAGMENT,
         receivedAt: new Date(),
@@ -232,14 +232,14 @@ describe('healthRecordRepository', () => {
       const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
 
       expect(coreMessageId).toEqual(messageId);
-      expect(fragmentMessageIds).toEqual([attachmentId]);
+      expect(fragmentMessageIds).toEqual([fragmentMessageId]);
     });
 
-    it('should return health record extract message id and attachment ids given large attachment', async () => {
+    it('should return health record extract message id and fragment message ids given nested fragments', async () => {
       const messageId = uuid();
       const conversationId = uuid();
-      const attachmentId = uuid();
-      const attachmentPartId = uuid();
+      const fragmentMessageId = uuid();
+      const nestedFragmentId = uuid();
 
       await Message.create({
         messageId,
@@ -249,7 +249,7 @@ describe('healthRecordRepository', () => {
       });
 
       await Message.create({
-        messageId: attachmentId,
+        messageId: fragmentMessageId,
         conversationId,
         type: MessageType.FRAGMENT,
         receivedAt: new Date(),
@@ -257,17 +257,17 @@ describe('healthRecordRepository', () => {
       });
 
       await Message.create({
-        messageId: attachmentPartId,
+        messageId: nestedFragmentId,
         conversationId,
         type: MessageType.FRAGMENT,
         receivedAt: new Date(),
-        parentId: attachmentId,
+        parentId: fragmentMessageId,
       });
 
       const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
 
       expect(coreMessageId).toEqual(messageId);
-      expect(fragmentMessageIds).toEqual([attachmentId, attachmentPartId]);
+      expect(fragmentMessageIds).toEqual([fragmentMessageId, nestedFragmentId]);
     });
   });
 
