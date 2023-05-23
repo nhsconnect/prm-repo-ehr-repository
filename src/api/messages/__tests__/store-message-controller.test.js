@@ -69,7 +69,7 @@ describe('storeMessageController', () => {
     it('should update receivedAt for given attachment and store its parts', async () => {
       const attachmentPartId = uuid();
       requestBody.data.attributes = {
-        messageType: MessageType.ATTACHMENT,
+        messageType: MessageType.FRAGMENT,
         conversationId,
         attachmentMessageIds: [attachmentPartId],
       };
@@ -93,7 +93,7 @@ describe('storeMessageController', () => {
       const attachmentPartId = uuid();
       requestBody.data.id = attachmentPartId;
       requestBody.data.attributes = {
-        messageType: MessageType.ATTACHMENT,
+        messageType: MessageType.FRAGMENT,
         conversationId,
         attachmentMessageIds: [],
       };
@@ -252,7 +252,7 @@ describe('storeMessageController', () => {
       };
       const errorMessage = {
         'data.attributes.messageType':
-          "'messageType' provided is not one of the following: ehrExtract, attachment",
+          "'messageType' provided is not one of the following: ehrExtract, fragment",
       };
 
       const res = await request(app)
@@ -329,18 +329,18 @@ describe('storeMessageController', () => {
       expect(res.status).toBe(201);
     });
 
-    it('should return 422 and an error message when nhsNumber has been provided for messageType attachment', async () => {
+    it('should return 422 and an error message when nhsNumber has been provided for messageType fragment', async () => {
       const requestBody = {
         data: {
           attributes: {
             nhsNumber: '1234567890',
-            messageType: 'attachment',
+            messageType: 'fragment',
           },
         },
       };
 
       const errorMessage = {
-        'data.attributes.nhsNumber': "'nhsNumber' should be empty for messageType attachment",
+        'data.attributes.nhsNumber': "'nhsNumber' should be empty for messageType fragment",
       };
 
       const res = await request(app)
@@ -352,14 +352,14 @@ describe('storeMessageController', () => {
       expect(res.body.errors).toContainEqual(errorMessage);
     });
 
-    it('should return 201 when nhsNumber has not been provided for messageType attachment', async () => {
+    it('should return 201 when nhsNumber has not been provided for messageType fragment', async () => {
       const requestBody = {
         data: {
           type: 'messages',
           id: uuid(),
           attributes: {
             conversationId: uuid(),
-            messageType: 'attachment',
+            messageType: 'fragment',
             attachmentMessageIds: [],
           },
         },

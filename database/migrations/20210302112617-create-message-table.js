@@ -2,7 +2,7 @@
 
 const MessageType = {
   EHR_EXTRACT: 'ehrExtract',
-  ATTACHMENT: 'attachment'
+  FRAGMENT: 'fragment'
 };
 
 const tableName = 'messages';

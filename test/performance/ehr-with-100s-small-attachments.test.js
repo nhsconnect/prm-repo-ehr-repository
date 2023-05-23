@@ -11,7 +11,7 @@ async function sendAttachment(id, conversationId, attachmentMessageIds) {
       id,
       attributes: {
         conversationId,
-        messageType: 'attachment',
+        messageType: 'fragment',
         attachmentMessageIds,
       },
     },

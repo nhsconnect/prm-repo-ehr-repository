@@ -101,7 +101,7 @@ describe('healthRecordRepository', () => {
       await Message.create({
         conversationId,
         messageId: attachmentId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: null,
       });
 
@@ -225,7 +225,7 @@ describe('healthRecordRepository', () => {
       await Message.create({
         messageId: attachmentId,
         conversationId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: new Date(),
         parentId: messageId,
       });
@@ -251,7 +251,7 @@ describe('healthRecordRepository', () => {
       await Message.create({
         messageId: attachmentId,
         conversationId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: new Date(),
         parentId: messageId,
       });
@@ -259,7 +259,7 @@ describe('healthRecordRepository', () => {
       await Message.create({
         messageId: attachmentPartId,
         conversationId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: new Date(),
         parentId: attachmentId,
       });

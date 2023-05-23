@@ -63,7 +63,7 @@ describe('messageRepository', () => {
 
       const actualAttachmentMessage = await Message.findByPk(attachment);
       expect(actualAttachmentMessage.conversationId).toBe(conversationId);
-      expect(actualAttachmentMessage.type).toBe(MessageType.ATTACHMENT);
+      expect(actualAttachmentMessage.type).toBe(MessageType.FRAGMENT);
       expect(actualAttachmentMessage.parentId).toBe(messageId);
       expect(actualAttachmentMessage.receivedAt).toBeNull();
     });
@@ -129,7 +129,7 @@ describe('messageRepository', () => {
       await Message.create({
         conversationId,
         messageId: attachmentMessageId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: null,
       });
       await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, []);
@@ -164,7 +164,7 @@ describe('messageRepository', () => {
       await Message.create({
         conversationId,
         messageId: attachmentMessageId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: null,
       });
       await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, [
@@ -193,13 +193,13 @@ describe('messageRepository', () => {
       await Message.create({
         conversationId,
         messageId: attachmentMessageId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: null,
       });
       await Message.create({
         conversationId,
         messageId: attachmentRemainingPartId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: new Date(),
         parentId: null,
       });
@@ -221,7 +221,7 @@ describe('messageRepository', () => {
       await Message.create({
         conversationId,
         messageId: messageId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         receivedAt: null,
       });
 
@@ -257,7 +257,7 @@ describe('messageRepository', () => {
 
       expect(attachment.conversationId).toEqual(conversationId);
       expect(attachment.receivedAt).toEqual(now);
-      expect(attachment.type).toEqual(MessageType.ATTACHMENT);
+      expect(attachment.type).toEqual(MessageType.FRAGMENT);
       expect(attachment.parentId).toBeNull();
     });
 

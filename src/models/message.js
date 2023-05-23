@@ -5,7 +5,7 @@ const tableName = 'messages';
 
 export const MessageType = {
   EHR_EXTRACT: 'ehrExtract',
-  ATTACHMENT: 'attachment',
+  FRAGMENT: 'fragment',
 };
 
 Object.freeze(MessageType);

@@ -27,7 +27,7 @@ export const createEhrExtract = async (ehrExtract) => {
       const attachmentMessage = {
         messageId: attachment,
         parentId: messageId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         conversationId,
       };
       await Message.create(attachmentMessage, { transaction: t });
@@ -58,7 +58,7 @@ export const updateAttachmentAndCreateItsParts = async (
       const attachmentPartMessage = {
         messageId: attachmentPartId,
         parentId: messageId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         conversationId,
       };
 
@@ -100,7 +100,7 @@ export const createAttachmentPart = async (id, conversationId) => {
   const attachment = {
     messageId: id,
     conversationId,
-    type: MessageType.ATTACHMENT,
+    type: MessageType.FRAGMENT,
     receivedAt: getNow(),
   };
 

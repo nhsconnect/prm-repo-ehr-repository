@@ -28,13 +28,13 @@ export const storeMessageControllerValidation = [
     .isLength({ min: 10, max: 10 })
     .withMessage("'nhsNumber' provided is not 10 characters"),
   body('data.attributes.nhsNumber')
-    .if(body('data.attributes.messageType').equals(MessageType.ATTACHMENT))
+    .if(body('data.attributes.messageType').equals(MessageType.FRAGMENT))
     .isEmpty()
-    .withMessage(`'nhsNumber' should be empty for messageType ${MessageType.ATTACHMENT}`),
+    .withMessage(`'nhsNumber' should be empty for messageType ${MessageType.FRAGMENT}`),
   body('data.attributes.messageType')
-    .isIn([MessageType.EHR_EXTRACT, MessageType.ATTACHMENT])
+    .isIn([MessageType.EHR_EXTRACT, MessageType.FRAGMENT])
     .withMessage(
-      `'messageType' provided is not one of the following: ${MessageType.EHR_EXTRACT}, ${MessageType.ATTACHMENT}`
+      `'messageType' provided is not one of the following: ${MessageType.EHR_EXTRACT}, ${MessageType.FRAGMENT}`
     ),
   body('data.attributes.attachmentMessageIds.*')
     .isUUID()
@@ -58,7 +58,7 @@ export const storeMessageController = async (req, res) => {
         attachmentMessageIds,
       });
     }
-    if (messageType === MessageType.ATTACHMENT) {
+    if (messageType === MessageType.FRAGMENT) {
       if (await attachmentExists(id)) {
         await updateAttachmentAndCreateItsParts(id, conversationId, attachmentMessageIds);
       } else {

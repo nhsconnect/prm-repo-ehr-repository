@@ -154,7 +154,7 @@ describe('app', () => {
             type: 'messages',
             attributes: {
               conversationId: conversationIdFromEhrIn,
-              messageType: MessageType.ATTACHMENT,
+              messageType: MessageType.FRAGMENT,
               attachmentMessageIds: [attachmentPartId],
             },
           },
@@ -171,7 +171,7 @@ describe('app', () => {
             type: 'messages',
             attributes: {
               conversationId: conversationIdFromEhrIn,
-              messageType: MessageType.ATTACHMENT,
+              messageType: MessageType.FRAGMENT,
               attachmentMessageIds: [],
             },
           },
@@ -274,7 +274,7 @@ describe('app', () => {
         id: messageId,
         attributes: {
           conversationId,
-          messageType: MessageType.ATTACHMENT,
+          messageType: MessageType.FRAGMENT,
           attachmentMessageIds: attachmentMessageIds,
         },
       },
@@ -323,7 +323,7 @@ describe('app', () => {
       const healthRecord = await HealthRecord.findByPk(conversationId);
 
       expect(attachmentMessage.conversationId).toBe(conversationId);
-      expect(attachmentMessage.type).toBe(MessageType.ATTACHMENT);
+      expect(attachmentMessage.type).toBe(MessageType.FRAGMENT);
       expect(attachmentMessage.parentId).toBe(messageId);
       expect(healthRecord.completedAt).toBeNull();
       expect(res.status).toBe(201);
