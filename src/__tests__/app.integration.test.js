@@ -223,7 +223,7 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
       expect(messageResponse.status).toEqual(201);
 
-      const attachmentRes = await request(app)
+      const attachmentResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
