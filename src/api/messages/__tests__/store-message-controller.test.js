@@ -2,10 +2,10 @@ import { v4 as uuid } from 'uuid';
 import request from 'supertest';
 import app from '../../../app';
 import {
-  updateAttachmentAndCreateItsParts,
+  updateFragmentAndCreateItsParts,
   createEhrExtract,
-  createAttachmentPart,
-  attachmentExists,
+  createFragmentPart,
+  fragmentExists,
 } from '../../../services/database/message-repository';
 import {
   updateHealthRecordCompleteness,
@@ -74,7 +74,7 @@ describe('storeMessageController', () => {
         attachmentMessageIds: [attachmentPartId],
       };
 
-      attachmentExists.mockResolvedValueOnce(true);
+      fragmentExists.mockResolvedValueOnce(true);
 
       const res = await request(app)
         .post('/messages')
@@ -83,7 +83,7 @@ describe('storeMessageController', () => {
 
       expect(res.status).toBe(201);
       expect(createEhrExtract).not.toHaveBeenCalled();
-      expect(updateAttachmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
+      expect(updateFragmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
         attachmentPartId,
       ]);
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
@@ -98,7 +98,7 @@ describe('storeMessageController', () => {
         attachmentMessageIds: [],
       };
 
-      attachmentExists.mockResolvedValueOnce(false);
+      fragmentExists.mockResolvedValueOnce(false);
 
       const res = await request(app)
         .post('/messages')
@@ -106,9 +106,9 @@ describe('storeMessageController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
-      expect(attachmentExists).toHaveBeenCalledWith(attachmentPartId);
-      expect(createAttachmentPart).toHaveBeenCalledWith(attachmentPartId, conversationId);
-      expect(updateAttachmentAndCreateItsParts).not.toHaveBeenCalled();
+      expect(fragmentExists).toHaveBeenCalledWith(attachmentPartId);
+      expect(createFragmentPart).toHaveBeenCalledWith(attachmentPartId, conversationId);
+      expect(updateFragmentAndCreateItsParts).not.toHaveBeenCalled();
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
   });

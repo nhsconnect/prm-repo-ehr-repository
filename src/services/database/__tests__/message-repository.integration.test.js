@@ -1,9 +1,9 @@
 import { v4 as uuid } from 'uuid';
 import {
-  updateAttachmentAndCreateItsParts,
+  updateFragmentAndCreateItsParts,
   createEhrExtract,
-  attachmentExists,
-  createAttachmentPart,
+  fragmentExists,
+  createFragmentPart,
 } from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
@@ -114,11 +114,11 @@ describe('messageRepository', () => {
     });
   });
 
-  describe('updateAttachmentAndCreateItsParts', () => {
-    it('should update receivedAt for an attachment with current date', async () => {
+  describe('updateFragmentAndCreateItsParts', () => {
+    it('should update receivedAt for a fragment with current date', async () => {
       const conversationId = uuid();
       const ehrMessageId = uuid();
-      const attachmentMessageId = uuid();
+      const fragmentMessageId = uuid();
       await HealthRecord.create({ conversationId, nhsNumber });
       await Message.create({
         conversationId,
@@ -128,20 +128,20 @@ describe('messageRepository', () => {
       });
       await Message.create({
         conversationId,
-        messageId: attachmentMessageId,
+        messageId: fragmentMessageId,
         type: MessageType.FRAGMENT,
         receivedAt: null,
       });
-      await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, []);
-      const attachment = await Message.findByPk(attachmentMessageId);
+      await updateFragmentAndCreateItsParts(fragmentMessageId, conversationId, []);
+      const fragment = await Message.findByPk(fragmentMessageId);
 
-      expect(attachment.receivedAt).toEqual(now);
+      expect(fragment.receivedAt).toEqual(now);
     });
 
     it('should not update receivedAt for a given attachment if database update query throws', async () => {
       const conversationId = uuid();
       try {
-        await updateAttachmentAndCreateItsParts('not-valid', conversationId, []);
+        await updateFragmentAndCreateItsParts('not-valid', conversationId, []);
       } catch (err) {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Message could not be stored', err);
@@ -167,7 +167,7 @@ describe('messageRepository', () => {
         type: MessageType.FRAGMENT,
         receivedAt: null,
       });
-      await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, [
+      await updateFragmentAndCreateItsParts(attachmentMessageId, conversationId, [
         attachmentRemainingPartId,
       ]);
       const attachmentRemainingPart = await Message.findByPk(attachmentRemainingPartId);
@@ -204,7 +204,7 @@ describe('messageRepository', () => {
         parentId: null,
       });
 
-      await updateAttachmentAndCreateItsParts(attachmentMessageId, conversationId, [
+      await updateFragmentAndCreateItsParts(attachmentMessageId, conversationId, [
         attachmentRemainingPartId,
       ]);
 
@@ -214,8 +214,8 @@ describe('messageRepository', () => {
     });
   });
 
-  describe('attachmentExists', () => {
-    it('should return true for an attachment existing in the database', async () => {
+  describe('fragmentExists', () => {
+    it('should return true for a fragment existing in the database', async () => {
       const conversationId = uuid();
       const messageId = uuid();
       await Message.create({
@@ -225,50 +225,50 @@ describe('messageRepository', () => {
         receivedAt: null,
       });
 
-      expect(await attachmentExists(messageId)).toBe(true);
+      expect(await fragmentExists(messageId)).toBe(true);
     });
 
-    it('should return false for an attachment that does not exist in the database', async () => {
+    it('should return false for a fragment that does not exist in the database', async () => {
       const messageId = uuid();
-      expect(await attachmentExists(messageId)).toBe(false);
+      expect(await fragmentExists(messageId)).toBe(false);
     });
 
     it('should throw if database querying throws', async () => {
       const messageId = 'not-valid';
       try {
-        await attachmentExists(messageId);
+        await fragmentExists(messageId);
       } catch (err) {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith(
-          'Querying database for attachment message failed',
+          'Querying database for fragment message failed',
           err
         );
       }
     });
   });
 
-  describe('createAttachmentPart', () => {
-    it('should create attachment entry in the database', async () => {
+  describe('createFragmentPart', () => {
+    it('should create fragment entry in the database', async () => {
       const messageId = uuid();
       const conversationId = uuid();
-      await createAttachmentPart(messageId, conversationId);
+      await createFragmentPart(messageId, conversationId);
 
-      const attachment = await Message.findByPk(messageId);
+      const fragment = await Message.findByPk(messageId);
 
-      expect(attachment.conversationId).toEqual(conversationId);
-      expect(attachment.receivedAt).toEqual(now);
-      expect(attachment.type).toEqual(MessageType.FRAGMENT);
-      expect(attachment.parentId).toBeNull();
+      expect(fragment.conversationId).toEqual(conversationId);
+      expect(fragment.receivedAt).toEqual(now);
+      expect(fragment.type).toEqual(MessageType.FRAGMENT);
+      expect(fragment.parentId).toBeNull();
     });
 
     it('should throw if database creation query throws', async () => {
       const conversationId = uuid();
       const messageId = 'not-valid';
       try {
-        await createAttachmentPart(messageId, conversationId);
+        await createFragmentPart(messageId, conversationId);
       } catch (err) {
         expect(err).not.toBeNull();
-        expect(logError).toHaveBeenCalledWith('Creating attachment database entry failed', err);
+        expect(logError).toHaveBeenCalledWith('Creating fragment database entry failed', err);
       }
     });
   });

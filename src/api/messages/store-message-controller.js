@@ -1,10 +1,10 @@
 import { body } from 'express-validator';
 import { MessageType } from '../../models/message';
 import {
-  updateAttachmentAndCreateItsParts,
+  updateFragmentAndCreateItsParts,
   createEhrExtract,
-  attachmentExists,
-  createAttachmentPart,
+  fragmentExists,
+  createFragmentPart,
 } from '../../services/database/message-repository';
 import { logError, logInfo, logWarning } from '../../middleware/logging';
 import {
@@ -59,21 +59,21 @@ export const storeMessageController = async (req, res) => {
       });
     }
     if (messageType === MessageType.FRAGMENT) {
-      if (await attachmentExists(id)) {
-        await updateAttachmentAndCreateItsParts(id, conversationId, attachmentMessageIds);
+      if (await fragmentExists(id)) {
+        await updateFragmentAndCreateItsParts(id, conversationId, attachmentMessageIds);
       } else {
         logWarning(
-          `Attachment message ${id} did not arrive in order. Attachment parts: ${JSON.stringify(
+          `Fragment message ${id} did not arrive in order. Fragment parts: ${JSON.stringify(
             attachmentMessageIds
           )}`
         );
-        await createAttachmentPart(id, conversationId);
+        await createFragmentPart(id, conversationId);
       }
     }
     await updateHealthRecordCompleteness(conversationId);
     const healthRecordStatus = await getHealthRecordStatus(conversationId);
 
-    logInfo('Health record status for attachments: ' + healthRecordStatus);
+    logInfo('Health record status for fragments: ' + healthRecordStatus);
     res.status(201).json({ healthRecordStatus });
   } catch (e) {
     logError('Returned 503 due to error while saving message', e);
