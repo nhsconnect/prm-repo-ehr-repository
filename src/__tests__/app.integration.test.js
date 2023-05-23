@@ -62,7 +62,7 @@ describe('app', () => {
                 conversationId,
                 messageType: MessageType.EHR_EXTRACT,
                 nhsNumber,
-                attachmentMessageIds: [fragmentMessageId],
+                fragmentMessageIds: [fragmentMessageId],
               },
             },
           })
@@ -80,7 +80,7 @@ describe('app', () => {
                 conversationId,
                 messageType: MessageType.FRAGMENT,
                 nhsNumber: "",
-                attachmentMessageIds: []
+                fragmentMessageIds: []
               },
             },
           })
@@ -136,7 +136,7 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [],
+              fragmentMessageIds: [],
             },
           },
         })
@@ -168,7 +168,7 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [fragmentId],
+              fragmentMessageIds: [fragmentId],
             },
           },
         })
@@ -216,7 +216,7 @@ describe('app', () => {
               conversationId: conversationIdFromEhrIn,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [fragmentId],
+              fragmentMessageIds: [fragmentId],
             },
           },
         })
@@ -232,7 +232,7 @@ describe('app', () => {
             attributes: {
               conversationId: conversationIdFromEhrIn,
               messageType: MessageType.FRAGMENT,
-              attachmentMessageIds: [nestedFragmentID],
+              fragmentMessageIds: [nestedFragmentID],
             },
           },
         })
@@ -249,7 +249,7 @@ describe('app', () => {
             attributes: {
               conversationId: conversationIdFromEhrIn,
               messageType: MessageType.FRAGMENT,
-              attachmentMessageIds: [],
+              fragmentMessageIds: [],
             },
           },
         })
@@ -307,7 +307,7 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [fragmentId],
+              fragmentMessageIds: [fragmentId],
             },
           },
         })
@@ -332,7 +332,7 @@ describe('app', () => {
     let conversationId;
     let messageId;
 
-    const createReqBodyForEhr = (messageId, conversationId, nhsNumber, attachmentMessageIds) => ({
+    const createReqBodyForEhr = (messageId, conversationId, nhsNumber, fragmentMessageIds) => ({
       data: {
         type: 'messages',
         id: messageId,
@@ -340,19 +340,19 @@ describe('app', () => {
           conversationId,
           messageType: MessageType.EHR_EXTRACT,
           nhsNumber,
-          attachmentMessageIds,
+          fragmentMessageIds,
         },
       },
     });
 
-    const createReqBodyForFragment = (messageId, conversationId, attachmentMessageIds = []) => ({
+    const createReqBodyForFragment = (messageId, conversationId, fragmentMessageIds = []) => ({
       data: {
         type: 'messages',
         id: messageId,
         attributes: {
           conversationId,
           messageType: MessageType.FRAGMENT,
-          attachmentMessageIds: attachmentMessageIds,
+          fragmentMessageIds: fragmentMessageIds,
         },
       },
     });

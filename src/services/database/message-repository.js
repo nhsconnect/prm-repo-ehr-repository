@@ -7,8 +7,7 @@ import { getNow } from '../time';
 export const createEhrExtract = async (ehrExtract) => {
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-  // TODO: rename attachmentMessageIds later as it is used as a key / API signature
-  const { conversationId, messageId, nhsNumber, attachmentMessageIds } = ehrExtract;
+  const { conversationId, messageId, nhsNumber, fragmentMessageIds } = ehrExtract;
   const healthRecord = { conversationId, nhsNumber };
   const message = {
     conversationId,
@@ -24,7 +23,7 @@ export const createEhrExtract = async (ehrExtract) => {
     await Message.create(message, { transaction: t });
     await HealthRecord.create(healthRecord, { transaction: t });
 
-    for (const fragmentMessageId of attachmentMessageIds) {
+    for (const fragmentMessageId of fragmentMessageIds) {
       const fragmentMessage = {
         messageId: fragmentMessageId,
         parentId: messageId,

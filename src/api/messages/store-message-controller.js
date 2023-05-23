@@ -36,17 +36,17 @@ export const storeMessageControllerValidation = [
     .withMessage(
       `'messageType' provided is not one of the following: ${MessageType.EHR_EXTRACT}, ${MessageType.FRAGMENT}`
     ),
-  body('data.attributes.attachmentMessageIds.*')
+  body('data.attributes.fragmentMessageIds.*')
     .isUUID()
-    .withMessage("'attachmentMessageIds' should be UUIDs"),
-  body('data.attributes.attachmentMessageIds')
+    .withMessage("'fragmentMessageIds' should be UUIDs"),
+  body('data.attributes.fragmentMessageIds')
     .isArray()
-    .withMessage("'attachmentMessageIds' should be an array"),
+    .withMessage("'fragmentMessageIds' should be an array"),
 ];
 
 export const storeMessageController = async (req, res) => {
   const { id, attributes } = req.body.data;
-  const { conversationId, messageType, nhsNumber, attachmentMessageIds } = attributes;
+  const { conversationId, messageType, nhsNumber, fragmentMessageIds } = attributes;
   setCurrentSpanAttributes({ conversationId, messageId: id });
 
   try {
@@ -55,16 +55,16 @@ export const storeMessageController = async (req, res) => {
         messageId: id,
         conversationId,
         nhsNumber,
-        attachmentMessageIds,
+        fragmentMessageIds,
       });
     }
     if (messageType === MessageType.FRAGMENT) {
       if (await fragmentExists(id)) {
-        await updateFragmentAndCreateItsParts(id, conversationId, attachmentMessageIds);
+        await updateFragmentAndCreateItsParts(id, conversationId, fragmentMessageIds);
       } else {
         logWarning(
           `Fragment message ${id} did not arrive in order. Fragment parts: ${JSON.stringify(
-            attachmentMessageIds
+            fragmentMessageIds
           )}`
         );
         await createFragmentPart(id, conversationId);

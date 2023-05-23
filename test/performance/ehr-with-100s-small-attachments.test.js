@@ -4,7 +4,7 @@ import adapter from 'axios/lib/adapters/http';
 
 const headers = { Authorization: process.env.E2E_TEST_AUTHORIZATION_KEYS_FOR_EHR_REPO };
 
-async function sendFragment(id, conversationId, attachmentMessageIds) {
+async function sendFragment(id, conversationId, fragmentMessageIds) {
   const fragment = {
     data: {
       type: 'messages',
@@ -12,7 +12,7 @@ async function sendFragment(id, conversationId, attachmentMessageIds) {
       attributes: {
         conversationId,
         messageType: 'fragment',
-        attachmentMessageIds,
+        fragmentMessageIds,
       },
     },
   };
@@ -39,7 +39,7 @@ async function sendEhrExtract(
         conversationId,
         nhsNumber,
         messageType: 'ehrExtract',
-        attachmentMessageIds: fragmentMessageIds,
+        fragmentMessageIds: fragmentMessageIds,
       },
     },
   };

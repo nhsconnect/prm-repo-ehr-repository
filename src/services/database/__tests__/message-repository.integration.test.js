@@ -19,7 +19,7 @@ describe('messageRepository', () => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const ehrExtractType = MessageType.EHR_EXTRACT;
   const attachment = uuid();
-  const attachmentMessageIds = [attachment];
+  const fragmentMessageIds = [attachment];
   const nhsNumber = '1234567890';
   const now = new Date();
 
@@ -35,7 +35,7 @@ describe('messageRepository', () => {
     it('should create message in db', async () => {
       const conversationId = uuid();
       const messageId = uuid();
-      const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds: [] };
+      const ehrExtract = { messageId, conversationId, nhsNumber, fragmentMessageIds: [] };
       await createEhrExtract(ehrExtract);
 
       const actualMessage = await Message.findByPk(messageId);
@@ -48,7 +48,7 @@ describe('messageRepository', () => {
     it('should create health record in db', async () => {
       const conversationId = uuid();
       const messageId = uuid();
-      const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds: [] };
+      const ehrExtract = { messageId, conversationId, nhsNumber, fragmentMessageIds: [] };
       await createEhrExtract(ehrExtract);
 
       const actualHealthRecord = await HealthRecord.findByPk(conversationId);
@@ -58,7 +58,7 @@ describe('messageRepository', () => {
     it('should create attachment message in db when health record has attachments', async () => {
       const conversationId = uuid();
       const messageId = uuid();
-      const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds };
+      const ehrExtract = { messageId, conversationId, nhsNumber, fragmentMessageIds };
       await createEhrExtract(ehrExtract);
 
       const actualAttachmentMessage = await Message.findByPk(attachment);
@@ -75,7 +75,7 @@ describe('messageRepository', () => {
         messageId: 'not-a-valid-message-id',
         conversationId,
         nhsNumber,
-        attachmentMessageIds: [],
+        fragmentMessageIds: [],
       };
 
       try {
@@ -98,7 +98,7 @@ describe('messageRepository', () => {
         conversationId,
         type: ehrExtractType,
         nhsNumber: 'not-valid',
-        attachmentMessageIds: [],
+        fragmentMessageIds: [],
       };
 
       try {

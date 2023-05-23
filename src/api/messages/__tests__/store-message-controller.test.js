@@ -31,7 +31,7 @@ describe('storeMessageController', () => {
   const conversationId = uuid();
   const nhsNumber = '1234567890';
   const messageId = uuid();
-  const attachmentMessageIds = [uuid()];
+  const fragmentMessageIds = [uuid()];
 
   describe('success', () => {
     let requestBody;
@@ -45,7 +45,7 @@ describe('storeMessageController', () => {
             conversationId,
             messageType: MessageType.EHR_EXTRACT,
             nhsNumber,
-            attachmentMessageIds,
+            fragmentMessageIds,
           },
         },
       };
@@ -53,7 +53,7 @@ describe('storeMessageController', () => {
 
     it('should return a 201 and health record status when message has successfully been stored in database', async () => {
       getHealthRecordStatus.mockResolvedValueOnce('complete');
-      const ehrExtract = { messageId, conversationId, nhsNumber, attachmentMessageIds };
+      const ehrExtract = { messageId, conversationId, nhsNumber, fragmentMessageIds };
       const res = await request(app)
         .post('/messages')
         .send(requestBody)
@@ -71,7 +71,7 @@ describe('storeMessageController', () => {
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
-        attachmentMessageIds: [fragmentPartId],
+        fragmentMessageIds: [fragmentPartId],
       };
 
       fragmentExists.mockResolvedValueOnce(true);
@@ -95,7 +95,7 @@ describe('storeMessageController', () => {
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
-        attachmentMessageIds: [],
+        fragmentMessageIds: [],
       };
 
       fragmentExists.mockResolvedValueOnce(false);
@@ -122,7 +122,7 @@ describe('storeMessageController', () => {
           conversationId,
           messageType: MessageType.EHR_EXTRACT,
           nhsNumber,
-          attachmentMessageIds,
+          fragmentMessageIds,
         },
       },
     };
@@ -273,7 +273,7 @@ describe('storeMessageController', () => {
             conversationId: uuid(),
             nhsNumber: '1234567890',
             messageType: 'ehrExtract',
-            attachmentMessageIds: [],
+            fragmentMessageIds: [],
           },
         },
       };
@@ -317,7 +317,7 @@ describe('storeMessageController', () => {
             conversationId: uuid(),
             nhsNumber: '1234567890',
             messageType: 'ehrExtract',
-            attachmentMessageIds: [],
+            fragmentMessageIds: [],
           },
         },
       };
@@ -360,7 +360,7 @@ describe('storeMessageController', () => {
           attributes: {
             conversationId: uuid(),
             messageType: 'fragment',
-            attachmentMessageIds: [],
+            fragmentMessageIds: [],
           },
         },
       };
@@ -373,17 +373,17 @@ describe('storeMessageController', () => {
       expect(res.status).toBe(201);
     });
 
-    it('should return 422 and an error message when attachmentMessageIds is not uuids', async () => {
+    it('should return 422 and an error message when fragmentMessageIds is not uuids', async () => {
       const requestBody = {
         data: {
           attributes: {
-            attachmentMessageIds: ['not-a-uuid'],
+            fragmentMessageIds: ['not-a-uuid'],
           },
         },
       };
 
       const errorMessage = {
-        'data.attributes.attachmentMessageIds[0]': "'attachmentMessageIds' should be UUIDs",
+        'data.attributes.fragmentMessageIds[0]': "'fragmentMessageIds' should be UUIDs",
       };
 
       const res = await request(app)
@@ -395,17 +395,17 @@ describe('storeMessageController', () => {
       expect(res.body.errors).toContainEqual(errorMessage);
     });
 
-    it('should return 422 and an error message when attachmentMessageIds is not an array', async () => {
+    it('should return 422 and an error message when fragmentMessageIds is not an array', async () => {
       const requestBody = {
         data: {
           attributes: {
-            attachmentMessageIds: 'not-an-array',
+            fragmentMessageIds: 'not-an-array',
           },
         },
       };
 
       const errorMessage = {
-        'data.attributes.attachmentMessageIds': "'attachmentMessageIds' should be an array",
+        'data.attributes.fragmentMessageIds': "'fragmentMessageIds' should be an array",
       };
 
       const res = await request(app)
