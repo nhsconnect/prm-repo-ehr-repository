@@ -78,7 +78,7 @@ describe('app', () => {
     it('should return 404 when health record is not complete', async () => {
       const conversationId = uuid();
       const messageId = uuid();
-      const attachmentId = uuid();
+      const fragmentId = uuid();
       const nhsNumber = '1234567890';
 
       const messageRes = await request(app)
@@ -91,7 +91,7 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [attachmentId],
+              attachmentMessageIds: [fragmentId],
             },
           },
         })

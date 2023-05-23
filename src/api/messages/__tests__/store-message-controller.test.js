@@ -66,12 +66,12 @@ describe('storeMessageController', () => {
       expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
     });
 
-    it('should update receivedAt for given attachment and store its parts', async () => {
-      const attachmentPartId = uuid();
+    it('should update receivedAt for given fragment and store its parts', async () => {
+      const fragmentPartId = uuid();
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
-        attachmentMessageIds: [attachmentPartId],
+        attachmentMessageIds: [fragmentPartId],
       };
 
       fragmentExists.mockResolvedValueOnce(true);
@@ -84,14 +84,14 @@ describe('storeMessageController', () => {
       expect(res.status).toBe(201);
       expect(createEhrExtract).not.toHaveBeenCalled();
       expect(updateFragmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
-        attachmentPartId,
+        fragmentPartId,
       ]);
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
 
-    it('should create message in the database when an attachment part arrives before first attachment part', async () => {
-      const attachmentPartId = uuid();
-      requestBody.data.id = attachmentPartId;
+    it('should create message in the database when an fragment part arrives before first fragment part', async () => {
+      const fragmentPartId = uuid();
+      requestBody.data.id = fragmentPartId;
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
@@ -106,8 +106,8 @@ describe('storeMessageController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
-      expect(fragmentExists).toHaveBeenCalledWith(attachmentPartId);
-      expect(createFragmentPart).toHaveBeenCalledWith(attachmentPartId, conversationId);
+      expect(fragmentExists).toHaveBeenCalledWith(fragmentPartId);
+      expect(createFragmentPart).toHaveBeenCalledWith(fragmentPartId, conversationId);
       expect(updateFragmentAndCreateItsParts).not.toHaveBeenCalled();
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
