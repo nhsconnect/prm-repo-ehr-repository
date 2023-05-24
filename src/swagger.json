@@ -173,7 +173,7 @@
     "/messages/{conversationId}/{messageId}": {
       "get": {
         "tags": [],
-        "summary": "Retrieves the location of the EHR",
+        "summary": "Retrieves a presigned url for uploading an EHR fragment",
         "consumes": ["application/json"],
         "parameters": [
           {
@@ -251,6 +251,55 @@
           },
           "503": {
             "description": "Failed to store message"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/fragments/{conversationId}/{messageId}": {
+      "get": {
+        "tags": [],
+        "summary": "Retrieves a presigned url for downloading an EHR fragment",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversationId",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "messageId",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieves s3 pre-signed URL for the message and sends it as the body"
+          },
+          "401": {
+            "description": "Authorization header missing"
+          },
+          "403": {
+            "description": "Authorization key invalid"
+          },
+          "404": {
+            "description": "Health record with that message id not found"
+          },
+          "422": {
+            "description": "Validation failed",
+            "schema": {
+              "$ref": "#/definitions/ValidationErrors"
+            }
+          },
+          "503": {
+            "description": "Failed to get presigned url"
           }
         },
         "security": [

@@ -20,6 +20,7 @@ export const messageLocationController = async (req, res) => {
       res.sendStatus(409);
       return;
     }
+    logInfo(`Retrieving presigned url to upload the fragment with message id: ${messageId}`);
     const presignedUrl = await getSignedUrl(conversationId, messageId, operation);
     res.status(200).send(presignedUrl);
     logInfo('Presigned URL sent successfully');
