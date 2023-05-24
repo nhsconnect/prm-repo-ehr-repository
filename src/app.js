@@ -4,7 +4,7 @@ import { errorLogger, logger as requestLogger } from 'express-winston';
 import swaggerUi from 'swagger-ui-express';
 import { messages } from './api/messages';
 import { patients } from './api/patients';
-import { fragments } from "./api/fragments";
+import { fragments } from './api/fragments';
 
 import { healthCheck } from './api/health-check/health-check';
 import { options } from './config/logging';
