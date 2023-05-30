@@ -18,8 +18,8 @@ describe('messageRepository', () => {
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const ehrExtractType = MessageType.EHR_EXTRACT;
-  const attachment = uuid();
-  const fragmentMessageIds = [attachment];
+  const fragmentMessageId = uuid();
+  const fragmentMessageIds = [fragmentMessageId];
   const nhsNumber = '1234567890';
   const now = new Date();
 
@@ -55,17 +55,17 @@ describe('messageRepository', () => {
       expect(actualHealthRecord.nhsNumber).toBe(nhsNumber);
     });
 
-    it('should create attachment message in db when health record has attachments', async () => {
+    it('should create fragments message in db when health record has fragments', async () => {
       const conversationId = uuid();
       const messageId = uuid();
       const ehrExtract = { messageId, conversationId, nhsNumber, fragmentMessageIds };
       await createEhrExtract(ehrExtract);
 
-      const actualAttachmentMessage = await Message.findByPk(attachment);
-      expect(actualAttachmentMessage.conversationId).toBe(conversationId);
-      expect(actualAttachmentMessage.type).toBe(MessageType.FRAGMENT);
-      expect(actualAttachmentMessage.parentId).toBe(messageId);
-      expect(actualAttachmentMessage.receivedAt).toBeNull();
+      const fragmentMessage = await Message.findByPk(fragmentMessageId);
+      expect(fragmentMessage.conversationId).toBe(conversationId);
+      expect(fragmentMessage.type).toBe(MessageType.FRAGMENT);
+      expect(fragmentMessage.parentId).toBe(messageId);
+      expect(fragmentMessage.receivedAt).toBeNull();
     });
 
     it('should not save message or health record with wrong type', async () => {
@@ -138,7 +138,7 @@ describe('messageRepository', () => {
       expect(fragment.receivedAt).toEqual(now);
     });
 
-    it('should not update receivedAt for a given attachment if database update query throws', async () => {
+    it('should not update receivedAt for a given fragments if database update query throws', async () => {
       const conversationId = uuid();
       try {
         await updateFragmentAndCreateItsParts('not-valid', conversationId, []);
@@ -148,11 +148,11 @@ describe('messageRepository', () => {
       }
     });
 
-    it('should create messages for attachment parts', async () => {
+    it('should create messages for nested fragments', async () => {
       const conversationId = uuid();
       const ehrMessageId = uuid();
-      const attachmentMessageId = uuid();
-      const attachmentRemainingPartId = uuid();
+      const fragmentMessageId = uuid();
+      const nestedFragmentMessageId = uuid();
 
       await HealthRecord.create({ conversationId, nhsNumber });
       await Message.create({
@@ -163,25 +163,25 @@ describe('messageRepository', () => {
       });
       await Message.create({
         conversationId,
-        messageId: attachmentMessageId,
+        messageId: fragmentMessageId,
         type: MessageType.FRAGMENT,
         receivedAt: null,
       });
-      await updateFragmentAndCreateItsParts(attachmentMessageId, conversationId, [
-        attachmentRemainingPartId,
+      await updateFragmentAndCreateItsParts(fragmentMessageId, conversationId, [
+        nestedFragmentMessageId,
       ]);
-      const attachmentRemainingPart = await Message.findByPk(attachmentRemainingPartId);
+      const nestedFragmentMessage = await Message.findByPk(nestedFragmentMessageId);
 
-      expect(attachmentRemainingPart.receivedAt).toEqual(null);
-      expect(attachmentRemainingPart.parentId).toEqual(attachmentMessageId);
-      expect(attachmentRemainingPart.conversationId).toEqual(conversationId);
+      expect(nestedFragmentMessage.receivedAt).toEqual(null);
+      expect(nestedFragmentMessage.parentId).toEqual(fragmentMessageId);
+      expect(nestedFragmentMessage.conversationId).toEqual(conversationId);
     });
 
-    it('should update parentId for an attachment part already existing in the DB', async () => {
+    it('should update parentId for an nested fragment already existing in the DB', async () => {
       const conversationId = uuid();
       const ehrMessageId = uuid();
-      const attachmentMessageId = uuid();
-      const attachmentRemainingPartId = uuid();
+      const fragmentMessageId = uuid();
+      const nestedFragmentMessageId = uuid();
 
       await HealthRecord.create({ conversationId, nhsNumber });
       await Message.create({
@@ -192,25 +192,25 @@ describe('messageRepository', () => {
       });
       await Message.create({
         conversationId,
-        messageId: attachmentMessageId,
+        messageId: fragmentMessageId,
         type: MessageType.FRAGMENT,
         receivedAt: null,
       });
       await Message.create({
         conversationId,
-        messageId: attachmentRemainingPartId,
+        messageId: nestedFragmentMessageId,
         type: MessageType.FRAGMENT,
         receivedAt: new Date(),
         parentId: null,
       });
 
-      await updateFragmentAndCreateItsParts(attachmentMessageId, conversationId, [
-        attachmentRemainingPartId,
+      await updateFragmentAndCreateItsParts(fragmentMessageId, conversationId, [
+        nestedFragmentMessageId,
       ]);
 
-      const attachmentRemainingPart = await Message.findByPk(attachmentRemainingPartId);
+      const nestedFragmentMessage = await Message.findByPk(nestedFragmentMessageId);
 
-      expect(attachmentRemainingPart.parentId).toEqual(attachmentMessageId);
+      expect(nestedFragmentMessage.parentId).toEqual(fragmentMessageId);
     });
   });
 
