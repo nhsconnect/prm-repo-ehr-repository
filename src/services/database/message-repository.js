@@ -69,7 +69,7 @@ export const updateFragmentAndCreateItsParts = async (
           { where: { messageId: fragmentPartId }, transaction: t }
         );
       } else {
-        await Message.create( fragmentPartMessage, { transaction: t });
+        await Message.create(fragmentPartMessage, { transaction: t });
       }
     }
   } catch (e) {

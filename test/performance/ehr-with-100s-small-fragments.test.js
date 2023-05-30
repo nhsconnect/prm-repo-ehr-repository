@@ -25,12 +25,7 @@ async function sendFragment(id, conversationId, fragmentMessageIds) {
   expect(response.status).toEqual(201);
 }
 
-async function sendEhrExtract(
-  ehrExtractMessageId,
-  conversationId,
-  nhsNumber,
-  fragmentMessageIds
-) {
+async function sendEhrExtract(ehrExtractMessageId, conversationId, nhsNumber, fragmentMessageIds) {
   const ehrExtract = {
     data: {
       type: 'messages',

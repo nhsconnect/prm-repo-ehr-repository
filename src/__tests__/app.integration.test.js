@@ -53,50 +53,50 @@ describe('app', () => {
     it('should return presigned url when the fragment record exists', async () => {
       // setting up database
       const coreMessageResponse = await request(app)
-          .post(`/messages`)
-          .send({
-            data: {
-              id: coreMessageId,
-              type: 'messages',
-              attributes: {
-                conversationId,
-                messageType: MessageType.EHR_EXTRACT,
-                nhsNumber,
-                fragmentMessageIds: [fragmentMessageId],
-              },
+        .post(`/messages`)
+        .send({
+          data: {
+            id: coreMessageId,
+            type: 'messages',
+            attributes: {
+              conversationId,
+              messageType: MessageType.EHR_EXTRACT,
+              nhsNumber,
+              fragmentMessageIds: [fragmentMessageId],
             },
-          })
-          .set('Authorization', authorizationKeys);
+          },
+        })
+        .set('Authorization', authorizationKeys);
 
       expect(coreMessageResponse.status).toEqual(201);
 
       const fragmentMessageResponse = await request(app)
-          .post(`/messages`)
-          .send({
-            data: {
-              id: fragmentMessageId,
-              type: 'messages',
-              attributes: {
-                conversationId,
-                messageType: MessageType.FRAGMENT,
-                nhsNumber: "",
-                fragmentMessageIds: []
-              },
+        .post(`/messages`)
+        .send({
+          data: {
+            id: fragmentMessageId,
+            type: 'messages',
+            attributes: {
+              conversationId,
+              messageType: MessageType.FRAGMENT,
+              nhsNumber: '',
+              fragmentMessageIds: [],
             },
-          })
-          .set('Authorization', authorizationKeys);
+          },
+        })
+        .set('Authorization', authorizationKeys);
 
       expect(fragmentMessageResponse.status).toEqual(201);
 
       // when
       const response = await request(app)
-          .get(`/fragments/${conversationId}/${fragmentMessageId}`)
-          .set('Authorization', authorizationKeys);
+        .get(`/fragments/${conversationId}/${fragmentMessageId}`)
+        .set('Authorization', authorizationKeys);
 
       // then
       expect(response.status).toBe(200);
       expect(response.text).toContain(
-          `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${fragmentMessageId}`
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${fragmentMessageId}`
       );
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
@@ -111,14 +111,14 @@ describe('app', () => {
 
       // when
       const response = await request(app)
-          .get(`/fragments/${conversationId}/${nonExistentMessageId}`)
-          .set('Authorization', authorizationKeys);
+        .get(`/fragments/${conversationId}/${nonExistentMessageId}`)
+        .set('Authorization', authorizationKeys);
 
       // then
       expect(response.status).toBe(404);
-      expectStructuredLogToContain(transportSpy, {conversationId, traceId: expect.anything()});
-    })
-  })
+      expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
+    });
+  });
 
   describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
     it('should return 200', async () => {
@@ -417,17 +417,13 @@ describe('app', () => {
 
       await request(app)
         .post(`/messages`)
-        .send(
-          createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId])
-        )
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
         .set('Authorization', authorizationKeys);
 
       const fragmentResponse = await request(app)
         .post(`/messages`)
         .send(
-          createReqBodyForFragment(fragmentMessageId, conversationId, [
-            nestedFragmentMessageId,
-          ])
+          createReqBodyForFragment(fragmentMessageId, conversationId, [nestedFragmentMessageId])
         )
         .set('Authorization', authorizationKeys);
 

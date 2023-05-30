@@ -239,10 +239,7 @@ describe('messageRepository', () => {
         await fragmentExists(messageId);
       } catch (err) {
         expect(err).not.toBeNull();
-        expect(logError).toHaveBeenCalledWith(
-          'Querying database for fragment message failed',
-          err
-        );
+        expect(logError).toHaveBeenCalledWith('Querying database for fragment message failed', err);
       }
     });
   });
