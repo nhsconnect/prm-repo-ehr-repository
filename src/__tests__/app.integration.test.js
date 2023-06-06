@@ -232,7 +232,7 @@ describe('app', () => {
             attributes: {
               conversationId: conversationIdFromEhrIn,
               messageType: MessageType.FRAGMENT,
-              fragmentMessageIds: [nestedFragmentID],
+              fragmentMessageIds: [nestedFragmentId],
             },
           },
         })
@@ -244,7 +244,7 @@ describe('app', () => {
         .post(`/messages`)
         .send({
           data: {
-            id: nestedFragmentID,
+            id: nestedFragmentId,
             type: 'messages',
             attributes: {
               conversationId: conversationIdFromEhrIn,
@@ -267,7 +267,7 @@ describe('app', () => {
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationIdFromEhrIn}/${healthRecordExtractId}`
       );
       expect(patientRes.body.fragmentMessageIds[0]).toEqual(fragmentId);
-      expect(patientRes.body.fragmentMessageIds[1]).toEqual(nestedFragmentID);
+      expect(patientRes.body.fragmentMessageIds[1]).toEqual(nestedFragmentId);
       expect(patientRes.body.conversationIdFromEhrIn).toEqual(conversationIdFromEhrIn);
       expectStructuredLogToContain(transportSpy, {
         conversationId: conversationId,
