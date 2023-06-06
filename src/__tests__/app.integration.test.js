@@ -203,7 +203,7 @@ describe('app', () => {
       const conversationIdFromEhrIn = uuid();
       const healthRecordExtractId = uuid();
       const fragmentId = uuid();
-      const nestedFragmentID = uuid();
+      const nestedFragmentId = uuid();
       const nhsNumber = '1234567890';
 
       const messageResponse = await request(app)
@@ -366,7 +366,7 @@ describe('app', () => {
       await ModelFactory.sequelize.close();
     });
 
-    it('should save health record without fragmentss in the database and return 201', async () => {
+    it('should save health record without fragments in the database and return 201', async () => {
       const response = await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, []))

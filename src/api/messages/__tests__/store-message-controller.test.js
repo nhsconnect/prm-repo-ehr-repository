@@ -67,11 +67,11 @@ describe('storeMessageController', () => {
     });
 
     it('should update receivedAt for given fragment and store its parts', async () => {
-      const fragmentPartId = uuid();
+      const nestedFragmentId = uuid();
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
-        fragmentMessageIds: [fragmentPartId],
+        fragmentMessageIds: [nestedFragmentId],
       };
 
       fragmentExists.mockResolvedValueOnce(true);
@@ -84,14 +84,14 @@ describe('storeMessageController', () => {
       expect(res.status).toBe(201);
       expect(createEhrExtract).not.toHaveBeenCalled();
       expect(updateFragmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
-        fragmentPartId,
+        nestedFragmentId,
       ]);
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });
 
-    it('should create message in the database when an fragment part arrives before first fragment part', async () => {
-      const fragmentPartId = uuid();
-      requestBody.data.id = fragmentPartId;
+    it('should create message in the database when a nested fragment arrives before first fragment', async () => {
+      const nestedFragmentId = uuid();
+      requestBody.data.id = nestedFragmentId;
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
@@ -106,8 +106,8 @@ describe('storeMessageController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
-      expect(fragmentExists).toHaveBeenCalledWith(fragmentPartId);
-      expect(createFragmentPart).toHaveBeenCalledWith(fragmentPartId, conversationId);
+      expect(fragmentExists).toHaveBeenCalledWith(nestedFragmentId);
+      expect(createFragmentPart).toHaveBeenCalledWith(nestedFragmentId, conversationId);
       expect(updateFragmentAndCreateItsParts).not.toHaveBeenCalled();
       expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
     });

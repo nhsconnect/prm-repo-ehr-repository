@@ -138,7 +138,7 @@ describe('messageRepository', () => {
       expect(fragment.receivedAt).toEqual(now);
     });
 
-    it('should not update receivedAt for a given fragments if database update query throws', async () => {
+    it('should not update receivedAt for a given fragment if database update query throws', async () => {
       const conversationId = uuid();
       try {
         await updateFragmentAndCreateItsParts('not-valid', conversationId, []);
@@ -177,7 +177,7 @@ describe('messageRepository', () => {
       expect(nestedFragmentMessage.conversationId).toEqual(conversationId);
     });
 
-    it('should update parentId for an nested fragment already existing in the DB', async () => {
+    it('should update parentId for a nested fragment already existing in the DB', async () => {
       const conversationId = uuid();
       const ehrMessageId = uuid();
       const fragmentMessageId = uuid();
