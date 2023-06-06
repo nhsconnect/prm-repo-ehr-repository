@@ -62,7 +62,7 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [fragmentMessageId],
+              fragmentMessageIds: [fragmentMessageId],
             },
           },
         })
@@ -78,9 +78,9 @@ describe('app', () => {
             type: 'messages',
             attributes: {
               conversationId,
-              messageType: MessageType.ATTACHMENT,
+              messageType: MessageType.FRAGMENT,
               nhsNumber: '',
-              attachmentMessageIds: [],
+              fragmentMessageIds: [],
             },
           },
         })
@@ -136,7 +136,7 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [],
+              fragmentMessageIds: [],
             },
           },
         })
@@ -155,7 +155,7 @@ describe('app', () => {
     it('should return 404 when health record is not complete', async () => {
       const conversationId = uuid();
       const messageId = uuid();
-      const attachmentId = uuid();
+      const fragmentId = uuid();
       const nhsNumber = '1234567890';
 
       const messageResponse = await request(app)
@@ -168,7 +168,7 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [attachmentId],
+              fragmentMessageIds: [fragmentId],
             },
           },
         })
@@ -202,8 +202,8 @@ describe('app', () => {
     it('should return 200 and patient health record link', async () => {
       const conversationIdFromEhrIn = uuid();
       const healthRecordExtractId = uuid();
-      const attachmentId = uuid();
-      const attachmentPartId = uuid();
+      const fragmentId = uuid();
+      const nestedFragmentId = uuid();
       const nhsNumber = '1234567890';
 
       const messageResponse = await request(app)
@@ -216,46 +216,46 @@ describe('app', () => {
               conversationId: conversationIdFromEhrIn,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [attachmentId],
+              fragmentMessageIds: [fragmentId],
             },
           },
         })
         .set('Authorization', authorizationKeys);
       expect(messageResponse.status).toEqual(201);
 
-      const attachmentResponse = await request(app)
+      const fragmentResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
-            id: attachmentId,
+            id: fragmentId,
             type: 'messages',
             attributes: {
               conversationId: conversationIdFromEhrIn,
-              messageType: MessageType.ATTACHMENT,
-              attachmentMessageIds: [attachmentPartId],
+              messageType: MessageType.FRAGMENT,
+              fragmentMessageIds: [nestedFragmentID],
             },
           },
         })
         .set('Authorization', authorizationKeys);
 
-      expect(attachmentResponse.status).toEqual(201);
+      expect(fragmentResponse.status).toEqual(201);
 
-      const attachmentPartResponse = await request(app)
+      const nestedFragmentResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
-            id: attachmentPartId,
+            id: nestedFragmentID,
             type: 'messages',
             attributes: {
               conversationId: conversationIdFromEhrIn,
-              messageType: MessageType.ATTACHMENT,
-              attachmentMessageIds: [],
+              messageType: MessageType.FRAGMENT,
+              fragmentMessageIds: [],
             },
           },
         })
         .set('Authorization', authorizationKeys);
 
-      expect(attachmentPartResponse.status).toEqual(201);
+      expect(nestedFragmentResponse.status).toEqual(201);
       const conversationId = uuid();
       const patientRes = await request(app)
         .get(`/patients/${nhsNumber}`)
@@ -266,8 +266,8 @@ describe('app', () => {
       expect(patientRes.body.coreMessageUrl).toContain(
         `${config.localstackUrl}/${config.awsS3BucketName}/${conversationIdFromEhrIn}/${healthRecordExtractId}`
       );
-      expect(patientRes.body.fragmentMessageIds[0]).toEqual(attachmentId);
-      expect(patientRes.body.fragmentMessageIds[1]).toEqual(attachmentPartId);
+      expect(patientRes.body.fragmentMessageIds[0]).toEqual(fragmentId);
+      expect(patientRes.body.fragmentMessageIds[1]).toEqual(nestedFragmentID);
       expect(patientRes.body.conversationIdFromEhrIn).toEqual(conversationIdFromEhrIn);
       expectStructuredLogToContain(transportSpy, {
         conversationId: conversationId,
@@ -294,7 +294,7 @@ describe('app', () => {
     it('should return a 404 if no complete health record is found', async () => {
       const conversationId = uuid();
       const healthRecordExtractId = uuid();
-      const attachmentId = uuid();
+      const fragmentId = uuid();
       const nhsNumber = '1234567891';
 
       const messageResponse = await request(app)
@@ -307,7 +307,7 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              attachmentMessageIds: [attachmentId],
+              fragmentMessageIds: [fragmentId],
             },
           },
         })
@@ -332,7 +332,7 @@ describe('app', () => {
     let conversationId;
     let messageId;
 
-    const createReqBodyForEhr = (messageId, conversationId, nhsNumber, attachmentMessageIds) => ({
+    const createReqBodyForEhr = (messageId, conversationId, nhsNumber, fragmentMessageIds) => ({
       data: {
         type: 'messages',
         id: messageId,
@@ -340,19 +340,19 @@ describe('app', () => {
           conversationId,
           messageType: MessageType.EHR_EXTRACT,
           nhsNumber,
-          attachmentMessageIds,
+          fragmentMessageIds,
         },
       },
     });
 
-    const createReqBodyForAttachment = (messageId, conversationId, attachmentMessageIds = []) => ({
+    const createReqBodyForFragment = (messageId, conversationId, fragmentMessageIds = []) => ({
       data: {
         type: 'messages',
         id: messageId,
         attributes: {
           conversationId,
-          messageType: MessageType.ATTACHMENT,
-          attachmentMessageIds: attachmentMessageIds,
+          messageType: MessageType.FRAGMENT,
+          fragmentMessageIds: fragmentMessageIds,
         },
       },
     });
@@ -366,7 +366,7 @@ describe('app', () => {
       await ModelFactory.sequelize.close();
     });
 
-    it('should save health record without attachments in the database and return 201', async () => {
+    it('should save health record without fragments in the database and return 201', async () => {
       const response = await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, []))
@@ -388,20 +388,20 @@ describe('app', () => {
       });
     });
 
-    it('should save health record with attachments in the database and return 201', async () => {
-      const attachment = uuid();
+    it('should save health record with fragments in the database and return 201', async () => {
+      const fragmentMessageId = uuid();
 
       const response = await request(app)
         .post(`/messages`)
-        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachment]))
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
         .set('Authorization', authorizationKeys);
 
-      const attachmentMessage = await Message.findByPk(attachment);
+      const fragmentMessage = await Message.findByPk(fragmentMessageId);
       const healthRecord = await HealthRecord.findByPk(conversationId);
 
-      expect(attachmentMessage.conversationId).toBe(conversationId);
-      expect(attachmentMessage.type).toBe(MessageType.ATTACHMENT);
-      expect(attachmentMessage.parentId).toBe(messageId);
+      expect(fragmentMessage.conversationId).toBe(conversationId);
+      expect(fragmentMessage.type).toBe(MessageType.FRAGMENT);
+      expect(fragmentMessage.parentId).toBe(messageId);
       expect(healthRecord.completedAt).toBeNull();
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
@@ -411,86 +411,82 @@ describe('app', () => {
       });
     });
 
-    it('should create large attachment parts messages in the database and return 201', async () => {
-      const firstPartOfLargeAttachmentId = uuid();
-      const restOfAttachmentId = uuid();
+    it('should create large nested fragment messages in the database and return 201', async () => {
+      const fragmentMessageId = uuid();
+      const nestedFragmentMessageId = uuid();
 
       await request(app)
         .post(`/messages`)
-        .send(
-          createReqBodyForEhr(messageId, conversationId, nhsNumber, [firstPartOfLargeAttachmentId])
-        )
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
         .set('Authorization', authorizationKeys);
 
-      const attachmentResponse = await request(app)
+      const fragmentResponse = await request(app)
         .post(`/messages`)
         .send(
-          createReqBodyForAttachment(firstPartOfLargeAttachmentId, conversationId, [
-            restOfAttachmentId,
-          ])
+          createReqBodyForFragment(fragmentMessageId, conversationId, [nestedFragmentMessageId])
         )
         .set('Authorization', authorizationKeys);
 
-      const restOfAttachmentMessage = await Message.findByPk(restOfAttachmentId);
+      const nestedFragmentMessage = await Message.findByPk(nestedFragmentMessageId);
       const healthRecord = await HealthRecord.findByPk(conversationId);
 
-      expect(restOfAttachmentMessage.receivedAt).toBeNull();
+      expect(nestedFragmentMessage.receivedAt).toBeNull();
       expect(healthRecord.completedAt).toBeNull();
-      expect(attachmentResponse.status).toBe(201);
+      expect(fragmentResponse.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
-        messageId: firstPartOfLargeAttachmentId,
+        messageId: fragmentMessageId,
         conversationId,
         traceId: expect.anything(),
       });
     });
 
-    it('should update database for attachments and return 201 when all attachments have been received', async () => {
-      const attachmentId = uuid();
+    it('should update database for fragments and return 201 when all fragments have been received', async () => {
+      const fragmentMessageId = uuid();
       await request(app)
         .post(`/messages`)
-        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachmentId]))
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
         .set('Authorization', authorizationKeys);
 
-      const attachmentResponse = await request(app)
+      const fragmentResponse = await request(app)
         .post(`/messages`)
-        .send(createReqBodyForAttachment(attachmentId, conversationId))
+        .send(createReqBodyForFragment(fragmentMessageId, conversationId))
         .set('Authorization', authorizationKeys);
 
-      const attachmentMessage = await Message.findByPk(attachmentId);
+      const fragmentMessage = await Message.findByPk(fragmentMessageId);
       const healthRecord = await HealthRecord.findByPk(conversationId);
 
-      expect(attachmentMessage.receivedAt).not.toBeNull();
+      expect(fragmentMessage.receivedAt).not.toBeNull();
       expect(healthRecord.completedAt).not.toBeNull();
-      expect(attachmentResponse.status).toBe(201);
+      expect(fragmentResponse.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
-        messageId: attachmentId,
+        messageId: fragmentMessageId,
         conversationId,
         traceId: expect.anything(),
       });
     });
 
-    it('should update database when attachment part arrives before first attachment part', async () => {
-      const attachmentId = uuid();
-      const attachmentPartId = uuid();
+    it('should update database when a nested fragment arrives before its parent fragment', async () => {
+      const fragmentMessageId = uuid();
+      const nestedFragmentId = uuid();
       await request(app)
         .post(`/messages`)
-        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [attachmentId]))
+        .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
         .set('Authorization', authorizationKeys);
 
       const response = await request(app)
         .post(`/messages`)
-        .send(createReqBodyForAttachment(attachmentPartId, conversationId))
+        .send(createReqBodyForFragment(nestedFragmentId, conversationId))
         .set('Authorization', authorizationKeys);
 
-      const attachmentPartMessage = await Message.findByPk(attachmentPartId);
+      const nestedFragmentMessage = await Message.findByPk(nestedFragmentId);
       const healthRecord = await HealthRecord.findByPk(conversationId);
 
-      expect(attachmentPartMessage.conversationId).toEqual(conversationId);
-      expect(attachmentPartMessage.receivedAt).not.toBeNull();
+      expect(nestedFragmentMessage.conversationId).toEqual(conversationId);
+      expect(nestedFragmentMessage.receivedAt).not.toBeNull();
       expect(healthRecord.completedAt).toBeNull();
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
-        messageId: attachmentPartId,
+        messageId: nestedFragmentId,
         conversationId,
         traceId: expect.anything(),
       });

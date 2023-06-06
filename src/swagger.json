@@ -389,7 +389,7 @@
                 "nhsNumber": {
                   "type": "string"
                 },
-                "attachmentMessageIds": {
+                "fragmentMessageIds": {
                   "type": "array",
                   "items": {
                     "type": "string",

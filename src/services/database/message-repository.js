@@ -7,7 +7,7 @@ import { getNow } from '../time';
 export const createEhrExtract = async (ehrExtract) => {
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-  const { conversationId, messageId, nhsNumber, attachmentMessageIds } = ehrExtract;
+  const { conversationId, messageId, nhsNumber, fragmentMessageIds } = ehrExtract;
   const healthRecord = { conversationId, nhsNumber };
   const message = {
     conversationId,
@@ -23,14 +23,14 @@ export const createEhrExtract = async (ehrExtract) => {
     await Message.create(message, { transaction: t });
     await HealthRecord.create(healthRecord, { transaction: t });
 
-    for (const attachment of attachmentMessageIds) {
-      const attachmentMessage = {
-        messageId: attachment,
+    for (const fragmentMessageId of fragmentMessageIds) {
+      const fragmentMessage = {
+        messageId: fragmentMessageId,
         parentId: messageId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         conversationId,
       };
-      await Message.create(attachmentMessage, { transaction: t });
+      await Message.create(fragmentMessage, { transaction: t });
     }
   } catch (e) {
     logError('Message could not be stored', e);
@@ -40,7 +40,7 @@ export const createEhrExtract = async (ehrExtract) => {
   await t.commit();
 };
 
-export const updateAttachmentAndCreateItsParts = async (
+export const updateFragmentAndCreateItsParts = async (
   messageId,
   conversationId,
   remainingPartsIds
@@ -54,22 +54,22 @@ export const updateAttachmentAndCreateItsParts = async (
       { where: { messageId: messageId }, transaction: t }
     );
 
-    for (const attachmentPartId of remainingPartsIds) {
-      const attachmentPartMessage = {
-        messageId: attachmentPartId,
+    for (const fragmentPartId of remainingPartsIds) {
+      const fragmentPartMessage = {
+        messageId: fragmentPartId,
         parentId: messageId,
-        type: MessageType.ATTACHMENT,
+        type: MessageType.FRAGMENT,
         conversationId,
       };
 
-      const attachmentPartExists = !!(await Message.findByPk(attachmentPartId));
-      if (attachmentPartExists) {
+      const fragmentPartExists = !!(await Message.findByPk(fragmentPartId));
+      if (fragmentPartExists) {
         await Message.update(
           { parentId: messageId },
-          { where: { messageId: attachmentPartId }, transaction: t }
+          { where: { messageId: fragmentPartId }, transaction: t }
         );
       } else {
-        await Message.create(attachmentPartMessage, { transaction: t });
+        await Message.create(fragmentPartMessage, { transaction: t });
       }
     }
   } catch (e) {
@@ -80,34 +80,34 @@ export const updateAttachmentAndCreateItsParts = async (
   await t.commit();
 };
 
-export const attachmentExists = async (id) => {
+export const fragmentExists = async (id) => {
   const Message = ModelFactory.getByName(messageModelName);
 
   try {
-    const attachment = await Message.findByPk(id);
+    const fragment = await Message.findByPk(id);
 
-    return !!attachment;
+    return !!fragment;
   } catch (e) {
-    logError('Querying database for attachment message failed', e);
+    logError('Querying database for fragment message failed', e);
     throw e;
   }
 };
 
-export const createAttachmentPart = async (id, conversationId) => {
+export const createFragmentPart = async (id, conversationId) => {
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
   const t = await sequelize.transaction();
-  const attachment = {
+  const fragment = {
     messageId: id,
     conversationId,
-    type: MessageType.ATTACHMENT,
+    type: MessageType.FRAGMENT,
     receivedAt: getNow(),
   };
 
   try {
-    await Message.create(attachment, { transaction: t });
+    await Message.create(fragment, { transaction: t });
   } catch (e) {
-    logError('Creating attachment database entry failed', e);
+    logError('Creating fragment database entry failed', e);
     await t.rollback();
     throw e;
   }

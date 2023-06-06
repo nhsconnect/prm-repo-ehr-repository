@@ -1,10 +1,10 @@
 import { body } from 'express-validator';
 import { MessageType } from '../../models/message';
 import {
-  updateAttachmentAndCreateItsParts,
+  updateFragmentAndCreateItsParts,
   createEhrExtract,
-  attachmentExists,
-  createAttachmentPart,
+  fragmentExists,
+  createFragmentPart,
 } from '../../services/database/message-repository';
 import { logError, logInfo, logWarning } from '../../middleware/logging';
 import {
@@ -28,25 +28,25 @@ export const storeMessageControllerValidation = [
     .isLength({ min: 10, max: 10 })
     .withMessage("'nhsNumber' provided is not 10 characters"),
   body('data.attributes.nhsNumber')
-    .if(body('data.attributes.messageType').equals(MessageType.ATTACHMENT))
+    .if(body('data.attributes.messageType').equals(MessageType.FRAGMENT))
     .isEmpty()
-    .withMessage(`'nhsNumber' should be empty for messageType ${MessageType.ATTACHMENT}`),
+    .withMessage(`'nhsNumber' should be empty for messageType ${MessageType.FRAGMENT}`),
   body('data.attributes.messageType')
-    .isIn([MessageType.EHR_EXTRACT, MessageType.ATTACHMENT])
+    .isIn([MessageType.EHR_EXTRACT, MessageType.FRAGMENT])
     .withMessage(
-      `'messageType' provided is not one of the following: ${MessageType.EHR_EXTRACT}, ${MessageType.ATTACHMENT}`
+      `'messageType' provided is not one of the following: ${MessageType.EHR_EXTRACT}, ${MessageType.FRAGMENT}`
     ),
-  body('data.attributes.attachmentMessageIds.*')
+  body('data.attributes.fragmentMessageIds.*')
     .isUUID()
-    .withMessage("'attachmentMessageIds' should be UUIDs"),
-  body('data.attributes.attachmentMessageIds')
+    .withMessage("'fragmentMessageIds' should be UUIDs"),
+  body('data.attributes.fragmentMessageIds')
     .isArray()
-    .withMessage("'attachmentMessageIds' should be an array"),
+    .withMessage("'fragmentMessageIds' should be an array"),
 ];
 
 export const storeMessageController = async (req, res) => {
   const { id, attributes } = req.body.data;
-  const { conversationId, messageType, nhsNumber, attachmentMessageIds } = attributes;
+  const { conversationId, messageType, nhsNumber, fragmentMessageIds } = attributes;
   setCurrentSpanAttributes({ conversationId, messageId: id });
 
   try {
@@ -55,25 +55,25 @@ export const storeMessageController = async (req, res) => {
         messageId: id,
         conversationId,
         nhsNumber,
-        attachmentMessageIds,
+        fragmentMessageIds,
       });
     }
-    if (messageType === MessageType.ATTACHMENT) {
-      if (await attachmentExists(id)) {
-        await updateAttachmentAndCreateItsParts(id, conversationId, attachmentMessageIds);
+    if (messageType === MessageType.FRAGMENT) {
+      if (await fragmentExists(id)) {
+        await updateFragmentAndCreateItsParts(id, conversationId, fragmentMessageIds);
       } else {
         logWarning(
-          `Attachment message ${id} did not arrive in order. Attachment parts: ${JSON.stringify(
-            attachmentMessageIds
+          `Fragment message ${id} did not arrive in order. Fragment parts: ${JSON.stringify(
+            fragmentMessageIds
           )}`
         );
-        await createAttachmentPart(id, conversationId);
+        await createFragmentPart(id, conversationId);
       }
     }
     await updateHealthRecordCompleteness(conversationId);
     const healthRecordStatus = await getHealthRecordStatus(conversationId);
 
-    logInfo('Health record status for attachments: ' + healthRecordStatus);
+    logInfo('Health record status for fragments: ' + healthRecordStatus);
     res.status(201).json({ healthRecordStatus });
   } catch (e) {
     logError('Returned 503 due to error while saving message', e);
