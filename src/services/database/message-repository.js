@@ -129,5 +129,6 @@ export const findAllDeletedMessages = async () => {
     .then((messages) => messages)
     .catch((error) => {
       logError(error);
+      throw new Error(error);
     });
 };
