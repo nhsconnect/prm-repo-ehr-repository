@@ -116,7 +116,7 @@ export const createFragmentPart = async (id, conversationId) => {
   await t.commit();
 };
 
-export const findAllDeleted = async () => {
+export const findAllDeletedMessages = async () => {
   const Message = ModelFactory.getByName(messageModelName);
 
   return Message.findAll({
