@@ -34,7 +34,7 @@ const compareAndDelete = async (messages) => {
     const today = moment();
     const softDeleteDate = message.deletedAt;
 
-    if (today.subtract(8, 'weeks').isSameOrBefore(softDeleteDate)) {
+    if (moment(softDeleteDate).add(8, 'weeks').isSameOrBefore(today)) {
       await permanentlyDeleteEhrFromRepo(message);
     }
   }
