@@ -31,8 +31,11 @@ const ehrDeletionJob = scheduleJob('00 00 03 *', async () => {
 
 const compareAndDelete = async (messages) => {
   for (const message of messages) {
-    if (moment().subtract(8, 'weeks').isSame(message.deletedAt)) {
-      await permanentlyDeleteEhrFromRepo();
+    const today = moment();
+    const softDeleteDate = message.deletedAt;
+
+    if (today.subtract(8, 'weeks').isSameOrBefore(softDeleteDate)) {
+      await permanentlyDeleteEhrFromRepo(message);
     }
   }
 };
