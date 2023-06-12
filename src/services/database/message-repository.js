@@ -3,6 +3,7 @@ import { MessageType, modelName as messageModelName } from '../../models/message
 import { modelName as healthRecordModelName } from '../../models/health-record';
 import { logError } from '../../middleware/logging';
 import { getNow } from '../time';
+import { Op } from 'sequelize';
 
 export const createEhrExtract = async (ehrExtract) => {
   const Message = ModelFactory.getByName(messageModelName);
@@ -113,4 +114,20 @@ export const createFragmentPart = async (id, conversationId) => {
   }
 
   await t.commit();
+};
+
+export const findAllDeleted = async () => {
+  const Message = ModelFactory.getByName(messageModelName);
+
+  return Message.findAll({
+    where: {
+      deletedAt: {
+        [Op.not]: null,
+      },
+    },
+  })
+    .then((messages) => messages)
+    .catch((error) => {
+      logError(error);
+    });
 };
