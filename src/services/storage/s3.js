@@ -43,6 +43,15 @@ export default class S3Service {
     });
   }
 
+  delete() {
+    return new Promise((resolve, reject) => {
+      this.s3.deleteObject(this.parameters, (error) => {
+        if (error) return reject(error);
+        resolve();
+      });
+    });
+  }
+
   getPresignedUrl(operation) {
     const params = {
       ...this.parameters,
