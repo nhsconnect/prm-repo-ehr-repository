@@ -114,3 +114,24 @@ export const createFragmentPart = async (id, conversationId) => {
 
   await t.commit();
 };
+
+export const deleteMessages = async (messageIds) => {
+  const Message = ModelFactory.getByName(messageModelName);
+  const sequelize = ModelFactory.sequelize;
+  const transaction = await sequelize.transaction();
+
+  try {
+    for (const messageId in messageIds) {
+      await Message.delete(
+        {
+          messageId,
+        },
+        transaction
+      );
+    }
+  } catch (error) {
+    logError(error);
+    transaction.rollback();
+    throw error;
+  }
+};
