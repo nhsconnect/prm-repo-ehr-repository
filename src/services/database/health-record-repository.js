@@ -1,8 +1,8 @@
-import Sequelize from 'sequelize';
-import ModelFactory from '../../models';
-import { modelName as healthRecordModelName } from '../../models/health-record';
 import { MessageType, modelName as messageModelName } from '../../models/message';
+import { modelName as healthRecordModelName } from '../../models/health-record';
 import { logError, logInfo } from '../../middleware/logging';
+import Sequelize, { Op } from 'sequelize';
+import ModelFactory from '../../models';
 import { getNow } from '../time';
 
 export const HealthRecordStatus = {
@@ -167,4 +167,21 @@ export const messageAlreadyReceived = async (messageId) => {
     logError('Querying database for health record failed', e);
     throw e;
   }
+};
+
+export const findAllDeletedHealthRecords = async () => {
+  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+
+  return HealthRecord.findAll({
+    where: {
+      deletedAt: {
+        [Op.not]: null,
+      },
+    },
+  })
+    .then((healthRecords) => healthRecords)
+    .catch((error) => {
+      logError(error);
+      throw new Error(error);
+    });
 };
