@@ -185,3 +185,30 @@ export const findAllDeletedHealthRecords = async () => {
       throw new Error(error);
     });
 };
+
+export const deleteHealthRecordAndMessages = async (conversationId) => {
+  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+  const Message = ModelFactory.getByName(messageModelName);
+  const sequelize = ModelFactory.sequelize;
+  const transaction = await sequelize.transaction();
+  const associatedMessages = await getHealthRecordMessageIds(conversationId);
+
+  try {
+    // Delete the messages.
+    for (const messageId in [...associatedMessages]) {
+      await Message.delete(
+        {
+          messageId,
+        },
+        transaction
+      );
+    }
+
+    // Delete the health record.
+    await HealthRecord.delete({ conversationId }, transaction);
+  } catch (error) {
+    logError(error);
+    transaction.rollback();
+    throw error;
+  }
+};
