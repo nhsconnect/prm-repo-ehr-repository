@@ -124,6 +124,7 @@ export const findAllDeletedMessages = async () => {
       deletedAt: {
         [Op.not]: null,
       },
+      type: MessageType.EHR_EXTRACT,
     },
   })
     .then((messages) => messages)
