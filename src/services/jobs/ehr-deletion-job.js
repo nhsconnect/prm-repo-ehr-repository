@@ -12,7 +12,6 @@ import { deleteMessages } from '../database/message-repository';
 
 const loggerPrefix = '[SCHEDULED JOB] [EHR S3 DELETIONS] -';
 
-// TODO PRMT-3415 MOVE CRON SCHEDULE STRING TO PARAMETER STORE
 const ehrDeletionJob = scheduleJob('00 00 03 * * *', async () => {
   logInfo(
     `${loggerPrefix} Deleting EHRs with soft deletion date equal to 8 weeks as of ${getNow()}.`
@@ -52,7 +51,7 @@ const permanentlyDeleteEhrFromRepoAndDb = async (healthRecord) => {
     await deleteMessages([...(await getHealthRecordMessageIds(healthRecord.conversationId))]);
 
     logInfo(
-      `${loggerPrefix} Successfully deleted EHR with Conversation ID ${healthRecord.conversationId} from S3.`
+      `${loggerPrefix} Successfully deleted EHR with Conversation ID ${healthRecord.conversationId} from S3, and associated records in the database.`
     );
   } catch (error) {
     logError(
