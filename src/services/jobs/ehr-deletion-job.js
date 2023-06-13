@@ -41,14 +41,13 @@ const compareAndDelete = async (messages) => {
 };
 
 const permanentlyDeleteEhrFromRepo = async (message) => {
-  logInfo(
-    `${loggerPrefix} Successfully deleted EHR with Conversation ID ${message.conversationId} from S3.`
-  );
-
   const s3 = new S3Service(`${message.conversationId}`);
 
   try {
     await s3.delete();
+    logInfo(
+      `${loggerPrefix} Successfully deleted EHR with Conversation ID ${message.conversationId} from S3.`
+    );
   } catch (error) {
     logError(
       `${loggerPrefix} Failed to delete object with conversation ID ${message.conversationId} - ${error}`
