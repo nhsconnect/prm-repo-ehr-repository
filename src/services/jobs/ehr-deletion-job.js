@@ -20,15 +20,19 @@ export const ehrDeletionJob = scheduleJob('00 00 03 * * *', async () => {
   try {
     const records = await findAllSoftDeletedHealthRecords();
 
-    if (records.length > 0) await compareAndDelete(records);
-    else await gracefulShutdown();
+    if (records.length > 0) {
+      await checkDateAndDelete(records);
+    } else {
+      logInfo(`${loggerPrefix} No health records are marked for deletion, shutting down.`);
+      await gracefulShutdown();
+    }
   } catch (error) {
-    logError(`${loggerPrefix} An error occurred, ${error} - shutting down.`);
+    logError(`${loggerPrefix} An error occurred - detail: ${error}, shutting down.`);
     await gracefulShutdown();
   }
 });
 
-const compareAndDelete = async (healthRecords) => {
+const checkDateAndDelete = async (healthRecords) => {
   for (const healthRecord of healthRecords) {
     const today = moment();
     const softDeleteDate = healthRecord.deletedAt;
