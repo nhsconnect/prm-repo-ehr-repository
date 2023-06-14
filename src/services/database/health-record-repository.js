@@ -192,7 +192,7 @@ export const deleteHealthRecord = async (conversationId) => {
   const transaction = await sequelize.transaction();
 
   try {
-    await HealthRecord.delete(
+    await HealthRecord.destroy(
       {
         where: {
           conversationId: {
@@ -202,6 +202,8 @@ export const deleteHealthRecord = async (conversationId) => {
       },
       { transaction }
     );
+
+    logInfo(`Health Record with Conversation ID ${conversationId} successfully deleted.`);
   } catch (error) {
     logError(error);
     transaction.rollback();

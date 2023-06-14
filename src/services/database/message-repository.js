@@ -122,20 +122,18 @@ export const deleteMessages = async (messageIds) => {
   const transaction = await sequelize.transaction();
 
   try {
-    for (const messageId in messageIds) {
-      await Message.delete(
-        {
-          where: {
-            messageId: {
-              [Op.eq]: messageId,
-            },
+    await Message.destroy(
+      {
+        where: {
+          messageId: {
+            [Op.eq]: messageIds,
           },
         },
-        { transaction }
-      );
+      },
+      { transaction }
+    );
 
-      logInfo(`Message with Message ID ${messageId} successfully deleted.`);
-    }
+    logInfo(`Messages with Message IDs ${messageIds} successfully deleted.`);
   } catch (error) {
     logError(error);
     transaction.rollback();
@@ -149,7 +147,7 @@ export const deleteMessage = async (messageId) => {
   const transaction = await sequelize.transaction();
 
   try {
-    await Message.delete(
+    await Message.destroy(
       {
         where: {
           messageId: {
