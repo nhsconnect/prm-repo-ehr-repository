@@ -1,6 +1,6 @@
 import {
   deleteHealthRecord,
-  findAllDeletedHealthRecords,
+  findAllSoftDeletedHealthRecords,
   getHealthRecordMessageIds,
 } from '../database/health-record-repository';
 import { gracefulShutdown, scheduleJob } from 'node-schedule';
@@ -12,13 +12,13 @@ import { deleteMessages } from '../database/message-repository';
 
 const loggerPrefix = '[SCHEDULED JOB] [EHR S3 DELETIONS] -';
 
-const ehrDeletionJob = scheduleJob('00 00 03 * * *', async () => {
+export const ehrDeletionJob = scheduleJob('00 00 03 * * *', async () => {
   logInfo(
     `${loggerPrefix} Deleting EHRs with soft deletion date equal to 8 weeks as of ${getNow()}.`
   );
 
   try {
-    const records = await findAllDeletedHealthRecords();
+    const records = await findAllSoftDeletedHealthRecords();
 
     if (records.length > 0) await compareAndDelete(records);
     else await gracefulShutdown();
