@@ -1,8 +1,9 @@
 import { MessageType, modelName as messageModelName } from '../../models/message';
 import { modelName as healthRecordModelName } from '../../models/health-record';
-import { logError } from '../../middleware/logging';
+import { logError, logInfo } from '../../middleware/logging';
 import ModelFactory from '../../models';
 import { getNow } from '../time';
+import { Op } from 'sequelize';
 
 export const createEhrExtract = async (ehrExtract) => {
   const Message = ModelFactory.getByName(messageModelName);
@@ -124,11 +125,42 @@ export const deleteMessages = async (messageIds) => {
     for (const messageId in messageIds) {
       await Message.delete(
         {
-          messageId,
+          where: {
+            messageId: {
+              [Op.eq]: messageId,
+            },
+          },
         },
-        transaction
+        { transaction }
       );
+
+      logInfo(`Message with Message ID ${messageId} successfully deleted.`);
     }
+  } catch (error) {
+    logError(error);
+    transaction.rollback();
+    throw error;
+  }
+};
+
+export const deleteMessage = async (messageId) => {
+  const Message = ModelFactory.getByName(messageModelName);
+  const sequelize = ModelFactory.sequelize;
+  const transaction = await sequelize.transaction();
+
+  try {
+    await Message.delete(
+      {
+        where: {
+          messageId: {
+            [Op.eq]: messageId,
+          },
+        },
+      },
+      { transaction }
+    );
+
+    logInfo(`Message with Message ID ${messageId} successfully deleted.`);
   } catch (error) {
     logError(error);
     transaction.rollback();
