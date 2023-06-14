@@ -35,9 +35,9 @@ export const ehrDeletionJob = scheduleJob('00 00 03 * * *', async () => {
 const checkDateAndDelete = async (healthRecords) => {
   for (const healthRecord of healthRecords) {
     const today = moment();
-    const softDeleteDate = healthRecord.deletedAt;
+    const softDeletedDate = moment(healthRecord.deletedAt);
 
-    if (moment(softDeleteDate).add(8, 'weeks').isSameOrBefore(today)) {
+    if (softDeletedDate.add(8, 'weeks').isSameOrBefore(today)) {
       await permanentlyDeleteEhrFromRepoAndDb(healthRecord);
     }
   }
