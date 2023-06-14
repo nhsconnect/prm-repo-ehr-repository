@@ -107,7 +107,12 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
       },
     },
     transaction: t,
-  });
+  })
+    .then((healthRecords) => healthRecords)
+    .catch((error) => {
+      logError(error);
+      throw error;
+    });
 
   if (!healthRecords || healthRecords.length === 0) {
     await t.rollback();
@@ -172,17 +177,18 @@ export const messageAlreadyReceived = async (messageId) => {
 export const findAllSoftDeletedHealthRecords = async () => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
 
-  return HealthRecord.findAll({
+  return await HealthRecord.findAll({
     where: {
       deletedAt: {
-        [Op.not]: null,
+        [Op.ne]: null,
       },
     },
+    paranoid: false,
   })
     .then((healthRecords) => healthRecords)
     .catch((error) => {
       logError(error);
-      throw new Error(error);
+      throw error;
     });
 };
 
@@ -210,4 +216,15 @@ export const deleteHealthRecord = async (conversationId) => {
     transaction.rollback();
     throw error;
   }
+};
+
+export const getHealthRecordByConversationId = async (conversationId) => {
+  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+
+  return await HealthRecord.findByPk(conversationId)
+    .then((healthRecord) => healthRecord)
+    .catch((error) => {
+      logError(error);
+      throw error;
+    });
 };
