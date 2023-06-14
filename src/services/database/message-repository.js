@@ -134,6 +134,7 @@ export const deleteMessages = async (messageIds) => {
     );
 
     logInfo(`Messages with Message IDs ${messageIds} successfully deleted.`);
+    await transaction.commit();
   } catch (error) {
     logError(error);
     transaction.rollback();
@@ -159,6 +160,7 @@ export const deleteMessage = async (messageId) => {
     );
 
     logInfo(`Message with Message ID ${messageId} successfully deleted.`);
+    await transaction.commit();
   } catch (error) {
     logError(error);
     transaction.rollback();

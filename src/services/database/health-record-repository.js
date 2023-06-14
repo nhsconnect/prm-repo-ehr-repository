@@ -204,6 +204,7 @@ export const deleteHealthRecord = async (conversationId) => {
     );
 
     logInfo(`Health Record with Conversation ID ${conversationId} successfully deleted.`);
+    transaction.commit();
   } catch (error) {
     logError(error);
     transaction.rollback();
