@@ -169,7 +169,7 @@ export const messageAlreadyReceived = async (messageId) => {
   }
 };
 
-export const findAllDeletedHealthRecords = async () => {
+export const findAllSoftDeletedHealthRecords = async () => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
 
   return HealthRecord.findAll({
@@ -192,7 +192,16 @@ export const deleteHealthRecord = async (conversationId) => {
   const transaction = await sequelize.transaction();
 
   try {
-    await HealthRecord.delete({ conversationId }, transaction);
+    await HealthRecord.delete(
+      {
+        where: {
+          conversationId: {
+            [Op.eq]: conversationId,
+          },
+        },
+      },
+      { transaction }
+    );
   } catch (error) {
     logError(error);
     transaction.rollback();
