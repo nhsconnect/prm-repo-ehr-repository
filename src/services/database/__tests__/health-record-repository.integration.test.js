@@ -7,21 +7,41 @@ import {
   getHealthRecordMessageIds,
   messageAlreadyReceived,
   markHealthRecordAsDeletedForPatient,
+  deleteHealthRecord,
+  getHealthRecordByConversationId,
+  findAllSoftDeletedHealthRecords,
 } from '../health-record-repository';
 import ModelFactory from '../../../models';
 import { modelName as healthRecordModelName } from '../../../models/health-record';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
 import { logError } from '../../../middleware/logging';
+import expect from 'expect';
+import { createEhrExtract } from '../message-repository';
+import {
+  generateMultipleUUID,
+  generateRandomNhsNumber,
+  generateRandomUUID,
+} from '../../../utilities/integration-test-utilities';
 
 jest.mock('../../../middleware/logging');
 
 describe('healthRecordRepository', () => {
+  // ========================= COMMON PROPERTIES =========================
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const Message = ModelFactory.getByName(messageModelName);
+  // =====================================================================
+
+  // ========================= SET UP / TEAR DOWN ========================
+  beforeEach(async () => {
+    await HealthRecord.truncate();
+    await Message.truncate();
+    await ModelFactory.sequelize.sync({ force: true });
+  });
 
   afterAll(async () => {
     await ModelFactory.sequelize.close();
   });
+  // =====================================================================
 
   describe('getHealthRecordStatus', () => {
     it("should return status 'complete' when health record 'completedAt' field is not null", async () => {
@@ -377,6 +397,108 @@ describe('healthRecordRepository', () => {
       expect(result).toEqual([firstConversationId, secondConversationId]);
       expect(healthRecordMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
       expect(messagesMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
+    });
+  });
+
+  describe('findAllSoftDeletedHealthRecords', () => {
+    it('should find all deleted health records successfully', async () => {
+      // given
+      const [messageId, conversationId] = generateMultipleUUID(2, true);
+      const nhsNumber = generateRandomNhsNumber();
+
+      // when
+      await createEhrExtract({
+        conversationId,
+        messageId,
+        nhsNumber,
+        fragmentMessageIds: [],
+      });
+
+      await getHealthRecordStatus(conversationId);
+      await updateHealthRecordCompleteness(conversationId);
+      await markHealthRecordAsDeletedForPatient(nhsNumber);
+
+      const foundRecords = await findAllSoftDeletedHealthRecords();
+
+      // then
+      expect(foundRecords.length).toEqual(1);
+      expect(foundRecords[0].conversationId).toEqual(conversationId.toLowerCase());
+      expect(foundRecords[0].nhsNumber).toEqual(nhsNumber);
+    });
+
+    it('should return empty array if no deleted health records are found', async () => {
+      // given
+      const [messageId, conversationId] = generateMultipleUUID(2, true);
+      const nhsNumber = generateRandomNhsNumber();
+
+      // when
+      await createEhrExtract({
+        conversationId,
+        messageId,
+        nhsNumber,
+        fragmentMessageIds: [],
+      });
+
+      const foundRecords = await findAllSoftDeletedHealthRecords();
+
+      // then
+      expect(foundRecords).toEqual([]);
+    });
+  });
+
+  describe('deleteHealthRecord', () => {
+    it('should delete a health record successfully, given a valid conversation id', async () => {
+      // given
+      const [messageId, conversationId] = generateMultipleUUID(2, true);
+      const fragmentMessageIds = generateMultipleUUID(5, true);
+      const nhsNumber = generateRandomNhsNumber();
+
+      // when
+      await createEhrExtract({
+        conversationId,
+        messageId,
+        nhsNumber,
+        fragmentMessageIds,
+      });
+
+      await deleteHealthRecord(conversationId);
+
+      const foundRecord = await getHealthRecordByConversationId(conversationId);
+
+      // then
+      expect(foundRecord).toBeNull();
+    });
+
+    it('should throw an error, given an invalid conversation id', async () => {
+      // given
+      const conversationId = generateRandomUUID(true);
+
+      // when
+      expect(async () => await deleteHealthRecord(conversationId)).rejects.toThrow(Error);
+    });
+  });
+
+  describe('getHealthRecordByConversationId', () => {
+    it('should return the health record successfully', async () => {
+      // given
+      const [messageId, conversationId] = generateMultipleUUID(2, true);
+      const fragmentMessageIds = generateMultipleUUID(5, true);
+      const nhsNumber = generateRandomNhsNumber();
+
+      // when
+      await createEhrExtract({
+        conversationId,
+        messageId,
+        nhsNumber,
+        fragmentMessageIds,
+      });
+
+      // when
+      const foundRecord = await getHealthRecordByConversationId(conversationId);
+
+      // then
+      expect(foundRecord.conversationId).toEqual(conversationId);
+      expect(foundRecord.nhsNumber).toEqual(nhsNumber);
     });
   });
 });
