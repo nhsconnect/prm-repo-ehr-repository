@@ -167,3 +167,20 @@ export const deleteMessage = async (messageId) => {
     throw error;
   }
 };
+
+export const findAllMessagesByConversationId = async (conversationId) => {
+  const Message = ModelFactory.getByName(messageModelName);
+
+  return await Message.findAll({
+    where: {
+      conversationId: {
+        [Op.eq]: conversationId,
+      },
+    },
+  })
+    .then((messages) => messages)
+    .catch((error) => {
+      logError(error);
+      throw error;
+    });
+};
