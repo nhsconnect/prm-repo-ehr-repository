@@ -10,7 +10,9 @@ import { MessageType, modelName as messageModelName } from '../../../models/mess
 import { modelName as healthRecordModelName } from '../../../models/health-record';
 import { logError } from '../../../middleware/logging';
 import { getNow } from '../../time';
+import expect from 'expect';
 
+// Mocking
 jest.mock('../../../middleware/logging');
 jest.mock('../../time');
 
@@ -23,8 +25,13 @@ describe('messageRepository', () => {
   const nhsNumber = '1234567890';
   const now = new Date();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     getNow.mockReturnValue(now);
+    const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+    const Message = ModelFactory.getByName(messageModelName);
+    await HealthRecord.truncate();
+    await Message.truncate();
+    await ModelFactory.sequelize.sync();
   });
 
   afterAll(async () => {
@@ -267,6 +274,51 @@ describe('messageRepository', () => {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Creating fragment database entry failed', err);
       }
+    });
+  });
+
+  describe('deleteMessages', () => {
+    it('should delete all the messages in the database, given a list of valid message ids', async () => {
+      // given
+      // when
+      // then
+    });
+    it('should throw an error and rollback, given a list of partially valid message ids', async () => {
+      // given
+      // when
+      // then
+    });
+    it('should throw an error and rollback, given a list of 1 invalid message id', async () => {
+      // given
+      // when
+      // then
+    });
+  });
+
+  describe('deleteMessage', () => {
+    it('should delete the message in the database, given a valid message id', async () => {
+      // given
+      // when
+      // then
+    });
+    it('should throw an error and rollback, given an invalid message id', async () => {
+      // given
+      // when
+      // then
+    });
+  });
+
+  describe('findAllMessagesByConversationId', () => {
+    it('should find all messages successfully, given a valid conversation ID', async () => {
+      // given
+      // when
+      // then
+    });
+
+    it('should return null, given an invalid conversation ID', async () => {
+      // given
+      // when
+      // then
     });
   });
 });
