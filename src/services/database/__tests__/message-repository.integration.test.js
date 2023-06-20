@@ -4,6 +4,8 @@ import {
   createEhrExtract,
   fragmentExists,
   createFragmentPart,
+  findAllMessagesByConversationId,
+  hardDeleteAllMessagesByConversationId,
 } from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
@@ -11,6 +13,11 @@ import { modelName as healthRecordModelName } from '../../../models/health-recor
 import { logError } from '../../../middleware/logging';
 import { getNow } from '../../time';
 import expect from 'expect';
+import {
+  generateMultipleUUID,
+  generateRandomNhsNumber,
+  generateRandomUUID,
+} from '../../../utilities/integration-test-utilities';
 
 // Mocking
 jest.mock('../../../middleware/logging');
@@ -27,11 +34,9 @@ describe('messageRepository', () => {
 
   beforeEach(async () => {
     getNow.mockReturnValue(now);
-    const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-    const Message = ModelFactory.getByName(messageModelName);
     await HealthRecord.truncate();
     await Message.truncate();
-    await ModelFactory.sequelize.sync();
+    await ModelFactory.sequelize.sync({ force: true });
   });
 
   afterAll(async () => {
@@ -277,48 +282,73 @@ describe('messageRepository', () => {
     });
   });
 
-  describe('deleteMessages', () => {
-    it('should delete all the messages in the database, given a list of valid message ids', async () => {
+  describe('hardDeleteAllMessagesByConversationId', () => {
+    it('should hard delete all the messages in the database, given a valid conversation ID', async () => {
       // given
-      // when
-      // then
-    });
-    it('should throw an error and rollback, given a list of partially valid message ids', async () => {
-      // given
-      // when
-      // then
-    });
-    it('should throw an error and rollback, given a list of 1 invalid message id', async () => {
-      // given
-      // when
-      // then
-    });
-  });
+      const [messageId, conversationId] = generateMultipleUUID(2, false);
+      const fragmentMessageIds = generateMultipleUUID(5, false);
+      const nhsNumber = generateRandomNhsNumber();
 
-  describe('deleteMessage', () => {
-    it('should delete the message in the database, given a valid message id', async () => {
-      // given
       // when
+      await createEhrExtract({
+        conversationId,
+        messageId,
+        nhsNumber,
+        fragmentMessageIds,
+      });
+
+      await hardDeleteAllMessagesByConversationId(conversationId);
+      const foundMessages = await findAllMessagesByConversationId(conversationId, true);
+
       // then
+      expect(foundMessages).toEqual([]);
     });
-    it('should throw an error and rollback, given an invalid message id', async () => {
+
+    it('should throw an error, given an invalid conversation id', async () => {
       // given
+      const conversationId = generateRandomUUID(false);
+
       // when
-      // then
+      try {
+        await hardDeleteAllMessagesByConversationId(conversationId);
+      } catch (error) {
+        // then
+        expect(error).not.toBeNull();
+      }
     });
   });
 
   describe('findAllMessagesByConversationId', () => {
     it('should find all messages successfully, given a valid conversation ID', async () => {
       // given
+      const [messageId, conversationId] = generateMultipleUUID(2, false);
+      const fragmentMessageIds = generateMultipleUUID(5, false);
+      const nhsNumber = generateRandomNhsNumber();
+
       // when
+      await createEhrExtract({
+        conversationId,
+        messageId,
+        nhsNumber,
+        fragmentMessageIds,
+      });
+
+      const foundMessages = await findAllMessagesByConversationId(conversationId, false);
+
       // then
+      expect(foundMessages.length).toEqual(5 + 1); // 5 fragments + 1 extract
     });
 
     it('should return null, given an invalid conversation ID', async () => {
       // given
+      const conversationId = generateRandomUUID(false);
+
       // when
+      const foundMessages = await findAllMessagesByConversationId(conversationId, false);
+
       // then
+      expect(foundMessages).toEqual([]);
+      expect(foundMessages.length).toBe(0);
     });
   });
 });

@@ -7,8 +7,8 @@ import {
   getHealthRecordMessageIds,
   messageAlreadyReceived,
   markHealthRecordAsDeletedForPatient,
-  deleteHealthRecord,
-  getHealthRecordByConversationId,
+  hardDeleteHealthRecordByConversationId,
+  findHealthRecordByConversationId,
   findAllSoftDeletedHealthRecords,
 } from '../health-record-repository';
 import ModelFactory from '../../../models';
@@ -16,11 +16,12 @@ import { modelName as healthRecordModelName } from '../../../models/health-recor
 import { MessageType, modelName as messageModelName } from '../../../models/message';
 import { logError } from '../../../middleware/logging';
 import expect from 'expect';
-import { createEhrExtract } from '../message-repository';
+import { createEhrExtract, findAllMessagesByConversationId } from '../message-repository';
 import {
   generateMultipleUUID,
   generateRandomNhsNumber,
   generateRandomUUID,
+  updateAllFragmentMessagesReceivedAtDateTime,
 } from '../../../utilities/integration-test-utilities';
 
 jest.mock('../../../middleware/logging');
@@ -401,9 +402,9 @@ describe('healthRecordRepository', () => {
   });
 
   describe('findAllSoftDeletedHealthRecords', () => {
-    it('should find all deleted health records successfully', async () => {
+    it('should find all soft deleted health records for a small EHR successfully', async () => {
       // given
-      const [messageId, conversationId] = generateMultipleUUID(2, true);
+      const [messageId, conversationId] = generateMultipleUUID(2, false);
       const nhsNumber = generateRandomNhsNumber();
 
       // when
@@ -414,7 +415,6 @@ describe('healthRecordRepository', () => {
         fragmentMessageIds: [],
       });
 
-      await getHealthRecordStatus(conversationId);
       await updateHealthRecordCompleteness(conversationId);
       await markHealthRecordAsDeletedForPatient(nhsNumber);
 
@@ -426,7 +426,35 @@ describe('healthRecordRepository', () => {
       expect(foundRecords[0].nhsNumber).toEqual(nhsNumber);
     });
 
-    it('should return empty array if no deleted health records are found', async () => {
+    it('should find all soft deleted health records for a large EHR successfully', async () => {
+      // given
+      const [messageId, conversationId] = generateMultipleUUID(2, false);
+      const fragmentMessageIds = generateMultipleUUID(5, false);
+      const nhsNumber = generateRandomNhsNumber();
+
+      // when
+      await createEhrExtract({
+        conversationId,
+        messageId,
+        nhsNumber,
+        fragmentMessageIds,
+      });
+
+      await updateAllFragmentMessagesReceivedAtDateTime(fragmentMessageIds);
+      await updateHealthRecordCompleteness(conversationId);
+      await markHealthRecordAsDeletedForPatient(nhsNumber);
+
+      const foundRecords = await findAllSoftDeletedHealthRecords();
+      const foundMessages = await findAllMessagesByConversationId(conversationId, false);
+
+      // then
+      expect(foundRecords.length).toEqual(1);
+      expect(foundRecords[0].conversationId).toEqual(conversationId);
+      expect(foundRecords[0].nhsNumber).toEqual(nhsNumber);
+      expect(JSON.stringify(foundMessages).search('')).toEqual(-1);
+    });
+
+    it('should return empty array if no soft deleted health records are found', async () => {
       // given
       const [messageId, conversationId] = generateMultipleUUID(2, true);
       const nhsNumber = generateRandomNhsNumber();
@@ -446,11 +474,11 @@ describe('healthRecordRepository', () => {
     });
   });
 
-  describe('deleteHealthRecord', () => {
-    it('should delete a health record successfully, given a valid conversation id', async () => {
+  describe('hardDeleteHealthRecordByConversationId', () => {
+    it('should hard delete a health record successfully, given a valid conversation id', async () => {
       // given
-      const [messageId, conversationId] = generateMultipleUUID(2, true);
-      const fragmentMessageIds = generateMultipleUUID(5, true);
+      const [messageId, conversationId] = generateMultipleUUID(2, false);
+      const fragmentMessageIds = generateMultipleUUID(5, false);
       const nhsNumber = generateRandomNhsNumber();
 
       // when
@@ -461,12 +489,14 @@ describe('healthRecordRepository', () => {
         fragmentMessageIds,
       });
 
-      await deleteHealthRecord(conversationId);
+      await hardDeleteHealthRecordByConversationId(conversationId);
 
-      const foundRecord = await getHealthRecordByConversationId(conversationId);
+      const foundRecord = await findHealthRecordByConversationId(conversationId);
+      const foundSoftDeletedRecords = await findAllSoftDeletedHealthRecords();
 
       // then
       expect(foundRecord).toBeNull();
+      expect(foundSoftDeletedRecords).toEqual([]);
     });
 
     it('should throw an error, given an invalid conversation id', async () => {
@@ -474,15 +504,20 @@ describe('healthRecordRepository', () => {
       const conversationId = generateRandomUUID(true);
 
       // when
-      expect(async () => await deleteHealthRecord(conversationId)).rejects.toThrow(Error);
+      try {
+        await hardDeleteHealthRecordByConversationId(conversationId);
+      } catch (error) {
+        // then
+        expect(error).not.toBeNull();
+      }
     });
   });
 
-  describe('getHealthRecordByConversationId', () => {
+  describe('findHealthRecordByConversationId', () => {
     it('should return the health record successfully', async () => {
       // given
-      const [messageId, conversationId] = generateMultipleUUID(2, true);
-      const fragmentMessageIds = generateMultipleUUID(5, true);
+      const [messageId, conversationId] = generateMultipleUUID(2, false);
+      const fragmentMessageIds = generateMultipleUUID(5, false);
       const nhsNumber = generateRandomNhsNumber();
 
       // when
@@ -493,12 +528,22 @@ describe('healthRecordRepository', () => {
         fragmentMessageIds,
       });
 
-      // when
-      const foundRecord = await getHealthRecordByConversationId(conversationId);
+      const foundRecord = await findHealthRecordByConversationId(conversationId);
 
       // then
       expect(foundRecord.conversationId).toEqual(conversationId);
       expect(foundRecord.nhsNumber).toEqual(nhsNumber);
+    });
+
+    it('should return null if the health record does not exist', async () => {
+      // given
+      const conversationId = generateRandomUUID(true);
+
+      // when
+      const foundRecord = await findHealthRecordByConversationId(conversationId);
+
+      // then
+      expect(foundRecord).toBeNull();
     });
   });
 });
