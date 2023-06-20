@@ -1,14 +1,13 @@
 import {
-  deleteHealthRecord,
+  hardDeleteHealthRecordByConversationId,
   findAllSoftDeletedHealthRecords,
-  getHealthRecordMessageIds,
 } from '../database/health-record-repository';
 import { gracefulShutdown, scheduleJob } from 'node-schedule';
 import { logError, logInfo } from '../../middleware/logging';
 import { S3Service } from '../storage';
 import { getNow } from '../time';
 import moment from 'moment';
-import { deleteMessages } from '../database/message-repository';
+import { hardDeleteAllMessagesByConversationId } from '../database/message-repository';
 
 const loggerPrefix = '[SCHEDULED JOB] [EHR S3 DELETIONS] -';
 
@@ -44,15 +43,16 @@ const checkDateAndDelete = async (healthRecords) => {
 };
 
 const permanentlyDeleteEhrFromRepoAndDb = async (healthRecord) => {
-  const s3 = new S3Service(`${healthRecord.conversationId}`);
+  const { conversationId } = healthRecord;
+  const s3 = new S3Service(`${conversationId}`);
 
   try {
     // Delete the object from the S3 bucket.
     await s3.delete();
 
     // Delete messages and health record within this database.
-    await deleteHealthRecord(healthRecord.conversationId);
-    await deleteMessages([...(await getHealthRecordMessageIds(healthRecord.conversationId))]);
+    await hardDeleteAllMessagesByConversationId(conversationId);
+    await hardDeleteHealthRecordByConversationId(conversationId);
 
     logInfo(
       `${loggerPrefix} Successfully deleted EHR with Conversation ID ${healthRecord.conversationId} from S3, and associated records in the database.`
