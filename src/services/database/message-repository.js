@@ -116,7 +116,7 @@ export const createFragmentPart = async (id, conversationId) => {
   await t.commit();
 };
 
-export const deleteMessages = async (messageIds) => {
+export const hardDeleteAllMessagesByConversationId = async (conversationId) => {
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
   const transaction = await sequelize.transaction();
@@ -125,15 +125,18 @@ export const deleteMessages = async (messageIds) => {
     await Message.destroy(
       {
         where: {
-          messageId: {
-            [Op.eq]: messageIds,
+          conversationId: {
+            [Op.eq]: conversationId,
           },
         },
+        force: true,
       },
       { transaction }
     );
 
-    logInfo(`Messages with Message IDs ${messageIds} successfully deleted.`);
+    logInfo(
+      `All messages with Conversation ID ${conversationId} have been successfully hard deleted.`
+    );
     await transaction.commit();
   } catch (error) {
     logError(error);
@@ -142,33 +145,7 @@ export const deleteMessages = async (messageIds) => {
   }
 };
 
-export const deleteMessage = async (messageId) => {
-  const Message = ModelFactory.getByName(messageModelName);
-  const sequelize = ModelFactory.sequelize;
-  const transaction = await sequelize.transaction();
-
-  try {
-    await Message.destroy(
-      {
-        where: {
-          messageId: {
-            [Op.eq]: messageId,
-          },
-        },
-      },
-      { transaction }
-    );
-
-    logInfo(`Message with Message ID ${messageId} successfully deleted.`);
-    await transaction.commit();
-  } catch (error) {
-    logError(error);
-    transaction.rollback();
-    throw error;
-  }
-};
-
-export const findAllMessagesByConversationId = async (conversationId) => {
+export const findAllMessagesByConversationId = async (conversationId, includeSoftDeleted) => {
   const Message = ModelFactory.getByName(messageModelName);
 
   return await Message.findAll({
@@ -177,6 +154,7 @@ export const findAllMessagesByConversationId = async (conversationId) => {
         [Op.eq]: conversationId,
       },
     },
+    paranoid: !includeSoftDeleted,
   })
     .then((messages) => messages)
     .catch((error) => {

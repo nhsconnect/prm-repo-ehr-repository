@@ -192,7 +192,7 @@ export const findAllSoftDeletedHealthRecords = async () => {
     });
 };
 
-export const deleteHealthRecord = async (conversationId) => {
+export const hardDeleteHealthRecordByConversationId = async (conversationId) => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const sequelize = ModelFactory.sequelize;
   const transaction = await sequelize.transaction();
@@ -205,11 +205,12 @@ export const deleteHealthRecord = async (conversationId) => {
             [Op.eq]: conversationId,
           },
         },
+        force: true,
       },
       { transaction }
     );
 
-    logInfo(`Health Record with Conversation ID ${conversationId} successfully deleted.`);
+    logInfo(`Health Record with Conversation ID ${conversationId} successfully hard deleted.`);
     transaction.commit();
   } catch (error) {
     logError(error);
@@ -218,7 +219,7 @@ export const deleteHealthRecord = async (conversationId) => {
   }
 };
 
-export const getHealthRecordByConversationId = async (conversationId) => {
+export const findHealthRecordByConversationId = async (conversationId) => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
 
   return await HealthRecord.findByPk(conversationId)
