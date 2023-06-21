@@ -11,7 +11,11 @@ import { hardDeleteAllMessagesByConversationId } from '../database/message-repos
 
 const loggerPrefix = '[SCHEDULED JOB] [EHR S3 DELETIONS] -';
 
-export const ehrDeletionJob = scheduleJob('00 00 03 * * *', async () => {
+/**
+ * Execute this job at exactly 3AM every day.
+ * @type {Job}
+ */
+export const ehrDeletionJob = scheduleJob('00 03 * * *', async () => {
   logInfo(
     `${loggerPrefix} Deleting EHRs with soft deletion date equal to 8 weeks as of ${getNow()}.`
   );
@@ -50,7 +54,7 @@ const permanentlyDeleteEhrFromRepoAndDb = async (healthRecord) => {
     // Delete the object from the S3 bucket.
     await s3.delete();
 
-    // Delete messages and health record within this database.
+    // Delete messages and health record within the ehr-out database.
     await hardDeleteAllMessagesByConversationId(conversationId);
     await hardDeleteHealthRecordByConversationId(conversationId);
 
