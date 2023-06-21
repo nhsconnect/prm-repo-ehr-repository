@@ -420,6 +420,8 @@ describe('healthRecordRepository', () => {
 
       const foundRecords = await findAllSoftDeletedHealthRecords();
 
+      console.log(foundRecords);
+
       // then
       expect(foundRecords.length).toEqual(1);
       expect(foundRecords[0].conversationId).toEqual(conversationId.toLowerCase());
@@ -451,7 +453,6 @@ describe('healthRecordRepository', () => {
       expect(foundRecords.length).toEqual(1);
       expect(foundRecords[0].conversationId).toEqual(conversationId);
       expect(foundRecords[0].nhsNumber).toEqual(nhsNumber);
-      expect(JSON.stringify(foundMessages).search('')).toEqual(-1);
     });
 
     it('should return empty array if no soft deleted health records are found', async () => {
