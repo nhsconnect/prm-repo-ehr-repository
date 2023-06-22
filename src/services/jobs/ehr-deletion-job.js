@@ -1,21 +1,17 @@
+import { hardDeleteAllMessagesByConversationId } from '../database/message-repository';
+import { logError, logInfo } from '../../middleware/logging';
 import {
   hardDeleteHealthRecordByConversationId,
   findAllSoftDeletedHealthRecords,
 } from '../database/health-record-repository';
-import { gracefulShutdown, scheduleJob } from 'node-schedule';
-import { logError, logInfo } from '../../middleware/logging';
 import { S3Service } from '../storage';
 import { getNow } from '../time';
+import cron from 'node-cron';
 import moment from 'moment';
-import { hardDeleteAllMessagesByConversationId } from '../database/message-repository';
 
 const loggerPrefix = '[SCHEDULED JOB] [EHR S3 DELETIONS] -';
 
-/**
- * Execute this job at exactly 3AM every day.
- * @type {Job}
- */
-export const ehrDeletionJob = scheduleJob('00 03 * * *', async () => {
+export const ehrDeletionJob = cron.schedule('00 03 * * *', async () => {
   logInfo(
     `${loggerPrefix} Deleting EHRs with soft deletion date equal to 8 weeks as of ${getNow()}.`
   );
@@ -27,11 +23,11 @@ export const ehrDeletionJob = scheduleJob('00 03 * * *', async () => {
       await checkDateAndDelete(records);
     } else {
       logInfo(`${loggerPrefix} No health records are marked for deletion, shutting down.`);
-      await gracefulShutdown();
+      await ehrDeletionJob.stop();
     }
   } catch (error) {
     logError(`${loggerPrefix} An error occurred - detail: ${error}, shutting down.`);
-    await gracefulShutdown();
+    await ehrDeletionJob.stop();
   }
 });
 
@@ -65,6 +61,6 @@ const permanentlyDeleteEhrFromRepoAndDb = async (healthRecord) => {
     logError(
       `${loggerPrefix} Failed to delete object with conversation ID ${healthRecord.conversationId} - ${error}`
     );
-    await ehrDeletionJob.gracefulShutdown();
+    await ehrDeletionJob.stop();
   }
 };
