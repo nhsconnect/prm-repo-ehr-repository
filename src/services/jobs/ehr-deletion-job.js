@@ -9,11 +9,11 @@ import { getNow } from '../time';
 import cron from 'node-cron';
 import moment from 'moment';
 
-const loggerPrefix = '[SCHEDULED JOB] [EHR S3 DELETIONS] -';
+const loggerPrefix = `[SCHEDULED JOB] [EHR S3 DELETIONS] -`;
 
 export const ehrDeletionJob = cron.schedule('00 03 * * *', async () => {
   logInfo(
-    `${loggerPrefix} Deleting EHRs with soft deletion date equal to 8 weeks as of ${getNow()}.`
+    `${loggerPrefix} Deleting health records with a soft deletion date equal to 8 weeks as of ${getNow()}.`
   );
 
   try {
@@ -22,12 +22,10 @@ export const ehrDeletionJob = cron.schedule('00 03 * * *', async () => {
     if (records.length > 0) {
       await checkDateAndDelete(records);
     } else {
-      logInfo(`${loggerPrefix} No health records are marked for deletion, shutting down.`);
-      await ehrDeletionJob.stop();
+      logInfo(`${loggerPrefix} No health records are marked for deletion.`);
     }
   } catch (error) {
-    logError(`${loggerPrefix} An error occurred - detail: ${error}, shutting down.`);
-    await ehrDeletionJob.stop();
+    logError(`${loggerPrefix} An error occurred - detail: ${error}.`);
   }
 });
 
@@ -55,7 +53,7 @@ const permanentlyDeleteEhrFromRepoAndDb = async (healthRecord) => {
     await hardDeleteHealthRecordByConversationId(conversationId);
 
     logInfo(
-      `${loggerPrefix} Successfully deleted EHR with Conversation ID ${healthRecord.conversationId} from S3, and associated records in the database.`
+      `${loggerPrefix} Successfully deleted health record with Conversation ID ${healthRecord.conversationId} from S3, and associated records within the database.`
     );
   } catch (error) {
     logError(
