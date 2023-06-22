@@ -9,7 +9,7 @@ import { getNow } from '../time';
 import cron from 'node-cron';
 import moment from 'moment';
 
-const loggerPrefix = `[SCHEDULED JOB] [EHR S3 DELETIONS] -`;
+const loggerPrefix = `[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] -`;
 
 export const ehrDeletionJob = cron.schedule('00 03 * * *', async () => {
   logInfo(
