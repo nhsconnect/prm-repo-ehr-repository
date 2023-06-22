@@ -420,8 +420,6 @@ describe('healthRecordRepository', () => {
 
       const foundRecords = await findAllSoftDeletedHealthRecords();
 
-      console.log(foundRecords);
-
       // then
       expect(foundRecords.length).toEqual(1);
       expect(foundRecords[0].conversationId).toEqual(conversationId.toLowerCase());
