@@ -15,7 +15,6 @@ import ModelFactory from '../../../models';
 import { modelName as healthRecordModelName } from '../../../models/health-record';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
 import { logError } from '../../../middleware/logging';
-import expect from 'expect';
 import { createEhrExtract, findAllMessagesByConversationId } from '../message-repository';
 import {
   generateMultipleUUID,
@@ -445,12 +444,13 @@ describe('healthRecordRepository', () => {
       await markHealthRecordAsDeletedForPatient(nhsNumber);
 
       const foundRecords = await findAllSoftDeletedHealthRecords();
-      const foundMessages = await findAllMessagesByConversationId(conversationId, false);
+      const foundMessages = await findAllMessagesByConversationId(conversationId, true);
 
       // then
       expect(foundRecords.length).toEqual(1);
       expect(foundRecords[0].conversationId).toEqual(conversationId);
       expect(foundRecords[0].nhsNumber).toEqual(nhsNumber);
+      expect(JSON.stringify(foundMessages).includes('"deletedAt": null')).toEqual(false);
     });
 
     it('should return empty array if no soft deleted health records are found', async () => {
