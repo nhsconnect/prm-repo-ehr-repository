@@ -10,11 +10,6 @@ const Message = ModelFactory.getByName(messageModelName);
 export const generateRandomNhsNumber = () =>
   Math.random().toString().slice(2, 12).replace('0', '5');
 
-export const generateMultipleRandomNhsNumbers = (amount) =>
-  Array(amount)
-    .fill(undefined)
-    .map(() => Math.random().toString().slice(2, 12).replace('0', '5'));
-
 export const generateRandomUUID = (isUppercase) =>
   isUppercase ? uuidv4().toUpperCase() : uuidv4();
 
