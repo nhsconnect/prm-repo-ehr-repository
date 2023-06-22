@@ -56,7 +56,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
     "moment": "^2.29.4",
-    "node-schedule": "^2.1.1",
+    "node-cron": "^3.0.2",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.26.0",
