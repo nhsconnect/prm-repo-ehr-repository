@@ -1,7 +1,7 @@
 import app from './app';
 import { logInfo } from './middleware/logging';
 import { portNumber } from './config';
-import { ehrDeletionJob } from './services/jobs/ehr-deletion-job';
+import { ehrDeletionJob } from './services/jobs/ehr-deletion-job/ehr-deletion-job';
 
 const port = portNumber || 3000;
 
