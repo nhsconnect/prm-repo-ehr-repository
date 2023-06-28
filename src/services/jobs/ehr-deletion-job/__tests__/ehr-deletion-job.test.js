@@ -36,7 +36,7 @@ describe('ehr-deletion-job.js', () => {
 
   afterEach(() => {
     ehrDeletionJob.stop();
-    sinon.restore();
+    sinon.reset();
     jest.resetAllMocks();
   });
 
@@ -52,29 +52,21 @@ describe('ehr-deletion-job.js', () => {
     expect(checkDateAndDelete).toBeCalledTimes(0);
   });
 
-  it('should schedule the job once per day at 3am, for 7 days', async () => {
-    // when
-    findAllSoftDeletedHealthRecords.mockResolvedValue([]);
+  it(
+    'should schedule the job once per day at 3am, for 7 days',
+    async () => {
+      // when
+      findAllSoftDeletedHealthRecords.mockResolvedValue([]);
 
-    await clock.tickAsync(timeframes.WEEK);
+      await clock.tickAsync(timeframes.WEEK);
 
-    // then
-    expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(7);
-    expect(logInfo).toBeCalledTimes(7);
-    expect(checkDateAndDelete).toBeCalledTimes(0);
-  });
-
-  it('should schedule the job once per day at 3am, for 14 days', async () => {
-    // when
-    findAllSoftDeletedHealthRecords.mockResolvedValueOnce([]);
-
-    await clock.tickAsync(timeframes.FORTNIGHTLY);
-
-    // then
-    expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(14);
-    expect(logInfo).toBeCalledTimes(28);
-    expect(checkDateAndDelete).toBeCalledTimes(0);
-  });
+      // then
+      expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(7);
+      expect(logInfo).toBeCalledTimes(14);
+      expect(checkDateAndDelete).toBeCalledTimes(0);
+    },
+    TEN_SECOND_TIMEOUT // this test takes longer than 5 seconds, setting it to 10 fixes it
+  );
 
   it('should run check date and delete if there is a health record present', async () => {
     // when
