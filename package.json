@@ -69,7 +69,10 @@
   "jest": {
     "resetModules": true,
     "clearMocks": true,
-    "automock": false
+    "automock": false,
+    "testPathIgnorePatterns": [
+      "test-utilities.js"
+    ]
   },
   "overrides": {
     "json5": "2.2.2",
