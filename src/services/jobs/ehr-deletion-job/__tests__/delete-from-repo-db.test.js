@@ -1,8 +1,8 @@
 import { hardDeleteHealthRecordByConversationId } from '../../../database/health-record-repository';
 import { hardDeleteAllMessagesByConversationId } from '../../../database/message-repository';
 import { permanentlyDeleteEhrFromRepoAndDb } from '../delete-from-repo-db';
-import { loggerPrefix } from '../ehr-deletion-job-utilities';
 import { logError, logInfo } from '../../../../middleware/logging';
+import { loggerPrefix } from '../ehr-deletion-job-common';
 import { getHealthRecords } from './test-utilities';
 import moment from 'moment/moment';
 
