@@ -3,6 +3,7 @@ import { checkDateAndDelete } from '../check-date-delete';
 import { logInfo } from '../../../../middleware/logging';
 import { getHealthRecords } from './test-utilities';
 import moment from 'moment/moment';
+import { loggerPrefix } from '../ehr-deletion-job-common';
 
 // Mocking
 jest.mock('../../../../middleware/logging');
@@ -22,14 +23,12 @@ describe('check-date-delete.js', () => {
     expect(permanentlyDeleteEhrFromRepoAndDb).toBeCalledTimes(1);
     expect(logInfo).toBeCalledTimes(3);
     expect(logInfo).toBeCalledWith(
-      '[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] - Identifying health records with a soft deletion date greater than or equal to 8 weeks.'
+      `${loggerPrefix} Identifying health records with a soft deletion date greater than or equal to 8 weeks.`
     );
     expect(logInfo).toBeCalledWith(
-      `[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] - Record found with Conversation ID: ${conversationId}, deleting...`
+      `${loggerPrefix} Record found with Conversation ID: ${conversationId}, deleting...`
     );
-    expect(logInfo).toBeCalledWith(
-      '[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] - 0 health records skipped, 1 deleted.'
-    );
+    expect(logInfo).toBeCalledWith(`${loggerPrefix} 0 health records skipped, 1 deleted.`);
   });
 
   it('should permanently delete a health record from the repo and DB, given multiple health records with a soft deleted date of greater than 8 weeks', async () => {
@@ -43,9 +42,7 @@ describe('check-date-delete.js', () => {
     // then
     expect(permanentlyDeleteEhrFromRepoAndDb).toBeCalledTimes(5);
     expect(logInfo).toBeCalledTimes(7);
-    expect(logInfo).toBeCalledWith(
-      '[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] - 0 health records skipped, 5 deleted.'
-    );
+    expect(logInfo).toBeCalledWith(`${loggerPrefix} 0 health records skipped, 5 deleted.`);
   });
 
   it('should not delete a health record, given a health record with a soft deleted date of less than 8 weeks', async () => {
@@ -58,10 +55,8 @@ describe('check-date-delete.js', () => {
     // then
     expect(logInfo).toBeCalledTimes(2);
     expect(logInfo).toBeCalledWith(
-      '[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] - Identifying health records with a soft deletion date greater than or equal to 8 weeks.'
+      `${loggerPrefix} Identifying health records with a soft deletion date greater than or equal to 8 weeks.`
     );
-    expect(logInfo).toBeCalledWith(
-      '[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] - No health records were deleted.'
-    );
+    expect(logInfo).toBeCalledWith(`${loggerPrefix} No health records were deleted.`);
   });
 });
