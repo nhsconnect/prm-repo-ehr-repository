@@ -52,11 +52,11 @@ export default class S3Service {
     const deleteParams = {
       Bucket: this.parameters.Bucket,
       Delete: {
-        Objects: [],
+        Objects: foundObjects.Contents.map((object) => {
+          return object.key;
+        }),
       },
     };
-
-    foundObjects.Contents.forEach(({ key }) => deleteParams.Delete.Objects.push({ key }));
 
     this.s3.deleteObjects(deleteParams, (error, data) => {
       if (error) throw new S3ObjectDeletionError(error.message);
