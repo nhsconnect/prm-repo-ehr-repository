@@ -1,5 +1,5 @@
 import { permanentlyDeleteEhrFromRepoAndDb } from './delete-from-repo-db';
-import { loggerPrefix } from './ehr-deletion-job-utilities';
+import { loggerPrefix } from './ehr-deletion-job-common';
 import { logInfo } from '../../../middleware/logging';
 import moment from 'moment/moment';
 

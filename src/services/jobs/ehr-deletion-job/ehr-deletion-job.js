@@ -1,5 +1,5 @@
 import { findAllSoftDeletedHealthRecords } from '../../database/health-record-repository';
-import { loggerPrefix } from './ehr-deletion-job-utilities';
+import { loggerPrefix } from './ehr-deletion-job-common';
 import { checkDateAndDelete } from './check-date-delete';
 import { logInfo } from '../../../middleware/logging';
 import cron from 'node-cron';
