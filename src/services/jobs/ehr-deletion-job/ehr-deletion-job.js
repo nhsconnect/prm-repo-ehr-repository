@@ -5,10 +5,15 @@ import { logInfo } from '../../../middleware/logging';
 import cron from 'node-cron';
 
 export const ehrDeletionJob = cron.schedule('00 03 * * *', async () => {
+  console.log('=================== [BEFORE INITIAL LOG] ============================');
   logInfo(`${loggerPrefix} Job triggered, preparing to delete health records.`);
 
   const records = await findAllSoftDeletedHealthRecords();
 
-  if (records.length > 0) await checkDateAndDelete(records);
-  else logInfo(`${loggerPrefix} Could not find any health records that are marked for deletion.`);
+  if (records.length > 0) {
+    await checkDateAndDelete(records);
+  } else {
+    console.log('=================== [BEFORE LOG ELSE] ============================');
+    logInfo(`${loggerPrefix} Could not find any health records that are marked for deletion.`);
+  }
 });

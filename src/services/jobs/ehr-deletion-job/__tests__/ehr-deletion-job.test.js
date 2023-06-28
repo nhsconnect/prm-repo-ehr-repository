@@ -49,17 +49,19 @@ describe('ehr-deletion-job.js', () => {
     // then
     expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
     expect(logInfo).toBeCalledTimes(2);
+    expect(checkDateAndDelete).toBeCalledTimes(0);
   });
 
   it('should schedule the job once per day at 3am, for 7 days', async () => {
     // when
-    findAllSoftDeletedHealthRecords.mockResolvedValueOnce([]);
+    findAllSoftDeletedHealthRecords.mockResolvedValue([]);
 
     await clock.tickAsync(timeframes.WEEK);
 
     // then
     expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(7);
-    expect(logInfo).toBeCalledTimes(14);
+    expect(logInfo).toBeCalledTimes(7);
+    expect(checkDateAndDelete).toBeCalledTimes(0);
   });
 
   it('should schedule the job once per day at 3am, for 14 days', async () => {
@@ -71,6 +73,7 @@ describe('ehr-deletion-job.js', () => {
     // then
     expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(14);
     expect(logInfo).toBeCalledTimes(28);
+    expect(checkDateAndDelete).toBeCalledTimes(0);
   });
 
   it('should run check date and delete if there is a health record present', async () => {
