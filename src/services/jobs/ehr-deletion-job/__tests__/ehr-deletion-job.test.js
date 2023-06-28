@@ -1,9 +1,10 @@
 import { findAllSoftDeletedHealthRecords } from '../../../database/health-record-repository';
 import { expect, jest, afterEach, beforeEach, describe, it } from '@jest/globals';
 import { checkDateAndDelete } from '../check-date-delete';
+import { loggerPrefix } from '../ehr-deletion-job-common';
 import { logInfo } from '../../../../middleware/logging';
-import { getOneHealthRecord } from './test-utilities';
 import { ehrDeletionJob } from '../ehr-deletion-job';
+import { getHealthRecords } from './test-utilities';
 import moment from 'moment/moment';
 import { now } from 'moment';
 import sinon from 'sinon';
@@ -26,7 +27,7 @@ describe('ehr-deletion-job.js', () => {
     FORTNIGHTLY: 1000 * 60 * 60 * 24 * 14,
   };
 
-  const healthRecord = getOneHealthRecord(moment().subtract(8, 'weeks').toISOString());
+  const healthRecord = getHealthRecords(moment().subtract(8, 'weeks').toISOString(), false);
   // =====================================================================
 
   beforeEach(() => {
@@ -94,10 +95,10 @@ describe('ehr-deletion-job.js', () => {
     // then
     expect(logInfo).toBeCalledTimes(2);
     expect(logInfo).toBeCalledWith(
-      '[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] - Job triggered, preparing to delete health records.'
+      `${loggerPrefix} Job triggered, preparing to delete health records.`
     );
     expect(logInfo).toBeCalledWith(
-      '[SCHEDULED JOB] [HEALTH RECORD S3 DELETIONS] - Could not find any health records that are marked for deletion.'
+      `${loggerPrefix} Could not find any health records that are marked for deletion.`
     );
   });
 });
