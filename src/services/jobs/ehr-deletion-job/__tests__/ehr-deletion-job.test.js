@@ -16,6 +16,8 @@ jest.mock('../../../../middleware/logging');
 
 describe('ehr-deletion-job.js', () => {
   // ========================= COMMON PROPERTIES =========================
+  const TEN_SECOND_TIMEOUT = 10000;
+
   const clock = sinon.useFakeTimers({
     now: now(),
     shouldClearNativeTimers: true,
@@ -24,7 +26,6 @@ describe('ehr-deletion-job.js', () => {
   const timeframes = {
     DAY: 1000 * 60 * 60 * 24,
     WEEK: 1000 * 60 * 60 * 24 * 7,
-    FORTNIGHTLY: 1000 * 60 * 60 * 24 * 14,
   };
 
   const healthRecord = getHealthRecords(moment().subtract(8, 'weeks').toISOString(), false);
