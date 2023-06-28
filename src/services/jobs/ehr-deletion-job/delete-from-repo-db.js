@@ -1,11 +1,14 @@
 import { S3Service } from '../../storage';
 import { hardDeleteAllMessagesByConversationId } from '../../database/message-repository';
 import { hardDeleteHealthRecordByConversationId } from '../../database/health-record-repository';
+import { setCurrentSpanAttributes } from '../../../config/tracing';
 import { logError, logInfo } from '../../../middleware/logging';
 import { loggerPrefix } from './ehr-deletion-job-utilities';
 
 export const permanentlyDeleteEhrFromRepoAndDb = async (healthRecord) => {
   const { conversationId } = healthRecord;
+
+  setCurrentSpanAttributes({ conversationId });
 
   try {
     const s3 = new S3Service(conversationId);
