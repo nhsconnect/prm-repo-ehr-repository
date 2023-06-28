@@ -28,7 +28,7 @@ describe('check-date-delete.js', () => {
     expect(logInfo).toBeCalledWith(
       `${loggerPrefix} Record found with Conversation ID: ${conversationId}, deleting...`
     );
-    expect(logInfo).toBeCalledWith(`${loggerPrefix} 0 health records skipped, 1 deleted.`);
+    expect(logInfo).toBeCalledWith(`${loggerPrefix} Summary: 0 skipped, 1 deleted.`);
   });
 
   it('should permanently delete a health record from the repo and DB, given multiple health records with a soft deleted date of greater than 8 weeks', async () => {
@@ -42,7 +42,7 @@ describe('check-date-delete.js', () => {
     // then
     expect(permanentlyDeleteEhrFromRepoAndDb).toBeCalledTimes(5);
     expect(logInfo).toBeCalledTimes(7);
-    expect(logInfo).toBeCalledWith(`${loggerPrefix} 0 health records skipped, 5 deleted.`);
+    expect(logInfo).toBeCalledWith(`${loggerPrefix} Summary: 0 skipped, 5 deleted.`);
   });
 
   it('should not delete a health record, given a health record with a soft deleted date of less than 8 weeks', async () => {
@@ -57,6 +57,6 @@ describe('check-date-delete.js', () => {
     expect(logInfo).toBeCalledWith(
       `${loggerPrefix} Identifying health records with a soft deletion date greater than or equal to 8 weeks.`
     );
-    expect(logInfo).toBeCalledWith(`${loggerPrefix} No health records were deleted.`);
+    expect(logInfo).toBeCalledWith(`${loggerPrefix} Summary: 1 skipped, 0 deleted.`);
   });
 });

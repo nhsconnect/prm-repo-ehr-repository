@@ -25,6 +25,5 @@ export const checkDateAndDelete = async (healthRecords) => {
     } else skipped++;
   }
 
-  if (skipped === healthRecords.length) logInfo(`${loggerPrefix} No health records were deleted.`);
-  else logInfo(`${loggerPrefix} ${skipped} health records skipped, ${deleted} deleted.`);
+  logInfo(`${loggerPrefix} Summary: ${skipped} skipped, ${deleted} deleted.`);
 };
