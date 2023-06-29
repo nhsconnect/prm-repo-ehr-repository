@@ -10,7 +10,7 @@ jest.mock('../../../../middleware/logging');
 jest.mock('../delete-from-repo-db');
 
 describe('check-date-delete.js', () => {
-  it('should permanently delete a health record from the repo and DB, given a health record with a soft deleted date of greater than 8 weeks', async () => {
+  it('should permanently delete a health record from the repo and DB, given a health record with a soft deleted date equal to 8 weeks', async () => {
     // given
     const healthRecord = getHealthRecords(moment().subtract(8, 'weeks').toISOString(), false);
     const { conversationId } = healthRecord[0];
@@ -31,9 +31,12 @@ describe('check-date-delete.js', () => {
     expect(logInfo).toBeCalledWith(`${loggerPrefix} Summary: 0 skipped, 1 deleted.`);
   });
 
-  it('should permanently delete a health record from the repo and DB, given multiple health records with a soft deleted date of greater than 8 weeks', async () => {
+  it('should permanently delete a health record from the repo and DB, given multiple health records with a soft deleted date equal to 8 weeks and 1 day', async () => {
     // given
-    const healthRecords = getHealthRecords(moment().subtract(8, 'weeks').toISOString(), true);
+    const healthRecords = getHealthRecords(
+      moment().subtract(8, 'weeks').subtract(1, 'days').toISOString(),
+      true
+    );
 
     // when
     permanentlyDeleteEhrFromRepoAndDb.mockResolvedValueOnce(undefined);
@@ -45,9 +48,12 @@ describe('check-date-delete.js', () => {
     expect(logInfo).toBeCalledWith(`${loggerPrefix} Summary: 0 skipped, 5 deleted.`);
   });
 
-  it('should not delete a health record, given a health record with a soft deleted date of less than 8 weeks', async () => {
+  it('should not delete a health record, given a health record with a soft deleted date equal to 7 weeks and 6 days', async () => {
     // given
-    const healthRecord = getHealthRecords(moment().subtract(2, 'weeks').toISOString(), false);
+    const healthRecord = getHealthRecords(
+      moment().subtract(7, 'weeks').subtract(6, 'days').toISOString(),
+      false
+    );
 
     // when
     await checkDateAndDelete(healthRecord);
