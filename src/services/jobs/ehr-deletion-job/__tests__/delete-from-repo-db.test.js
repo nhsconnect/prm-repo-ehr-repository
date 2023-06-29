@@ -2,15 +2,18 @@ import { hardDeleteHealthRecordByConversationId } from '../../../database/health
 import { hardDeleteAllMessagesByConversationId } from '../../../database/message-repository';
 import { permanentlyDeleteEhrFromRepoAndDb } from '../delete-from-repo-db';
 import { logError, logInfo } from '../../../../middleware/logging';
+import { S3ObjectDeletionError } from '../../../../errors/errors';
 import { loggerPrefix } from '../ehr-deletion-job-common';
 import { getHealthRecords } from './test-utilities';
+import S3Service from '../../../storage/s3';
 import moment from 'moment/moment';
+import { v4 as uuid } from 'uuid';
 
 // Mocking
 jest.mock('../../../database/message-repository');
 jest.mock('../../../database/health-record-repository');
-jest.mock('../../../storage/s3');
 jest.mock('../../../../middleware/logging');
+jest.mock('../../../storage/s3');
 
 describe('delete-from-repo-db.js', () => {
   // ========================= COMMON PROPERTIES =========================
@@ -18,7 +21,7 @@ describe('delete-from-repo-db.js', () => {
   const { conversationId } = healthRecord[0];
   // =====================================================================
 
-  it('should permanently delete the EHR from the repo and S3 successfully, given a valid health record', async () => {
+  it('should permanently delete the health record from the repo and S3 successfully, given a valid health record', async () => {
     // when
     hardDeleteAllMessagesByConversationId.mockResolvedValueOnce(undefined);
     hardDeleteHealthRecordByConversationId.mockResolvedValueOnce(undefined);
@@ -34,7 +37,29 @@ describe('delete-from-repo-db.js', () => {
     );
   });
 
-  it('should fail to delete the EHR from the repo and S3, given an invalid conversation ID', async () => {
+  it('should fail to delete the health record from the S3', async () => {
+    // given
+    const errorMessage = 'AWS is not available.';
+
+    // when
+    const mockMethod = jest.fn().mockRejectedValueOnce(new S3ObjectDeletionError(errorMessage));
+    S3Service.mockImplementation(() => {
+      return {
+        deleteObject: mockMethod,
+      };
+    });
+
+    await permanentlyDeleteEhrFromRepoAndDb(healthRecord[0]);
+
+    // then
+    expect(logError).toBeCalledTimes(2);
+    expect(logError).toHaveBeenCalledWith(`Failed to delete an object from S3 - ${errorMessage}`);
+    expect(logError).toHaveBeenCalledWith(
+      `${loggerPrefix} Failed to delete health record with conversation ID ${conversationId}, more details: - Error: Failed to delete an object from S3 - ${errorMessage}`
+    );
+  });
+
+  it('should fail to delete the health record from the database, given an invalid conversation ID', async () => {
     // when
     hardDeleteAllMessagesByConversationId.mockRejectedValueOnce();
 
