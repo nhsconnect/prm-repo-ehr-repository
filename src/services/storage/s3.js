@@ -52,9 +52,7 @@ export default class S3Service {
     const deleteParams = {
       Bucket: this.parameters.Bucket,
       Delete: {
-        Objects: foundObjects.Contents.map((object) => {
-          return object.key;
-        }),
+        Objects: foundObjects.Contents.map((object) => ({ Key: object.key })),
       },
     };
 
