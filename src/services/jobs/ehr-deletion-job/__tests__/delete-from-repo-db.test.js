@@ -7,7 +7,6 @@ import { loggerPrefix } from '../ehr-deletion-job-common';
 import { getHealthRecords } from './test-utilities';
 import S3Service from '../../../storage/s3';
 import moment from 'moment/moment';
-import { v4 as uuid } from 'uuid';
 
 // Mocking
 jest.mock('../../../database/message-repository');
@@ -69,7 +68,8 @@ describe('delete-from-repo-db.js', () => {
     expect(hardDeleteAllMessagesByConversationId).toBeCalledTimes(1);
     expect(logError).toBeCalledTimes(1);
     expect(logError).toBeCalledWith(
-      `${loggerPrefix} Failed to delete health record with conversation ID ${conversationId}, more details: - undefined`
+      `${loggerPrefix} Failed to delete health record with conversation ID ${conversationId}.`,
+      undefined
     );
   });
 });

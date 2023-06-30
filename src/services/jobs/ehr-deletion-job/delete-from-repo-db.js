@@ -22,7 +22,8 @@ export const permanentlyDeleteEhrFromRepoAndDb = async (healthRecord) => {
     );
   } catch (error) {
     logError(
-      `${loggerPrefix} Failed to delete health record with conversation ID ${healthRecord.conversationId}, more details: - ${error}`
+      `${loggerPrefix} Failed to delete health record with conversation ID ${healthRecord.conversationId}.`,
+      error
     );
   }
 };
