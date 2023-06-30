@@ -7,7 +7,6 @@ import {
   getHealthRecordMessageIds,
   messageAlreadyReceived,
   markHealthRecordAsDeletedForPatient,
-  hardDeleteHealthRecordByConversationId,
   findHealthRecordByConversationId,
   findAllSoftDeletedHealthRecords,
 } from '../health-record-repository';
@@ -470,45 +469,6 @@ describe('healthRecordRepository', () => {
 
       // then
       expect(foundRecords).toEqual([]);
-    });
-  });
-
-  describe('hardDeleteHealthRecordByConversationId', () => {
-    it('should hard delete a health record successfully, given a valid conversation id', async () => {
-      // given
-      const [messageId, conversationId] = generateMultipleUUID(2, false);
-      const fragmentMessageIds = generateMultipleUUID(5, false);
-      const nhsNumber = generateRandomNhsNumber();
-
-      // when
-      await createEhrExtract({
-        conversationId,
-        messageId,
-        nhsNumber,
-        fragmentMessageIds,
-      });
-
-      await hardDeleteHealthRecordByConversationId(conversationId);
-
-      const foundRecord = await findHealthRecordByConversationId(conversationId);
-      const foundSoftDeletedRecords = await findAllSoftDeletedHealthRecords();
-
-      // then
-      expect(foundRecord).toBeNull();
-      expect(foundSoftDeletedRecords).toEqual([]);
-    });
-
-    it('should throw an error, given an invalid conversation id', async () => {
-      // given
-      const conversationId = generateRandomUUID(true);
-
-      // when
-      try {
-        await hardDeleteHealthRecordByConversationId(conversationId);
-      } catch (error) {
-        // then
-        expect(error).not.toBeNull();
-      }
     });
   });
 
