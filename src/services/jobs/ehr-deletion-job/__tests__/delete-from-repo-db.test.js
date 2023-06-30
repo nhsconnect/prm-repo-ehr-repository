@@ -54,7 +54,8 @@ describe('delete-from-repo-db.js', () => {
     expect(logError).toBeCalledTimes(2);
     expect(logError).toHaveBeenCalledWith(`Failed to delete an object from S3 - ${errorMessage}`);
     expect(logError).toHaveBeenCalledWith(
-      `${loggerPrefix} Failed to delete health record with conversation ID ${conversationId}, more details: - Error: Failed to delete an object from S3 - ${errorMessage}`
+      `${loggerPrefix} Failed to delete health record with conversation ID ${conversationId}.`,
+      new S3ObjectDeletionError(errorMessage)
     );
   });
 
