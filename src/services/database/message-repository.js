@@ -1,6 +1,6 @@
 import { MessageType, modelName as messageModelName } from '../../models/message';
 import { modelName as healthRecordModelName } from '../../models/health-record';
-import { logError, logInfo } from '../../middleware/logging';
+import { logError } from '../../middleware/logging';
 import ModelFactory from '../../models';
 import { getNow } from '../time';
 import { Op } from 'sequelize';
@@ -114,35 +114,6 @@ export const createFragmentPart = async (id, conversationId) => {
   }
 
   await t.commit();
-};
-
-export const hardDeleteAllMessagesByConversationId = async (conversationId) => {
-  const Message = ModelFactory.getByName(messageModelName);
-  const sequelize = ModelFactory.sequelize;
-  const transaction = await sequelize.transaction();
-
-  try {
-    await Message.destroy(
-      {
-        where: {
-          conversationId: {
-            [Op.eq]: conversationId,
-          },
-        },
-        force: true,
-      },
-      { transaction }
-    );
-
-    logInfo(
-      `All messages with Conversation ID ${conversationId} have been successfully hard deleted.`
-    );
-    await transaction.commit();
-  } catch (error) {
-    logError(error);
-    transaction.rollback();
-    throw error;
-  }
 };
 
 export const findAllMessagesByConversationId = async (conversationId, includeSoftDeleted) => {
