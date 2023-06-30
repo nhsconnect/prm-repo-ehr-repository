@@ -155,10 +155,8 @@ export const findAllMessagesByConversationId = async (conversationId, includeSof
       },
     },
     paranoid: !includeSoftDeleted,
-  })
-    .then((messages) => messages)
-    .catch((error) => {
-      logError(error);
-      throw error;
-    });
+  }).catch((error) => {
+    logError(error);
+    throw error;
+  });
 };

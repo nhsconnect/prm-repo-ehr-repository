@@ -184,12 +184,10 @@ export const findAllSoftDeletedHealthRecords = async () => {
       },
     },
     paranoid: false,
-  })
-    .then((healthRecords) => healthRecords)
-    .catch((error) => {
-      logError(error);
-      throw error;
-    });
+  }).catch((error) => {
+    logError(error);
+    throw error;
+  });
 };
 
 export const hardDeleteHealthRecordByConversationId = async (conversationId) => {
@@ -222,10 +220,8 @@ export const hardDeleteHealthRecordByConversationId = async (conversationId) => 
 export const findHealthRecordByConversationId = async (conversationId) => {
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
 
-  return await HealthRecord.findByPk(conversationId)
-    .then((healthRecord) => healthRecord)
-    .catch((error) => {
-      logError(error);
-      throw error;
-    });
+  return await HealthRecord.findByPk(conversationId).catch((error) => {
+    logError(error);
+    throw error;
+  });
 };
