@@ -5,7 +5,6 @@ import {
   fragmentExists,
   createFragmentPart,
   findAllMessagesByConversationId,
-  hardDeleteAllMessagesByConversationId,
 } from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
@@ -278,42 +277,6 @@ describe('messageRepository', () => {
       } catch (err) {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Creating fragment database entry failed', err);
-      }
-    });
-  });
-
-  describe('hardDeleteAllMessagesByConversationId', () => {
-    it('should hard delete all the messages in the database, given a valid conversation ID', async () => {
-      // given
-      const [messageId, conversationId] = generateMultipleUUID(2, false);
-      const fragmentMessageIds = generateMultipleUUID(5, false);
-      const nhsNumber = generateRandomNhsNumber();
-
-      // when
-      await createEhrExtract({
-        conversationId,
-        messageId,
-        nhsNumber,
-        fragmentMessageIds,
-      });
-
-      await hardDeleteAllMessagesByConversationId(conversationId);
-      const foundMessages = await findAllMessagesByConversationId(conversationId, true);
-
-      // then
-      expect(foundMessages).toEqual([]);
-    });
-
-    it('should throw an error, given an invalid conversation id', async () => {
-      // given
-      const conversationId = generateRandomUUID(false);
-
-      // when
-      try {
-        await hardDeleteAllMessagesByConversationId(conversationId);
-      } catch (error) {
-        // then
-        expect(error).not.toBeNull();
       }
     });
   });
