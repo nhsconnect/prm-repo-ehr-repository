@@ -7,8 +7,7 @@ import { Op } from 'sequelize';
 
 const Message = ModelFactory.getByName(messageModelName);
 
-export const generateRandomNhsNumber = () =>
-  Math.random().toString().slice(2, 12).replace('0', '5');
+export const generateRandomNhsNumber = () => (Math.floor(Math.random() * 9e9) + 1e9).toString();
 
 export const generateRandomUUID = (isUppercase) =>
   isUppercase ? uuidv4().toUpperCase() : uuidv4();
