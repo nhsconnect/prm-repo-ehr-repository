@@ -79,7 +79,7 @@ describe('delete-health-record.js', () => {
       });
 
       // then
-      await expect(async () => deleteHealthRecordAndMessages(conversationId)).rejects.toThrow(
+      await expect(() => deleteHealthRecordAndMessages(conversationId)).rejects.toThrow(
         NoMessageFoundError
       );
     });
@@ -105,7 +105,7 @@ describe('delete-health-record.js', () => {
       });
 
       // then
-      await expect(async () => deleteHealthRecordAndMessages(conversationId)).rejects.toThrow(
+      await expect(() => deleteHealthRecordAndMessages(conversationId)).rejects.toThrow(
         NoS3ObjectsFoundError
       );
       expect(logError).toBeCalledTimes(2);
