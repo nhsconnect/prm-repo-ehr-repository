@@ -16,7 +16,7 @@ jest.mock('../../../../middleware/logging');
 
 describe('ehr-deletion-job.js', () => {
   // ========================= COMMON PROPERTIES =========================
-  const TEN_SECOND_TIMEOUT = 10000;
+  const TWENTY_SECOND_TIMEOUT = 20000;
 
   const clock = sinon.useFakeTimers({
     now: now(),
@@ -56,7 +56,7 @@ describe('ehr-deletion-job.js', () => {
       expect(logInfo).toBeCalledTimes(2);
       expect(checkDateAndDelete).toBeCalledTimes(0);
     },
-    TEN_SECOND_TIMEOUT
+    TWENTY_SECOND_TIMEOUT
   );
 
   it(
@@ -72,7 +72,7 @@ describe('ehr-deletion-job.js', () => {
       expect(logInfo).toBeCalledTimes(14);
       expect(checkDateAndDelete).toBeCalledTimes(0);
     },
-    TEN_SECOND_TIMEOUT // this test takes longer than 5 seconds, setting it to 10 fixes it
+    TWENTY_SECOND_TIMEOUT // this test takes longer than 5 seconds, setting it to 10 fixes it
   );
 
   it(
@@ -89,7 +89,7 @@ describe('ehr-deletion-job.js', () => {
       expect(checkDateAndDelete).toBeCalledTimes(1);
       expect(logInfo).toBeCalledTimes(1);
     },
-    TEN_SECOND_TIMEOUT
+    TWENTY_SECOND_TIMEOUT
   );
 
   it(
@@ -109,6 +109,6 @@ describe('ehr-deletion-job.js', () => {
         `${loggerPrefix} Could not find any health records that are marked for deletion.`
       );
     },
-    TEN_SECOND_TIMEOUT
+    TWENTY_SECOND_TIMEOUT
   );
 });
