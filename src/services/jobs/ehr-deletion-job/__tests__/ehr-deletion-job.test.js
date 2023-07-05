@@ -28,7 +28,9 @@ describe('ehr-deletion-job.js', () => {
     WEEK: 1000 * 60 * 60 * 24 * 7,
   };
 
-  const healthRecord = getHealthRecords(moment().subtract(8, 'weeks').toISOString(), false);
+  const date = moment().subtract(8, 'weeks').toISOString();
+
+  const healthRecord = getHealthRecords(date, date, date, date, false);
   // =====================================================================
 
   beforeEach(() => {

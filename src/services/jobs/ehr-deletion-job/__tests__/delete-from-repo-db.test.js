@@ -11,7 +11,8 @@ jest.mock('../../../../middleware/logging');
 
 describe('delete-from-repo-db.js', () => {
   // ========================= COMMON PROPERTIES =========================
-  const healthRecord = getHealthRecords(moment().subtract(8, 'weeks').toISOString(), false);
+  const date = moment().subtract(8, 'weeks').toISOString();
+  const healthRecord = getHealthRecords(date, date, date, date, false);
   const { conversationId } = healthRecord[0];
   // =====================================================================
 
