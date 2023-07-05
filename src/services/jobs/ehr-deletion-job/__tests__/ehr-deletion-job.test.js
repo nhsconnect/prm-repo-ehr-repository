@@ -43,17 +43,21 @@ describe('ehr-deletion-job.js', () => {
     jest.resetAllMocks();
   });
 
-  it('should schedule the job once per day at 3am', async () => {
-    // when
-    findAllSoftDeletedHealthRecords.mockResolvedValueOnce([]);
+  it(
+    'should schedule the job once per day at 3am',
+    async () => {
+      // when
+      findAllSoftDeletedHealthRecords.mockResolvedValueOnce([]);
 
-    await clock.tickAsync(timeframes.DAY);
+      await clock.tickAsync(timeframes.DAY);
 
-    // then
-    expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
-    expect(logInfo).toBeCalledTimes(2);
-    expect(checkDateAndDelete).toBeCalledTimes(0);
-  });
+      // then
+      expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
+      expect(logInfo).toBeCalledTimes(2);
+      expect(checkDateAndDelete).toBeCalledTimes(0);
+    },
+    TEN_SECOND_TIMEOUT
+  );
 
   it(
     'should schedule the job once per day at 3am, for 7 days',
@@ -71,32 +75,40 @@ describe('ehr-deletion-job.js', () => {
     TEN_SECOND_TIMEOUT // this test takes longer than 5 seconds, setting it to 10 fixes it
   );
 
-  it('should run check date and delete if there is a health record present', async () => {
-    // when
-    findAllSoftDeletedHealthRecords.mockResolvedValueOnce(healthRecord);
-    checkDateAndDelete.mockResolvedValueOnce(undefined);
+  it(
+    'should run check date and delete if there is a health record present',
+    async () => {
+      // when
+      findAllSoftDeletedHealthRecords.mockResolvedValueOnce(healthRecord);
+      checkDateAndDelete.mockResolvedValueOnce(undefined);
 
-    await clock.tickAsync(timeframes.DAY);
+      await clock.tickAsync(timeframes.DAY);
 
-    // then
-    expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
-    expect(checkDateAndDelete).toBeCalledTimes(1);
-    expect(logInfo).toBeCalledTimes(1);
-  });
+      // then
+      expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
+      expect(checkDateAndDelete).toBeCalledTimes(1);
+      expect(logInfo).toBeCalledTimes(1);
+    },
+    TEN_SECOND_TIMEOUT
+  );
 
-  it('should not run check date and delete if there is no health record present', async () => {
-    // when
-    findAllSoftDeletedHealthRecords.mockResolvedValueOnce([]);
+  it(
+    'should not run check date and delete if there is no health record present',
+    async () => {
+      // when
+      findAllSoftDeletedHealthRecords.mockResolvedValueOnce([]);
 
-    await clock.tickAsync(timeframes.DAY);
+      await clock.tickAsync(timeframes.DAY);
 
-    // then
-    expect(logInfo).toBeCalledTimes(2);
-    expect(logInfo).toBeCalledWith(
-      `${loggerPrefix} Job triggered, preparing to delete health records.`
-    );
-    expect(logInfo).toBeCalledWith(
-      `${loggerPrefix} Could not find any health records that are marked for deletion.`
-    );
-  });
+      // then
+      expect(logInfo).toBeCalledTimes(2);
+      expect(logInfo).toBeCalledWith(
+        `${loggerPrefix} Job triggered, preparing to delete health records.`
+      );
+      expect(logInfo).toBeCalledWith(
+        `${loggerPrefix} Could not find any health records that are marked for deletion.`
+      );
+    },
+    TEN_SECOND_TIMEOUT
+  );
 });
