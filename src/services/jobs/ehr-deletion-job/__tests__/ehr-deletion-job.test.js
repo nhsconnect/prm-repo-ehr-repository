@@ -35,12 +35,12 @@ describe('ehr-deletion-job.js', () => {
 
   beforeEach(() => {
     ehrDeletionJob.start();
-    jest.resetAllMocks();
-    sinon.reset();
   });
 
   afterEach(() => {
     ehrDeletionJob.stop();
+    jest.resetAllMocks();
+    sinon.reset();
   });
 
   it(
