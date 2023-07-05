@@ -1,6 +1,8 @@
-import dayjs from 'dayjs';
-import { Endpoint, S3 } from 'aws-sdk';
+import { NoS3ObjectsFoundError, S3ObjectDeletionError } from '../../errors/errors';
+import { logInfo } from '../../middleware/logging';
 import { initializeConfig } from '../../config';
+import { Endpoint, S3 } from 'aws-sdk';
+import dayjs from 'dayjs';
 
 const URL_EXPIRY_TIME = 60;
 const CONTENT_TYPE = 'text/xml';
@@ -40,6 +42,23 @@ export default class S3Service {
         if (err) return reject(err);
         resolve();
       });
+    });
+  }
+
+  async deleteObject() {
+    const foundObjects = await this.s3.listObjectsV2(this.parameters).promise();
+    if (foundObjects.Contents.length === 0) throw new NoS3ObjectsFoundError();
+
+    const deleteParams = {
+      Bucket: this.parameters.Bucket,
+      Delete: {
+        Objects: foundObjects.Contents.map((object) => ({ Key: object.Key })),
+      },
+    };
+
+    this.s3.deleteObjects(deleteParams, (error, data) => {
+      if (error) throw new S3ObjectDeletionError(error.message);
+      else logInfo(`Successfully deleted objects from S3 bucket: ${data}`);
     });
   }
 

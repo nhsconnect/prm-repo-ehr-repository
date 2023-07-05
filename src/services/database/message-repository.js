@@ -1,8 +1,9 @@
-import ModelFactory from '../../models';
 import { MessageType, modelName as messageModelName } from '../../models/message';
 import { modelName as healthRecordModelName } from '../../models/health-record';
 import { logError } from '../../middleware/logging';
+import ModelFactory from '../../models';
 import { getNow } from '../time';
+import { Op } from 'sequelize';
 
 export const createEhrExtract = async (ehrExtract) => {
   const Message = ModelFactory.getByName(messageModelName);
@@ -113,4 +114,20 @@ export const createFragmentPart = async (id, conversationId) => {
   }
 
   await t.commit();
+};
+
+export const findAllMessagesByConversationId = async (conversationId, includeSoftDeleted) => {
+  const Message = ModelFactory.getByName(messageModelName);
+
+  return await Message.findAll({
+    where: {
+      conversationId: {
+        [Op.eq]: conversationId,
+      },
+    },
+    paranoid: !includeSoftDeleted,
+  }).catch((error) => {
+    logError(error);
+    throw error;
+  });
 };
