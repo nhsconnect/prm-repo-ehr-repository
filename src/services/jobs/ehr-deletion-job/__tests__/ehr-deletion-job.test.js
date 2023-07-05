@@ -52,9 +52,9 @@ describe('ehr-deletion-job.js', () => {
       await clock.tickAsync(timeframes.DAY);
 
       // then
-      await expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
-      await expect(logInfo).toBeCalledTimes(2);
-      await expect(checkDateAndDelete).toBeCalledTimes(0);
+      expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
+      expect(logInfo).toBeCalledTimes(2);
+      expect(checkDateAndDelete).toBeCalledTimes(0);
     },
     TWENTY_SECOND_TIMEOUT
   );
@@ -68,9 +68,9 @@ describe('ehr-deletion-job.js', () => {
       await clock.tickAsync(timeframes.WEEK);
 
       // then
-      await expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(7);
-      await expect(logInfo).toBeCalledTimes(14);
-      await expect(checkDateAndDelete).toBeCalledTimes(0);
+      expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(7);
+      expect(logInfo).toBeCalledTimes(14);
+      expect(checkDateAndDelete).toBeCalledTimes(0);
     },
     TWENTY_SECOND_TIMEOUT // this test takes longer than 5 seconds, setting it to 10 fixes it
   );
@@ -85,9 +85,9 @@ describe('ehr-deletion-job.js', () => {
       await clock.tickAsync(timeframes.DAY);
 
       // then
-      await expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
-      await expect(checkDateAndDelete).toBeCalledTimes(1);
-      await expect(logInfo).toBeCalledTimes(1);
+      expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
+      expect(checkDateAndDelete).toBeCalledTimes(1);
+      expect(logInfo).toBeCalledTimes(1);
     },
     TWENTY_SECOND_TIMEOUT
   );
@@ -101,11 +101,11 @@ describe('ehr-deletion-job.js', () => {
       await clock.tickAsync(timeframes.DAY);
 
       // then
-      await expect(logInfo).toBeCalledTimes(2);
-      await expect(logInfo).toBeCalledWith(
+      expect(logInfo).toBeCalledTimes(2);
+      expect(logInfo).toBeCalledWith(
         `${loggerPrefix} Job triggered, preparing to delete health records.`
       );
-      await expect(logInfo).toBeCalledWith(
+      expect(logInfo).toBeCalledWith(
         `${loggerPrefix} Could not find any health records that are marked for deletion.`
       );
     },
