@@ -12,7 +12,10 @@ jest.mock('../delete-from-repo-db');
 describe('check-date-delete.js', () => {
   it('should permanently delete a health record from the repo and DB, given a health record with a soft deleted date equal to 8 weeks', async () => {
     // given
-    const healthRecord = getHealthRecords(moment().subtract(8, 'weeks').toISOString(), false);
+    const date = moment().subtract(8, 'weeks').toISOString();
+
+    const healthRecord = getHealthRecords(date, date, date, date, false);
+
     const { conversationId } = healthRecord[0];
 
     // when
@@ -33,10 +36,9 @@ describe('check-date-delete.js', () => {
 
   it('should permanently delete a health record from the repo and DB, given multiple health records with a soft deleted date equal to 8 weeks and 1 day', async () => {
     // given
-    const healthRecords = getHealthRecords(
-      moment().subtract(8, 'weeks').subtract(1, 'days').toISOString(),
-      true
-    );
+    const date = moment().subtract(8, 'weeks').subtract(1, 'days').toISOString();
+
+    const healthRecords = getHealthRecords(date, date, date, date, true);
 
     // when
     permanentlyDeleteEhrFromRepoAndDb.mockResolvedValueOnce(undefined);
@@ -50,10 +52,9 @@ describe('check-date-delete.js', () => {
 
   it('should not delete a health record, given a health record with a soft deleted date equal to 7 weeks and 6 days', async () => {
     // given
-    const healthRecord = getHealthRecords(
-      moment().subtract(7, 'weeks').subtract(6, 'days').toISOString(),
-      false
-    );
+    const date = moment().subtract(7, 'weeks').subtract(6, 'days').toISOString();
+
+    const healthRecord = getHealthRecords(date, date, date, date, false);
 
     // when
     await checkDateAndDelete(healthRecord);

@@ -1,7 +1,13 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
-export const getHealthRecords = (date, getMultiple) => {
+export const getHealthRecords = (
+  completedAtDate,
+  createdAtDate,
+  updatedAtDate,
+  deletedAtDate,
+  getMultiple
+) => {
   return JSON.parse(
     readFileSync(
       path.join(
@@ -12,10 +18,10 @@ export const getHealthRecords = (date, getMultiple) => {
       'utf-8'
     )
   ).map((message) => {
-    message.completedAt = date;
-    message.createdAt = date;
-    message.updatedAt = date;
-    message.deletedAt = date;
+    message.completedAt = completedAtDate;
+    message.createdAt = createdAtDate;
+    message.updatedAt = updatedAtDate;
+    message.deletedAt = deletedAtDate;
 
     return message;
   });
