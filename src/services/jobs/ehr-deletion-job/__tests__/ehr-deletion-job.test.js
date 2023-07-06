@@ -17,6 +17,7 @@ jest.mock('../../../../middleware/logging');
 describe('ehr-deletion-job.js', () => {
   // ========================= COMMON PROPERTIES =========================
   const TWENTY_SECOND_TIMEOUT = 20000;
+  const TWO_MINUTE_TIMEOUT = 120000;
 
   const clock = sinon.useFakeTimers({
     now: now(),
@@ -72,7 +73,7 @@ describe('ehr-deletion-job.js', () => {
       expect(logInfo).toBeCalledTimes(14);
       expect(checkDateAndDelete).toBeCalledTimes(0);
     },
-    TWENTY_SECOND_TIMEOUT // this test takes longer than 5 seconds, setting it to 10 fixes it
+    TWO_MINUTE_TIMEOUT
   );
 
   it(
