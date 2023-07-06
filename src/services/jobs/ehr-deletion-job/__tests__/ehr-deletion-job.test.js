@@ -6,23 +6,23 @@ import { logInfo } from '../../../../middleware/logging';
 import { ehrDeletionJob } from '../ehr-deletion-job';
 import { getHealthRecords } from './test-utilities';
 import moment from 'moment/moment';
-import { now } from 'moment';
-import sinon from 'sinon';
 
 // Mocking
 jest.mock('../../../database/health-record-repository');
 jest.mock('../check-date-delete');
 jest.mock('../../../../middleware/logging');
 
+const flushPromises = async () => {
+  // utility function to wait for pending promises in background to complete first
+  return new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+};
+
 describe('ehr-deletion-job.js', () => {
   // ========================= COMMON PROPERTIES =========================
   const TWENTY_SECOND_TIMEOUT = 20000;
-  const TWO_MINUTE_TIMEOUT = 120000;
+  const TWO_MINUTES_TIMEOUT = 1000 * 60 * 2;
 
-  const clock = sinon.useFakeTimers({
-    now: now(),
-    shouldClearNativeTimers: true,
-  });
+  jest.useFakeTimers();
 
   const timeframes = {
     DAY: 1000 * 60 * 60 * 24,
@@ -41,7 +41,6 @@ describe('ehr-deletion-job.js', () => {
   afterEach(() => {
     ehrDeletionJob.stop();
     jest.resetAllMocks();
-    sinon.reset();
   });
 
   it(
@@ -50,7 +49,8 @@ describe('ehr-deletion-job.js', () => {
       // when
       findAllSoftDeletedHealthRecords.mockResolvedValueOnce([]);
 
-      await clock.tickAsync(timeframes.DAY);
+      jest.advanceTimersByTime(timeframes.DAY);
+      await flushPromises();
 
       // then
       expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
@@ -66,14 +66,15 @@ describe('ehr-deletion-job.js', () => {
       // when
       findAllSoftDeletedHealthRecords.mockResolvedValue([]);
 
-      await clock.tickAsync(timeframes.WEEK);
+      jest.advanceTimersByTime(timeframes.WEEK);
+      await flushPromises();
 
       // then
       expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(7);
       expect(logInfo).toBeCalledTimes(14);
       expect(checkDateAndDelete).toBeCalledTimes(0);
     },
-    TWO_MINUTE_TIMEOUT
+    TWO_MINUTES_TIMEOUT
   );
 
   it(
@@ -83,7 +84,8 @@ describe('ehr-deletion-job.js', () => {
       findAllSoftDeletedHealthRecords.mockResolvedValueOnce(healthRecord);
       checkDateAndDelete.mockResolvedValueOnce(undefined);
 
-      await clock.tickAsync(timeframes.DAY);
+      jest.advanceTimersByTime(timeframes.DAY);
+      await flushPromises();
 
       // then
       expect(findAllSoftDeletedHealthRecords).toBeCalledTimes(1);
@@ -99,7 +101,8 @@ describe('ehr-deletion-job.js', () => {
       // when
       findAllSoftDeletedHealthRecords.mockResolvedValueOnce([]);
 
-      await clock.tickAsync(timeframes.DAY);
+      jest.advanceTimersByTime(timeframes.DAY);
+      await flushPromises();
 
       // then
       expect(logInfo).toBeCalledTimes(2);
