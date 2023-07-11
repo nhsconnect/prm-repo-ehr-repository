@@ -3,6 +3,7 @@ services:
   default:
     links:
       - db:db
+      - localstack:localstack
     ports:
       - 3000:3000
   db:
@@ -14,3 +15,17 @@ services:
       LC_ALL: C
     ports:
       - 5432:5432
+  localstack:
+    image: localstack/localstack:0.10.9
+    environment:
+      - SERVICES=s3:4572
+      - DEBUG=true
+      - PORT_WEB_UI=5555
+      - LAMBDA_EXECUTOR=local
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - S3_BUCKET_NAME=test-bucket
+      - LOCALSTACK_URL=http://localstack:4572
+    volumes:
+      - ./scripts/create-bucket.sh:/docker-entrypoint-initaws.d/create-bucket.sh
+      - /var/run/docker.sock:/var/run/docker.sock

@@ -379,11 +379,16 @@ case "${command}" in
   _test_integration)
       npm install
       npm run db:migrate
+      node scripts/wait-for-localstack.js
       npm run test:integration
       ;;
   test_integration)
       configure_local_envs
       dojo -c Dojofile-itest "./tasks _test_integration"
+      ;;
+  test_integration_shell)
+      configure_local_envs
+      dojo -c Dojofile-itest
       ;;
   _test_all)
       npm install
