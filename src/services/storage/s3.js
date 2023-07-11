@@ -46,7 +46,11 @@ export default class S3Service {
   }
 
   async deleteObject() {
-    const foundObjects = await this.s3.listObjectsV2(this.parameters).promise();
+    const params = {
+      Bucket: this.parameters.Bucket,
+      Prefix: this.parameters.key
+    };
+    const foundObjects = await this.s3.listObjectsV2(params).promise();
     if (foundObjects.Contents.length === 0) throw new NoS3ObjectsFoundError();
 
     const deleteParams = {
@@ -56,10 +60,13 @@ export default class S3Service {
       },
     };
 
-    this.s3.deleteObjects(deleteParams, (error, data) => {
-      if (error) throw new S3ObjectDeletionError(error.message);
-      else logInfo(`Successfully deleted objects from S3 bucket: ${data}`);
-    });
+    try {
+      const data = await this.s3.deleteObjects(deleteParams).promise();
+      logInfo('Successfully deleted objects from S3 bucket:');
+      logInfo(data?.Deleted);
+    } catch(error) {
+      throw new S3ObjectDeletionError(error.message);
+    }
   }
 
   getPresignedUrl(operation) {
