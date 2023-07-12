@@ -12,7 +12,7 @@ const Message = ModelFactory.getByName(messageModelName);
 export const deleteHealthRecordAndMessages = async (conversationId) => {
   const sequelize = ModelFactory.sequelize;
   const transaction = await sequelize.transaction();
-  const s3 = new S3Service(`/${conversationId}/`);
+  const s3 = new S3Service(`${conversationId}`);
 
   try {
     const messageResult = await Message.destroy(
@@ -41,7 +41,7 @@ export const deleteHealthRecordAndMessages = async (conversationId) => {
 
     validateDeletionIntegrity(messageResult, healthRecordResult, conversationId);
 
-    await s3.deleteObject();
+    await s3.deleteObjectsByPrefix(`${conversationId}/`);
     await transaction.commit();
   } catch (error) {
     logError(error);

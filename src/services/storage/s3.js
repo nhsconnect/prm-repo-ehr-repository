@@ -1,4 +1,8 @@
-import { NoS3ObjectsFoundError, S3ObjectDeletionError } from '../../errors/errors';
+import {
+  InvalidArgumentError,
+  NoS3ObjectsFoundError,
+  S3ObjectDeletionError,
+} from '../../errors/errors';
 import { logInfo } from '../../middleware/logging';
 import { initializeConfig } from '../../config';
 import { Endpoint, S3 } from 'aws-sdk';
@@ -9,8 +13,12 @@ const CONTENT_TYPE = 'text/xml';
 const config = initializeConfig();
 
 export default class S3Service {
+  // TODO: This interface is using aws-sdk v2,
+  // which is announced to be entering maintenance mode in 2023, and could possibly EOL in 2024.
+  // To consider upgrade to v3 when we have time.
   constructor(filename) {
     this.s3 = new S3(this._get_config());
+    this.Bucket = config.awsS3BucketName;
 
     this.parameters = {
       Bucket: config.awsS3BucketName,
@@ -45,26 +53,54 @@ export default class S3Service {
     });
   }
 
-  async deleteObject() {
+  saveObjectWithName(filename, data) {
     const params = {
-      Bucket: this.parameters.Bucket,
-      Prefix: this.parameters.key
+      Bucket: config.awsS3BucketName,
+      Key: filename,
+      Body: data,
     };
-    const foundObjects = await this.s3.listObjectsV2(params).promise();
-    if (foundObjects.Contents.length === 0) throw new NoS3ObjectsFoundError();
+    return this.s3.putObject(params).promise();
+  }
 
-    const deleteParams = {
-      Bucket: this.parameters.Bucket,
+  async listObjects() {
+    const listObjectParams = {
+      Bucket: this.Bucket,
+    };
+    return this.s3
+      .listObjectsV2(listObjectParams)
+      .promise()
+      .then((foundObjects) => foundObjects.Contents);
+  }
+
+  buildDeleteParamsFromObjects(arrayOfObjects) {
+    return {
+      Bucket: this.Bucket,
       Delete: {
-        Objects: foundObjects.Contents.map((object) => ({ Key: object.Key })),
+        Objects: arrayOfObjects.map((object) => ({ Key: object.Key })),
       },
     };
+  }
+
+  async deleteObjectsByPrefix(prefix) {
+    if (typeof prefix !== 'string' || prefix.length === 0) {
+      // reject here to prevent accidentally wiping out whole bucket by calling with empty prefix
+      throw new InvalidArgumentError('Prefix has to be a non-empty string');
+    }
+    const listObjectParams = {
+      Bucket: this.Bucket,
+      Prefix: prefix,
+    };
+
+    const foundObjects = await this.s3.listObjectsV2(listObjectParams).promise();
+    if (foundObjects.Contents.length === 0) throw new NoS3ObjectsFoundError();
+
+    const deleteParams = this.buildDeleteParamsFromObjects(foundObjects.Contents);
 
     try {
       const data = await this.s3.deleteObjects(deleteParams).promise();
       logInfo('Successfully deleted objects from S3 bucket:');
-      logInfo(data?.Deleted);
-    } catch(error) {
+      logInfo(data?.Deleted); // this log a list of deleted objects
+    } catch (error) {
       throw new S3ObjectDeletionError(error.message);
     }
   }
