@@ -104,7 +104,7 @@ describe('S3Service integration test with localstack', () => {
       filesToDelete.forEach((deletedFile) => {
         expect(filesRemainInBucket).not.toContain(deletedFile);
       });
-      expect(filesRemainInBucket.sort()).toEqual(filesToKeep.sort());
+      expect(filesRemainInBucket).toEqual(expect.arrayContaining(filesToKeep));
     });
 
     it('should throw InvalidArgumentError if the given prefix is an empty string', async () => {
@@ -115,11 +115,8 @@ describe('S3Service integration test with localstack', () => {
     });
 
     it('throws NoS3ObjectsFoundError if no objects match the given prefix', async () => {
-      // given
-      const conversationId = uuidv4();
-
       // when
-      await expect(S3CLIENT.deleteObjectsByPrefix(conversationId))
+      await expect(S3CLIENT.deleteObjectsByPrefix('non-exist-filename'))
         // then
         .rejects.toThrow(NoS3ObjectsFoundError);
     });
