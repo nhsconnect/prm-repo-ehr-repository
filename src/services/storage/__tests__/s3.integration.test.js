@@ -67,6 +67,7 @@ describe('S3Service integration test with localstack', () => {
   describe('listObjects', () => {
     it('can list all objects in the S3 bucket', async () => {
       // given
+      // put 5 objects to bucket
       const testFileNames = generateMultipleUUID(5);
       for (let filename of testFileNames) {
         await S3CLIENT.saveObjectWithName(filename, 'test file');
@@ -74,7 +75,7 @@ describe('S3Service integration test with localstack', () => {
 
       // when
       const response = await S3CLIENT.listObjects();
-      const filenamesInResponse = response.map((object) => object.Key);
+      const filenamesInResponse = extractFilenames(response);
 
       // then
       expect(filenamesInResponse.sort()).toEqual(testFileNames.sort());
@@ -84,6 +85,7 @@ describe('S3Service integration test with localstack', () => {
   describe('deleteObjectsByPrefix', () => {
     it('delete all objects of filename starting with the given prefix', async () => {
       // given
+      // save 6 objects to bucket, with 3 of them share the same conversation id, and the other 3 share another.
       const conversationIdToDelete = uuidv4();
       const filesToDelete = generateMultipleUUID(3).map(
         (messageId) => conversationIdToDelete + '/' + messageId
@@ -103,13 +105,13 @@ describe('S3Service integration test with localstack', () => {
       // then
       expect(logInfo).toBeCalledWith('Successfully deleted objects from S3 bucket:');
 
-      // verify that files start with conversationIdToDelete are deleted
+      // verify that files starting with conversationIdToDelete are deleted
       const filesRemainInBucket = await S3CLIENT.listObjects().then(extractFilenames);
       filesToDelete.forEach((deletedFile) => {
         expect(filesRemainInBucket).not.toContain(deletedFile);
       });
 
-      // verify that files not start with conversationIdToDelete are still there
+      // verify that files not starting with conversationIdToDelete are still there
       expect(filesRemainInBucket).toEqual(expect.arrayContaining(filesToKeep));
     });
 
@@ -122,24 +124,27 @@ describe('S3Service integration test with localstack', () => {
 
     it('throws NoS3ObjectsFoundError if no objects match the given prefix', async () => {
       // when
-      await expect(S3CLIENT.deleteObjectsByPrefix('non-exist-filename'))
+      const nonExistConversationId = uuidv4();
+      await expect(S3CLIENT.deleteObjectsByPrefix(nonExistConversationId))
         // then
         .rejects.toThrow(NoS3ObjectsFoundError);
     });
   });
 
   describe('getSignedUrl', () => {
+    const testEhrCore = {
+      ebXML: '<soap:Envelope><content>ebXML</content></soap:Envelope>',
+      payload: '<RCMR_IN030000UK06>payload</<RCMR_IN030000UK06>',
+      attachments: [],
+      external_attachments: [],
+    };
+
     it('return a presigned url for upload when operation = putObject', async () => {
+      // make a presigned url for putObject, upload an object with that url, then verify that the object is in bucket
       // given
       const [conversationId, messageId] = generateMultipleUUID(2);
       const testFileName = `${conversationId}/${messageId}`;
       const operation = 'putObject';
-      const testEhrCore = {
-        ebXML: '<soap:Envelope><content>soup envelope</content></soap:Envelope>',
-        payload: '<RCMR_IN030000UK06>payload</<RCMR_IN030000UK06>',
-        attachments: [],
-        external_attachments: [],
-      };
 
       // when
       const presignedUrl = await getSignedUrl(conversationId, messageId, operation);
@@ -159,17 +164,12 @@ describe('S3Service integration test with localstack', () => {
     });
 
     it('return a presigned url for download when operation = getObject', async () => {
+      // store an object to the S3 bucket, then download it with presigned url
       // given
       const [conversationId, messageId] = generateMultipleUUID(2);
       const testFileName = `${conversationId}/${messageId}`;
       const operation = 'getObject';
 
-      const testEhrCore = {
-        ebXML: '<soap:Envelope><content>soup envelope</content></soap:Envelope>',
-        payload: '<RCMR_IN030000UK06>payload</<RCMR_IN030000UK06>',
-        attachments: [],
-        external_attachments: [],
-      };
       await S3CLIENT.saveObjectWithName(testFileName, JSON.stringify(testEhrCore));
 
       // when
