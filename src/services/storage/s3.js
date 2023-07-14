@@ -13,9 +13,6 @@ const CONTENT_TYPE = 'text/xml';
 const config = initializeConfig();
 
 export default class S3Service {
-  // TODO: This interface is using aws-sdk v2,
-  // which is announced to be entering maintenance mode in 2023, and could possibly EOL in 2024.
-  // To consider upgrade to v3 when we have time.
   constructor(filename) {
     this.s3 = new S3(this._get_config());
     this.Bucket = config.awsS3BucketName;
@@ -108,6 +105,20 @@ export default class S3Service {
   getPresignedUrl(operation) {
     const params = {
       ...this.parameters,
+      Expires: URL_EXPIRY_TIME,
+    };
+
+    if (operation === 'putObject') {
+      params.ContentType = CONTENT_TYPE;
+    }
+
+    return this.s3.getSignedUrlPromise(operation, params);
+  }
+
+  getPresignedUrlWithFilename(filename, operation) {
+    const params = {
+      Bucket: this.Bucket,
+      Key: filename,
       Expires: URL_EXPIRY_TIME,
     };
 

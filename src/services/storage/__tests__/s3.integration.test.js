@@ -1,5 +1,7 @@
-import S3Service from '../s3';
+import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+
+import S3Service from '../s3';
 import { logInfo } from '../../../middleware/logging';
 import { generateMultipleUUID } from '../../../utilities/integration-test-utilities';
 import { InvalidArgumentError, NoS3ObjectsFoundError } from '../../../errors/errors';
@@ -9,6 +11,7 @@ jest.mock('../../../middleware/logging');
 describe('S3Service integration test with localstack', () => {
   const S3CLIENT = new S3Service();
 
+  // helper methods that shouldn't go into the actual implementation of S3 client
   const extractFilenames = (arrayOfObjects) => arrayOfObjects.map((object) => object.Key);
   const clearS3Bucket = async () => {
     const allObjects = await S3CLIENT.listObjects();
@@ -16,6 +19,14 @@ describe('S3Service integration test with localstack', () => {
 
     const deleteObjectParams = S3CLIENT.buildDeleteParamsFromObjects(allObjects);
     await S3CLIENT.s3.deleteObjects(deleteObjectParams).promise();
+  };
+  const getObjectByName = (filename) => {
+    return S3CLIENT.s3
+      .getObject({
+        Bucket: S3CLIENT.Bucket,
+        Key: filename,
+      })
+      .promise();
   };
 
   beforeEach(async () => {
@@ -48,15 +59,10 @@ describe('S3Service integration test with localstack', () => {
       await S3CLIENT.saveObjectWithName(testFileName, testData);
 
       // then
-      const objectInBucket = await S3CLIENT.s3
-        .getObject({
-          Bucket: S3CLIENT.Bucket,
-          Key: testFileName,
-        })
-        .promise();
-      const objectBody = objectInBucket.Body.toString();
+      const objectInBucket = await getObjectByName(testFileName)
+      const objectContent = objectInBucket.Body.toString();
 
-      expect(objectBody).toEqual(testData);
+      expect(objectContent).toEqual(testData);
     });
   });
 
@@ -121,4 +127,62 @@ describe('S3Service integration test with localstack', () => {
         .rejects.toThrow(NoS3ObjectsFoundError);
     });
   });
+
+  describe('getPresignedUrl', () => {
+    it('return a presigned url for upload when operation = putObject', async () => {
+      // given
+      const testFilename = generateMultipleUUID(2).join('/');
+      const operation = 'putObject';
+      const testEhrCore = {
+        ebXML: '<soap:Envelope><content>soup envelope</content></soap:Envelope>',
+        payload: '<RCMR_IN030000UK06>payload</<RCMR_IN030000UK06>',
+        attachments: [],
+        external_attachments: [],
+      };
+
+      // when
+      const presignedUrl = await S3CLIENT.getPresignedUrlWithFilename(testFilename, operation);
+      const response = await axios.put(presignedUrl, testEhrCore);
+
+      // then
+      expect(response.status).toBe(200);
+
+      // verify that the uploaded file is in the test bucket
+      const bucketFilenames = await S3CLIENT.listObjects().then(extractFilenames);
+      expect(bucketFilenames).toContain(testFilename);
+
+      const objectInBucket = await getObjectByName(testFilename);
+      const objectContent = objectInBucket.Body.toString();
+
+
+      expect(objectContent).toEqual(JSON.stringify(testEhrCore));
+    });
+
+    it("return a presigned url for download when operation = getObject", async () => {
+      // given
+      const testFilename = generateMultipleUUID(2).join('/');
+      const operation = 'getObject';
+
+      const testEhrCore = {
+        ebXML: '<soap:Envelope><content>soup envelope</content></soap:Envelope>',
+        payload: '<RCMR_IN030000UK06>payload</<RCMR_IN030000UK06>',
+        attachments: [],
+        external_attachments: [],
+      };
+      await S3CLIENT.saveObjectWithName(testFilename, JSON.stringify(testEhrCore));
+
+      // when
+      const presignedUrl = await S3CLIENT.getPresignedUrlWithFilename(testFilename, operation);
+
+      // then
+      const response = await axios.get(presignedUrl);
+      expect(response.status).toBe(200);
+      console.log(response)
+
+      // verify that the file we download from presignedUrl is same as the file we stored in bucket
+      expect(response.data).toEqual(testEhrCore)
+    });
+  });
+
+
 });
