@@ -7,52 +7,13 @@ jest.mock('aws-sdk');
 
 describe('S3Service', () => {
   const config = initializeConfig();
-  describe('getPresignedUrl', () => {
-    it('should call s3 getSignedUrl with parameters', () => {
-      const mockSignedUrl = jest.fn().mockResolvedValue('some-presigned-url');
-
-      S3.mockImplementation(() => ({
-        getSignedUrlPromise: mockSignedUrl,
-      }));
-
-      const parameters = {
-        Bucket: config.awsS3BucketName,
-        Key: 'some-filename',
-        Expires: 60,
-        ContentType: 'text/xml',
-      };
-
-      return new S3Service('some-filename').getPresignedUrl('putObject').then((url) => {
-        expect(url).toEqual('some-presigned-url');
-        expect(mockSignedUrl).toHaveBeenCalledWith('putObject', parameters);
-      });
-    });
-
-    it('should call s3 getSignedUrl with parameters', () => {
-      const mockSignedUrl = jest.fn().mockResolvedValue('some-presigned-url');
-
-      S3.mockImplementation(() => ({
-        getSignedUrlPromise: mockSignedUrl,
-      }));
-
-      const parameters = {
-        Bucket: config.awsS3BucketName,
-        Key: 'some-filename',
-        Expires: 60,
-      };
-
-      return new S3Service('some-filename').getPresignedUrl('getObject').then((url) => {
-        expect(url).toEqual('some-presigned-url');
-        expect(mockSignedUrl).toHaveBeenCalledWith('getObject', parameters);
-      });
-    });
-  });
 
   describe('checkS3Health', () => {
     const error = 'some-error';
+    const mockPutObjectPromise = jest.fn();
 
-    const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
-    const mockHeadBucket = jest.fn().mockImplementation((config, callback) => callback());
+    const mockPutObject = jest.fn().mockImplementation(() => ({ promise: mockPutObjectPromise }));
+    const mockHeadBucket = jest.fn().mockImplementation((_config, callback) => callback());
 
     const expectedResultBase = {
       type: 's3',
@@ -69,7 +30,7 @@ describe('S3Service', () => {
     });
 
     it('should return writable true if you can save to S3', () => {
-      mockPutObject.mockImplementation((config, callback) => callback());
+      mockPutObjectPromise.mockReturnValueOnce(Promise.resolve());
 
       return new S3Service('some-filename').checkS3Health().then((result) => {
         expect(result).toStrictEqual({
@@ -81,12 +42,12 @@ describe('S3Service', () => {
     });
 
     it('should return writable false if you can not save to S3', () => {
-      mockPutObject.mockImplementation((config, callback) => callback(error));
+      mockPutObjectPromise.mockReturnValueOnce(Promise.reject(error));
 
       return new S3Service('some-filename').checkS3Health().then((result) => {
         expect(result).toStrictEqual({
           ...expectedResultBase,
-          error: 'some-error',
+          error: error,
           available: true,
         });
       });

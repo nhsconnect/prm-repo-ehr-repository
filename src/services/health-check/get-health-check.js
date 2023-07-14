@@ -7,7 +7,7 @@ export function getHealthCheck() {
   const config = initializeConfig();
   logInfo('Starting health check');
 
-  const s3Service = new S3Service('health-check.txt');
+  const s3Service = new S3Service();
 
   return Promise.all([s3Service.checkS3Health(), checkDbHealth()]).then(([s3, db]) => {
     logInfo('Health check status', db, s3);

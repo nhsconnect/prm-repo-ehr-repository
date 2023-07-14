@@ -5,13 +5,14 @@ import S3Service from '../s3';
 import { logInfo } from '../../../middleware/logging';
 import { generateMultipleUUID } from '../../../utilities/integration-test-utilities';
 import { InvalidArgumentError, NoS3ObjectsFoundError } from '../../../errors/errors';
+import getSignedUrl from '../get-signed-url';
 
 jest.mock('../../../middleware/logging');
 
 describe('S3Service integration test with localstack', () => {
   const S3CLIENT = new S3Service();
 
-  // helper methods that shouldn't go into the actual implementation of S3 client
+  // ===== HELPER METHODS =====
   const extractFilenames = (arrayOfObjects) => arrayOfObjects.map((object) => object.Key);
   const clearS3Bucket = async () => {
     const allObjects = await S3CLIENT.listObjects();
@@ -21,24 +22,21 @@ describe('S3Service integration test with localstack', () => {
     await S3CLIENT.s3.deleteObjects(deleteObjectParams).promise();
   };
   const getObjectByName = (filename) => {
-    return S3CLIENT.s3
-      .getObject({
-        Bucket: S3CLIENT.Bucket,
-        Key: filename,
-      })
-      .promise();
+    const getObjectParams = {
+      Bucket: S3CLIENT.Bucket,
+      Key: filename,
+    };
+    return S3CLIENT.s3.getObject(getObjectParams).promise();
   };
 
   beforeEach(async () => {
     await clearS3Bucket();
   });
 
-  it('can see the default test-bucket in localstack', async () => {
-    // given
-    const client = new S3Service('test-health-check');
-
+  // ===== TESTS START FROM HERE =====
+  it('can access the default test-bucket in localstack', async () => {
     // when
-    const response = await client.checkS3Health();
+    const response = await S3CLIENT.checkS3Health();
 
     // then
     expect(response).toEqual({
@@ -59,7 +57,7 @@ describe('S3Service integration test with localstack', () => {
       await S3CLIENT.saveObjectWithName(testFileName, testData);
 
       // then
-      const objectInBucket = await getObjectByName(testFileName)
+      const objectInBucket = await getObjectByName(testFileName);
       const objectContent = objectInBucket.Body.toString();
 
       expect(objectContent).toEqual(testData);
@@ -105,11 +103,13 @@ describe('S3Service integration test with localstack', () => {
       // then
       expect(logInfo).toBeCalledWith('Successfully deleted objects from S3 bucket:');
 
-      // verify that the files start with conversationIdToDelete are deleted, and other files are still there
+      // verify that files start with conversationIdToDelete are deleted
       const filesRemainInBucket = await S3CLIENT.listObjects().then(extractFilenames);
       filesToDelete.forEach((deletedFile) => {
         expect(filesRemainInBucket).not.toContain(deletedFile);
       });
+
+      // verify that files not start with conversationIdToDelete are still there
       expect(filesRemainInBucket).toEqual(expect.arrayContaining(filesToKeep));
     });
 
@@ -128,10 +128,11 @@ describe('S3Service integration test with localstack', () => {
     });
   });
 
-  describe('getPresignedUrl', () => {
+  describe('getSignedUrl', () => {
     it('return a presigned url for upload when operation = putObject', async () => {
       // given
-      const testFilename = generateMultipleUUID(2).join('/');
+      const [conversationId, messageId] = generateMultipleUUID(2);
+      const testFileName = `${conversationId}/${messageId}`;
       const operation = 'putObject';
       const testEhrCore = {
         ebXML: '<soap:Envelope><content>soup envelope</content></soap:Envelope>',
@@ -141,7 +142,7 @@ describe('S3Service integration test with localstack', () => {
       };
 
       // when
-      const presignedUrl = await S3CLIENT.getPresignedUrlWithFilename(testFilename, operation);
+      const presignedUrl = await getSignedUrl(conversationId, messageId, operation);
       const response = await axios.put(presignedUrl, testEhrCore);
 
       // then
@@ -149,18 +150,18 @@ describe('S3Service integration test with localstack', () => {
 
       // verify that the uploaded file is in the test bucket
       const bucketFilenames = await S3CLIENT.listObjects().then(extractFilenames);
-      expect(bucketFilenames).toContain(testFilename);
+      expect(bucketFilenames).toContain(testFileName);
 
-      const objectInBucket = await getObjectByName(testFilename);
+      const objectInBucket = await getObjectByName(testFileName);
       const objectContent = objectInBucket.Body.toString();
-
 
       expect(objectContent).toEqual(JSON.stringify(testEhrCore));
     });
 
-    it("return a presigned url for download when operation = getObject", async () => {
+    it('return a presigned url for download when operation = getObject', async () => {
       // given
-      const testFilename = generateMultipleUUID(2).join('/');
+      const [conversationId, messageId] = generateMultipleUUID(2);
+      const testFileName = `${conversationId}/${messageId}`;
       const operation = 'getObject';
 
       const testEhrCore = {
@@ -169,20 +170,17 @@ describe('S3Service integration test with localstack', () => {
         attachments: [],
         external_attachments: [],
       };
-      await S3CLIENT.saveObjectWithName(testFilename, JSON.stringify(testEhrCore));
+      await S3CLIENT.saveObjectWithName(testFileName, JSON.stringify(testEhrCore));
 
       // when
-      const presignedUrl = await S3CLIENT.getPresignedUrlWithFilename(testFilename, operation);
+      const presignedUrl = await getSignedUrl(conversationId, messageId, operation);
+      const response = await axios.get(presignedUrl);
 
       // then
-      const response = await axios.get(presignedUrl);
       expect(response.status).toBe(200);
-      console.log(response)
 
       // verify that the file we download from presignedUrl is same as the file we stored in bucket
-      expect(response.data).toEqual(testEhrCore)
+      expect(response.data).toEqual(testEhrCore);
     });
   });
-
-
 });

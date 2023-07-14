@@ -8,7 +8,8 @@ jest.mock('aws-sdk');
 describe('getHealthCheck', () => {
   const config = initializeConfig();
   const mockHeadBucket = jest.fn().mockImplementation((config, callback) => callback());
-  const mockPutObject = jest.fn().mockImplementation((config, callback) => callback());
+  const mockPutObjectPromise = jest.fn();
+  const mockPutObject = jest.fn().mockImplementation(() => ({ promise: mockPutObjectPromise }));
   const error = 'some-error';
 
   beforeEach(() => {
@@ -25,8 +26,11 @@ describe('getHealthCheck', () => {
   });
 
   it('should return successful s3 health check if s3 succeeds', () => {
+    // when
+    mockPutObjectPromise.mockReturnValueOnce(Promise.resolve());
     return getHealthCheck().then((result) => {
       const s3 = result.details.filestore;
+      // then
       expect(s3).toEqual({
         type: 's3',
         bucketName: config.awsS3BucketName,
@@ -37,10 +41,11 @@ describe('getHealthCheck', () => {
   });
 
   it('should return failed s3 health check if s3 returns an error', () => {
-    mockPutObject.mockImplementation((config, callback) => callback(error));
+    // when
+    mockPutObjectPromise.mockRejectedValue(error);
     return getHealthCheck().then((result) => {
       const s3 = result.details.filestore;
-
+      // then
       return expect(s3).toEqual({
         type: 's3',
         bucketName: config.awsS3BucketName,
