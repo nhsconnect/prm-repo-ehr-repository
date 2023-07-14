@@ -32,7 +32,7 @@ describe('S3Service', () => {
     it('should return writable true if you can save to S3', () => {
       mockPutObjectPromise.mockReturnValueOnce(Promise.resolve());
 
-      return new S3Service('some-filename').checkS3Health().then((result) => {
+      return new S3Service().checkS3Health().then((result) => {
         expect(result).toStrictEqual({
           ...expectedResultBase,
           available: true,
@@ -44,7 +44,7 @@ describe('S3Service', () => {
     it('should return writable false if you can not save to S3', () => {
       mockPutObjectPromise.mockReturnValueOnce(Promise.reject(error));
 
-      return new S3Service('some-filename').checkS3Health().then((result) => {
+      return new S3Service().checkS3Health().then((result) => {
         expect(result).toStrictEqual({
           ...expectedResultBase,
           error: error,
@@ -56,7 +56,7 @@ describe('S3Service', () => {
     it('should return writable and accessible false if you can not connect to S3', () => {
       mockHeadBucket.mockImplementation((config, callback) => callback(error));
 
-      return new S3Service('some-filename').checkS3Health().then((result) => {
+      return new S3Service().checkS3Health().then((result) => {
         expect(result).toStrictEqual({
           ...expectedResultBase,
           error: 'some-error',

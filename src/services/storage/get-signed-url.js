@@ -6,7 +6,7 @@ const getSignedUrl = (conversationId, messageId, operation) => {
   conversationId = conversationId.toLowerCase();
   messageId = messageId.toLowerCase();
   const fileName = `${conversationId}/${messageId}`.toLowerCase();
-  return new S3Service('').getPresignedUrlWithFilename(fileName, operation);
+  return new S3Service().getPresignedUrlWithFilename(fileName, operation);
 };
 
 export default getSignedUrl;

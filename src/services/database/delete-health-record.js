@@ -12,7 +12,7 @@ const Message = ModelFactory.getByName(messageModelName);
 export const deleteHealthRecordAndMessages = async (conversationId) => {
   const sequelize = ModelFactory.sequelize;
   const transaction = await sequelize.transaction();
-  const s3 = new S3Service(`${conversationId}`);
+  const s3 = new S3Service();
 
   try {
     const messageResult = await Message.destroy(
