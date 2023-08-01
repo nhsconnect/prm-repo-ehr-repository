@@ -1,4 +1,8 @@
-import { NoS3ObjectsFoundError, S3ObjectDeletionError } from '../../errors/errors';
+import {
+  InvalidArgumentError,
+  NoS3ObjectsFoundError,
+  S3ObjectDeletionError,
+} from '../../errors/errors';
 import { logInfo } from '../../middleware/logging';
 import { initializeConfig } from '../../config';
 import { Endpoint, S3 } from 'aws-sdk';
@@ -9,13 +13,9 @@ const CONTENT_TYPE = 'text/xml';
 const config = initializeConfig();
 
 export default class S3Service {
-  constructor(filename) {
+  constructor() {
     this.s3 = new S3(this._get_config());
-
-    this.parameters = {
-      Bucket: config.awsS3BucketName,
-      Key: filename,
-    };
+    this.Bucket = config.awsS3BucketName;
   }
 
   checkS3Health() {
@@ -29,42 +29,69 @@ export default class S3Service {
     const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
     return this._isConnected()
       .then(() =>
-        this.save(date)
+        this.saveObjectWithName('health-check.txt', date)
           .then(() => ({ ...result, writable: true }))
           .catch((err) => ({ ...result, error: err }))
       )
       .catch((err) => ({ ...result, error: err, available: false }));
   }
 
-  save(data) {
-    return new Promise((resolve, reject) => {
-      this.s3.putObject({ ...this.parameters, Body: data }, (err) => {
-        if (err) return reject(err);
-        resolve();
-      });
-    });
+  saveObjectWithName(filename, data) {
+    const params = {
+      Bucket: config.awsS3BucketName,
+      Key: filename,
+      Body: data,
+    };
+    return this.s3.putObject(params).promise();
   }
 
-  async deleteObject() {
-    const foundObjects = await this.s3.listObjectsV2(this.parameters).promise();
-    if (foundObjects.Contents.length === 0) throw new NoS3ObjectsFoundError();
+  async listObjects() {
+    const listObjectParams = {
+      Bucket: this.Bucket,
+    };
+    return this.s3
+      .listObjectsV2(listObjectParams)
+      .promise()
+      .then((foundObjects) => foundObjects.Contents);
+  }
 
-    const deleteParams = {
-      Bucket: this.parameters.Bucket,
+  buildDeleteParamsFromObjects(arrayOfObjects) {
+    return {
+      Bucket: this.Bucket,
       Delete: {
-        Objects: foundObjects.Contents.map((object) => ({ Key: object.Key })),
+        Objects: arrayOfObjects.map((object) => ({ Key: object.Key })),
       },
     };
-
-    this.s3.deleteObjects(deleteParams, (error, data) => {
-      if (error) throw new S3ObjectDeletionError(error.message);
-      else logInfo(`Successfully deleted objects from S3 bucket: ${data}`);
-    });
   }
 
-  getPresignedUrl(operation) {
+  async deleteObjectsByPrefix(prefix) {
+    if (typeof prefix !== 'string' || prefix.length === 0) {
+      // reject here to prevent calling with empty string accidentally wiping out whole bucket
+      throw new InvalidArgumentError('Prefix has to be a non-empty string');
+    }
+    const listObjectParams = {
+      Bucket: this.Bucket,
+      Prefix: prefix,
+    };
+
+    const foundObjects = await this.s3.listObjectsV2(listObjectParams).promise();
+    if (foundObjects.Contents.length === 0) throw new NoS3ObjectsFoundError();
+
+    const deleteParams = this.buildDeleteParamsFromObjects(foundObjects.Contents);
+
+    try {
+      const data = await this.s3.deleteObjects(deleteParams).promise();
+      logInfo('Successfully deleted objects from S3 bucket:');
+      logInfo(data?.Deleted); // this log a list of deleted objects
+    } catch (error) {
+      throw new S3ObjectDeletionError(error.message);
+    }
+  }
+
+  getPresignedUrlWithFilename(filename, operation) {
     const params = {
-      ...this.parameters,
+      Bucket: this.Bucket,
+      Key: filename,
       Expires: URL_EXPIRY_TIME,
     };
 

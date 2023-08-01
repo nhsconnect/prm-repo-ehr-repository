@@ -3,8 +3,9 @@ services:
   default:
     links:
       - db:db
+      - localstack:localstack
     ports:
-      - 3000:3000
+      - "3000:3000"
   db:
     image: postgres:12.1
     environment:
@@ -13,4 +14,17 @@ services:
       POSTGRES_DB: deductions_test
       LC_ALL: C
     ports:
-      - 5432:5432
+      - "5432:5432"
+  localstack:
+    image: localstack/localstack:0.10.9
+    environment:
+      - SERVICES=s3:4572
+      - S3_BUCKET_NAME=test-bucket
+      - LOCALSTACK_URL=http://localstack:4572
+    ports:
+      - "4572:4572"
+    volumes:
+      - ./scripts/create-bucket.sh:/docker-entrypoint-initaws.d/create-bucket.sh
+      - /var/run/docker.sock:/var/run/docker.sock
+    logging:
+      driver: none

@@ -43,9 +43,10 @@ describe('delete-health-record.js', () => {
       const nhsNumber = generateRandomNhsNumber();
 
       // when
-      const deleteObject = S3Service.mockImplementation(() => {
+      const deleteObjectsByPrefix = jest.fn();
+      S3Service.mockImplementation(() => {
         return {
-          deleteObject: jest.fn().mockResolvedValueOnce(undefined),
+          deleteObjectsByPrefix: deleteObjectsByPrefix,
         };
       });
 
@@ -64,7 +65,8 @@ describe('delete-health-record.js', () => {
       // then
       expect(foundMessages).toEqual([]);
       expect(healthRecord).toBeNull();
-      expect(deleteObject).toBeCalledTimes(1);
+      expect(deleteObjectsByPrefix).toBeCalledTimes(1);
+      expect(deleteObjectsByPrefix).toBeCalledWith(`${conversationId}/`);
     });
 
     it('should throw an error, given an invalid conversation ID', async () => {
@@ -74,7 +76,7 @@ describe('delete-health-record.js', () => {
       // when
       S3Service.mockImplementation(() => {
         return {
-          deleteObject: jest.fn().mockResolvedValueOnce(undefined),
+          deleteObjectsByPrefix: jest.fn().mockResolvedValueOnce(undefined),
         };
       });
 
@@ -93,7 +95,7 @@ describe('delete-health-record.js', () => {
       // when
       S3Service.mockImplementation(() => {
         return {
-          deleteObject: jest.fn().mockRejectedValueOnce(new NoS3ObjectsFoundError()),
+          deleteObjectsByPrefix: jest.fn().mockRejectedValueOnce(new NoS3ObjectsFoundError()),
         };
       });
 
