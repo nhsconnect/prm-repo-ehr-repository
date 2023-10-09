@@ -1,15 +1,15 @@
-import app from './app';
+import { ehrDeletionJob } from './services/jobs/ehr-deletion-job/ehr-deletion-job';
 import { logInfo } from './middleware/logging';
 import { portNumber } from './config';
-// { ehrDeletionJob } from './services/jobs/ehr-deletion-job/ehr-deletion-job';
+import app from './app';
 
 const port = portNumber || 3000;
 
 app.listen(port, () => {
   logInfo(`Listening on port ${port}`);
-  // startScheduledJobs();
+  startScheduledJobs();
 });
 
-// const startScheduledJobs = () => {
-//   ehrDeletionJob.start();
-// };
+const startScheduledJobs = () => {
+  ehrDeletionJob.start();
+};
