@@ -5,7 +5,7 @@ import { logInfo } from '../../../middleware/logging';
 import cron from 'node-cron';
 
 export const ehrDeletionJob = cron.schedule(
-  '00 03 * * *',
+  '15 * * * *', // TODO: PRMT-4126, REVERT BACK TO 3AM.
   async () => {
     logInfo(`${loggerPrefix} Job triggered, preparing to delete health records.`);
 
