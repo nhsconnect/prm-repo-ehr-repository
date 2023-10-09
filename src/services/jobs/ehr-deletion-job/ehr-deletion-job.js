@@ -16,6 +16,6 @@ export const ehrDeletionJob = cron.schedule(
     } else {
       logInfo(`${loggerPrefix} Could not find any health records that are marked for deletion.`);
     }
-  },
-  { scheduled: false }
+  }
+  // { scheduled: false }
 );
