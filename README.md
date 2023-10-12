@@ -72,7 +72,7 @@ npm test
 sequelize-cli db:migrate:undo:all # Undoes the migration to leave clean env
 ```
 
-## Run the coverage tests (unit test and integration test)
+## Run the coverage tests (unit and integration tests)
 
 By entering the `dojo` container and running `./tasks _test_coverage`
 
