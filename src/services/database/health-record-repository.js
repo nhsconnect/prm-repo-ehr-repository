@@ -1,7 +1,7 @@
 import { MessageType, modelName as messageModelName } from '../../models/message';
 import { modelName as healthRecordModelName } from '../../models/health-record';
 import { logError, logInfo } from '../../middleware/logging';
-import Sequelize, { Op } from 'sequelize';
+import Sequelize from 'sequelize';
 import ModelFactory from '../../models';
 import { getNow } from '../time';
 
@@ -172,29 +172,4 @@ export const messageAlreadyReceived = async (messageId) => {
     logError('Querying database for health record failed', e);
     throw e;
   }
-};
-
-export const findAllSoftDeletedHealthRecords = async () => {
-  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-
-  return await HealthRecord.findAll({
-    where: {
-      deletedAt: {
-        [Op.ne]: null,
-      },
-    },
-    paranoid: false,
-  }).catch((error) => {
-    logError(error);
-    throw error;
-  });
-};
-
-export const findHealthRecordByConversationId = async (conversationId) => {
-  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-
-  return await HealthRecord.findByPk(conversationId).catch((error) => {
-    logError(error);
-    throw error;
-  });
 };

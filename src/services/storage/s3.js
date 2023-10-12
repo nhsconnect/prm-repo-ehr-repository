@@ -1,9 +1,3 @@
-import {
-  InvalidArgumentError,
-  NoS3ObjectsFoundError,
-  S3ObjectDeletionError,
-} from '../../errors/errors';
-import { logInfo } from '../../middleware/logging';
 import { initializeConfig } from '../../config';
 import { Endpoint, S3 } from 'aws-sdk';
 import dayjs from 'dayjs';
@@ -43,49 +37,6 @@ export default class S3Service {
       Body: data,
     };
     return this.s3.putObject(params).promise();
-  }
-
-  async listObjects() {
-    const listObjectParams = {
-      Bucket: this.Bucket,
-    };
-    return this.s3
-      .listObjectsV2(listObjectParams)
-      .promise()
-      .then((foundObjects) => foundObjects.Contents);
-  }
-
-  buildDeleteParamsFromObjects(arrayOfObjects) {
-    return {
-      Bucket: this.Bucket,
-      Delete: {
-        Objects: arrayOfObjects.map((object) => ({ Key: object.Key })),
-      },
-    };
-  }
-
-  async deleteObjectsByPrefix(prefix) {
-    if (typeof prefix !== 'string' || prefix.length === 0) {
-      // reject here to prevent calling with empty string accidentally wiping out whole bucket
-      throw new InvalidArgumentError('Prefix has to be a non-empty string');
-    }
-    const listObjectParams = {
-      Bucket: this.Bucket,
-      Prefix: prefix,
-    };
-
-    const foundObjects = await this.s3.listObjectsV2(listObjectParams).promise();
-    if (foundObjects.Contents.length === 0) throw new NoS3ObjectsFoundError();
-
-    const deleteParams = this.buildDeleteParamsFromObjects(foundObjects.Contents);
-
-    try {
-      const data = await this.s3.deleteObjects(deleteParams).promise();
-      logInfo('Successfully deleted objects from S3 bucket:');
-      logInfo(data?.Deleted); // this log a list of deleted objects
-    } catch (error) {
-      throw new S3ObjectDeletionError(error.message);
-    }
   }
 
   getPresignedUrlWithFilename(filename, operation) {
