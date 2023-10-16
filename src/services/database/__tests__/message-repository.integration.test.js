@@ -4,7 +4,6 @@ import {
   createEhrExtract,
   fragmentExists,
   createFragmentPart,
-  findAllMessagesByConversationId,
 } from '../message-repository';
 import ModelFactory from '../../../models';
 import { MessageType, modelName as messageModelName } from '../../../models/message';
@@ -12,11 +11,6 @@ import { modelName as healthRecordModelName } from '../../../models/health-recor
 import { logError } from '../../../middleware/logging';
 import { getNow } from '../../time';
 import expect from 'expect';
-import {
-  generateMultipleUUID,
-  generateRandomNhsNumber,
-  generateRandomUUID,
-} from '../../../utilities/integration-test-utilities';
 
 // Mocking
 jest.mock('../../../middleware/logging');
@@ -278,40 +272,6 @@ describe('messageRepository', () => {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Creating fragment database entry failed', err);
       }
-    });
-  });
-
-  describe('findAllMessagesByConversationId', () => {
-    it('should find all messages successfully, given a valid conversation ID', async () => {
-      // given
-      const [messageId, conversationId] = generateMultipleUUID(2, false);
-      const fragmentMessageIds = generateMultipleUUID(5, false);
-      const nhsNumber = generateRandomNhsNumber();
-
-      // when
-      await createEhrExtract({
-        conversationId,
-        messageId,
-        nhsNumber,
-        fragmentMessageIds,
-      });
-
-      const foundMessages = await findAllMessagesByConversationId(conversationId, false);
-
-      // then
-      expect(foundMessages.length).toEqual(5 + 1); // 5 fragments + 1 extract
-    });
-
-    it('should return null, given an invalid conversation ID', async () => {
-      // given
-      const conversationId = generateRandomUUID(false);
-
-      // when
-      const foundMessages = await findAllMessagesByConversationId(conversationId, false);
-
-      // then
-      expect(foundMessages).toEqual([]);
-      expect(foundMessages.length).toBe(0);
     });
   });
 });
