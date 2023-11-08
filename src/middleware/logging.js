@@ -3,9 +3,9 @@ import { startRequest } from '../config/tracing';
 
 export const logError = (status, error) => logger.error(status, { error });
 
-export const logWarning = (status) => logger.warn(status);
+export const logWarning = (...logs) => logs.forEach(log => logger.warn(log));
 
-export const logInfo = (status) => logger.info(status);
+export const logInfo = (...logs) => logs.forEach(log => logger.info(log));
 
 export const logDebug = (status) => logger.debug(status);
 
@@ -24,7 +24,7 @@ export const eventFinished = (req, res) => {
 
   if (res.statusCode < 400) {
     logInfo(url, { req: reqLog, res: resLog });
-  } else if (res.statusCode == 404) {
+  } else if (res.statusCode === 404) {
     logWarning(url, { req: reqLog, res: resLog });
   } else {
     logError(url, { req: reqLog, res: resLog });
