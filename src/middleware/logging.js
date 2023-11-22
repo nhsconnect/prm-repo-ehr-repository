@@ -3,9 +3,9 @@ import { startRequest } from '../config/tracing';
 
 export const logError = (status, error) => logger.error(status, { error });
 
-export const logWarning = (...logs) => logs.forEach(log => logger.warn(log));
+export const logWarning = (...logs) => logs.forEach((log) => logger.warn(log));
 
-export const logInfo = (...logs) => logs.forEach(log => logger.info(log));
+export const logInfo = (...logs) => logs.forEach((log) => logger.info(log));
 
 export const logDebug = (status) => logger.debug(status);
 
