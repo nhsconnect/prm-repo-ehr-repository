@@ -16,8 +16,6 @@ variable "dns_name" {}
 
 variable "s3_bucket_name" {}
 variable "s3_prev_bucket_name" {}
-# Set to true if if the environment needs backing up e.g. in production.
-# This will result in versioning and object locking being enabled for select buckets containing critical live data.
 variable "s3_backup_enabled" {
   type        = bool
   default     = false
