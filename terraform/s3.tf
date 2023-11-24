@@ -35,6 +35,8 @@ resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_bucket" {
       days = 36500 # 100 Years
     }
   }
+
+  depends_on = [aws_s3_bucket_versioning.ehr_repo_bucket]
 }
 
 resource "aws_s3_bucket_versioning" "ehr_repo_bucket" {
