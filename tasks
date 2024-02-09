@@ -94,11 +94,16 @@ function prepare_local_envs_for_ide {
   echo $envs | tr ' ' ';'
 }
 
+function generate_secure_string {
+  local length=$1
+  tr -dc 'A-Za-z0-9_!@#$%^&*()' < /dev/urandom | head -c $length ; echo
+}
+
 function configure_local_envs {
-  export AUTHORIZATION_KEYS=auth-key-1
+  export AUTHORIZATION_KEYS=$(generate_secure_string 10)
   export DATABASE_NAME=deductions_test
-  export DATABASE_USER=deductions_user
-  export DATABASE_PASSWORD=secret
+  export DATABASE_USER=$(generate_secure_string 20)
+  export DATABASE_PASSWORD=$(generate_secure_string 20)
   export DATABASE_HOST=db
   export S3_BUCKET_NAME=test-bucket
   export LOCALSTACK_URL=http://localstack:4572
