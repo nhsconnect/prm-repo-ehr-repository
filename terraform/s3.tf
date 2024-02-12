@@ -49,6 +49,13 @@ resource "aws_s3_bucket_versioning" "ehr_repo_bucket" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "ehr_repo_access_block" {
+  bucket = aws_s3_bucket.ehr-repo-bucket.bucket
+
+  block_public_acls = true
+  block_public_policy = true
+}
+
 resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
   bucket = aws_s3_bucket.ehr-repo-bucket.id
   policy = jsonencode({
@@ -104,6 +111,13 @@ resource "aws_s3_bucket_versioning" "ehr_repo_access_logs" {
   versioning_configuration {
     status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket_public_access_block" "ehr_repo_access_logs_access_block" {
+  bucket = aws_s3_bucket.ehr_repo_access_logs.bucket
+
+  block_public_acls = true
+  block_public_policy = true
 }
 
 resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_policy" {
