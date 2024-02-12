@@ -52,7 +52,7 @@ resource "aws_s3_bucket_versioning" "ehr_repo_bucket" {
 resource "aws_s3_bucket_public_access_block" "ehr_repo_access_block" {
   bucket = aws_s3_bucket.ehr-repo-bucket.bucket
 
-  block_public_acls = true
+  block_public_acls   = true
   block_public_policy = true
 }
 
@@ -116,7 +116,7 @@ resource "aws_s3_bucket_versioning" "ehr_repo_access_logs" {
 resource "aws_s3_bucket_public_access_block" "ehr_repo_access_logs_access_block" {
   bucket = aws_s3_bucket.ehr_repo_access_logs.bucket
 
-  block_public_acls = true
+  block_public_acls   = true
   block_public_policy = true
 }
 
