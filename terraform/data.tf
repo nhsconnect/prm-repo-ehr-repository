@@ -8,6 +8,10 @@ data "aws_ssm_parameter" "deductions_private_vpc_id" {
   name = "/repo/${var.environment}/output/prm-deductions-infra/private-vpc-id"
 }
 
+data "aws_ssm_parameter" "access_logs_s3_bucket_id" {
+  name = "/repo/${var.environment}/output/prm-deductions-infra/access-logs-s3-bucket-id"
+}
+
 data "aws_ssm_parameter" "private_zone_id" {
   name = "/repo/${var.environment}/output/prm-deductions-infra/private-root-zone-id"
 }
