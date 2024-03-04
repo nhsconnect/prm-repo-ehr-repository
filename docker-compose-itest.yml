@@ -35,7 +35,7 @@ services:
       - SERVICES=dynamodb
       - DYNAMODB_SHARE_DB=1
     volumes:
-      - ./scripts/ehr-transfer-tracker-db.json:/etc/localstack/init/ready.d/ehr-transfer-tracker-db.json
+      - ./scripts/local-test-db-scheme.json:/etc/localstack/init/ready.d/local-test-db-scheme.json
       - ./scripts/create-dynamodb-table.sh:/etc/localstack/init/ready.d/create-dynamodb-table.sh
     ports:
       - "4573:4566"
