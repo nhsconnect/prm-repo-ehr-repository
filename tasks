@@ -96,7 +96,7 @@ function prepare_local_envs_for_ide {
 
 function generate_secure_string {
   local length=$1
-  tr -dc 'A-Za-z0-9_!@#$%^&*()' < /dev/urandom | head -c $length ; echo
+  LC_CTYPE="en_GB.UTF8" tr -dc 'A-Za-z0-9' < /dev/urandom | head -c $length ; echo
 }
 
 function configure_local_envs {
@@ -113,7 +113,6 @@ function configure_local_envs {
 
   export DYNAMODB_NAME=local-ehr-transfer-tracker
   export DYNAMODB_ENDPOINT=http://localstack-dynamo:4566/
-  export AWS_REGION=$AWS_DEFAULT_REGION
   export AWS_ACCESS_KEY_ID=$(generate_secure_string 20)
   export AWS_SECRET_ACCESS_KEY=$(generate_secure_string 20)
 

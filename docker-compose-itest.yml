@@ -4,7 +4,7 @@ services:
     links:
       - db:db
       - localstack:localstack
-#      - localstack-dynamo:localstack-dynamo
+      - localstack-dynamo:localstack-dynamo
     ports:
       - "3000:3000"
   db:
@@ -29,14 +29,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     logging:
       driver: none
-#  localstack-dynamo:
-#    image: localstack/localstack
-#    environment:
-#      - SERVICES=dynamodb
-#      - DEBUG=1
-#      - DYNAMODB_SHARE_DB=1
-#    volumes:
-#      - ./scripts/ehr-transfer-tracker-db.json:/etc/localstack/init/ready.d/ehr-transfer-tracker-db.json
-#      - ./scripts/create-dynamodb-table.sh:/etc/localstack/init/ready.d/create-dynamodb-table.sh
-#    ports:
-#      - "4573:4566"
+  localstack-dynamo:
+    image: localstack/localstack
+    environment:
+      - SERVICES=dynamodb
+      - DYNAMODB_SHARE_DB=1
+    volumes:
+      - ./scripts/ehr-transfer-tracker-db.json:/etc/localstack/init/ready.d/ehr-transfer-tracker-db.json
+      - ./scripts/create-dynamodb-table.sh:/etc/localstack/init/ready.d/create-dynamodb-table.sh
+    ports:
+      - "4573:4566"

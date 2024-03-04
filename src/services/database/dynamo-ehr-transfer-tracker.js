@@ -10,14 +10,17 @@ export class EhrTransferTracker {
     }
     EhrTransferTracker._instance = this;
 
-    // TOOD: read env var DYNAMODB_NAME from param store
     this.tableName = process.env.DYNAMODB_NAME;
 
-    const localDynamodbConfig = {
-      endpoint: process.env.DYNAMODB_ENDPOINT ?? "http://localhost:4573/"
-    };
+    const clientConfig = {
+      region: process.env.AWS_DEFAULT_REGION ?? 'eu-west-2'
+    }
+
     const isInLocal = process.env.nhsEnvironment === "local" || !process.env.nhsEnvironment;
-    const clientConfig = isInLocal ? localDynamodbConfig : {};
+    if (isInLocal) {
+      clientConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
+      this.tableName = process.env.DYNAMODB_NAME;
+    }
 
     const baseClient = new DynamoDBClient(clientConfig);
     this.client = DynamoDBDocumentClient.from(baseClient);
