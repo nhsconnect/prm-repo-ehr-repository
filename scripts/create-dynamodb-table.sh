@@ -1,11 +1,7 @@
 #!/bin/bash
 
-export AWS_SECRET_ACCESS_KEY=test_key
-export AWS_ACCESS_KEY_ID=test_id
-export AWS_REGION=eu-west-2
-
 set -e
-echo Creating dynamodb table in localstack...
+echo Creating a table for test in dynamodb-local...
 cd "$(dirname "$0")"
-awslocal --region eu-west-2 dynamodb create-table --cli-input-json file://local-test-db-scheme.json
+aws --region eu-west-2 --endpoint=http://dynamodb-local:8000 dynamodb create-table --cli-input-json file://local-test-db-scheme.json
 set +e

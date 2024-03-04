@@ -4,7 +4,7 @@ services:
     links:
       - db:db
       - localstack:localstack
-      - localstack-dynamo:localstack-dynamo
+      - dynamodb-local:dynamodb-local
     ports:
       - "3000:3000"
   db:
@@ -29,13 +29,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     logging:
       driver: none
-  localstack-dynamo:
-    image: localstack/localstack
-    environment:
-      - SERVICES=dynamodb
-      - DYNAMODB_SHARE_DB=1
-    volumes:
-      - ./scripts/local-test-db-scheme.json:/etc/localstack/init/ready.d/local-test-db-scheme.json
-      - ./scripts/create-dynamodb-table.sh:/etc/localstack/init/ready.d/create-dynamodb-table.sh
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
     ports:
-      - "4573:4566"
+     - "4573:8000"
+
