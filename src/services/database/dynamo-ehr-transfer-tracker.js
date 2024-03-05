@@ -2,7 +2,9 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getUKTimestamp } from "../time";
-import { logError } from "../../middleware/logging";
+import { logError, logInfo } from "../../middleware/logging";
+import { updateHealthRecordCompleteness } from "./health-record-repository";
+import { QueryType } from "../../models/QueryType";
 
 
 export class EhrTransferTracker {
@@ -125,17 +127,31 @@ export class EhrTransferTracker {
     return currentRecord.InboundConversationId;
   }
 
-  async queryTableByConversationId(inboundConversationId) {
+  async queryTableByConversationId(inboundConversationId, queryType = QueryType.ALL) {
     const params = {
       TableName: this.tableName,
-      ExpressionAttributeValues: {
-        ":InboundConversationId": inboundConversationId
-      },
       ExpressionAttributeNames: {
         "#InboundConversationId": "InboundConversationId"
       },
+      ExpressionAttributeValues: {
+        ":InboundConversationId": inboundConversationId
+      },
       KeyConditionExpression: "#InboundConversationId = :InboundConversationId"
     };
+
+    switch (queryType) {
+      case QueryType.ALL:
+        break;
+      case QueryType.CONVERSATION:
+      case QueryType.CORE:
+      case QueryType.FRAGMENT:
+        params.ExpressionAttributeNames['#sortKey'] = 'Layer';
+        params.ExpressionAttributeValues[':sortKey'] = queryType;
+        params.KeyConditionExpression += " AND begins_with(#sortKey, :sortKey)";
+        break;
+      default:
+        logInfo(`Received unexpected queryType: ${queryType}. Will treat it as 'ALL'.`)
+    }
 
     const command = new QueryCommand(params);
 
@@ -188,4 +204,8 @@ export class EhrTransferTracker {
     });
     await this.client.send(command);
   };
+
+  async updateHealthRecordCompleteness(conversationId) {
+
+  }
 }

@@ -1,6 +1,7 @@
 import { EhrTransferTracker } from "../dynamo-ehr-transfer-tracker";
 import { v4 as uuid } from "uuid";
 import { createConversationForTest, deleteConversationForTest } from "../../../models/conversation";
+import { QueryType } from "../../../models/queryType";
 
 describe("EhrTransferTracker", () => {
   const testConversationId = uuid();
@@ -30,8 +31,7 @@ describe("EhrTransferTracker", () => {
     await db.createCore(ehrExtract);
 
     // then
-    const records = await db.queryTableByConversationId(testConversationId);
-    const actual = records.filter(item => item.Layer.startsWith("Core"));
+    const actual = await db.queryTableByConversationId(testConversationId, QueryType.CORE);
 
     expect(actual).toHaveLength(1);
     expect(actual[0]).toMatchObject({
@@ -65,18 +65,16 @@ describe("EhrTransferTracker", () => {
     // when
     await db.updateFragmentAndCreateItsParts(testChildMessageIds[0], testConversationId);
 
-    const records = await db.queryTableByConversationId(testConversationId);
+    const actual = await db.queryTableByConversationId(testConversationId, QueryType.FRAGMENT);
 
     // then
+    expect(actual).toHaveLength(testChildMessageIds.length);
 
-    const expectedSize = 5; // Conversation + core + 3 children fragments
-    expect(records).toHaveLength(expectedSize);
-
-    const receivedFragment = records.filter(item => item.Layer.startsWith("Fragment") && item.ReceivedAt);
+    const receivedFragment = actual.filter(item => item.ReceivedAt);
     expect(receivedFragment).toHaveLength(1);
     expect(receivedFragment[0].InboundMessageId).toEqual(testChildMessageIds[0]);
 
-    const nonReceivedFragments = records.filter(item => item.Layer.startsWith("Fragment") && !item.ReceivedAt);
+    const nonReceivedFragments = actual.filter(item => !item.ReceivedAt);
     expect(nonReceivedFragments).toHaveLength(2);
   });
 });
