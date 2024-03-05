@@ -1,10 +1,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getUKTimestamp } from "../time";
 import { logError, logInfo } from "../../middleware/logging";
-import { updateHealthRecordCompleteness } from "./health-record-repository";
-import { QueryType } from "../../models/QueryType";
+import { QueryType, ConversationStates } from "../../models/enums";
 
 
 export class EhrTransferTracker {
@@ -21,13 +20,14 @@ export class EhrTransferTracker {
     };
 
     const isInLocal = process.env.NHS_ENVIRONMENT === "local" || !process.env.NHS_ENVIRONMENT;
-    const isInDojo = process.env.DOJO_VERSION !== undefined
+    const isInDojo = process.env.DOJO_VERSION !== undefined;
 
     if (isInLocal) {
+      // for running whole integration test suite in dojo
       clientConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
     }
-    // for running individual test in IDE
     if (isInLocal && !isInDojo) {
+      // for running individual test with IDE
       clientConfig.endpoint = "http://localhost:4573";
       this.tableName = "local-test-db";
     }
@@ -119,9 +119,10 @@ export class EhrTransferTracker {
       throw new Error("No record was found for given NHS number");
     }
 
-    // TODO: to compare "completed at" rather then "created at"
-    const currentRecord = items.reduce((prev, current) => {
-      return (current && current?.CreatedAt > prev?.CreatedAt) ? current : prev;
+    const completedRecords = items.filter(item => item.State === ConversationStates.COMPLETE || item.State.startsWith('Outbound'));
+
+    const currentRecord = completedRecords.reduce((prev, current) => {
+      return (current && current?.UpdatedAt > prev?.UpdatedAt) ? current : prev;
     });
 
     return currentRecord.InboundConversationId;
@@ -145,12 +146,12 @@ export class EhrTransferTracker {
       case QueryType.CONVERSATION:
       case QueryType.CORE:
       case QueryType.FRAGMENT:
-        params.ExpressionAttributeNames['#sortKey'] = 'Layer';
-        params.ExpressionAttributeValues[':sortKey'] = queryType;
+        params.ExpressionAttributeNames["#sortKey"] = "Layer";
+        params.ExpressionAttributeValues[":sortKey"] = queryType;
         params.KeyConditionExpression += " AND begins_with(#sortKey, :sortKey)";
         break;
       default:
-        logInfo(`Received unexpected queryType: ${queryType}. Will treat it as 'ALL'.`)
+        logInfo(`Received unexpected queryType: ${queryType}. Will treat it as 'ALL'.`);
     }
 
     const command = new QueryCommand(params);
@@ -206,6 +207,29 @@ export class EhrTransferTracker {
   };
 
   async updateHealthRecordCompleteness(conversationId) {
+    const allFragments = this.queryTableByConversationId(conversationId, QueryType.FRAGMENT);
+    const pendingMessages = allFragments.filter(fragment => fragment.receivedAt === undefined);
+    if (pendingMessages.length !== 0) {
+      logInfo(`${pendingMessages.length} more fragments to be received.`);
+      return;
+    }
 
+    logInfo("All fragments are received. Will mark this conversation as complete");
+
+    const timestamp = getUKTimestamp();
+    const updateParam = {
+      TableName: this.tableName,
+      Key: {
+        InboundConversationId: conversationId,
+        Layer: "Conversation"
+      },
+      UpdateExpression: "set UpdatedAt = :now, State = :complete",
+      ExpressionAttributeValues: {
+        ":now": timestamp,
+        ":complete": ConversationStates.COMPLETE
+      }
+    };
+
+    await this.client.send(new UpdateCommand(updateParam));
   }
 }
