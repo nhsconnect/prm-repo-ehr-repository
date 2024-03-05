@@ -4,6 +4,7 @@ import { getUKTimestamp } from "../time";
 import { logError, logInfo } from "../../middleware/logging";
 import { QueryType, ConversationStates } from "../../models/enums";
 import { getDynamodbClient } from "./dynamodb-client";
+import { fragmentUpdateParams } from "../../models/fragment";
 
 
 export class EhrTransferTracker {
@@ -48,6 +49,21 @@ export class EhrTransferTracker {
     await this.client.send(command);
   }
 
+  async updateItemsInTransaction(updateParams) {
+    if (!updateParams || !Array.isArray(updateParams)) {
+      throw new Error("The given argument `updateParams` is not an array");
+    }
+    const command = new TransactWriteCommand({
+      TransactItems: updateParams.map((params) => ({
+        Update: {
+          TableName: this.tableName, ...params
+        }
+      }))
+    });
+
+    await this.client.send(command);
+  }
+
   async queryTableByNhsNumber(nhsNumber) {
     const params = {
       TableName: this.tableName,
@@ -80,7 +96,7 @@ export class EhrTransferTracker {
       throw new Error("No record was found for given NHS number");
     }
 
-    const completedRecords = items.filter(item => item.State === ConversationStates.COMPLETE || item.State.startsWith('Outbound'));
+    const completedRecords = items.filter(item => item.State === ConversationStates.COMPLETE || item.State.startsWith("Outbound"));
 
     const currentRecord = completedRecords.reduce((prev, current) => {
       return (current && current?.UpdatedAt > prev?.UpdatedAt) ? current : prev;
@@ -127,44 +143,21 @@ export class EhrTransferTracker {
 
   async updateFragmentAndCreateItsParts(messageId,
                                         conversationId,
-                                        remainingPartsIds) {
+                                        remainingPartsIds = []) {
     // to replace the existing methods `updateFragmentAndCreateItsParts` and `createFragmentPart`
     const timestamp = getUKTimestamp();
 
-    const currentFragment = {
-      TableName: this.tableName,
-      Key: {
-        InboundConversationId: conversationId,
-        Layer: `Fragment#${messageId}`
-      },
-      UpdateExpression: "set ReceivedAt = :now, CreatedAt = if_not_exists(CreatedAt, :now), UpdatedAt = :now",
-      ExpressionAttributeValues: {
-        ":now": timestamp
-      }
-    };
+    const currentFragmentParams = fragmentUpdateParams(conversationId, messageId, { ReceivedAt: timestamp });
 
-    const childFragments = remainingPartsIds ? remainingPartsIds.map(fragmentPartId => {
-      return ({
-        TableName: this.tableName,
-        Key: {
-          InboundConversationId: conversationId,
-          Layer: `Fragment#${fragmentPartId}`
-        },
-        UpdateExpression: "set CreatedAt = if_not_exists(CreatedAt, :now), UpdatedAt = :now, ParentId = :parentMessageId",
-        ExpressionAttributeValues: {
-          ":now": timestamp,
-          ":parentMessageId": messageId
-        }
-      });
-    }) : [];
-
-    const updateParams = [currentFragment, ...childFragments];
-    const command = new TransactWriteCommand({
-      TransactItems: updateParams.map((param) => ({
-        Update: param
-      }))
+    const childFragmentsParams = remainingPartsIds.map(fragmentPartId => {
+      return fragmentUpdateParams(
+        conversationId,
+        fragmentPartId,
+        { ParentId: messageId }
+      );
     });
-    await this.client.send(command);
+
+    await this.updateItemsInTransaction([currentFragmentParams, ...childFragmentsParams]);
   };
 
   async updateHealthRecordCompleteness(conversationId) {

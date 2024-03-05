@@ -2,7 +2,7 @@ import { EhrTransferTracker } from "../dynamo-ehr-transfer-tracker";
 import { v4 as uuid } from "uuid";
 import { createConversationForTest, cleanupRecordsForTest } from "../../../models/conversation";
 import { QueryType } from "../../../models/enums";
-import { createCore } from "../../../models/ehrCore";
+import { createCore } from "../ehr-core-repository";
 
 describe("EhrTransferTracker", () => {
   const testConversationId = uuid();
@@ -13,7 +13,7 @@ describe("EhrTransferTracker", () => {
   });
 
   afterEach(async () => {
-    await cleanupRecordsForTest(testConversationId);
+    // await cleanupRecordsForTest(testConversationId);
   });
 
   it("create and read an ehrCore in dynamodb", async () => {
@@ -51,6 +51,7 @@ describe("EhrTransferTracker", () => {
     const testMessageId = uuid();
     const testNhsNumber = "9000000002";
     const testChildMessageIds = [uuid(), uuid(), uuid()];
+    const testNestedChildIds = [uuid(), uuid(), uuid()];
 
     const ehrExtract = {
       conversationId: testConversationId,
@@ -62,18 +63,19 @@ describe("EhrTransferTracker", () => {
     await createCore(ehrExtract);
 
     // when
-    await db.updateFragmentAndCreateItsParts(testChildMessageIds[0], testConversationId);
+    await db.updateFragmentAndCreateItsParts(testChildMessageIds[0], testConversationId, testNestedChildIds);
 
     const actual = await db.queryTableByConversationId(testConversationId, QueryType.FRAGMENT);
 
     // then
-    expect(actual).toHaveLength(testChildMessageIds.length);
+    const expectedTotalMessages = testChildMessageIds.length + testNestedChildIds.length;
+    expect(actual).toHaveLength(expectedTotalMessages);
 
     const receivedFragment = actual.filter(item => item.ReceivedAt);
     expect(receivedFragment).toHaveLength(1);
     expect(receivedFragment[0].InboundMessageId).toEqual(testChildMessageIds[0]);
 
     const nonReceivedFragments = actual.filter(item => !item.ReceivedAt);
-    expect(nonReceivedFragments).toHaveLength(2);
+    expect(nonReceivedFragments).toHaveLength(5);
   });
 });
