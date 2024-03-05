@@ -1,9 +1,9 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { TransactWriteCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getUKTimestamp } from "../time";
 import { logError, logInfo } from "../../middleware/logging";
 import { QueryType, ConversationStates } from "../../models/enums";
+import { getDynamodbClient } from "./dynamodb-client";
 
 
 export class EhrTransferTracker {
@@ -15,25 +15,15 @@ export class EhrTransferTracker {
 
     this.tableName = process.env.DYNAMODB_NAME;
 
-    const clientConfig = {
-      region: process.env.AWS_DEFAULT_REGION ?? "eu-west-2"
-    };
-
     const isInLocal = process.env.NHS_ENVIRONMENT === "local" || !process.env.NHS_ENVIRONMENT;
     const isInDojo = process.env.DOJO_VERSION !== undefined;
 
-    if (isInLocal) {
-      // for running whole integration test suite in dojo
-      clientConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
-    }
     if (isInLocal && !isInDojo) {
       // for running individual test with IDE
-      clientConfig.endpoint = "http://localhost:4573";
       this.tableName = "local-test-db";
     }
 
-    const baseClient = new DynamoDBClient(clientConfig);
-    this.client = DynamoDBDocumentClient.from(baseClient);
+    this.client = getDynamodbClient();
   }
 
   static getInstance() {
@@ -41,35 +31,6 @@ export class EhrTransferTracker {
       return this._instance;
     }
     return new this();
-  }
-
-  async createCore(ehrExtract) {
-
-    const { conversationId, messageId, nhsNumber, fragmentMessageIds } = ehrExtract;
-    const timestamp = getUKTimestamp();
-
-    const core = {
-      InboundConversationId: conversationId,
-      Layer: `Core#${messageId}`,
-      InboundMessageId: messageId,
-      CreatedAt: timestamp,
-      ReceivedAt: timestamp,
-      UpdatedAt: timestamp
-    };
-    const fragments = fragmentMessageIds ? fragmentMessageIds.map(fragmentMessageId => {
-      return {
-        InboundConversationId: conversationId,
-        Layer: `Fragment#${fragmentMessageId}`,
-        InboundMessageId: fragmentMessageId,
-        ParentId: messageId,
-        CreatedAt: timestamp,
-        UpdatedAt: timestamp
-      };
-    }) : [];
-
-    const itemsToWrite = [core, ...fragments];
-
-    await this.writeItemsToTable(itemsToWrite);
   }
 
   async writeItemsToTable(items) {
@@ -132,12 +93,12 @@ export class EhrTransferTracker {
     const params = {
       TableName: this.tableName,
       ExpressionAttributeNames: {
-        "#InboundConversationId": "InboundConversationId"
+        "#PrimaryKey": "InboundConversationId"
       },
       ExpressionAttributeValues: {
         ":InboundConversationId": inboundConversationId
       },
-      KeyConditionExpression: "#InboundConversationId = :InboundConversationId"
+      KeyConditionExpression: "#PrimaryKey = :InboundConversationId"
     };
 
     switch (queryType) {

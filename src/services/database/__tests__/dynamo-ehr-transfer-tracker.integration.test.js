@@ -1,7 +1,8 @@
 import { EhrTransferTracker } from "../dynamo-ehr-transfer-tracker";
 import { v4 as uuid } from "uuid";
-import { createConversationForTest, deleteConversationForTest } from "../../../models/conversation";
+import { createConversationForTest, cleanupRecordsForTest } from "../../../models/conversation";
 import { QueryType } from "../../../models/enums";
+import { createCore } from "../../../models/ehrCore";
 
 describe("EhrTransferTracker", () => {
   const testConversationId = uuid();
@@ -12,14 +13,13 @@ describe("EhrTransferTracker", () => {
   });
 
   afterEach(async () => {
-    await deleteConversationForTest(testConversationId);
+    await cleanupRecordsForTest(testConversationId);
   });
 
   it("create and read an ehrCore in dynamodb", async () => {
     // given
     const db = EhrTransferTracker.getInstance();
     const testMessageId = uuid();
-    const testNhsNumber = "9000000001";
 
     const ehrExtract = {
       conversationId: testConversationId,
@@ -27,8 +27,7 @@ describe("EhrTransferTracker", () => {
       nhsNumber: testNhsNumber
     };
 
-    // when
-    await db.createCore(ehrExtract);
+    await createCore(ehrExtract);
 
     // then
     const actual = await db.queryTableByConversationId(testConversationId, QueryType.CORE);
@@ -60,7 +59,7 @@ describe("EhrTransferTracker", () => {
       fragmentMessageIds: testChildMessageIds
     };
 
-    await db.createCore(ehrExtract);
+    await createCore(ehrExtract);
 
     // when
     await db.updateFragmentAndCreateItsParts(testChildMessageIds[0], testConversationId);

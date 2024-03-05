@@ -25,7 +25,7 @@ export const createConversationForTest = async (conversationId, nhsNumber) => {
   await db.writeItemsToTable([item]);
 };
 
-export const deleteConversationForTest = async (conversationId) => {
+export const cleanupRecordsForTest = async (conversationId) => {
   // This method is only meant for testing purpose,
 
   const isInLocal = process.env.NHS_ENVIRONMENT === "local" || !process.env.NHS_ENVIRONMENT;
@@ -48,15 +48,6 @@ export const deleteConversationForTest = async (conversationId) => {
       }))
     }
   );
-
-
-  // const deleteCommand = new DeleteCommand({
-  //   TableName: db.tableName,
-  //   Key: {
-  //     InboundConversationId: records[0].InboundConversationId,
-  //     Layer: records[0].Layer
-  //   }
-  // });
 
   await db.client.send(deleteCommand);
 };

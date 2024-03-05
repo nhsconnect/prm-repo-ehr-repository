@@ -1,17 +1,18 @@
 import { getUKTimestamp } from "../services/time";
 import { EhrTransferTracker } from "../services/database/dynamo-ehr-transfer-tracker";
 import { arrayOfFragments } from "./ehrFragment";
+import { CoreStates } from "./enums";
 
-export const createCore = async ({ inboundConversationId, messageId, fragmentMessageIds }) => {
+export const createCore = async ({ conversationId, messageId, fragmentMessageIds }) => {
   // to replace the existing `createEhrExtract` method
 
   const db = EhrTransferTracker.getInstance();
-  const itemsToWrite = [ehrCore({ inboundConversationId, messageId })];
+  const itemsToWrite = [ehrCore(conversationId, messageId)];
 
   if (fragmentMessageIds) {
     const directFragments = arrayOfFragments(
       {
-        inboundConversationId,
+        inboundConversationId: conversationId,
         fragmentMessageIds,
         parentMessageId: messageId
       }
@@ -23,7 +24,7 @@ export const createCore = async ({ inboundConversationId, messageId, fragmentMes
 };
 
 
-export const ehrCore = ({ inboundConversationId, messageId }) => {
+export const ehrCore = (inboundConversationId, messageId) => {
   const timestamp = getUKTimestamp();
   return {
     InboundConversationId: inboundConversationId,
@@ -31,6 +32,7 @@ export const ehrCore = ({ inboundConversationId, messageId }) => {
     InboundMessageId: messageId,
     CreatedAt: timestamp,
     ReceivedAt: timestamp,
-    UpdatedAt: timestamp
+    UpdatedAt: timestamp,
+    State: CoreStates.COMPLETE
   };
 };

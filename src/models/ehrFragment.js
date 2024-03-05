@@ -1,5 +1,4 @@
 import { getUKTimestamp } from "../services/time";
-import { EhrTransferTracker } from "../services/database/dynamo-ehr-transfer-tracker";
 
 
 
