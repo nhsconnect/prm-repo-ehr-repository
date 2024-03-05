@@ -1,9 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 import { getUKTimestamp } from "../time";
 import { logError } from "../../middleware/logging";
-import { createConversationForTest } from "../../models/conversation";
 
 
 export class EhrTransferTracker {
@@ -151,7 +150,7 @@ export class EhrTransferTracker {
   async updateFragmentAndCreateItsParts(messageId,
                                         conversationId,
                                         remainingPartsIds) {
-    // to replace existing method of the same name
+    // to replace the existing methods `updateFragmentAndCreateItsParts` and `createFragmentPart`
     const timestamp = getUKTimestamp();
 
     const currentFragment = {
@@ -189,5 +188,4 @@ export class EhrTransferTracker {
     });
     await this.client.send(command);
   };
-
 }
