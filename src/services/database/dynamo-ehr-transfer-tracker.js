@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import moment from "moment";
+import moment from "moment-timezone";
 
 
 export class EhrTransferTracker {
@@ -36,13 +36,13 @@ export class EhrTransferTracker {
   async createCore(ehrExtract) {
     // to replace the existing `createEhrExtract` method
     const { conversationId, messageId, nhsNumber, fragmentMessageIds } = ehrExtract;
-    const timestamp = moment().toISOString();
+    const timestamp = moment().tz('Europe/London').format('YYYY-MM-DDThh:mm:ssZ');
     const conversation = {
       InboundConversationId: conversationId,
       Layer: "Conversation",
       NhsNumber: nhsNumber,
       CreatedAt: timestamp,
-      LastUpdatedAt: timestamp
+      UpdatedAt: timestamp
     };
     const core = {
       InboundConversationId: conversationId,
@@ -50,7 +50,7 @@ export class EhrTransferTracker {
       InboundMessageId: messageId,
       CreatedAt: timestamp,
       ReceivedAt: timestamp,
-      LastUpdatedAt: timestamp
+      UpdatedAt: timestamp
     };
     const fragments = fragmentMessageIds ? fragmentMessageIds.map(fragmentMessageId => {
       return {
@@ -59,7 +59,7 @@ export class EhrTransferTracker {
         InboundMessageId: fragmentMessageId,
         ParentId: messageId,
         CreatedAt: timestamp,
-        LastUpdatedAt: timestamp
+        UpdatedAt: timestamp
       };
     }) : [];
 
