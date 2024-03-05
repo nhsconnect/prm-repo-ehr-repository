@@ -1,6 +1,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import moment from "moment-timezone";
+import { DynamoDBDocumentClient, TransactWriteCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+
+import { getUKTimestamp } from "../time";
+import { logError } from "../../middleware/logging";
+import { createConversationForTest } from "../../models/conversation";
 
 
 export class EhrTransferTracker {
@@ -16,10 +19,16 @@ export class EhrTransferTracker {
       region: process.env.AWS_DEFAULT_REGION ?? "eu-west-2"
     };
 
-    const isInLocal = process.env.nhsEnvironment === "local" || !process.env.nhsEnvironment;
+    const isInLocal = process.env.NHS_ENVIRONMENT === "local" || !process.env.NHS_ENVIRONMENT;
+    const isInDojo = process.env.DOJO_VERSION !== undefined
 
     if (isInLocal) {
       clientConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
+    }
+    // for running individual test in IDE
+    if (isInLocal && !isInDojo) {
+      clientConfig.endpoint = "http://localhost:4573";
+      this.tableName = "local-test-db";
     }
 
     const baseClient = new DynamoDBClient(clientConfig);
@@ -34,16 +43,10 @@ export class EhrTransferTracker {
   }
 
   async createCore(ehrExtract) {
-    // to replace the existing `createEhrExtract` method
+
     const { conversationId, messageId, nhsNumber, fragmentMessageIds } = ehrExtract;
-    const timestamp = moment().tz('Europe/London').format('YYYY-MM-DDThh:mm:ssZ');
-    const conversation = {
-      InboundConversationId: conversationId,
-      Layer: "Conversation",
-      NhsNumber: nhsNumber,
-      CreatedAt: timestamp,
-      UpdatedAt: timestamp
-    };
+    const timestamp = getUKTimestamp();
+
     const core = {
       InboundConversationId: conversationId,
       Layer: `Core#${messageId}`,
@@ -63,10 +66,19 @@ export class EhrTransferTracker {
       };
     }) : [];
 
+    const itemsToWrite = [core, ...fragments];
+
+    await this.writeItemsToTable(itemsToWrite);
+  }
+
+  async writeItemsToTable(items) {
+    if (!items || !Array.isArray(items)) {
+      throw new Error("The given argument `items` is not an array");
+    }
     const command = new TransactWriteCommand({
-      TransactItems: [conversation, core, ...fragments].map((item) => ({
+      TransactItems: items.map((item) => ({
         Put: {
-          TableName: this.tableName, Item: item, ConditionExpression: "attribute_not_exists(InboundConversationId)"
+          TableName: this.tableName, Item: item
         }
       }))
     });
@@ -74,9 +86,7 @@ export class EhrTransferTracker {
     await this.client.send(command);
   }
 
-  async getCurrentHealthRecordIdForPatient(nhsNumber) {
-    // to replace the existing method of the same name
-
+  async queryTableByNhsNumber(nhsNumber) {
     const params = {
       TableName: this.tableName,
       IndexName: "NhsNumberSecondaryIndex",
@@ -94,7 +104,18 @@ export class EhrTransferTracker {
     const response = await this.client.send(command);
     const items = response?.Items;
     if (!items) {
-      throw new Error("No records was found for given NHS number");
+      logError("Received an empty response from dynamodb during query");
+    }
+    return items;
+  }
+
+  async getCurrentHealthRecordIdForPatient(nhsNumber) {
+    // to replace the existing method of the same name
+
+    const items = await this.queryTableByNhsNumber(nhsNumber);
+
+    if (!items || items.length === 0) {
+      throw new Error("No record was found for given NHS number");
     }
 
     // TODO: to compare "completed at" rather then "created at"
@@ -104,4 +125,69 @@ export class EhrTransferTracker {
 
     return currentRecord.InboundConversationId;
   }
+
+  async queryTableByConversationId(inboundConversationId) {
+    const params = {
+      TableName: this.tableName,
+      ExpressionAttributeValues: {
+        ":InboundConversationId": inboundConversationId
+      },
+      ExpressionAttributeNames: {
+        "#InboundConversationId": "InboundConversationId"
+      },
+      KeyConditionExpression: "#InboundConversationId = :InboundConversationId"
+    };
+
+    const command = new QueryCommand(params);
+
+    const response = await this.client.send(command);
+    const items = response?.Items;
+    if (!items) {
+      logError("Received an empty response from dynamodb during query");
+    }
+    return items;
+  }
+
+  async updateFragmentAndCreateItsParts(messageId,
+                                        conversationId,
+                                        remainingPartsIds) {
+    // to replace existing method of the same name
+    const timestamp = getUKTimestamp();
+
+    const currentFragment = {
+      TableName: this.tableName,
+      Key: {
+        InboundConversationId: conversationId,
+        Layer: `Fragment#${messageId}`
+      },
+      UpdateExpression: "set ReceivedAt = :now, CreatedAt = if_not_exists(CreatedAt, :now), UpdatedAt = :now",
+      ExpressionAttributeValues: {
+        ":now": timestamp
+      }
+    };
+
+    const childFragments = remainingPartsIds ? remainingPartsIds.map(fragmentPartId => {
+      return ({
+        TableName: this.tableName,
+        Key: {
+          InboundConversationId: conversationId,
+          Layer: `Fragment#${fragmentPartId}`
+        },
+        UpdateExpression: "set CreatedAt = if_not_exists(CreatedAt, :now), UpdatedAt = :now, ParentId = :parentMessageId",
+        ExpressionAttributeValues: {
+          ":now": timestamp,
+          ":parentMessageId": messageId
+        }
+      });
+    }) : [];
+
+    const updateParams = [currentFragment, ...childFragments];
+    const command = new TransactWriteCommand({
+      TransactItems: updateParams.map((param) => ({
+        Update: param
+      }))
+    });
+    await this.client.send(command);
+  };
+
 }
