@@ -1,7 +1,5 @@
-import { ConversationStates, HealthRecordStatus, QueryType } from '../../models/enums';
+import { ConversationStates, HealthRecordStatus, RecordType } from '../../models/enums';
 import { logError, logInfo } from '../../middleware/logging';
-import { getUKTimestamp } from '../time';
-import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
 import { buildConversationUpdateParams } from '../../models/conversation';
 import { HealthRecordNotFoundError } from '../../errors/errors';
@@ -29,7 +27,7 @@ export const getHealthRecordStatus = async (conversationId) => {
 export const getConversationById = async (conversationId) => {
   const db = EhrTransferTracker.getInstance();
 
-  const results = await db.queryTableByConversationId(conversationId, QueryType.CONVERSATION);
+  const results = await db.queryTableByConversationId(conversationId, RecordType.CONVERSATION);
   if (!results || results.length === 0) {
     logInfo('Health Record not found');
     throw new HealthRecordNotFoundError();
@@ -44,7 +42,7 @@ export const updateConversationCompleteness = async (conversationId) => {
   try {
     const db = EhrTransferTracker.getInstance();
 
-    const allFragments = await db.queryTableByConversationId(conversationId, QueryType.FRAGMENT);
+    const allFragments = await db.queryTableByConversationId(conversationId, RecordType.FRAGMENT);
     const pendingMessages = allFragments.filter((fragment) => fragment.ReceivedAt === undefined);
 
     if (pendingMessages.length !== 0) {

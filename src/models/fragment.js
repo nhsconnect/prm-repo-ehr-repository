@@ -51,9 +51,12 @@ export const buildFragmentUpdateParams = (conversationId, messageId, changes) =>
       InboundConversationId: conversationId,
       Layer: `Fragment#${messageId}`,
     },
-    UpdateExpression: 'set CreatedAt = if_not_exists(CreatedAt, :now), UpdatedAt = :now',
+    UpdateExpression: `set CreatedAt = if_not_exists(CreatedAt, :now), \
+      InboundMessageId = if_not_exists(InboundMessageId, :messageId), \
+      UpdatedAt = :now`,
     ExpressionAttributeValues: {
       ':now': getUKTimestamp(),
+      ':messageId': messageId
     },
   };
 
@@ -67,3 +70,7 @@ export const buildFragmentUpdateParams = (conversationId, messageId, changes) =>
 
   return params;
 };
+
+export const isFragment = (dynamoDbItem) => {
+  return dynamoDbItem?.Layer?.startsWith('Fragment');
+}

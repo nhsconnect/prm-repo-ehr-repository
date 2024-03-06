@@ -1,8 +1,7 @@
 import { getUKTimestamp } from '../time';
-import { TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
 import { buildFragmentUpdateParams } from '../../models/fragment';
-import { QueryType } from '../../models/enums';
+import { RecordType } from '../../models/enums';
 import { logError } from '../../middleware/logging';
 
 export const markFragmentAsReceivedAndCreateItsParts = async (
@@ -34,7 +33,7 @@ export const markFragmentAsReceivedAndCreateItsParts = async (
 export const getFragmentByKey = (inboundConversationId, inboundMessageId) => {
   // to replace the findByPk default method from sequalize
   const db = EhrTransferTracker.getInstance();
-  return db.getItemByKey(inboundConversationId, inboundMessageId, QueryType.FRAGMENT);
+  return db.getItemByKey(inboundConversationId, inboundMessageId, RecordType.FRAGMENT);
 };
 
 export const fragmentExists = async (inboundConversationId, inboundMessageId) => {
@@ -43,7 +42,19 @@ export const fragmentExists = async (inboundConversationId, inboundMessageId) =>
     const fragment = await getFragmentByKey(inboundConversationId, inboundMessageId);
     return !!fragment;
   } catch (e) {
+    // TODO: change this error message
     logError('Querying database for fragment message failed', e);
     throw e;
   }
 };
+
+export const fragmentAlreadyReceived = async (conversationId, messageId) => {
+  // to replace the method `messageAlreadyReceived`
+  try {
+    const fragment = await getFragmentByKey(conversationId, messageId)
+    return fragment?.ReceivedAt !== undefined;
+  } catch (e) {
+    logError('Querying database for fragment message failed', e);
+    throw e;
+  }
+}

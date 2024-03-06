@@ -1,4 +1,4 @@
-export const QueryType = {
+export const RecordType = {
   ALL: 'ALL',
   CONVERSATION: 'Conversation',
   CORE: 'Core',
@@ -30,7 +30,7 @@ export const HealthRecordStatus = {
 };
 
 Object.freeze(HealthRecordStatus);
-Object.freeze(QueryType);
+Object.freeze(RecordType);
 Object.freeze(ConversationStates);
 Object.freeze(CoreStates);
 Object.freeze(FragmentStates);

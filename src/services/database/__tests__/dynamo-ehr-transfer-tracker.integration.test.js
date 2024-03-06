@@ -1,6 +1,6 @@
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import { v4 as uuid } from 'uuid';
-import { QueryType } from '../../../models/enums';
+import { RecordType } from '../../../models/enums';
 import { createCore } from '../ehr-core-repository';
 import {
   cleanupRecordsForTest,
@@ -34,7 +34,7 @@ describe('EhrTransferTracker', () => {
     await createCore(ehrExtract);
 
     // then
-    const actual = await db.queryTableByConversationId(testConversationId, QueryType.CORE);
+    const actual = await db.queryTableByConversationId(testConversationId, RecordType.CORE);
 
     expect(actual).toHaveLength(1);
     expect(actual[0]).toMatchObject({
@@ -72,7 +72,7 @@ describe('EhrTransferTracker', () => {
       testNestedChildIds
     );
 
-    const actual = await db.queryTableByConversationId(testConversationId, QueryType.FRAGMENT);
+    const actual = await db.queryTableByConversationId(testConversationId, RecordType.FRAGMENT);
 
     // then
     const expectedTotalMessages = testChildMessageIds.length + testNestedChildIds.length;

@@ -20,3 +20,7 @@ export const core = (inboundConversationId, messageId) => {
     State: CoreStates.COMPLETE,
   };
 };
+
+export const isCore = (dynamoDbItem) => {
+  return dynamoDbItem?.Layer?.startsWith('Core');
+}

@@ -8,10 +8,15 @@ import {
 } from '../ehr-conversation-repository';
 import { ConversationStates, HealthRecordStatus } from '../../../models/enums';
 import { createConversationForTest } from '../../../utilities/integration-test-utilities';
-import { createCore } from '../ehr-core-repository';
+import { createCore, getHealthRecordMessageIds } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
-import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
-import { HealthRecordNotFoundError } from "../../../errors/errors";
+import {
+  fragmentAlreadyReceived,
+  markFragmentAsReceivedAndCreateItsParts,
+} from '../ehr-fragment-repository';
+import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
+import { core } from '../../../models/core';
+import { getEpochTimeInSecond } from '../../time';
 
 jest.mock('../../../middleware/logging');
 
@@ -245,140 +250,125 @@ describe('healthRecordRepository', () => {
     });
   });
 
-  describe.skip('getHealthRecordMessageIds', () => {
-    it('should throw a meaningful error if there are no undeleted messages associated with conversation id', async () => {
+  describe('getHealthRecordMessageIds', () => {
+    it('should throw an error if no message found with given conversationId', async () => {
+      // given
       const conversationId = uuid();
-      await Message.create({
-        messageId: uuid(),
-        conversationId,
-        type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date(),
-        deletedAt: new Date(), // nb magical sequelize "paranoid" deletion
-      });
 
-      try {
-        await getHealthRecordMessageIds(conversationId);
-        fail('should have thrown');
-      } catch (e) {
-        expect(e.message).toEqual(
-          'There were no undeleted messages associated with conversation id'
-        );
-      }
+      // when
+      await expect(() => getHealthRecordMessageIds(conversationId))
+        // then
+        .rejects.toThrowError(MessageNotFoundError);
+    });
+
+    it('should throw an error if the only existing messages were deleted', async () => {
+      // given
+      const conversationId = uuid();
+      const messageId = uuid();
+      const item = { ...core(conversationId, messageId), DeletedAt: getEpochTimeInSecond() };
+
+      await db.writeItemsToTable([item]);
+
+      // when
+      await expect(() => getHealthRecordMessageIds(conversationId))
+        // then
+        .rejects.toThrowError(MessageNotFoundError);
     });
 
     it('should return health record extract message id given a conversation id for a small health record', async () => {
+      // given
       const messageId = uuid();
       const conversationId = uuid();
+      await createCore({ conversationId, messageId, fragmentMessageIds: [] });
 
-      await Message.create({
-        messageId,
-        conversationId,
-        type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date(),
-      });
+      // when
       const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
 
+      // then
       expect(coreMessageId).toEqual(messageId);
       expect(fragmentMessageIds).toEqual([]);
     });
 
     it('should return health record extract message id and fragment message ids given singular fragment', async () => {
+      // given
       const messageId = uuid();
       const conversationId = uuid();
       const fragmentMessageId = uuid();
 
-      await Message.create({
-        messageId,
-        conversationId,
-        type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date(),
-      });
+      await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
+      await markFragmentAsReceived(fragmentMessageId, conversationId);
 
-      await Message.create({
-        messageId: fragmentMessageId,
-        conversationId,
-        type: MessageType.FRAGMENT,
-        receivedAt: new Date(),
-        parentId: messageId,
-      });
+      // when
       const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
 
+      // then
       expect(coreMessageId).toEqual(messageId);
       expect(fragmentMessageIds).toEqual([fragmentMessageId]);
     });
 
     it('should return health record extract message id and fragment message ids given nested fragments', async () => {
+      // given
       const messageId = uuid();
       const conversationId = uuid();
       const fragmentMessageId = uuid();
       const nestedFragmentId = uuid();
 
-      await Message.create({
-        messageId,
-        conversationId,
-        type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date(),
-      });
+      await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
+      await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId, [
+        nestedFragmentId,
+      ]);
+      await markFragmentAsReceived(nestedFragmentId, conversationId);
 
-      await Message.create({
-        messageId: fragmentMessageId,
-        conversationId,
-        type: MessageType.FRAGMENT,
-        receivedAt: new Date(),
-        parentId: messageId,
-      });
-
-      await Message.create({
-        messageId: nestedFragmentId,
-        conversationId,
-        type: MessageType.FRAGMENT,
-        receivedAt: new Date(),
-        parentId: fragmentMessageId,
-      });
-
+      // when
       const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
 
+      // then
       expect(coreMessageId).toEqual(messageId);
-      expect(fragmentMessageIds).toEqual([fragmentMessageId, nestedFragmentId]);
+      expect(fragmentMessageIds.sort()).toEqual([fragmentMessageId, nestedFragmentId].sort());
     });
   });
 
-  describe.skip('healthRecordExists', () => {
+  describe('fragmentAlreadyReceived', () => {
     it("should return false if 'messageId' is not found in db", async () => {
+      // given
       const messageId = uuid();
-      const result = await messageAlreadyReceived(messageId);
+
+      // when
+      const result = await fragmentAlreadyReceived(messageId);
+
+      // then
       expect(result).toEqual(false);
     });
 
-    it("should return true if 'messageId' is found in db", async () => {
+    it("should return true if 'messageId' is received in db", async () => {
+      // given
       const conversationId = uuid();
       const messageId = uuid();
-      const nhsNumber = '9876543211';
+      const fragmentMessageId = uuid();
 
-      await HealthRecord.create({
-        conversationId,
-        nhsNumber,
-      });
+      await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
+      await markFragmentAsReceived(fragmentMessageId, conversationId);
 
-      await Message.create({
-        messageId,
-        conversationId,
-        type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date(),
-      });
+      // when
+      const result = await fragmentAlreadyReceived(conversationId, fragmentMessageId);
 
-      const result = await messageAlreadyReceived(messageId);
+      // then
       expect(result).toEqual(true);
     });
 
     it('should throw if database querying throws', async () => {
-      const messageId = 'not-valid';
+      // given
+      const messageId = uuid();
+      mimicDynamodbFail();
+
+      // when
       try {
-        await messageAlreadyReceived(messageId);
+        await fragmentAlreadyReceived(messageId);
         fail('should have throw');
       } catch (err) {
+        // then
         expect(err).not.toBeNull();
-        expect(logError).toHaveBeenCalledWith('Querying database for health record failed', err);
+        expect(logError).toHaveBeenCalledWith('Querying database for fragment message failed', err);
       }
     });
   });

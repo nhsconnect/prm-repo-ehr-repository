@@ -7,7 +7,7 @@ import {
 
 import { getUKTimestamp } from '../time';
 import { logError, logInfo } from '../../middleware/logging';
-import { QueryType, ConversationStates } from '../../models/enums';
+import { RecordType, ConversationStates } from '../../models/enums';
 import { getDynamodbClient } from './dynamodb-client';
 import { buildFragmentUpdateParams } from '../../models/fragment';
 
@@ -113,7 +113,7 @@ export class EhrTransferTracker {
     return currentRecord.InboundConversationId;
   }
 
-  async queryTableByConversationId(inboundConversationId, queryType = QueryType.ALL) {
+  async queryTableByConversationId(inboundConversationId, recordType = RecordType.ALL) {
     const params = {
       TableName: this.tableName,
       ExpressionAttributeNames: {
@@ -123,20 +123,21 @@ export class EhrTransferTracker {
         ':InboundConversationId': inboundConversationId,
       },
       KeyConditionExpression: '#PrimaryKey = :InboundConversationId',
+      FilterExpression: 'attribute_not_exists(DeletedAt)'
     };
 
-    switch (queryType) {
-      case QueryType.ALL:
+    switch (recordType) {
+      case RecordType.ALL:
         break;
-      case QueryType.CONVERSATION:
-      case QueryType.CORE:
-      case QueryType.FRAGMENT:
+      case RecordType.CONVERSATION:
+      case RecordType.CORE:
+      case RecordType.FRAGMENT:
         params.ExpressionAttributeNames['#sortKey'] = 'Layer';
-        params.ExpressionAttributeValues[':sortKey'] = queryType;
+        params.ExpressionAttributeValues[':sortKey'] = recordType;
         params.KeyConditionExpression += ' AND begins_with(#sortKey, :sortKey)';
         break;
       default:
-        logInfo(`Received unexpected queryType: ${queryType}. Will treat it as 'ALL'.`);
+        logInfo(`Received unexpected queryType: ${recordType}. Will treat it as 'ALL'.`);
     }
 
     const command = new QueryCommand(params);
@@ -150,11 +151,11 @@ export class EhrTransferTracker {
     return items;
   }
 
-  async getItemByKey(inboundConversationId, inboundMessageId, queryType = QueryType.FRAGMENT) {
-    const expectedQueryTypes = [QueryType.CORE, QueryType.FRAGMENT];
+  async getItemByKey(inboundConversationId, inboundMessageId, recordType = RecordType.FRAGMENT) {
+    const expectedTypes = [RecordType.CORE, RecordType.FRAGMENT];
 
-    if (!expectedQueryTypes.includes(queryType)) {
-      throw new Error('queryType has to be either Core or Fragment');
+    if (!expectedTypes.includes(recordType)) {
+      throw new Error('recordType has to be either Core or Fragment');
     }
     if (!inboundConversationId && !inboundMessageId) {
       throw new Error('must be called with both conversationId and inboundMessageId');
@@ -164,7 +165,7 @@ export class EhrTransferTracker {
       TableName: this.tableName,
       Key: {
         InboundConversationId: inboundConversationId,
-        Layer: `${queryType}#${inboundMessageId}`,
+        Layer: `${recordType}#${inboundMessageId}`,
       },
     });
 
@@ -177,6 +178,6 @@ export class EhrTransferTracker {
   }
 
   async getFragmentByKey(inboundConversationId, inboundMessageId) {
-    return this.getItemByKey(inboundConversationId, inboundMessageId, QueryType.FRAGMENT);
+    return this.getItemByKey(inboundConversationId, inboundMessageId, RecordType.FRAGMENT);
   }
 }
