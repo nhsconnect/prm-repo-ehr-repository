@@ -99,7 +99,7 @@ export class EhrTransferTracker {
     const completedRecords = items.filter(item => item.State === ConversationStates.COMPLETE || item.State.startsWith("Outbound"));
 
     const currentRecord = completedRecords.reduce((prev, current) => {
-      return (current && current?.UpdatedAt > prev?.UpdatedAt) ? current : prev;
+      return (current && current?.CreatedAt > prev?.CreatedAt) ? current : prev;
     });
 
     return currentRecord.InboundConversationId;

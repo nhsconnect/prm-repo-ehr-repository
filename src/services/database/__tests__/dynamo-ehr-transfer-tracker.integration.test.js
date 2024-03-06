@@ -1,8 +1,8 @@
 import { EhrTransferTracker } from "../dynamo-ehr-transfer-tracker";
 import { v4 as uuid } from "uuid";
-import { createConversationForTest, cleanupRecordsForTest } from "../../../models/conversation";
 import { QueryType } from "../../../models/enums";
 import { createCore } from "../ehr-core-repository";
+import { cleanupRecordsForTest, createConversationForTest } from "../../../utilities/integration-test-utilities";
 
 describe("EhrTransferTracker", () => {
   const testConversationId = uuid();
@@ -13,7 +13,7 @@ describe("EhrTransferTracker", () => {
   });
 
   afterEach(async () => {
-    // await cleanupRecordsForTest(testConversationId);
+    await cleanupRecordsForTest(testConversationId);
   });
 
   it("create and read an ehrCore in dynamodb", async () => {
