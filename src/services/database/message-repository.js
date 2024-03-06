@@ -5,6 +5,10 @@ import ModelFactory from '../../models';
 import { getNow } from '../time';
 
 export const createEhrExtract = async (ehrExtract) => {
+  /**
+   * @deprecated
+   * To be replaced by new method `createCore`
+   */
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const { conversationId, messageId, nhsNumber, fragmentMessageIds } = ehrExtract;
@@ -45,6 +49,10 @@ export const updateFragmentAndCreateItsParts = async (
   conversationId,
   remainingPartsIds
 ) => {
+  /**
+   * @deprecated
+   * To be replaced by new method `markFragmentAsReceivedAndCreateItsParts`
+   */
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
   const t = await sequelize.transaction();
@@ -81,6 +89,10 @@ export const updateFragmentAndCreateItsParts = async (
 };
 
 export const fragmentExists = async (id) => {
+  /**
+   * @deprecated
+   * To be replaced by new method of the same name at ehr-fragment-repository
+   */
   const Message = ModelFactory.getByName(messageModelName);
 
   try {
@@ -94,6 +106,10 @@ export const fragmentExists = async (id) => {
 };
 
 export const createFragmentPart = async (id, conversationId) => {
+  /**
+   * @deprecated
+   * To be replaced by new method `markFragmentAsReceivedAndCreateItsParts`
+   */
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
   const t = await sequelize.transaction();

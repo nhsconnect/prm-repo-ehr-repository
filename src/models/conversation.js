@@ -1,3 +1,26 @@
 import { getUKTimestamp } from "../services/time";
-import { EhrTransferTracker } from "../services/database/dynamo-ehr-transfer-tracker";
-import { DeleteCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
+
+const fieldsAllowedToUpdate = ['State', 'FailureCode'];
+
+export const buildConversationUpdateParams = (conversationId, changes) => {
+  const params = {
+    Key: {
+      InboundConversationId: conversationId,
+      Layer: 'Conversation'
+    },
+    UpdateExpression: "set UpdatedAt = :now",
+    ExpressionAttributeValues: {
+      ":now": getUKTimestamp()
+    }
+  };
+
+  for (const fieldname in fieldsAllowedToUpdate) {
+    if (fieldname in changes){
+      const colonKey = `:${fieldname}`
+      params.UpdateExpression += `, ${fieldname} = ${colonKey}`;
+      params.ExpressionAttributeValues[colonKey] = changes[fieldname]
+    }
+  }
+
+  return params;
+}

@@ -1,11 +1,15 @@
-import { TransactWriteCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  TransactWriteCommand,
+  QueryCommand,
+  UpdateCommand,
+  GetCommand,
+} from '@aws-sdk/lib-dynamodb';
 
-import { getUKTimestamp } from "../time";
-import { logError, logInfo } from "../../middleware/logging";
-import { QueryType, ConversationStates } from "../../models/enums";
-import { getDynamodbClient } from "./dynamodb-client";
-import { fragmentUpdateParams } from "../../models/fragment";
-
+import { getUKTimestamp } from '../time';
+import { logError, logInfo } from '../../middleware/logging';
+import { QueryType, ConversationStates } from '../../models/enums';
+import { getDynamodbClient } from './dynamodb-client';
+import { buildFragmentUpdateParams } from '../../models/fragment';
 
 export class EhrTransferTracker {
   constructor() {
@@ -16,12 +20,12 @@ export class EhrTransferTracker {
 
     this.tableName = process.env.DYNAMODB_NAME;
 
-    const isInLocal = process.env.NHS_ENVIRONMENT === "local" || !process.env.NHS_ENVIRONMENT;
+    const isInLocal = process.env.NHS_ENVIRONMENT === 'local' || !process.env.NHS_ENVIRONMENT;
     const isInDojo = process.env.DOJO_VERSION !== undefined;
 
     if (isInLocal && !isInDojo) {
       // for running individual test with IDE
-      this.tableName = "local-test-db";
+      this.tableName = 'local-test-db';
     }
 
     this.client = getDynamodbClient();
@@ -36,14 +40,15 @@ export class EhrTransferTracker {
 
   async writeItemsToTable(items) {
     if (!items || !Array.isArray(items)) {
-      throw new Error("The given argument `items` is not an array");
+      throw new Error('The given argument `items` is not an array');
     }
     const command = new TransactWriteCommand({
       TransactItems: items.map((item) => ({
         Put: {
-          TableName: this.tableName, Item: item
-        }
-      }))
+          TableName: this.tableName,
+          Item: item,
+        },
+      })),
     });
 
     await this.client.send(command);
@@ -51,14 +56,15 @@ export class EhrTransferTracker {
 
   async updateItemsInTransaction(updateParams) {
     if (!updateParams || !Array.isArray(updateParams)) {
-      throw new Error("The given argument `updateParams` is not an array");
+      throw new Error('The given argument `updateParams` is not an array');
     }
     const command = new TransactWriteCommand({
       TransactItems: updateParams.map((params) => ({
         Update: {
-          TableName: this.tableName, ...params
-        }
-      }))
+          TableName: this.tableName,
+          ...params,
+        },
+      })),
     });
 
     await this.client.send(command);
@@ -67,14 +73,14 @@ export class EhrTransferTracker {
   async queryTableByNhsNumber(nhsNumber) {
     const params = {
       TableName: this.tableName,
-      IndexName: "NhsNumberSecondaryIndex",
+      IndexName: 'NhsNumberSecondaryIndex',
       ExpressionAttributeValues: {
-        ":nhsNumber": nhsNumber
+        ':nhsNumber': nhsNumber,
       },
       ExpressionAttributeNames: {
-        "#NhsNumber": "NhsNumber"
+        '#NhsNumber': 'NhsNumber',
       },
-      KeyConditionExpression: "#NhsNumber = :nhsNumber"
+      KeyConditionExpression: '#NhsNumber = :nhsNumber',
     };
 
     const command = new QueryCommand(params);
@@ -82,7 +88,7 @@ export class EhrTransferTracker {
     const response = await this.client.send(command);
     const items = response?.Items;
     if (!items) {
-      logError("Received an empty response from dynamodb during query");
+      logError('Received an empty response from dynamodb during query');
     }
     return items;
   }
@@ -93,13 +99,15 @@ export class EhrTransferTracker {
     const items = await this.queryTableByNhsNumber(nhsNumber);
 
     if (!items || items.length === 0) {
-      throw new Error("No record was found for given NHS number");
+      throw new Error('No record was found for given NHS number');
     }
 
-    const completedRecords = items.filter(item => item.State === ConversationStates.COMPLETE || item.State.startsWith("Outbound"));
+    const completedRecords = items.filter(
+      (item) => item.State === ConversationStates.COMPLETE || item.State.startsWith('Outbound')
+    );
 
     const currentRecord = completedRecords.reduce((prev, current) => {
-      return (current && current?.CreatedAt > prev?.CreatedAt) ? current : prev;
+      return current && current?.CreatedAt > prev?.CreatedAt ? current : prev;
     });
 
     return currentRecord.InboundConversationId;
@@ -109,12 +117,12 @@ export class EhrTransferTracker {
     const params = {
       TableName: this.tableName,
       ExpressionAttributeNames: {
-        "#PrimaryKey": "InboundConversationId"
+        '#PrimaryKey': 'InboundConversationId',
       },
       ExpressionAttributeValues: {
-        ":InboundConversationId": inboundConversationId
+        ':InboundConversationId': inboundConversationId,
       },
-      KeyConditionExpression: "#PrimaryKey = :InboundConversationId"
+      KeyConditionExpression: '#PrimaryKey = :InboundConversationId',
     };
 
     switch (queryType) {
@@ -123,9 +131,9 @@ export class EhrTransferTracker {
       case QueryType.CONVERSATION:
       case QueryType.CORE:
       case QueryType.FRAGMENT:
-        params.ExpressionAttributeNames["#sortKey"] = "Layer";
-        params.ExpressionAttributeValues[":sortKey"] = queryType;
-        params.KeyConditionExpression += " AND begins_with(#sortKey, :sortKey)";
+        params.ExpressionAttributeNames['#sortKey'] = 'Layer';
+        params.ExpressionAttributeValues[':sortKey'] = queryType;
+        params.KeyConditionExpression += ' AND begins_with(#sortKey, :sortKey)';
         break;
       default:
         logInfo(`Received unexpected queryType: ${queryType}. Will treat it as 'ALL'.`);
@@ -136,54 +144,38 @@ export class EhrTransferTracker {
     const response = await this.client.send(command);
     const items = response?.Items;
     if (!items) {
-      logError("Received an empty response from dynamodb during query");
+      logError('Received an empty response from dynamodb during query');
     }
     return items;
   }
 
-  async updateFragmentAndCreateItsParts(messageId,
-                                        conversationId,
-                                        remainingPartsIds = []) {
-    // to replace the existing methods `updateFragmentAndCreateItsParts` and `createFragmentPart`
-    const timestamp = getUKTimestamp();
+  async getItemByKey(inboundConversationId, inboundMessageId, queryType = QueryType.FRAGMENT) {
+    const expectedQueryTypes = [QueryType.CORE, QueryType.FRAGMENT];
 
-    const currentFragmentParams = fragmentUpdateParams(conversationId, messageId, { ReceivedAt: timestamp });
-
-    const childFragmentsParams = remainingPartsIds.map(fragmentPartId => {
-      return fragmentUpdateParams(
-        conversationId,
-        fragmentPartId,
-        { ParentId: messageId }
-      );
-    });
-
-    await this.updateItemsInTransaction([currentFragmentParams, ...childFragmentsParams]);
-  };
-
-  async updateHealthRecordCompleteness(conversationId) {
-    const allFragments = this.queryTableByConversationId(conversationId, QueryType.FRAGMENT);
-    const pendingMessages = allFragments.filter(fragment => fragment.receivedAt === undefined);
-    if (pendingMessages.length !== 0) {
-      logInfo(`${pendingMessages.length} more fragments to be received.`);
-      return;
+    if (!expectedQueryTypes.includes(queryType)) {
+      throw new Error('queryType has to be either Core or Fragment');
+    }
+    if (!inboundConversationId && !inboundMessageId) {
+      throw new Error('must be called with both conversationId and inboundMessageId');
     }
 
-    logInfo("All fragments are received. Will mark this conversation as complete");
-
-    const timestamp = getUKTimestamp();
-    const updateParam = {
+    const command = new GetCommand({
       TableName: this.tableName,
       Key: {
-        InboundConversationId: conversationId,
-        Layer: "Conversation"
+        InboundConversationId: inboundConversationId,
+        Layer: `${queryType}#${inboundMessageId}`,
       },
-      UpdateExpression: "set UpdatedAt = :now, State = :complete",
-      ExpressionAttributeValues: {
-        ":now": timestamp,
-        ":complete": ConversationStates.COMPLETE
-      }
-    };
+    });
 
-    await this.client.send(new UpdateCommand(updateParam));
+    const response = await this.client.send(command);
+
+    if (response?.Item) {
+      logError('Received an empty response from dynamodb during query');
+    }
+    return response?.Item ?? null;
+  }
+
+  async getFragmentByKey(inboundConversationId, inboundMessageId) {
+    return this.getItemByKey(inboundConversationId, inboundMessageId, QueryType.FRAGMENT);
   }
 }

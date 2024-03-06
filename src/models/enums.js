@@ -12,18 +12,18 @@ export const ConversationStates = {
   COMPLETE: 'INBOUND_COMPLETE',
   FAILED: 'INBOUND_FAILED',
   TIMEOUT: 'INBOUND_TIMEOUT',
-}
+};
 
 export const CoreStates = {
   COMPLETE: 'INBOUND_COMPLETE',
-}
+};
 
 export const FragmentStates = {
   PENDING: 'INBOUND_REQUEST_SENT',
   COMPLETE: 'INBOUND_COMPLETE',
-}
+};
 
-Object.freeze(QueryType)
-Object.freeze(ConversationStates)
-Object.freeze(CoreStates)
-Object.freeze(FragmentStates)
+Object.freeze(QueryType);
+Object.freeze(ConversationStates);
+Object.freeze(CoreStates);
+Object.freeze(FragmentStates);
