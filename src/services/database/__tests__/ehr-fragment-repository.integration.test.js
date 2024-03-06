@@ -1,7 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { logError } from '../../../middleware/logging';
-// import * as time from '../../time';
-import { createCore, getCoreByKey } from '../ehr-core-repository';
+import { createCore } from '../ehr-core-repository';
 import {
   fragmentExists,
   getFragmentByKey,
@@ -13,80 +12,12 @@ import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 // Mocking
 jest.mock('../../../middleware/logging');
 
-describe('messageRepository', () => {
+describe('ehr-fragment-repository', () => {
   const expectedTimestamp = '2024-03-06T12:34:56+00:00';
   const mockTime = new Date(Date.parse(expectedTimestamp));
 
   beforeEach(async () => {
     jest.useFakeTimers().setSystemTime(mockTime);
-  });
-
-  describe('createCore', () => {
-    it('should create core message in db', async () => {
-      // given
-      const conversationId = uuid();
-      const messageId = uuid();
-      const ehrExtract = { messageId, conversationId, fragmentMessageIds: [] };
-
-      // when
-      await createCore(ehrExtract);
-
-      // then
-      const actualMessage = await getCoreByKey(conversationId, messageId);
-
-      expect(actualMessage.InboundMessageId).toBe(messageId);
-      expect(actualMessage.InboundConversationId).toBe(conversationId);
-      expect(actualMessage.Layer).toBe(`Core#${messageId}`);
-      expect(actualMessage.ReceivedAt).toEqual(expectedTimestamp);
-    });
-
-    // Note: old test it('should create health record in db') is not migrated,
-    // as now the responsibility of creating a new conversation is handled by another service
-
-    it('should create fragments message in db when health record has fragments', async () => {
-      // given
-      const conversationId = uuid();
-      const messageId = uuid();
-      const fragmentMessageId = uuid();
-      const fragmentMessageIds = [fragmentMessageId];
-      const ehrExtract = { messageId, conversationId, fragmentMessageIds };
-
-      // when
-      await createCore(ehrExtract);
-
-      // then
-      const fragmentMessage = await getFragmentByKey(conversationId, fragmentMessageId);
-      expect(fragmentMessage.InboundConversationId).toBe(conversationId);
-      expect(fragmentMessage.Layer).toBe(`Fragment#${fragmentMessageId}`);
-      expect(fragmentMessage.InboundMessageId).toBe(fragmentMessageId);
-      expect(fragmentMessage.ParentId).toBe(messageId);
-      expect(fragmentMessage.ReceivedAt).toBeUndefined();
-    });
-
-    it('should not save message with wrong type', async () => {
-      // given
-      const conversationId = uuid();
-      const messageId = 'not-a-valid-message-id';
-      const ehrExtract = {
-        messageId,
-        conversationId,
-        fragmentMessageIds: [],
-      };
-
-      try {
-        // when
-        await createCore(ehrExtract);
-      } catch (err) {
-        // then
-        expect(err).not.toBeNull();
-        expect(logError).toHaveBeenCalledWith('Message could not be stored', err);
-      }
-      const actualMessage = await getCoreByKey(conversationId, messageId);
-      expect(actualMessage).toBeNull();
-    });
-
-    // Note: not migrating old test it('should not save message or health record with wrong nhs number'),
-    // because now the nhs number field only present at conversation level.
   });
 
   describe('markFragmentAsReceivedAndCreateItsParts', () => {
@@ -210,7 +141,7 @@ describe('messageRepository', () => {
   });
 
   describe('markFragmentAsReceivedAndCreateItsParts', () => {
-    // Note: this describe block is migrated from the test of old method "createFragmentPart"
+    // Note: this describe block is migrated from the tests of old method "createFragmentPart"
     it('should create fragment entry in the database', async () => {
       const messageId = uuid();
       const conversationId = uuid();
