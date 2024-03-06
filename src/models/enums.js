@@ -23,6 +23,13 @@ export const FragmentStates = {
   COMPLETE: 'INBOUND_COMPLETE',
 };
 
+export const HealthRecordStatus = {
+  COMPLETE: "complete",
+  PENDING: "pending",
+  NOT_FOUND: "notFound"
+};
+
+Object.freeze(HealthRecordStatus);
 Object.freeze(QueryType);
 Object.freeze(ConversationStates);
 Object.freeze(CoreStates);

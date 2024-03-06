@@ -3,9 +3,10 @@ import { v4 as uuid } from 'uuid';
 import app from '../../../app';
 import {
   getHealthRecordStatus,
-  HealthRecordStatus,
+
 } from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
+import { HealthRecordStatus } from "../../../models/enums";
 
 jest.mock('../../../services/database/health-record-repository');
 jest.mock('../../../config', () => ({

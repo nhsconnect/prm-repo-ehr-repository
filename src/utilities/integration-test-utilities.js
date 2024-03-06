@@ -13,7 +13,7 @@ export const generateMultipleUUID = (amount, isUppercase) =>
     .fill(undefined)
     .map(() => (isUppercase ? uuidv4().toUpperCase() : uuidv4()));
 
-export const createConversationForTest = async (conversationId, nhsNumber) => {
+export const createConversationForTest = async (conversationId, nhsNumber, overrides) => {
   // This method is only meant for testing purpose,
   // as the inbound conversation record is supposed to be created by other service.
 
@@ -31,6 +31,7 @@ export const createConversationForTest = async (conversationId, nhsNumber) => {
     NhsNumber: nhsNumber,
     CreatedAt: timestamp,
     UpdatedAt: timestamp,
+    ...overrides
   };
 
   await db.writeItemsToTable([item]);

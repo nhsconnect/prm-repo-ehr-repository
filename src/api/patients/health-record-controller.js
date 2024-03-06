@@ -1,9 +1,10 @@
 import { param } from 'express-validator';
 import {
   getHealthRecordStatus,
-  HealthRecordStatus,
+
 } from '../../services/database/health-record-repository';
 import { setCurrentSpanAttributes } from '../../config/tracing';
+import { HealthRecordStatus } from "../../models/enums";
 
 export const healthRecordControllerValidation = [
   param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),

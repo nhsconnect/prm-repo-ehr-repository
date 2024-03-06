@@ -1,15 +1,10 @@
-import { MessageType, modelName as messageModelName } from '../../models/message';
-import { modelName as healthRecordModelName } from '../../models/health-record';
-import { logError, logInfo } from '../../middleware/logging';
-import Sequelize from 'sequelize';
-import ModelFactory from '../../models';
-import { getNow } from '../time';
-
-export const HealthRecordStatus = {
-  COMPLETE: 'complete',
-  PENDING: 'pending',
-  NOT_FOUND: 'notFound',
-};
+import { MessageType, modelName as messageModelName } from "../../models/message";
+import { modelName as healthRecordModelName } from "../../models/health-record";
+import { logError, logInfo } from "../../middleware/logging";
+import Sequelize from "sequelize";
+import ModelFactory from "../../models";
+import { getNow } from "../time";
+import { HealthRecordStatus } from "../../models/enums";
 
 Object.freeze(HealthRecordStatus);
 
