@@ -1,8 +1,10 @@
-import { ConversationStates, HealthRecordStatus, RecordType } from '../../models/enums';
-import { logError, logInfo } from '../../middleware/logging';
-import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
-import { buildConversationUpdateParams } from '../../models/conversation';
-import { HealthRecordNotFoundError } from '../../errors/errors';
+import { ConversationStates, HealthRecordStatus, RecordType } from "../../models/enums";
+import { logError, logInfo } from "../../middleware/logging";
+import { EhrTransferTracker } from "./dynamo-ehr-transfer-tracker";
+import { buildConversationUpdateParams } from "../../models/conversation";
+import { HealthRecordNotFoundError, MessageNotFoundError } from "../../errors/errors";
+import { isCore } from "../../models/core";
+import { isFragment } from "../../models/fragment";
 
 export const getHealthRecordStatus = async (conversationId) => {
   // to replace the method with same name
@@ -81,4 +83,23 @@ export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
   });
 
   return currentRecord.InboundConversationId;
+};
+
+
+export const getHealthRecordMessageIds = async (conversationId) => {
+  // to replace the method of same name
+
+  const db = EhrTransferTracker.getInstance();
+  const items = await db.queryTableByConversationId(conversationId, RecordType.ALL);
+
+  const core = items.filter(isCore)?.[0];
+  const fragments = items.filter(isFragment);
+
+  if (!core) {
+    throw new MessageNotFoundError();
+  }
+  const coreMessageId = core.InboundMessageId;
+  const fragmentMessageIds = fragments.map(message => message.InboundMessageId);
+
+  return { coreMessageId, fragmentMessageIds };
 };

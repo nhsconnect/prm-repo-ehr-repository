@@ -3,12 +3,13 @@ import { logError } from '../../../middleware/logging';
 import {
   getConversationById,
   getCurrentHealthRecordIdForPatient,
+  getHealthRecordMessageIds,
   getHealthRecordStatus,
   updateConversationCompleteness,
 } from '../ehr-conversation-repository';
 import { ConversationStates, HealthRecordStatus } from '../../../models/enums';
 import { createConversationForTest } from '../../../utilities/integration-test-utilities';
-import { createCore, getHealthRecordMessageIds } from '../ehr-core-repository';
+import { createCore } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import {
   fragmentAlreadyReceived,
