@@ -6,6 +6,11 @@ import AWS from 'aws-sdk';
 import { logError, logInfo } from '../middleware/logging';
 
 class ModelFactory {
+  /**
+   * @deprecated
+   * Postgres DB related stubs
+   * To be deleted PRMT-4568
+   */
   constructor() {
     this.db = {};
     this.sequelize = {};

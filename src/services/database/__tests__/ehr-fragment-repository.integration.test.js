@@ -3,7 +3,7 @@ import { logError } from '../../../middleware/logging';
 import { createCore } from '../ehr-core-repository';
 import {
   fragmentAlreadyReceived,
-  fragmentExists,
+  fragmentExistsInRecord,
   getFragmentByKey,
   markFragmentAsReceivedAndCreateItsParts,
 } from '../ehr-fragment-repository';
@@ -125,7 +125,7 @@ describe('ehr-fragment-repository', () => {
     });
   });
 
-  describe('fragmentExists', () => {
+  describe('fragmentExistsInRecord', () => {
     it('should return true for a fragment existing in the database', async () => {
       const conversationId = uuid();
       const messageId = uuid();
@@ -137,19 +137,19 @@ describe('ehr-fragment-repository', () => {
       const db = EhrTransferTracker.getInstance();
       await db.writeItemsToTable([fragment]);
 
-      expect(await fragmentExists(conversationId, messageId)).toBe(true);
+      expect(await fragmentExistsInRecord(conversationId, messageId)).toBe(true);
     });
 
     it('should return false for a fragment that does not exist in the database', async () => {
       const conversationId = uuid();
       const messageId = uuid();
-      expect(await fragmentExists(conversationId, messageId)).toBe(false);
+      expect(await fragmentExistsInRecord(conversationId, messageId)).toBe(false);
     });
 
     it('should throw if database querying throws', async () => {
       const messageId = 'not-valid';
       try {
-        await fragmentExists(messageId);
+        await fragmentExistsInRecord(messageId);
       } catch (err) {
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Querying database for fragment message failed', err);

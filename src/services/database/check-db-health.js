@@ -3,6 +3,11 @@ import { ERROR_CODES } from './pg-error-codes';
 import { modelName } from '../../models/health-check';
 
 export const checkDbHealth = () => {
+  /**
+   * @deprecated
+   * It is decided we will not carry out health check by read/write into database anymore
+   * To be deleted PRMT-4568
+   */
   const HealthCheck = ModelFactory.getByName(modelName);
 
   return HealthCheck.create()

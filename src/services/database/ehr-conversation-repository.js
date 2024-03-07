@@ -7,8 +7,7 @@ import { isCore } from '../../models/core';
 import { isFragment } from '../../models/fragment';
 import { buildSoftDeleteUpdateParams } from '../../utilities/dynamodb-helper';
 
-export const getHealthRecordStatus = async (conversationId) => {
-  // to replace the method with same name
+export const getConversationStatus = async (conversationId) => {
   try {
     const conversation = await getConversationById(conversationId);
     if (conversation.TransferStatus === ConversationStatus.COMPLETE) {
@@ -66,8 +65,7 @@ export const updateConversationCompleteness = async (conversationId) => {
   }
 };
 
-export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
-  // to replace the existing method of the same name
+export const getCurrentConversationIdForPatient = async (nhsNumber) => {
   const db = EhrTransferTracker.getInstance();
   const conversations = await db.queryTableByNhsNumber(nhsNumber);
 
@@ -88,27 +86,7 @@ export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
   return currentRecord.InboundConversationId;
 };
 
-export const getHealthRecordMessageIds = async (conversationId) => {
-  // to replace the method of same name
-
-  const db = EhrTransferTracker.getInstance();
-  const items = await db.queryTableByConversationId(conversationId, RecordType.ALL);
-
-  const core = items.filter(isCore)?.[0];
-  const fragments = items.filter(isFragment);
-
-  if (!core) {
-    throw new MessageNotFoundError();
-  }
-  const coreMessageId = core.InboundMessageId;
-  const fragmentMessageIds = fragments.map((message) => message.InboundMessageId);
-
-  return { coreMessageId, fragmentMessageIds };
-};
-
-export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
-  // to replace the method of same name
-
+export const markRecordAsSoftDeleteForPatient = async (nhsNumber) => {
   const db = EhrTransferTracker.getInstance();
   const allConversations = await db.queryTableByNhsNumber(nhsNumber);
   const allConversationIds = allConversations.map((item) => item.InboundConversationId);
@@ -123,4 +101,20 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
 
   await db.updateItemsInTransaction(allUpdateParams);
   return allConversationIds;
+};
+
+export const getMessageIdsForConversation = async (conversationId) => {
+  const db = EhrTransferTracker.getInstance();
+  const items = await db.queryTableByConversationId(conversationId, RecordType.ALL);
+
+  const core = items.filter(isCore)?.[0];
+  const fragments = items.filter(isFragment);
+
+  if (!core) {
+    throw new MessageNotFoundError();
+  }
+  const coreMessageId = core.InboundMessageId;
+  const fragmentMessageIds = fragments.map((message) => message.InboundMessageId);
+
+  return { coreMessageId, fragmentMessageIds };
 };

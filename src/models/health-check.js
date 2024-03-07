@@ -1,5 +1,10 @@
 import getParameters from './parameters';
 
+/**
+ * @deprecated
+ * Postgres DB related stubs
+ * To be deleted PRMT-4568
+ */
 export const modelName = 'HealthCheck';
 const tableName = 'health_checks';
 

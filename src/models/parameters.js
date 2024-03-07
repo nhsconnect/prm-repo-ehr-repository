@@ -1,3 +1,8 @@
+/**
+ * @deprecated
+ * Postgres DB related stubs
+ * To be deleted PRMT-4568
+ */
 const getParameters = (tableName) => ({
   tableName: tableName,
   createdAt: 'created_at',

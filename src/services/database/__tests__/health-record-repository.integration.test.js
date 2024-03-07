@@ -16,6 +16,11 @@ import { HealthRecordStatus } from "../../../models/enums";
 jest.mock('../../../middleware/logging');
 
 describe('healthRecordRepository', () => {
+  /**
+   * @deprecated
+   * All the tests here are migrated to new test suite of dynamodb-based implementation
+   * To be deleted PRMT-4568
+   */
   // ========================= COMMON PROPERTIES =========================
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const Message = ModelFactory.getByName(messageModelName);

@@ -2,10 +2,10 @@ import { v4 as uuid } from 'uuid';
 import { logError } from '../../../middleware/logging';
 import {
   getConversationById,
-  getCurrentHealthRecordIdForPatient,
-  getHealthRecordMessageIds,
-  getHealthRecordStatus,
-  markHealthRecordAsDeletedForPatient,
+  getCurrentConversationIdForPatient,
+  getMessageIdsForConversation,
+  getConversationStatus,
+  markRecordAsSoftDeleteForPatient,
   updateConversationCompleteness,
 } from '../ehr-conversation-repository';
 import { ConversationStatus, HealthRecordStatus, RecordType } from '../../../models/enums';
@@ -44,7 +44,7 @@ describe('ehr-conversation-repository', () => {
   });
   // =====================================================================
 
-  describe('getHealthRecordStatus', () => {
+  describe('getConversationStatus', () => {
     it("should return status 'complete' when conversation status is Complete", async () => {
       // given
       const conversationId = uuid();
@@ -54,7 +54,7 @@ describe('ehr-conversation-repository', () => {
       });
 
       // when
-      const status = await getHealthRecordStatus(conversationId);
+      const status = await getConversationStatus(conversationId);
 
       // then
       expect(status).toEqual(HealthRecordStatus.COMPLETE);
@@ -69,7 +69,7 @@ describe('ehr-conversation-repository', () => {
       });
 
       // when
-      const status = await getHealthRecordStatus(conversationId);
+      const status = await getConversationStatus(conversationId);
 
       // then
       expect(status).toEqual(HealthRecordStatus.PENDING);
@@ -80,7 +80,7 @@ describe('ehr-conversation-repository', () => {
       const conversationId = uuid();
 
       // when
-      const status = await getHealthRecordStatus(conversationId);
+      const status = await getConversationStatus(conversationId);
 
       // then
       expect(status).toEqual(HealthRecordStatus.NOT_FOUND);
@@ -93,7 +93,7 @@ describe('ehr-conversation-repository', () => {
 
       try {
         // when
-        await getHealthRecordStatus(conversationId);
+        await getConversationStatus(conversationId);
         fail('should have throw');
       } catch (err) {
         // then
@@ -106,7 +106,7 @@ describe('ehr-conversation-repository', () => {
     });
   });
 
-  describe('updateHealthRecordCompleteness', () => {
+  describe('updateConversationCompleteness', () => {
     it("should set conversation state to 'Complete' for a small health record", async () => {
       // given
       const conversationId = uuid();
@@ -188,7 +188,7 @@ describe('ehr-conversation-repository', () => {
     });
   });
 
-  describe('getCurrentHealthRecordIdForPatient', () => {
+  describe('getCurrentConversationIdForPatient', () => {
     it('should return most recent complete health record conversation id', async () => {
       // given
       const nhsNumber = '9876543212';
@@ -210,7 +210,7 @@ describe('ehr-conversation-repository', () => {
       });
 
       // when
-      const actual = await getCurrentHealthRecordIdForPatient(nhsNumber);
+      const actual = await getCurrentConversationIdForPatient(nhsNumber);
 
       // then
       expect(actual).toEqual(currentHealthRecordConversationId);
@@ -225,7 +225,7 @@ describe('ehr-conversation-repository', () => {
       });
 
       // when
-      await expect(() => getCurrentHealthRecordIdForPatient(nhsNumber))
+      await expect(() => getCurrentConversationIdForPatient(nhsNumber))
         // then
         .rejects.toThrowError(HealthRecordNotFoundError);
     });
@@ -235,19 +235,19 @@ describe('ehr-conversation-repository', () => {
       const nhsNumber = '1111111112';
 
       // when
-      await expect(() => getCurrentHealthRecordIdForPatient(nhsNumber))
+      await expect(() => getCurrentConversationIdForPatient(nhsNumber))
         // then
         .rejects.toThrowError(HealthRecordNotFoundError);
     });
   });
 
-  describe('getHealthRecordMessageIds', () => {
+  describe('getMessageIdsForConversation', () => {
     it('should throw an error if no message found with given conversationId', async () => {
       // given
       const conversationId = uuid();
 
       // when
-      await expect(() => getHealthRecordMessageIds(conversationId))
+      await expect(() => getMessageIdsForConversation(conversationId))
         // then
         .rejects.toThrowError(MessageNotFoundError);
     });
@@ -261,7 +261,7 @@ describe('ehr-conversation-repository', () => {
       await db.writeItemsToTable([item]);
 
       // when
-      await expect(() => getHealthRecordMessageIds(conversationId))
+      await expect(() => getMessageIdsForConversation(conversationId))
         // then
         .rejects.toThrowError(MessageNotFoundError);
     });
@@ -273,7 +273,7 @@ describe('ehr-conversation-repository', () => {
       await createCore({ conversationId, messageId, fragmentMessageIds: [] });
 
       // when
-      const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
+      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(conversationId);
 
       // then
       expect(coreMessageId).toEqual(messageId);
@@ -290,7 +290,7 @@ describe('ehr-conversation-repository', () => {
       await markFragmentAsReceived(fragmentMessageId, conversationId);
 
       // when
-      const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
+      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(conversationId);
 
       // then
       expect(coreMessageId).toEqual(messageId);
@@ -311,7 +311,7 @@ describe('ehr-conversation-repository', () => {
       await markFragmentAsReceived(nestedFragmentId, conversationId);
 
       // when
-      const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(conversationId);
+      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(conversationId);
 
       // then
       expect(coreMessageId).toEqual(messageId);
@@ -319,7 +319,7 @@ describe('ehr-conversation-repository', () => {
     });
   });
 
-  describe('markHealthRecordAsDeletedForPatient', () => {
+  describe('markAllRecordAsDeletedForPatient', () => {
     // ========================= HELPER SETUPS FOR THIS BLOCK =========================
     let conversationIdUsed = [];
     const mockTime = new Date(Date.parse('2024-03-06T12:34:56+00:00'));
@@ -366,10 +366,10 @@ describe('ehr-conversation-repository', () => {
       await createCompleteRecordForTest(nhsNumber, conversationId, messageId, fragmentIds);
 
       // when
-      const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
+      const result = await markRecordAsSoftDeleteForPatient(nhsNumber);
 
       // then
-      const healthRecordStatusAfterwards = await getHealthRecordStatus(conversationId);
+      const healthRecordStatusAfterwards = await getConversationStatus(conversationId);
       expect(result).toEqual([conversationId]);
       expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.NOT_FOUND);
 
@@ -400,7 +400,7 @@ describe('ehr-conversation-repository', () => {
       await createCompleteRecordForTest(nhsNumber, secondConversationId, secondMessageId);
 
       // when
-      const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
+      const result = await markRecordAsSoftDeleteForPatient(nhsNumber);
 
       // then
       expect(result).toHaveLength(2);

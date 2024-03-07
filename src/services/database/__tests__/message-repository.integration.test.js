@@ -16,10 +16,11 @@ import expect from 'expect';
 jest.mock('../../../middleware/logging');
 jest.mock('../../time');
 
-describe.skip('messageRepository', () => {
+describe('messageRepository', () => {
   /**
    * @deprecated
    * All the tests here are migrated to new test suite of dynamodb-based implementation
+   * To be deleted PRMT-4568
    */
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);

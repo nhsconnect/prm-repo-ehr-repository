@@ -7,7 +7,8 @@ import { getNow } from '../time';
 export const createEhrExtract = async (ehrExtract) => {
   /**
    * @deprecated
-   * To be replaced by new method `createCore`
+   * Replaced by new method `createCore`
+   * To be deleted PRMT-4568
    */
   const Message = ModelFactory.getByName(messageModelName);
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
@@ -51,7 +52,8 @@ export const updateFragmentAndCreateItsParts = async (
 ) => {
   /**
    * @deprecated
-   * To be replaced by new method `markFragmentAsReceivedAndCreateItsParts`
+   * Replaced by new method `markFragmentAsReceivedAndCreateItsParts`
+   * To be deleted PRMT-4568
    */
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
@@ -91,7 +93,8 @@ export const updateFragmentAndCreateItsParts = async (
 export const fragmentExists = async (id) => {
   /**
    * @deprecated
-   * To be replaced by new method of the same name at ehr-fragment-repository
+   * Replaced by new method `fragmentExistsInRecord`
+   * To be deleted PRMT-4568
    */
   const Message = ModelFactory.getByName(messageModelName);
 

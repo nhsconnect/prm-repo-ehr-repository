@@ -1,6 +1,11 @@
 const use_ssl = process.env.USE_SSL_FOR_DB === 'true';
 const use_rds_credentials = process.env.USE_AWS_RDS_CREDENTIALS === 'true';
 
+/**
+ * @deprecated
+ * Postgres DB related stubs
+ * To be deleted PRMT-4568
+ */
 const sequelizeConfig = {
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,

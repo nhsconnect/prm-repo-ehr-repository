@@ -9,8 +9,6 @@ export const markFragmentAsReceivedAndCreateItsParts = async (
   conversationId,
   remainingPartsIds = []
 ) => {
-  // to replace the existing methods `updateFragmentAndCreateItsParts` and `createFragmentPart`
-
   try {
     const db = EhrTransferTracker.getInstance();
     const timestamp = getUKTimestamp();
@@ -36,20 +34,17 @@ export const getFragmentByKey = (inboundConversationId, inboundMessageId) => {
   return db.getItemByKey(inboundConversationId, inboundMessageId, RecordType.FRAGMENT);
 };
 
-export const fragmentExists = async (inboundConversationId, inboundMessageId) => {
-  // to replace the method with same name
+export const fragmentExistsInRecord = async (inboundConversationId, inboundMessageId) => {
   try {
     const fragment = await getFragmentByKey(inboundConversationId, inboundMessageId);
     return !!fragment;
   } catch (e) {
-    // TODO: change this error message
     logError('Querying database for fragment message failed', e);
     throw e;
   }
 };
 
 export const fragmentAlreadyReceived = async (conversationId, messageId) => {
-  // to replace the method `messageAlreadyReceived`
   try {
     const fragment = await getFragmentByKey(conversationId, messageId)
     return fragment?.ReceivedAt !== undefined;

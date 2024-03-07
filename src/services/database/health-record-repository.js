@@ -5,10 +5,16 @@ import Sequelize from "sequelize";
 import ModelFactory from "../../models";
 import { getNow } from "../time";
 import { HealthRecordStatus } from "../../models/enums";
+import { markRecordAsSoftDeleteForPatient } from "./ehr-conversation-repository";
 
 Object.freeze(HealthRecordStatus);
 
 export const getHealthRecordStatus = async (conversationId) => {
+  /**
+   * @deprecated
+   * Replaced by new method `getConversationStatus`
+   * To be deleted PRMT-4568
+   */
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   try {
     const healthRecord = await HealthRecord.findByPk(conversationId);
@@ -31,6 +37,11 @@ export const getHealthRecordStatus = async (conversationId) => {
 };
 
 export const updateHealthRecordCompleteness = async (conversationId) => {
+  /**
+   * @deprecated
+   * Replaced by new method `updateConversationCompleteness`
+   * To be deleted PRMT-4568
+   */
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
@@ -59,6 +70,11 @@ export const updateHealthRecordCompleteness = async (conversationId) => {
 };
 
 export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
+  /**
+   * @deprecated
+   * Replaced by new method `getCurrentConversationIdForPatient`
+   * To be deleted PRMT-4568
+   */
   try {
     const Op = Sequelize.Op;
     const HealthRecord = ModelFactory.getByName(healthRecordModelName);
@@ -88,6 +104,11 @@ export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
 };
 
 export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
+  /**
+   * @deprecated
+   * Replaced by new method `markRecordAsSoftDeleteForPatient`
+   * To be deleted PRMT-4568
+   */
   const HealthRecord = ModelFactory.getByName(healthRecordModelName);
   const Message = ModelFactory.getByName(messageModelName);
   const sequelize = ModelFactory.sequelize;
@@ -128,6 +149,11 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
 };
 
 export const getHealthRecordMessageIds = async (conversationId) => {
+  /**
+   * @deprecated
+   * Replaced by new method `getMessageIdsForConversation`
+   * To be deleted PRMT-4568
+   */
   const Message = ModelFactory.getByName(messageModelName);
 
   logInfo('finding messages for conversation id ' + conversationId);
@@ -155,6 +181,11 @@ export const getHealthRecordMessageIds = async (conversationId) => {
 };
 
 export const messageAlreadyReceived = async (messageId) => {
+  /**
+   * @deprecated
+   * Replaced by new method `fragmentAlreadyReceived`
+   * To be deleted PRMT-4568
+   */
   const Message = ModelFactory.getByName(messageModelName);
   try {
     const message = await Message.findByPk(messageId);

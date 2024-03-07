@@ -1,5 +1,10 @@
 import { getParametersRefactored } from './parameters';
 
+/**
+ * @deprecated
+ * Postgres DB related stubs
+ * To be deleted PRMT-4568
+ */
 export const modelName = 'HealthRecord';
 const tableName = 'health_records';
 
