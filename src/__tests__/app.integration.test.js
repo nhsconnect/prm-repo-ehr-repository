@@ -60,6 +60,8 @@ describe('app', () => {
     const fragmentMessageId = v4();
     const nhsNumber = '2345678901';
 
+    const db = EhrTransferTracker.getInstance();
+
     it('should return presigned url when the fragment record exists', async () => {
       // setting up database
       const coreMessageResponse = await request(app)

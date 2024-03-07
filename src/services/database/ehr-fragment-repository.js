@@ -47,7 +47,7 @@ export const fragmentExistsInRecord = async (inboundConversationId, inboundMessa
 
 export const fragmentAlreadyReceived = async (conversationId, messageId) => {
   try {
-    const fragment = await getFragmentByKey(conversationId, messageId)
+    const fragment = await getFragmentByKey(conversationId, messageId);
     return fragment?.ReceivedAt !== undefined;
   } catch (e) {
     logError('Querying database for fragment message failed', e);
