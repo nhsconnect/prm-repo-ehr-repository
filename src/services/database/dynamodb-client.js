@@ -11,7 +11,7 @@ export const getDynamodbClient = () => {
 
   if (isInLocal) {
     // for running whole integration test suite in dojo
-    clientConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
+    clientConfig.endpoint = process.env.DYNAMODB_LOCAL_ENDPOINT;
   }
   if (isInLocal && !isInDojo) {
     // for running individual test with IDE

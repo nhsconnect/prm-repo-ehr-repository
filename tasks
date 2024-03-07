@@ -112,7 +112,7 @@ function configure_local_envs {
   export NODE_ENV=local
 
   export DYNAMODB_NAME=local-test-db
-  export DYNAMODB_ENDPOINT=http://dynamodb-local:8000/
+  export DYNAMODB_LOCAL_ENDPOINT=http://dynamodb-local:8000/
   export AWS_ACCESS_KEY_ID=$(generate_secure_string 20)
   export AWS_SECRET_ACCESS_KEY=$(generate_secure_string 20)
 
@@ -126,8 +126,6 @@ function configure_db_migration_envs {
   export DATABASE_NAME=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-name")
   export DATABASE_PASSWORD="$(aws rds generate-db-auth-token --hostname $DATABASE_HOST --port 5432 --region $AWS_DEFAULT_REGION --username $DATABASE_USER)"
   export USE_SSL_FOR_DB="true"
-
-  export DYNAMODB_NAME=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-infra/ehr-transfer-tracker-db-name")
 }
 
 function get_aws_account_id {
@@ -258,8 +256,6 @@ function get_db_credentials {
   export DATABASE_USER=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
   export DATABASE_HOST=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
   export DATABASE_NAME="deductions_db"
-
-  export DYNAMODB_NAME=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-infra/ehr-transfer-tracker-db-name")
 }
 
 function drop_db {
