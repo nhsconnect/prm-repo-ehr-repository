@@ -93,28 +93,6 @@ export class EhrTransferTracker {
     return items;
   }
 
-  async getCurrentHealthRecordIdForPatient(nhsNumber) {
-    // to replace the existing method of the same name
-
-    const items = await this.queryTableByNhsNumber(nhsNumber);
-
-    if (!items || items.length === 0) {
-      throw new Error('No record was found for given NHS number');
-    }
-
-    const completedRecords = items.filter(
-      (item) =>
-        item.TransferStatus === ConversationStatus.COMPLETE ||
-        item.TransferStatus.startsWith('Outbound')
-    );
-
-    const currentRecord = completedRecords.reduce((prev, current) => {
-      return current && current?.CreatedAt > prev?.CreatedAt ? current : prev;
-    });
-
-    return currentRecord.InboundConversationId;
-  }
-
   async queryTableByConversationId(
     inboundConversationId,
     recordType = RecordType.ALL,

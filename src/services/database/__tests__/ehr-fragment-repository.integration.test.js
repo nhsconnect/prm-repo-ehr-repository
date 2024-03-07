@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { logError } from '../../../middleware/logging';
 import { createCore } from '../ehr-core-repository';
 import {
+  fragmentAlreadyReceived,
   fragmentExists,
   getFragmentByKey,
   markFragmentAsReceivedAndCreateItsParts,
@@ -13,13 +14,29 @@ import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 jest.mock('../../../middleware/logging');
 
 describe('ehr-fragment-repository', () => {
+  // ========================= COMMON PROPERTIES =========================
   const expectedTimestamp = '2024-03-06T12:34:56+00:00';
   const mockTime = new Date(Date.parse(expectedTimestamp));
+  const db = EhrTransferTracker.getInstance();
 
+  // ========================= HELPERS========== =========================
+  const markFragmentAsReceived = markFragmentAsReceivedAndCreateItsParts;
+  const tableNameBackup = db.tableName;
+  const mimicDynamodbFail = () => {
+    db.tableName = 'non-exist-table';
+  };
+  const undoMimicDynamodbFail = () => {
+    db.tableName = tableNameBackup;
+  };
+
+  // ========================= SET UP / TEAR DOWN ========================
   beforeEach(async () => {
     jest.useFakeTimers().setSystemTime(mockTime);
   });
-
+  afterEach(() => {
+    undoMimicDynamodbFail();
+  });
+  // =====================================================================
   describe('markFragmentAsReceivedAndCreateItsParts', () => {
     it('should update receivedAt for a fragment with current date', async () => {
       // given
@@ -33,7 +50,7 @@ describe('ehr-fragment-repository', () => {
       });
 
       // when
-      await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId, []);
+      await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId);
 
       // then
       const fragment = await getFragmentByKey(conversationId, fragmentMessageId);
@@ -45,7 +62,7 @@ describe('ehr-fragment-repository', () => {
       const conversationId = uuid();
       try {
         // when
-        await markFragmentAsReceivedAndCreateItsParts('not-valid', conversationId, []);
+        await markFragmentAsReceivedAndCreateItsParts('not-valid', conversationId);
       } catch (err) {
         // then
         expect(err).not.toBeNull();
@@ -166,6 +183,51 @@ describe('ehr-fragment-repository', () => {
       }
       expect(err).not.toBeNull();
       expect(logError).toHaveBeenCalledWith('Message could not be stored', err);
+    });
+  });
+
+  describe('fragmentAlreadyReceived', () => {
+    it("should return false if 'messageId' is not found in db", async () => {
+      // given
+      const messageId = uuid();
+
+      // when
+      const result = await fragmentAlreadyReceived(messageId);
+
+      // then
+      expect(result).toEqual(false);
+    });
+
+    it("should return true if 'messageId' is received in db", async () => {
+      // given
+      const conversationId = uuid();
+      const messageId = uuid();
+      const fragmentMessageId = uuid();
+
+      await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
+      await markFragmentAsReceived(fragmentMessageId, conversationId);
+
+      // when
+      const result = await fragmentAlreadyReceived(conversationId, fragmentMessageId);
+
+      // then
+      expect(result).toEqual(true);
+    });
+
+    it('should throw if database querying throws', async () => {
+      // given
+      const messageId = uuid();
+      mimicDynamodbFail();
+
+      // when
+      try {
+        await fragmentAlreadyReceived(messageId);
+        fail('should have throw');
+      } catch (err) {
+        // then
+        expect(err).not.toBeNull();
+        expect(logError).toHaveBeenCalledWith('Querying database for fragment message failed', err);
+      }
     });
   });
 });

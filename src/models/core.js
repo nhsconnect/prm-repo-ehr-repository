@@ -2,8 +2,6 @@ import { getUKTimestamp } from '../services/time';
 import { CoreStatus } from './enums';
 import { validateIds } from '../utilities/dynamodb-helper';
 
-const fieldsAllowedToUpdate = ['TransferStatus', 'DeletedAt'];
-
 export const core = (inboundConversationId, messageId) => {
   const timestamp = getUKTimestamp();
 

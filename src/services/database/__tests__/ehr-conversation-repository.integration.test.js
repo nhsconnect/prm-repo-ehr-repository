@@ -16,7 +16,6 @@ import {
 import { createCore } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import {
-  fragmentAlreadyReceived,
   markFragmentAsReceivedAndCreateItsParts,
 } from '../ehr-fragment-repository';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
@@ -25,7 +24,7 @@ import { getEpochTimeInSecond } from '../../time';
 
 jest.mock('../../../middleware/logging');
 
-describe('healthRecordRepository', () => {
+describe('ehr-conversation-repository', () => {
   // ========================= COMMON PROPERTIES =========================
   const db = EhrTransferTracker.getInstance();
   const markFragmentAsReceived = markFragmentAsReceivedAndCreateItsParts;
@@ -320,53 +319,8 @@ describe('healthRecordRepository', () => {
     });
   });
 
-  describe('fragmentAlreadyReceived', () => {
-    it("should return false if 'messageId' is not found in db", async () => {
-      // given
-      const messageId = uuid();
-
-      // when
-      const result = await fragmentAlreadyReceived(messageId);
-
-      // then
-      expect(result).toEqual(false);
-    });
-
-    it("should return true if 'messageId' is received in db", async () => {
-      // given
-      const conversationId = uuid();
-      const messageId = uuid();
-      const fragmentMessageId = uuid();
-
-      await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
-      await markFragmentAsReceived(fragmentMessageId, conversationId);
-
-      // when
-      const result = await fragmentAlreadyReceived(conversationId, fragmentMessageId);
-
-      // then
-      expect(result).toEqual(true);
-    });
-
-    it('should throw if database querying throws', async () => {
-      // given
-      const messageId = uuid();
-      mimicDynamodbFail();
-
-      // when
-      try {
-        await fragmentAlreadyReceived(messageId);
-        fail('should have throw');
-      } catch (err) {
-        // then
-        expect(err).not.toBeNull();
-        expect(logError).toHaveBeenCalledWith('Querying database for fragment message failed', err);
-      }
-    });
-  });
-
   describe('markHealthRecordAsDeletedForPatient', () => {
-    // HELPER SETUPS
+    // ========================= HELPER SETUPS FOR THIS BLOCK =========================
     let conversationIdUsed = [];
     const mockTime = new Date(Date.parse('2024-03-06T12:34:56+00:00'));
     const mockTimeInEpochSecond = mockTime / 1000;
@@ -401,8 +355,7 @@ describe('healthRecordRepository', () => {
       }
     };
 
-    // TESTS START FROM HERE
-
+    // ========================= TESTS BEGINS HERE =================================
     it('should return conversation id for the patient marked as deleted', async () => {
       // given
       const nhsNumber = '9898989898';
@@ -416,7 +369,6 @@ describe('healthRecordRepository', () => {
       const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
 
       // then
-
       const healthRecordStatusAfterwards = await getHealthRecordStatus(conversationId);
       expect(result).toEqual([conversationId]);
       expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.NOT_FOUND);

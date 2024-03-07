@@ -37,6 +37,5 @@ export const buildSoftDeleteUpdateParams = (item) => {
       ':now': getUKTimestamp(),
       ':deletedAt': getEpochTimeInSecond(),
     },
-    ReturnValues: 'ALL_NEW'
   };
 };

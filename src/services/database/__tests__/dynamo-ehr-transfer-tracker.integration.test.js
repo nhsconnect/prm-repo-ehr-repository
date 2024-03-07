@@ -7,6 +7,7 @@ import {
   createConversationForTest,
 } from '../../../utilities/integration-test-utilities';
 import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
+import { core } from '../../../models/core';
 
 describe('EhrTransferTracker', () => {
   const testConversationId = uuid();
@@ -25,13 +26,9 @@ describe('EhrTransferTracker', () => {
     const db = EhrTransferTracker.getInstance();
     const testMessageId = uuid();
 
-    const ehrExtract = {
-      conversationId: testConversationId,
-      messageId: testMessageId,
-      nhsNumber: testNhsNumber,
-    };
+    const ehrCore = core(testConversationId, testMessageId);
 
-    await createCore(ehrExtract);
+    await db.writeItemsToTable([ehrCore]);
 
     // then
     const actual = await db.queryTableByConversationId(testConversationId, RecordType.CORE);
@@ -45,44 +42,5 @@ describe('EhrTransferTracker', () => {
       CreatedAt: expect.any(String),
       UpdatedAt: expect.any(String),
     });
-  });
-
-  it('updateFragmentAndCreateItsParts', async () => {
-    // given
-    const db = EhrTransferTracker.getInstance();
-
-    const testMessageId = uuid();
-    const testNhsNumber = '9000000002';
-    const testChildMessageIds = [uuid(), uuid(), uuid()];
-    const testNestedChildIds = [uuid(), uuid(), uuid()];
-
-    const ehrExtract = {
-      conversationId: testConversationId,
-      messageId: testMessageId,
-      nhsNumber: testNhsNumber,
-      fragmentMessageIds: testChildMessageIds,
-    };
-
-    await createCore(ehrExtract);
-
-    // when
-    await markFragmentAsReceivedAndCreateItsParts(
-      testChildMessageIds[0],
-      testConversationId,
-      testNestedChildIds
-    );
-
-    const actual = await db.queryTableByConversationId(testConversationId, RecordType.FRAGMENT);
-
-    // then
-    const expectedTotalMessages = testChildMessageIds.length + testNestedChildIds.length;
-    expect(actual).toHaveLength(expectedTotalMessages);
-
-    const receivedFragment = actual.filter((item) => item.ReceivedAt);
-    expect(receivedFragment).toHaveLength(1);
-    expect(receivedFragment[0].InboundMessageId).toEqual(testChildMessageIds[0]);
-
-    const nonReceivedFragments = actual.filter((item) => !item.ReceivedAt);
-    expect(nonReceivedFragments).toHaveLength(5);
   });
 });

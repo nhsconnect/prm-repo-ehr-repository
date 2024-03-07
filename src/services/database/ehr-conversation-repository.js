@@ -5,7 +5,6 @@ import { buildConversationUpdateParams } from '../../models/conversation';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../errors/errors';
 import { isCore } from '../../models/core';
 import { isFragment } from '../../models/fragment';
-import { getEpochTimeInSecond, getUKTimestamp } from '../time';
 import { buildSoftDeleteUpdateParams } from '../../utilities/dynamodb-helper';
 
 export const getHealthRecordStatus = async (conversationId) => {
@@ -112,7 +111,7 @@ export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
 
   const db = EhrTransferTracker.getInstance();
   const allConversations = await db.queryTableByNhsNumber(nhsNumber);
-  const allConversationIds = allConversations.map(item => item.InboundConversationId);
+  const allConversationIds = allConversations.map((item) => item.InboundConversationId);
 
   const allRecords = [];
   for (const conversationId of allConversationIds) {
