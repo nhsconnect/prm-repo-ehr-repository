@@ -19,7 +19,6 @@ export const CoreStatus = {
 };
 
 export const FragmentStatus = {
-  PENDING: 'INBOUND_REQUEST_SENT',
   COMPLETE: 'INBOUND_COMPLETE',
 };
 

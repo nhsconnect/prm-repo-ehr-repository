@@ -39,12 +39,11 @@ export const getConversationById = async (conversationId) => {
 };
 
 export const updateConversationCompleteness = async (conversationId) => {
-  // to replace the existing method `updateHealthRecordCompleteness`
-
   try {
     const db = EhrTransferTracker.getInstance();
 
     const allFragments = await db.queryTableByConversationId(conversationId, RecordType.FRAGMENT);
+
     const pendingMessages = allFragments.filter((fragment) => fragment.ReceivedAt === undefined);
 
     if (pendingMessages.length !== 0) {

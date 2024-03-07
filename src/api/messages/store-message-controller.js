@@ -106,16 +106,14 @@ export const storeMessageController = async (req, res) => {
       });
     }
     if (messageType === MessageType.FRAGMENT) {
-      if (await fragmentExistsInRecord(messageId)) {
-        await markFragmentAsReceivedAndCreateItsParts(messageId, conversationId, fragmentMessageIds);
-      } else {
+      if (!await fragmentExistsInRecord(messageId)) {
         logWarning(
           `Fragment message ${messageId} did not arrive in order. Fragment parts: ${JSON.stringify(
             fragmentMessageIds
           )}`
         );
-        await markFragmentAsReceivedAndCreateItsParts(messageId, conversationId);
       }
+      await markFragmentAsReceivedAndCreateItsParts(messageId, conversationId, fragmentMessageIds);
     }
     await updateConversationCompleteness(conversationId);
     const healthRecordStatus = await getConversationStatus(conversationId);
