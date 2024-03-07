@@ -5,10 +5,14 @@ import {
   getCurrentHealthRecordIdForPatient,
   getHealthRecordMessageIds,
   getHealthRecordStatus,
+  markHealthRecordAsDeletedForPatient,
   updateConversationCompleteness,
 } from '../ehr-conversation-repository';
-import { ConversationStates, HealthRecordStatus } from '../../../models/enums';
-import { createConversationForTest } from '../../../utilities/integration-test-utilities';
+import { ConversationStatus, HealthRecordStatus, RecordType } from '../../../models/enums';
+import {
+  cleanupRecordsForTest,
+  createConversationForTest,
+} from '../../../utilities/integration-test-utilities';
 import { createCore } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import {
@@ -23,8 +27,6 @@ jest.mock('../../../middleware/logging');
 
 describe('healthRecordRepository', () => {
   // ========================= COMMON PROPERTIES =========================
-  // const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-  // const Message = ModelFactory.getByName(messageModelName);
   const db = EhrTransferTracker.getInstance();
   const markFragmentAsReceived = markFragmentAsReceivedAndCreateItsParts;
   const fail = (reason) => {
@@ -37,21 +39,9 @@ describe('healthRecordRepository', () => {
   const undoMimicDynamodbFail = () => {
     db.tableName = tableNameBackup;
   };
-  // =====================================================================
-
   // ========================= SET UP / TEAR DOWN ========================
-  beforeEach(async () => {
-    // await HealthRecord.truncate();
-    // await Message.truncate();
-    // await ModelFactory.sequelize.sync({ force: true });
-  });
-
   afterEach(() => {
     undoMimicDynamodbFail();
-  });
-
-  afterAll(async () => {
-    // await ModelFactory.sequelize.close();
   });
   // =====================================================================
 
@@ -61,7 +51,7 @@ describe('healthRecordRepository', () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
-        State: ConversationStates.COMPLETE,
+        TransferStatus: ConversationStatus.COMPLETE,
       });
 
       // when
@@ -76,7 +66,7 @@ describe('healthRecordRepository', () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
-        State: ConversationStates.CONTINUE_REQUEST_SENT,
+        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT,
       });
 
       // when
@@ -124,7 +114,7 @@ describe('healthRecordRepository', () => {
       const messageId = uuid();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
-        State: ConversationStates.REQUEST_SENT,
+        TransferStatus: ConversationStatus.REQUEST_SENT,
       });
       await createCore({ conversationId, messageId, fragmentMessageIds: [] });
 
@@ -134,7 +124,7 @@ describe('healthRecordRepository', () => {
       // then
       const conversation = await getConversationById(conversationId);
 
-      expect(conversation.State).toBe(ConversationStates.COMPLETE);
+      expect(conversation.TransferStatus).toBe(ConversationStatus.COMPLETE);
     });
 
     it('should not set State to Complete if there are still messages to be received', async () => {
@@ -145,7 +135,7 @@ describe('healthRecordRepository', () => {
       const nhsNumber = '1234567890';
 
       await createConversationForTest(conversationId, nhsNumber, {
-        State: ConversationStates.CONTINUE_REQUEST_SENT,
+        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT,
       });
       await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
 
@@ -155,7 +145,7 @@ describe('healthRecordRepository', () => {
       // then
       const conversation = await getConversationById(conversationId);
 
-      expect(conversation.State).toBe(ConversationStates.CONTINUE_REQUEST_SENT);
+      expect(conversation.TransferStatus).toBe(ConversationStatus.CONTINUE_REQUEST_SENT);
     });
 
     it('Should set State to Complete if all fragments are received', async () => {
@@ -166,7 +156,7 @@ describe('healthRecordRepository', () => {
       const nhsNumber = '1234567890';
 
       await createConversationForTest(conversationId, nhsNumber, {
-        State: ConversationStates.CONTINUE_REQUEST_SENT,
+        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT,
       });
       await createCore({ conversationId, messageId, fragmentMessageIds: fragmentMessageIds });
       for (const fragmentId of fragmentMessageIds) {
@@ -179,7 +169,7 @@ describe('healthRecordRepository', () => {
       // then
       const conversation = await getConversationById(conversationId);
 
-      expect(conversation.State).toBe(ConversationStates.COMPLETE);
+      expect(conversation.TransferStatus).toBe(ConversationStatus.COMPLETE);
     });
 
     it('should throw an error when database query fails', async () => {
@@ -202,21 +192,22 @@ describe('healthRecordRepository', () => {
   describe('getCurrentHealthRecordIdForPatient', () => {
     it('should return most recent complete health record conversation id', async () => {
       // given
-      const nhsNumber = '9876543210';
+      const nhsNumber = '9876543212';
       const previousHealthRecordConversationId = uuid();
       const incompleteHealthRecordConversationId = uuid();
       const currentHealthRecordConversationId = uuid();
 
       await createConversationForTest(previousHealthRecordConversationId, nhsNumber, {
-        State: ConversationStates.COMPLETE,
+        TransferStatus: ConversationStatus.COMPLETE,
+        CreatedAt: '2024-01-01T10:00:00+00:00',
       });
 
       await createConversationForTest(incompleteHealthRecordConversationId, nhsNumber, {
-        State: ConversationStates.TIMEOUT,
+        TransferStatus: ConversationStatus.TIMEOUT,
       });
 
       await createConversationForTest(currentHealthRecordConversationId, nhsNumber, {
-        State: ConversationStates.COMPLETE,
+        TransferStatus: ConversationStatus.COMPLETE,
       });
 
       // when
@@ -231,7 +222,7 @@ describe('healthRecordRepository', () => {
       const nhsNumber = '9876543211';
       const incompleteHealthRecordConversationId = uuid();
       await createConversationForTest(incompleteHealthRecordConversationId, nhsNumber, {
-        State: ConversationStates.TIMEOUT,
+        TransferStatus: ConversationStatus.TIMEOUT,
       });
 
       // when
@@ -374,73 +365,110 @@ describe('healthRecordRepository', () => {
     });
   });
 
-  describe.skip('markHealthRecordAsDeletedForPatient', () => {
-    async function createHealthRecordAndMessage(nhsNumber, conversationId, messageId) {
-      await HealthRecord.create({
-        conversationId,
-        nhsNumber,
-        completedAt: new Date(),
-      });
-      await Message.create({
-        conversationId,
-        messageId,
-        type: MessageType.EHR_EXTRACT,
-        receivedAt: new Date(),
-      });
-    }
+  describe('markHealthRecordAsDeletedForPatient', () => {
+    // HELPER SETUPS
+    let conversationIdUsed = [];
+    const mockTime = new Date(Date.parse('2024-03-06T12:34:56+00:00'));
+    const mockTimeInEpochSecond = mockTime / 1000;
 
-    it('should return conversation id for the patient marked as deleted', async () => {
-      const nhsNumber = '9898989898';
-      const messageId = uuid();
-      const conversationId = uuid();
-
-      await createHealthRecordAndMessage(nhsNumber, conversationId, messageId);
-
-      const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
-
-      const healthRecordMarkedAsDeleted = await HealthRecord.findAll({
-        where: { nhsNumber },
-        paranoid: false,
-      });
-
-      const messagesMarkedAsDeleted = await Message.findAll({
-        where: { conversationId },
-        paranoid: false,
-      });
-
-      const healthRecordStatusAfterwards = await getHealthRecordStatus(conversationId);
-
-      expect(result).toEqual([conversationId]);
-      expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.NOT_FOUND);
-      expect(healthRecordMarkedAsDeleted[0].deletedAt).not.toBeNull();
-      expect(messagesMarkedAsDeleted[0].deletedAt).not.toBeNull();
+    beforeEach(async () => {
+      jest.useFakeTimers().setSystemTime(mockTime);
     });
 
-    it('should return conversation id for the patient marked as deleted when the patient has several health records', async () => {
+    afterEach(async () => {
+      await Promise.all(conversationIdUsed.map(cleanupRecordsForTest));
+      conversationIdUsed = [];
+    });
+
+    const makeConversationIdForTest = () => {
+      const id = uuid();
+      conversationIdUsed.push(id);
+      return id;
+    };
+
+    const createCompleteRecordForTest = async (
+      nhsNumber,
+      conversationId,
+      messageId,
+      fragmentMessageIds = []
+    ) => {
+      await createConversationForTest(conversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.COMPLETE,
+      });
+      await createCore({ conversationId, messageId, fragmentMessageIds });
+      for (const fragmentMessageId of fragmentMessageIds) {
+        await markFragmentAsReceived(fragmentMessageId, conversationId);
+      }
+    };
+
+    // TESTS START FROM HERE
+
+    it('should return conversation id for the patient marked as deleted', async () => {
+      // given
+      const nhsNumber = '9898989898';
+      const messageId = uuid();
+      const conversationId = makeConversationIdForTest();
+      const fragmentIds = [uuid(), uuid(), uuid()];
+
+      await createCompleteRecordForTest(nhsNumber, conversationId, messageId, fragmentIds);
+
+      // when
+      const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
+
+      // then
+
+      const healthRecordStatusAfterwards = await getHealthRecordStatus(conversationId);
+      expect(result).toEqual([conversationId]);
+      expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.NOT_FOUND);
+
+      const deletedRecords = await db.queryTableByConversationId(
+        conversationId,
+        RecordType.ALL,
+        true
+      );
+      expect(deletedRecords).toHaveLength(5); // conversation + core + 3 fragments
+
+      for (const item of deletedRecords) {
+        expect(item).toMatchObject({
+          InboundConversationId: conversationId,
+          DeletedAt: mockTimeInEpochSecond,
+        });
+      }
+    });
+
+    it('should return conversation ids for the patient marked as deleted when the patient has several health records', async () => {
+      // given
       const nhsNumber = '6767676767';
       const firstMessageId = uuid();
       const secondMessageId = uuid();
-      const firstConversationId = uuid();
-      const secondConversationId = uuid();
+      const firstConversationId = makeConversationIdForTest();
+      const secondConversationId = makeConversationIdForTest();
 
-      await createHealthRecordAndMessage(nhsNumber, firstConversationId, firstMessageId);
-      await createHealthRecordAndMessage(nhsNumber, secondConversationId, secondMessageId);
+      await createCompleteRecordForTest(nhsNumber, firstConversationId, firstMessageId);
+      await createCompleteRecordForTest(nhsNumber, secondConversationId, secondMessageId);
 
+      // when
       const result = await markHealthRecordAsDeletedForPatient(nhsNumber);
 
-      const healthRecordMarkedAsDeleted = await HealthRecord.findAll({
-        where: { nhsNumber },
-        paranoid: false,
-      });
+      // then
+      expect(result).toHaveLength(2);
+      expect(result.sort()).toEqual([firstConversationId, secondConversationId].sort());
 
-      const messagesMarkedAsDeleted = await Message.findAll({
-        where: { conversationId: [firstConversationId, secondConversationId] },
-        paranoid: false,
-      });
+      const deletedRecords = (
+        await Promise.all(
+          result.map((conversationId) =>
+            db.queryTableByConversationId(conversationId, RecordType.ALL, true)
+          )
+        )
+      ).flat();
 
-      expect(result).toEqual([firstConversationId, secondConversationId]);
-      expect(healthRecordMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
-      expect(messagesMarkedAsDeleted).not.toHaveProperty('deletedAt', null);
+      expect(deletedRecords).toHaveLength(4); // two sets of conversation + core
+
+      for (const item of deletedRecords) {
+        expect(item).toMatchObject({
+          DeletedAt: mockTimeInEpochSecond,
+        });
+      }
     });
   });
 });

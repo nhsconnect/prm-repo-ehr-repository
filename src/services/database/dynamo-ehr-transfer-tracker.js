@@ -7,7 +7,7 @@ import {
 
 import { getUKTimestamp } from '../time';
 import { logError, logInfo } from '../../middleware/logging';
-import { RecordType, ConversationStates } from '../../models/enums';
+import { RecordType, ConversationStatus } from '../../models/enums';
 import { getDynamodbClient } from './dynamodb-client';
 import { buildFragmentUpdateParams } from '../../models/fragment';
 
@@ -103,7 +103,9 @@ export class EhrTransferTracker {
     }
 
     const completedRecords = items.filter(
-      (item) => item.State === ConversationStates.COMPLETE || item.State.startsWith('Outbound')
+      (item) =>
+        item.TransferStatus === ConversationStatus.COMPLETE ||
+        item.TransferStatus.startsWith('Outbound')
     );
 
     const currentRecord = completedRecords.reduce((prev, current) => {
@@ -113,7 +115,11 @@ export class EhrTransferTracker {
     return currentRecord.InboundConversationId;
   }
 
-  async queryTableByConversationId(inboundConversationId, recordType = RecordType.ALL) {
+  async queryTableByConversationId(
+    inboundConversationId,
+    recordType = RecordType.ALL,
+    includeDeletedRecord = false
+  ) {
     const params = {
       TableName: this.tableName,
       ExpressionAttributeNames: {
@@ -123,8 +129,10 @@ export class EhrTransferTracker {
         ':InboundConversationId': inboundConversationId,
       },
       KeyConditionExpression: '#PrimaryKey = :InboundConversationId',
-      FilterExpression: 'attribute_not_exists(DeletedAt)'
     };
+    if (!includeDeletedRecord) {
+      params.FilterExpression = 'attribute_not_exists(DeletedAt)';
+    }
 
     switch (recordType) {
       case RecordType.ALL:

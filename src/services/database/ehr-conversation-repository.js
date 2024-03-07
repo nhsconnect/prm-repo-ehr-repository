@@ -1,16 +1,18 @@
-import { ConversationStates, HealthRecordStatus, RecordType } from "../../models/enums";
-import { logError, logInfo } from "../../middleware/logging";
-import { EhrTransferTracker } from "./dynamo-ehr-transfer-tracker";
-import { buildConversationUpdateParams } from "../../models/conversation";
-import { HealthRecordNotFoundError, MessageNotFoundError } from "../../errors/errors";
-import { isCore } from "../../models/core";
-import { isFragment } from "../../models/fragment";
+import { ConversationStatus, HealthRecordStatus, RecordType } from '../../models/enums';
+import { logError, logInfo } from '../../middleware/logging';
+import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
+import { buildConversationUpdateParams } from '../../models/conversation';
+import { HealthRecordNotFoundError, MessageNotFoundError } from '../../errors/errors';
+import { isCore } from '../../models/core';
+import { isFragment } from '../../models/fragment';
+import { getEpochTimeInSecond, getUKTimestamp } from '../time';
+import { buildSoftDeleteUpdateParams } from '../../utilities/dynamodb-helper';
 
 export const getHealthRecordStatus = async (conversationId) => {
   // to replace the method with same name
   try {
     const conversation = await getConversationById(conversationId);
-    if (conversation.State === ConversationStates.COMPLETE) {
+    if (conversation.TransferStatus === ConversationStatus.COMPLETE) {
       return HealthRecordStatus.COMPLETE;
     } else {
       return HealthRecordStatus.PENDING;
@@ -55,7 +57,7 @@ export const updateConversationCompleteness = async (conversationId) => {
     logInfo('All fragments are received. Will mark this inbound conversation as complete');
 
     const updateParam = buildConversationUpdateParams(conversationId, {
-      State: ConversationStates.COMPLETE,
+      TransferStatus: ConversationStatus.COMPLETE,
     });
 
     await db.updateItemsInTransaction([updateParam]);
@@ -71,7 +73,9 @@ export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
   const conversations = await db.queryTableByNhsNumber(nhsNumber);
 
   const completedRecords = conversations?.filter(
-    (item) => item.State === ConversationStates.COMPLETE || item.State.startsWith('Outbound')
+    (item) =>
+      item.TransferStatus === ConversationStatus.COMPLETE ||
+      item.TransferStatus?.startsWith('Outbound')
   );
 
   if (!completedRecords || completedRecords.length === 0) {
@@ -84,7 +88,6 @@ export const getCurrentHealthRecordIdForPatient = async (nhsNumber) => {
 
   return currentRecord.InboundConversationId;
 };
-
 
 export const getHealthRecordMessageIds = async (conversationId) => {
   // to replace the method of same name
@@ -99,7 +102,26 @@ export const getHealthRecordMessageIds = async (conversationId) => {
     throw new MessageNotFoundError();
   }
   const coreMessageId = core.InboundMessageId;
-  const fragmentMessageIds = fragments.map(message => message.InboundMessageId);
+  const fragmentMessageIds = fragments.map((message) => message.InboundMessageId);
 
   return { coreMessageId, fragmentMessageIds };
+};
+
+export const markHealthRecordAsDeletedForPatient = async (nhsNumber) => {
+  // to replace the method of same name
+
+  const db = EhrTransferTracker.getInstance();
+  const allConversations = await db.queryTableByNhsNumber(nhsNumber);
+  const allConversationIds = allConversations.map(item => item.InboundConversationId);
+
+  const allRecords = [];
+  for (const conversationId of allConversationIds) {
+    const items = await db.queryTableByConversationId(conversationId, RecordType.ALL);
+    allRecords.push(...items);
+  }
+
+  const allUpdateParams = allRecords.map(buildSoftDeleteUpdateParams);
+
+  await db.updateItemsInTransaction(allUpdateParams);
+  return allConversationIds;
 };

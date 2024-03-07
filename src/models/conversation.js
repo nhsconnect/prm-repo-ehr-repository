@@ -1,10 +1,11 @@
 import { getUKTimestamp } from '../services/time';
-import { logError } from "../middleware/logging";
+import { logError } from '../middleware/logging';
+import { addChangesToUpdateParams } from '../utilities/dynamodb-helper';
 
-const fieldsAllowedToUpdate = ['State', 'FailureCode'];
+const fieldsAllowedToUpdate = ['TransferStatus', 'FailureCode', 'DeletedAt'];
 
 export const buildConversationUpdateParams = (conversationId, changes) => {
-  const params = {
+  const baseParams = {
     Key: {
       InboundConversationId: conversationId,
       Layer: 'Conversation',
@@ -15,19 +16,9 @@ export const buildConversationUpdateParams = (conversationId, changes) => {
     },
   };
 
-  for (const [fieldName, updatedValue] of Object.entries(changes)) {
-    if (fieldsAllowedToUpdate.includes(fieldName)) {
-      const keyToken = `#${fieldName}`;
-      const valueToken = `:${fieldName}`;
+  return addChangesToUpdateParams(baseParams, changes, fieldsAllowedToUpdate);
+};
 
-      params.UpdateExpression += `, ${keyToken} = ${valueToken}`;
-      params.ExpressionAttributeValues[valueToken] = updatedValue;
-      params.ExpressionAttributeNames = params.ExpressionAttributeNames ?? {};
-      params.ExpressionAttributeNames[keyToken] = fieldName;
-    } else {
-      logError(`Ignoring attempt to update non-allowed field ${fieldName}`)
-    }
-  }
-
-  return params;
+export const isConversation = (item) => {
+  return item.Layer === 'Conversation';
 };

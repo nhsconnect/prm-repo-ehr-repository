@@ -1,14 +1,13 @@
 import { getUKTimestamp } from '../services/time';
-import { CoreStates } from './enums';
-import { validate } from 'uuid';
+import { CoreStatus } from './enums';
+import { validateIds } from '../utilities/dynamodb-helper';
+
+const fieldsAllowedToUpdate = ['TransferStatus', 'DeletedAt'];
 
 export const core = (inboundConversationId, messageId) => {
   const timestamp = getUKTimestamp();
 
-  const uuidsAreValid = validate(inboundConversationId) && validate(messageId);
-  if (!uuidsAreValid) {
-    throw new Error('received invalid uuid as either conversationId or messageId');
-  }
+  validateIds(inboundConversationId, messageId);
 
   return {
     InboundConversationId: inboundConversationId,
@@ -17,10 +16,10 @@ export const core = (inboundConversationId, messageId) => {
     CreatedAt: timestamp,
     ReceivedAt: timestamp,
     UpdatedAt: timestamp,
-    State: CoreStates.COMPLETE,
+    TransferStatus: CoreStatus.COMPLETE,
   };
 };
 
 export const isCore = (dynamoDbItem) => {
   return dynamoDbItem?.Layer?.startsWith('Core');
-}
+};

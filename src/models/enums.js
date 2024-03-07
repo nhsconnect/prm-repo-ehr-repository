@@ -5,7 +5,7 @@ export const RecordType = {
   FRAGMENT: 'Fragment',
 };
 
-export const ConversationStates = {
+export const ConversationStatus = {
   STARTED: 'INBOUND_STARTED',
   REQUEST_SENT: 'INBOUND_REQUEST_SENT',
   CONTINUE_REQUEST_SENT: 'INBOUND_CONTINUE_REQUEST_SENT',
@@ -14,11 +14,11 @@ export const ConversationStates = {
   TIMEOUT: 'INBOUND_TIMEOUT',
 };
 
-export const CoreStates = {
+export const CoreStatus = {
   COMPLETE: 'INBOUND_COMPLETE',
 };
 
-export const FragmentStates = {
+export const FragmentStatus = {
   PENDING: 'INBOUND_REQUEST_SENT',
   COMPLETE: 'INBOUND_COMPLETE',
 };
@@ -31,6 +31,6 @@ export const HealthRecordStatus = {
 
 Object.freeze(HealthRecordStatus);
 Object.freeze(RecordType);
-Object.freeze(ConversationStates);
-Object.freeze(CoreStates);
-Object.freeze(FragmentStates);
+Object.freeze(ConversationStatus);
+Object.freeze(CoreStatus);
+Object.freeze(FragmentStatus);

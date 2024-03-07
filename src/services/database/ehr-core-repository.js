@@ -1,10 +1,10 @@
-import { EhrTransferTracker } from "./dynamo-ehr-transfer-tracker";
-import { arrayOfFragments } from "../../models/fragment";
-import { core } from "../../models/core";
-import { RecordType } from "../../models/enums";
-import { logError } from "../../middleware/logging";
+import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
+import { arrayOfFragments } from '../../models/fragment';
+import { core } from '../../models/core';
+import { RecordType } from '../../models/enums';
+import { logError } from '../../middleware/logging';
 
-export const createCore = async ({ conversationId, messageId, fragmentMessageIds }) => {
+export const createCore = async ({ conversationId, messageId, fragmentMessageIds = [] }) => {
   // to replace the existing `createEhrExtract` method
 
   try {
@@ -31,4 +31,3 @@ export const getCoreByKey = (inboundConversationId, inboundMessageId) => {
   const db = EhrTransferTracker.getInstance();
   return db.getItemByKey(inboundConversationId, inboundMessageId, RecordType.CORE);
 };
-

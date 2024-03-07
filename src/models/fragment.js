@@ -1,12 +1,8 @@
 import { getUKTimestamp } from '../services/time';
 import { validate } from 'uuid';
+import { addChangesToUpdateParams, validateIds } from "../utilities/dynamodb-helper";
 
-const validateIds = (conversationId, messageId) => {
-  const uuidsAreValid = validate(conversationId) && validate(messageId);
-  if (!uuidsAreValid) {
-    throw new Error('received invalid uuid as either conversationId or messageId');
-  }
-};
+const fieldsAllowedToUpdate = ['TransferStatus', 'ParentId', 'ReceivedAt', 'DeletedAt'];
 
 export const singleFragment = ({ inboundConversationId, fragmentMessageId, parentMessageId }) => {
   const timestamp = getUKTimestamp();
@@ -36,13 +32,6 @@ export const arrayOfFragments = ({
   );
 };
 
-const FieldsAllowedToUpdate = {
-  State: 'State',
-  ParentId: 'ParentId',
-  ReceivedAt: 'ReceivedAt',
-  DeletedAt: 'DeletedAt',
-};
-
 export const buildFragmentUpdateParams = (conversationId, messageId, changes) => {
   validateIds(conversationId, messageId);
 
@@ -56,21 +45,13 @@ export const buildFragmentUpdateParams = (conversationId, messageId, changes) =>
       UpdatedAt = :now`,
     ExpressionAttributeValues: {
       ':now': getUKTimestamp(),
-      ':messageId': messageId
+      ':messageId': messageId,
     },
   };
 
-  for (const fieldname in FieldsAllowedToUpdate) {
-    if (fieldname in changes) {
-      const colonKey = `:${fieldname}`;
-      params.UpdateExpression += `, ${fieldname} = ${colonKey}`;
-      params.ExpressionAttributeValues[colonKey] = changes[fieldname];
-    }
-  }
-
-  return params;
+  return addChangesToUpdateParams(params, changes, fieldsAllowedToUpdate);
 };
 
 export const isFragment = (dynamoDbItem) => {
   return dynamoDbItem?.Layer?.startsWith('Fragment');
-}
+};
