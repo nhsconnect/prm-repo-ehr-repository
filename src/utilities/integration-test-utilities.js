@@ -15,12 +15,12 @@ export const generateMultipleUUID = (amount, isUppercase) =>
     .map(() => (isUppercase ? uuidv4().toUpperCase() : uuidv4()));
 
 export const createConversationForTest = async (conversationId, nhsNumber, overrides) => {
-  // This method is only meant for testing purpose,
-  // as the inbound conversation record is supposed to be created by other service.
+  // This method is only meant for testing purpose.
+  // the inbound conversation record is supposed to be created by other service.
 
   const isInLocal = process.env.NHS_ENVIRONMENT === 'local' || !process.env.NHS_ENVIRONMENT;
   if (!isInLocal) {
-    throw new Error('Unexpected call to createConversation method in non-local environment');
+    throw new Error('Unexpected call to createConversationForTest method in non-local environment');
   }
 
   const timestamp = getUKTimestamp();
@@ -35,7 +35,7 @@ export const createConversationForTest = async (conversationId, nhsNumber, overr
     ...overrides
   };
 
-  await db.writeItemsToTable([item]);
+  await db.writeItemsInTransaction([item]);
 };
 
 export const cleanupRecordsForTest = async (conversationId) => {
@@ -43,7 +43,7 @@ export const cleanupRecordsForTest = async (conversationId) => {
 
   const isInLocal = process.env.NHS_ENVIRONMENT === 'local' || !process.env.NHS_ENVIRONMENT;
   if (!isInLocal) {
-    throw new Error('Unexpected call to createConversation method in non-local environment');
+    throw new Error('Unexpected call to cleanupRecordsForTest method in non-local environment');
   }
 
   const db = EhrTransferTracker.getInstance();

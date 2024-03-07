@@ -1,7 +1,7 @@
 import { ConversationStatus, HealthRecordStatus, RecordType } from '../../models/enums';
 import { logError, logInfo } from '../../middleware/logging';
 import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
-import { buildConversationUpdateParams } from '../../models/conversation';
+import { buildConversationUpdateParams, isInCompleteStatus } from '../../models/conversation';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../errors/errors';
 import { isCore } from '../../models/core';
 import { isFragment } from '../../models/fragment';
@@ -69,11 +69,7 @@ export const getCurrentConversationIdForPatient = async (nhsNumber) => {
   const db = EhrTransferTracker.getInstance();
   const conversations = await db.queryTableByNhsNumber(nhsNumber);
 
-  const completedRecords = conversations?.filter(
-    (item) =>
-      item.TransferStatus === ConversationStatus.COMPLETE ||
-      item.TransferStatus?.startsWith('Outbound')
-  );
+  const completedRecords = conversations?.filter(isInCompleteStatus);
 
   if (!completedRecords || completedRecords.length === 0) {
     throw new HealthRecordNotFoundError();

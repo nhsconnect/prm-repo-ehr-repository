@@ -1,10 +1,9 @@
 import { getUKTimestamp } from '../services/time';
-import { validate } from 'uuid';
 import { addChangesToUpdateParams, validateIds } from "../utilities/dynamodb-helper";
 
 const fieldsAllowedToUpdate = ['TransferStatus', 'ParentId', 'ReceivedAt', 'DeletedAt'];
 
-export const singleFragment = ({ inboundConversationId, fragmentMessageId, parentMessageId }) => {
+export const buildFragment = ({ inboundConversationId, fragmentMessageId, parentMessageId }) => {
   const timestamp = getUKTimestamp();
 
   validateIds(inboundConversationId, fragmentMessageId);
@@ -19,7 +18,7 @@ export const singleFragment = ({ inboundConversationId, fragmentMessageId, paren
   };
 };
 
-export const arrayOfFragments = ({
+export const buildMultipleFragments = ({
   inboundConversationId,
   fragmentMessageIds,
   parentMessageId,
@@ -28,7 +27,7 @@ export const arrayOfFragments = ({
     return [];
   }
   return fragmentMessageIds.map((fragmentMessageId) =>
-    singleFragment({ inboundConversationId, fragmentMessageId, parentMessageId })
+    buildFragment({ inboundConversationId, fragmentMessageId, parentMessageId })
   );
 };
 

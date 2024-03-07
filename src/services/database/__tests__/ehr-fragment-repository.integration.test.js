@@ -7,7 +7,7 @@ import {
   getFragmentByKey,
   markFragmentAsReceivedAndCreateItsParts,
 } from '../ehr-fragment-repository';
-import { singleFragment } from '../../../models/fragment';
+import { buildFragment } from '../../../models/fragment';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 
 // Mocking
@@ -107,12 +107,12 @@ describe('ehr-fragment-repository', () => {
         fragmentMessageIds: [fragmentMessageId],
       });
 
-      const nestedFragmentArrivedEarly = singleFragment({
+      const nestedFragmentArrivedEarly = buildFragment({
         inboundConversationId: conversationId,
         fragmentMessageId: nestedFragmentMessageId,
       });
       const db = EhrTransferTracker.getInstance();
-      await db.writeItemsToTable([nestedFragmentArrivedEarly]);
+      await db.writeItemsInTransaction([nestedFragmentArrivedEarly]);
 
       // when
       await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId, [
@@ -130,12 +130,12 @@ describe('ehr-fragment-repository', () => {
       const conversationId = uuid();
       const messageId = uuid();
 
-      const fragment = singleFragment({
+      const fragment = buildFragment({
         inboundConversationId: conversationId,
         fragmentMessageId: messageId,
       });
       const db = EhrTransferTracker.getInstance();
-      await db.writeItemsToTable([fragment]);
+      await db.writeItemsInTransaction([fragment]);
 
       expect(await fragmentExistsInRecord(conversationId, messageId)).toBe(true);
     });

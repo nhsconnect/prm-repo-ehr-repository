@@ -7,7 +7,7 @@ import {
   createConversationForTest,
 } from '../../../utilities/integration-test-utilities';
 import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
-import { core } from '../../../models/core';
+import { buildCore } from '../../../models/core';
 
 describe('EhrTransferTracker', () => {
   const testConversationId = uuid();
@@ -26,9 +26,9 @@ describe('EhrTransferTracker', () => {
     const db = EhrTransferTracker.getInstance();
     const testMessageId = uuid();
 
-    const ehrCore = core(testConversationId, testMessageId);
+    const ehrCore = buildCore(testConversationId, testMessageId);
 
-    await db.writeItemsToTable([ehrCore]);
+    await db.writeItemsInTransaction([ehrCore]);
 
     // then
     const actual = await db.queryTableByConversationId(testConversationId, RecordType.CORE);

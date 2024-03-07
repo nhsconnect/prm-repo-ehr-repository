@@ -19,7 +19,7 @@ import {
   markFragmentAsReceivedAndCreateItsParts,
 } from '../ehr-fragment-repository';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
-import { core } from '../../../models/core';
+import { buildCore } from '../../../models/core';
 import { getEpochTimeInSecond } from '../../time';
 
 jest.mock('../../../middleware/logging');
@@ -256,9 +256,9 @@ describe('ehr-conversation-repository', () => {
       // given
       const conversationId = uuid();
       const messageId = uuid();
-      const item = { ...core(conversationId, messageId), DeletedAt: getEpochTimeInSecond() };
+      const item = { ...buildCore(conversationId, messageId), DeletedAt: getEpochTimeInSecond() };
 
-      await db.writeItemsToTable([item]);
+      await db.writeItemsInTransaction([item]);
 
       // when
       await expect(() => getMessageIdsForConversation(conversationId))

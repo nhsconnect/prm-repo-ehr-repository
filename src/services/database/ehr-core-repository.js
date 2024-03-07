@@ -1,6 +1,6 @@
 import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
-import { arrayOfFragments } from '../../models/fragment';
-import { core } from '../../models/core';
+import { buildMultipleFragments } from '../../models/fragment';
+import { buildCore } from '../../models/core';
 import { RecordType } from '../../models/enums';
 import { logError } from '../../middleware/logging';
 
@@ -9,10 +9,10 @@ export const createCore = async ({ conversationId, messageId, fragmentMessageIds
 
   try {
     const db = EhrTransferTracker.getInstance();
-    const itemsToWrite = [core(conversationId, messageId)];
+    const itemsToWrite = [buildCore(conversationId, messageId)];
 
     if (fragmentMessageIds) {
-      const directFragments = arrayOfFragments({
+      const directFragments = buildMultipleFragments({
         inboundConversationId: conversationId,
         fragmentMessageIds,
         parentMessageId: messageId,
@@ -20,7 +20,7 @@ export const createCore = async ({ conversationId, messageId, fragmentMessageIds
       itemsToWrite.push(...directFragments);
     }
 
-    await db.writeItemsToTable(itemsToWrite);
+    await db.writeItemsInTransaction(itemsToWrite);
   } catch (e) {
     logError('Message could not be stored', e);
     throw e;

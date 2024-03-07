@@ -38,7 +38,7 @@ export class EhrTransferTracker {
     return new this();
   }
 
-  async writeItemsToTable(items) {
+  async writeItemsInTransaction(items) {
     if (!items || !Array.isArray(items)) {
       throw new Error('The given argument `items` is not an array');
     }
@@ -161,9 +161,5 @@ export class EhrTransferTracker {
       logError('Received an empty response from dynamodb during query');
     }
     return response?.Item ?? null;
-  }
-
-  async getFragmentByKey(inboundConversationId, inboundMessageId) {
-    return this.getItemByKey(inboundConversationId, inboundMessageId, RecordType.FRAGMENT);
   }
 }

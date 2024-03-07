@@ -2,7 +2,7 @@ import { getUKTimestamp } from '../services/time';
 import { CoreStatus } from './enums';
 import { validateIds } from '../utilities/dynamodb-helper';
 
-export const core = (inboundConversationId, messageId) => {
+export const buildCore = (inboundConversationId, messageId) => {
   const timestamp = getUKTimestamp();
 
   validateIds(inboundConversationId, messageId);
