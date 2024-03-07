@@ -1,30 +1,31 @@
 import { v4 as uuid } from 'uuid';
 import request from 'supertest';
 import app from '../../../app';
-
+import { initializeConfig } from '../../../config';
 import { logError } from '../../../middleware/logging';
+import { MessageType } from "../../../models/enums";
 import {
   getConversationStatus,
   updateConversationCompleteness
 } from "../../../services/database/ehr-conversation-repository";
+import { createCore } from "../../../services/database/ehr-core-repository";
+import {
+  fragmentExistsInRecord,
+  markFragmentAsReceivedAndCreateItsParts
+} from "../../../services/database/ehr-fragment-repository";
 
-jest.mock('../../../services/database/ehr-conversation-repository');
+jest.mock("../../../services/database/ehr-conversation-repository");
+jest.mock("../../../services/database/ehr-core-repository");
+jest.mock("../../../services/database/ehr-fragment-repository");
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({}),
 }));
 
 describe('storeMessageController', () => {
-  const initializeConfig = () => ({
-    consumerApiKeys: { TEST_USER: 'correct-key' }
+  initializeConfig.mockReturnValue({
+    consumerApiKeys: { TEST_USER: 'correct-key' },
   });
-  const MessageType = {
-    EHR_EXTRACT: 'ehrExtract',
-    FRAGMENT: 'fragment',
-  };
-  // initializeConfig.mockReturnValue({
-  //   consumerApiKeys: { TEST_USER: 'correct-key' },
-  // });
 
   const authorizationKeys = 'correct-key';
   const conversationId = uuid();
@@ -52,7 +53,7 @@ describe('storeMessageController', () => {
 
     it('should return a 201 and health record status when message has successfully been stored in database', async () => {
       getConversationStatus.mockResolvedValueOnce('complete');
-      const ehrExtract = { messageId, conversationId,fragmentMessageIds };
+      const ehrExtract = { messageId, conversationId, fragmentMessageIds };
       const res = await request(app)
         .post('/messages')
         .send(requestBody)
@@ -73,7 +74,7 @@ describe('storeMessageController', () => {
         fragmentMessageIds: [nestedFragmentId],
       };
 
-      fragmentExists.mockResolvedValueOnce(true);
+      fragmentExistsInRecord.mockResolvedValueOnce(true);
 
       const res = await request(app)
         .post('/messages')
@@ -81,11 +82,11 @@ describe('storeMessageController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
-      expect(createEhrExtract).not.toHaveBeenCalled();
-      expect(updateFragmentAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
+      expect(createCore).not.toHaveBeenCalled();
+      expect(markFragmentAsReceivedAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
         nestedFragmentId,
       ]);
-      expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
+      expect(updateConversationCompleteness).toHaveBeenCalledWith(conversationId);
     });
 
     it('should create message in the database when a nested fragment arrives before first fragment', async () => {
@@ -97,7 +98,7 @@ describe('storeMessageController', () => {
         fragmentMessageIds: [],
       };
 
-      fragmentExists.mockResolvedValueOnce(false);
+      fragmentExistsInRecord.mockResolvedValueOnce(false);
 
       const res = await request(app)
         .post('/messages')
@@ -105,10 +106,9 @@ describe('storeMessageController', () => {
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(201);
-      expect(fragmentExists).toHaveBeenCalledWith(nestedFragmentId);
-      expect(createFragmentPart).toHaveBeenCalledWith(nestedFragmentId, conversationId);
-      expect(updateFragmentAndCreateItsParts).not.toHaveBeenCalled();
-      expect(updateHealthRecordCompleteness).toHaveBeenCalledWith(conversationId);
+      expect(fragmentExistsInRecord).toHaveBeenCalledWith(nestedFragmentId);
+      expect(markFragmentAsReceivedAndCreateItsParts).toHaveBeenCalledWith(nestedFragmentId, conversationId);
+      expect(updateConversationCompleteness).toHaveBeenCalledWith(conversationId);
     });
   });
 
@@ -126,7 +126,7 @@ describe('storeMessageController', () => {
       },
     };
     it('should return a 503 when message cannot be stored in the database', async () => {
-      createEhrExtract.mockRejectedValueOnce({ error: 'db is down' });
+      createCore.mockRejectedValueOnce({ error: 'db is down' });
       const res = await request(app)
         .post('/messages')
         .send(requestBody)

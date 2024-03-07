@@ -24,9 +24,14 @@ export const FragmentStatus = {
 };
 
 export const HealthRecordStatus = {
-  COMPLETE: "complete",
-  PENDING: "pending",
-  NOT_FOUND: "notFound"
+  COMPLETE: 'complete',
+  PENDING: 'pending',
+  NOT_FOUND: 'notFound',
+};
+
+export const MessageType = {
+  EHR_EXTRACT: 'ehrExtract',
+  FRAGMENT: 'fragment',
 };
 
 Object.freeze(HealthRecordStatus);
@@ -34,3 +39,4 @@ Object.freeze(RecordType);
 Object.freeze(ConversationStatus);
 Object.freeze(CoreStatus);
 Object.freeze(FragmentStatus);
+Object.freeze(MessageType);

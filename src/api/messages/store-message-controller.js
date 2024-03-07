@@ -12,6 +12,15 @@ import {
   getHealthRecordStatus,
 } from '../../services/database/health-record-repository';
 import { setCurrentSpanAttributes } from '../../config/tracing';
+import { createCore } from "../../services/database/ehr-core-repository";
+import {
+  fragmentExistsInRecord,
+  markFragmentAsReceivedAndCreateItsParts
+} from "../../services/database/ehr-fragment-repository";
+import {
+  getConversationStatus,
+  updateConversationCompleteness
+} from "../../services/database/ehr-conversation-repository";
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
@@ -44,34 +53,72 @@ export const storeMessageControllerValidation = [
     .withMessage("'fragmentMessageIds' should be an array"),
 ];
 
+// @deprecated
+// to be deleted PRMT-4568
+//
+// export const storeMessageController = async (req, res) => {
+//   const { id, attributes } = req.body.data;
+//   const { conversationId, messageType, nhsNumber, fragmentMessageIds } = attributes;
+//   setCurrentSpanAttributes({ conversationId, messageId: id });
+//
+//   try {
+//     if (messageType === MessageType.EHR_EXTRACT) {
+//       await createEhrExtract({
+//         messageId: id,
+//         conversationId,
+//         nhsNumber,
+//         fragmentMessageIds,
+//       });
+//     }
+//     if (messageType === MessageType.FRAGMENT) {
+//       if (await fragmentExists(id)) {
+//         await updateFragmentAndCreateItsParts(id, conversationId, fragmentMessageIds);
+//       } else {
+//         logWarning(
+//           `Fragment message ${id} did not arrive in order. Fragment parts: ${JSON.stringify(
+//             fragmentMessageIds
+//           )}`
+//         );
+//         await createFragmentPart(id, conversationId);
+//       }
+//     }
+//     await updateHealthRecordCompleteness(conversationId);
+//     const healthRecordStatus = await getHealthRecordStatus(conversationId);
+//
+//     logInfo('Health record status for fragments: ' + healthRecordStatus);
+//     res.status(201).json({ healthRecordStatus });
+//   } catch (e) {
+//     logError('Returned 503 due to error while saving message', e);
+//     res.sendStatus(503);
+//   }
+// };
 export const storeMessageController = async (req, res) => {
-  const { id, attributes } = req.body.data;
-  const { conversationId, messageType, nhsNumber, fragmentMessageIds } = attributes;
-  setCurrentSpanAttributes({ conversationId, messageId: id });
+  const { id: messageId, attributes } = req.body.data;
+  const { conversationId, messageType, fragmentMessageIds } = attributes;
+  setCurrentSpanAttributes({ conversationId, messageId });
 
   try {
     if (messageType === MessageType.EHR_EXTRACT) {
-      await createEhrExtract({
-        messageId: id,
+      await createCore({
+        messageId,
         conversationId,
-        nhsNumber,
         fragmentMessageIds,
       });
     }
     if (messageType === MessageType.FRAGMENT) {
-      if (await fragmentExists(id)) {
-        await updateFragmentAndCreateItsParts(id, conversationId, fragmentMessageIds);
+      if (await fragmentExistsInRecord(messageId)) {
+        await markFragmentAsReceivedAndCreateItsParts(messageId, conversationId, fragmentMessageIds);
       } else {
         logWarning(
-          `Fragment message ${id} did not arrive in order. Fragment parts: ${JSON.stringify(
+          `Fragment message ${messageId} did not arrive in order. Fragment parts: ${JSON.stringify(
             fragmentMessageIds
           )}`
         );
-        await createFragmentPart(id, conversationId);
+        await markFragmentAsReceivedAndCreateItsParts(messageId, conversationId);
       }
     }
-    await updateHealthRecordCompleteness(conversationId);
-    const healthRecordStatus = await getHealthRecordStatus(conversationId);
+    await updateConversationCompleteness(conversationId);
+    const healthRecordStatus = await getConversationStatus(conversationId);
 
     logInfo('Health record status for fragments: ' + healthRecordStatus);
     res.status(201).json({ healthRecordStatus });

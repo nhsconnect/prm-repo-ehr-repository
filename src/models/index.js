@@ -29,6 +29,8 @@ class ModelFactory {
   }
 
   configure() {
+    return;
+
     if (this.sequelize instanceof Sequelize) {
       this.sequelize.close();
     }
