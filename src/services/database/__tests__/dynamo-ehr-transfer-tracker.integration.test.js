@@ -21,7 +21,7 @@ describe('EhrTransferTracker', () => {
     await cleanupRecordsForTest(testConversationId);
   });
 
-  it('create and read an ehrCore in dynamodb', async () => {
+  it('can create and read a record in dynamodb', async () => {
     // given
     const db = EhrTransferTracker.getInstance();
     const testMessageId = uuid();
