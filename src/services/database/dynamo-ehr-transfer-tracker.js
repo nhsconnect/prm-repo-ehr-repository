@@ -1,17 +1,20 @@
 import {
   TransactWriteCommand,
   QueryCommand,
-  UpdateCommand,
   GetCommand,
 } from '@aws-sdk/lib-dynamodb';
 
-import { getUKTimestamp } from '../time';
 import { logError, logInfo } from '../../middleware/logging';
-import { RecordType, ConversationStatus } from '../../models/enums';
+import { RecordType } from '../../models/enums';
 import { getDynamodbClient } from './dynamodb-client';
-import { buildFragmentUpdateParams } from '../../models/fragment';
 
 export class EhrTransferTracker {
+  /**
+   * An abstract layer for accessing the EhrTransferTracker table on dynamodb.
+   *
+   * Due to singleton nature, this class is NOT supposed to be instantiated by `new EhrTransferTracker()`.
+   * Please call the class method `getInstance()` instead.
+   */
   constructor() {
     if (EhrTransferTracker._instance) {
       throw new Error("Singleton classes can't be instantiated more than once.");
@@ -24,7 +27,7 @@ export class EhrTransferTracker {
     const isInDojo = process.env.DOJO_VERSION !== undefined;
 
     if (isInLocal && !isInDojo) {
-      // for running individual test with IDE
+      // for running integration test within IDE
       this.tableName = 'local-test-db';
     }
 
@@ -32,6 +35,10 @@ export class EhrTransferTracker {
   }
 
   static getInstance() {
+    /**
+     * Return the existing instance of this class. Create a new one if no instances was created before.
+     * This is the supposed way to use this class.
+     */
     if (this._instance) {
       return this._instance;
     }
