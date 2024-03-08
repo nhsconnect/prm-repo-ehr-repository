@@ -62,3 +62,12 @@ export const cleanupRecordsForTest = async (conversationId) => {
 
   await db.client.send(deleteCommand);
 };
+
+
+export const cleanupRecordsForTestByNhsNumber = async (nhsNumber) => {
+  // This method is only meant for testing purpose
+  const db = EhrTransferTracker.getInstance()
+  const allConversations = await db.queryTableByNhsNumber(nhsNumber);
+  const removeAllRecords = allConversations.map(item => cleanupRecordsForTest(item.InboundConversationId));
+  return Promise.all(removeAllRecords);
+}

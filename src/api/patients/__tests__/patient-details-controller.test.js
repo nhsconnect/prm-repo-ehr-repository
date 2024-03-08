@@ -2,19 +2,20 @@ import request from 'supertest';
 import { when } from 'jest-when';
 import { v4 as uuid } from 'uuid';
 import app from '../../../app';
-import {
-  getCurrentHealthRecordIdForPatient,
-  getHealthRecordMessageIds,
-} from '../../../services/database/health-record-repository';
 import { initializeConfig } from '../../../config';
 import { logError, logInfo, logWarning } from '../../../middleware/logging';
 import getSignedUrl from '../../../services/storage/get-signed-url';
+import {
+  getCurrentConversationIdForPatient,
+  getMessageIdsForConversation
+} from "../../../services/database/ehr-conversation-repository";
+import { HealthRecordNotFoundError } from "../../../errors/errors";
 
-jest.mock('../../../services/database/health-record-repository');
+jest.mock('../../../services/database/ehr-conversation-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../services/storage/get-signed-url');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
+  initializeConfig: jest.fn().mockReturnValue({}),
 }));
 
 describe('patientDetailsController', () => {
@@ -26,24 +27,27 @@ describe('patientDetailsController', () => {
 
   describe('success', () => {
     it('should return 200 and correct link to health record extract given a small record', async () => {
+      // given
       const nhsNumber = '1234567890';
       const conversationId = uuid();
       const messageId = uuid();
       const presignedUrl = 'test-url';
 
-      getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
-      getHealthRecordMessageIds.mockResolvedValue({
+      getCurrentConversationIdForPatient.mockResolvedValue(conversationId);
+      getMessageIdsForConversation.mockResolvedValue({
         coreMessageId: messageId,
         fragmentMessageIds: [],
       });
       getSignedUrl.mockResolvedValue(presignedUrl);
 
+      // when
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
+      // then
       expect(res.status).toBe(200);
-      expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
+      expect(getCurrentConversationIdForPatient).toHaveBeenCalledWith(nhsNumber);
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, messageId, 'getObject');
       expect(res.body.coreMessageUrl).toEqual(presignedUrl);
       expect(res.body.fragmentMessageIds).toEqual([]);
@@ -51,14 +55,15 @@ describe('patientDetailsController', () => {
     });
 
     it('should return 200 and correct link to health record extract and fragment message IDs', async () => {
+      // given
       const nhsNumber = '1234567890';
       const conversationId = uuid();
       const healthRecordExtractId = uuid();
       const fragmentMessageId = uuid();
       const extractPresignedUrl = 'extract-url';
 
-      getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
-      getHealthRecordMessageIds.mockResolvedValue({
+      getCurrentConversationIdForPatient.mockResolvedValue(conversationId);
+      getMessageIdsForConversation.mockResolvedValue({
         coreMessageId: healthRecordExtractId,
         fragmentMessageIds: [fragmentMessageId],
       });
@@ -66,12 +71,14 @@ describe('patientDetailsController', () => {
         .calledWith(conversationId, healthRecordExtractId, 'getObject')
         .mockResolvedValue(extractPresignedUrl);
 
+      // when
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
+      // then
       expect(res.status).toBe(200);
-      expect(getCurrentHealthRecordIdForPatient).toHaveBeenCalledWith(nhsNumber);
+      expect(getCurrentConversationIdForPatient).toHaveBeenCalledWith(nhsNumber);
       expect(getSignedUrl).toHaveBeenCalledWith(conversationId, healthRecordExtractId, 'getObject');
       expect(getSignedUrl).not.toHaveBeenCalledWith(conversationId, fragmentMessageId, 'getObject');
       expect(res.body.coreMessageUrl).toEqual(extractPresignedUrl);
@@ -80,14 +87,15 @@ describe('patientDetailsController', () => {
     });
 
     it('should return 200 but log a warning when conversation id is not passed as header', async () => {
+      // given
       const nhsNumber = '1234567890';
       const conversationId = uuid();
       const healthRecordExtractId = uuid();
       const fragmentMessageId = uuid();
       const extractPresignedUrl = 'extract-url';
 
-      getCurrentHealthRecordIdForPatient.mockResolvedValue(conversationId);
-      getHealthRecordMessageIds.mockResolvedValue({
+      getCurrentConversationIdForPatient.mockResolvedValue(conversationId);
+      getMessageIdsForConversation.mockResolvedValue({
         coreMessageId: healthRecordExtractId,
         fragmentMessageIds: [fragmentMessageId],
       });
@@ -95,10 +103,12 @@ describe('patientDetailsController', () => {
         .calledWith(conversationId, healthRecordExtractId, 'getObject')
         .mockResolvedValue(extractPresignedUrl);
 
+      // when
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set({ Authorization: authorizationKeys });
 
+      // then
       expect(logWarning).toHaveBeenCalledWith('conversationId not passed as header');
       expect(res.status).toEqual(200);
     });
@@ -109,21 +119,29 @@ describe('patientDetailsController', () => {
     const conversationId = 'fake-conversationId';
 
     it('should return a 404 when no complete health record is found', async () => {
-      getCurrentHealthRecordIdForPatient.mockReturnValue(undefined);
+      // given
+      getCurrentConversationIdForPatient.mockRejectedValue(new HealthRecordNotFoundError());
+
+      // when
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
+      // then
       expect(res.status).toEqual(404);
       expect(logInfo).toHaveBeenCalledWith('Did not find a complete patient health record');
     });
 
     it('should return a 503 when cannot get patient health record from database', async () => {
-      getCurrentHealthRecordIdForPatient.mockRejectedValue({ bob: 'cheese' });
+      // given
+      getCurrentConversationIdForPatient.mockRejectedValue({ bob: 'cheese' });
+
+      // when
       const res = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set({ Authorization: authorizationKeys, conversationId: conversationId });
 
+      // then
       expect(res.status).toEqual(503);
       expect(logError).toHaveBeenCalledWith('Could not retrieve patient health record', {
         bob: 'cheese',

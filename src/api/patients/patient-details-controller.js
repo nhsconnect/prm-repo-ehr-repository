@@ -1,11 +1,16 @@
 import { param } from 'express-validator';
-import {
-  getCurrentHealthRecordIdForPatient,
-  getHealthRecordMessageIds,
-} from '../../services/database/health-record-repository';
+// import {
+//   getCurrentHealthRecordIdForPatient,
+//   getHealthRecordMessageIds,
+// } from '../../services/database/health-record-repository';
 import { logError, logInfo, logWarning } from '../../middleware/logging';
 import getSignedUrl from '../../services/storage/get-signed-url';
 import { setCurrentSpanAttributes } from '../../config/tracing';
+import {
+  getCurrentConversationIdForPatient,
+  getMessageIdsForConversation,
+} from '../../services/database/ehr-conversation-repository';
+import { HealthRecordNotFoundError } from '../../errors/errors';
 
 export const patientDetailsValidation = [
   param('nhsNumber')
@@ -15,20 +20,54 @@ export const patientDetailsValidation = [
     .withMessage("'nhsNumber' provided is not 10 characters"),
 ];
 
+// @deprecated
+// to be deleted PRMT-4568
+//
+// export const patientDetailsController = async (req, res) => {
+//   const { nhsNumber } = req.params;
+//   addConversationIdToLogContext(req.get('conversationId'));
+//
+//   try {
+//     const currentHealthRecordConversationId = await getCurrentHealthRecordIdForPatient(nhsNumber);
+//     if (!currentHealthRecordConversationId) {
+//       logInfo('Did not find a complete patient health record');
+//       res.sendStatus(404);
+//       return;
+//     }
+//
+//     logInfo('Getting fragment message ids');
+//     const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(
+//       currentHealthRecordConversationId
+//     );
+//
+//     const getOperation = 'getObject';
+//     const coreMessageUrl = await getSignedUrl(
+//       currentHealthRecordConversationId,
+//       coreMessageId,
+//       getOperation
+//     );
+//
+//     const responseBody = {
+//       coreMessageUrl,
+//       fragmentMessageIds,
+//       conversationIdFromEhrIn: currentHealthRecordConversationId,
+//     };
+//
+//     res.status(200).json(responseBody);
+//   } catch (err) {
+//     logError('Could not retrieve patient health record', err);
+//     res.sendStatus(503);
+//   }
+// };
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
   addConversationIdToLogContext(req.get('conversationId'));
 
   try {
-    const currentHealthRecordConversationId = await getCurrentHealthRecordIdForPatient(nhsNumber);
-    if (!currentHealthRecordConversationId) {
-      logInfo('Did not find a complete patient health record');
-      res.sendStatus(404);
-      return;
-    }
+    const currentHealthRecordConversationId = await getCurrentConversationIdForPatient(nhsNumber);
 
     logInfo('Getting fragment message ids');
-    const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(
+    const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(
       currentHealthRecordConversationId
     );
 
@@ -42,11 +81,20 @@ export const patientDetailsController = async (req, res) => {
     const responseBody = {
       coreMessageUrl,
       fragmentMessageIds,
+      // TODO: remove this duplicated `conversationIdFromEhrIn` field,
+      // after updating ehr-out to use the field name "inboundConversationId"
       conversationIdFromEhrIn: currentHealthRecordConversationId,
+      inboundConversationId: currentHealthRecordConversationId
     };
 
     res.status(200).json(responseBody);
   } catch (err) {
+    if (err instanceof HealthRecordNotFoundError) {
+      logInfo('Did not find a complete patient health record');
+      res.sendStatus(404);
+      return;
+    }
+
     logError('Could not retrieve patient health record', err);
     res.sendStatus(503);
   }

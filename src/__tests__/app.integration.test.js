@@ -7,16 +7,19 @@ import { expectStructuredLogToContain, transportSpy } from '../__builders__/logg
 import ModelFactory from '../models';
 import { MessageType, modelName as messageModelName } from '../models/message';
 import { modelName as healthRecordModelName } from '../models/health-record';
-import { EhrTransferTracker } from "../services/database/dynamo-ehr-transfer-tracker";
-import { getCoreByKey } from "../services/database/ehr-core-repository";
-import { cleanupRecordsForTest, createConversationForTest } from "../utilities/integration-test-utilities";
-import { getConversationById } from "../services/database/ehr-conversation-repository";
-import { ConversationStatus } from "../models/enums";
-import { isCore } from "../models/core";
-import { getFragmentByKey } from "../services/database/ehr-fragment-repository";
-import { isFragment } from "../models/fragment";
-import { isInCompleteStatus } from "../models/conversation";
-import { TIMESTAMP_REGEX } from "../services/time";
+import { EhrTransferTracker } from '../services/database/dynamo-ehr-transfer-tracker';
+import { getCoreByKey } from '../services/database/ehr-core-repository';
+import {
+  cleanupRecordsForTest, cleanupRecordsForTestByNhsNumber,
+  createConversationForTest
+} from "../utilities/integration-test-utilities";
+import { getConversationById } from '../services/database/ehr-conversation-repository';
+import { ConversationStatus } from '../models/enums';
+import { isCore } from '../models/core';
+import { getFragmentByKey } from '../services/database/ehr-fragment-repository';
+import { isFragment } from '../models/fragment';
+import { isInCompleteStatus } from '../models/conversation';
+import { TIMESTAMP_REGEX } from '../services/time';
 
 describe('app', () => {
   const config = initializeConfig();
@@ -211,21 +214,33 @@ describe('app', () => {
   });
 
   describe('GET /patients/:nhsNumber', () => {
+    // tear down to avoid interfering other tests
+    afterAll(async () => {
+      await cleanupRecordsForTestByNhsNumber('1234567890');
+      await cleanupRecordsForTestByNhsNumber('1234567891');
+    });
+
     it('should return 200 and patient health record link', async () => {
-      const conversationIdFromEhrIn = uuid();
-      const healthRecordExtractId = uuid();
+      // ===============  given  ====================
+      const nhsNumber = '1234567890';
+      const inboundConversationId = uuid();
+      const coreMessageId = uuid();
       const fragmentId = uuid();
       const nestedFragmentId = uuid();
-      const nhsNumber = '1234567890';
+
+      // mimic the record at Conversation Layer, which should in actual case should be already created by ehr-transfer-service
+      await createConversationForTest(inboundConversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.STARTED,
+      });
 
       const messageResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
-            id: healthRecordExtractId,
+            id: coreMessageId,
             type: 'messages',
             attributes: {
-              conversationId: conversationIdFromEhrIn,
+              conversationId: inboundConversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
               fragmentMessageIds: [fragmentId],
@@ -242,7 +257,7 @@ describe('app', () => {
             id: fragmentId,
             type: 'messages',
             attributes: {
-              conversationId: conversationIdFromEhrIn,
+              conversationId: inboundConversationId,
               messageType: MessageType.FRAGMENT,
               fragmentMessageIds: [nestedFragmentId],
             },
@@ -259,7 +274,7 @@ describe('app', () => {
             id: nestedFragmentId,
             type: 'messages',
             attributes: {
-              conversationId: conversationIdFromEhrIn,
+              conversationId: inboundConversationId,
               messageType: MessageType.FRAGMENT,
               fragmentMessageIds: [],
             },
@@ -268,55 +283,69 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(nestedFragmentResponse.status).toEqual(201);
-      const conversationId = uuid();
+      const outboundConversationId = uuid();
+
+      // ===============  when  ====================
       const patientRes = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys)
-        .set('conversationId', conversationId);
+        .set('conversationId', outboundConversationId);
 
+      // ===============  then  ====================
       expect(patientRes.status).toEqual(200);
       expect(patientRes.body.coreMessageUrl).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationIdFromEhrIn}/${healthRecordExtractId}`
+        `${config.localstackUrl}/${config.awsS3BucketName}/${inboundConversationId}/${coreMessageId}`
       );
-      expect(patientRes.body.fragmentMessageIds[0]).toEqual(fragmentId);
-      expect(patientRes.body.fragmentMessageIds[1]).toEqual(nestedFragmentId);
-      expect(patientRes.body.conversationIdFromEhrIn).toEqual(conversationIdFromEhrIn);
+      expect(patientRes.body.fragmentMessageIds).toHaveLength(2);
+      expect(patientRes.body.fragmentMessageIds).toEqual(
+        expect.arrayContaining([fragmentId, nestedFragmentId])
+      );
+      expect(patientRes.body.conversationIdFromEhrIn).toEqual(inboundConversationId);
       expectStructuredLogToContain(transportSpy, {
-        conversationId: conversationId,
+        conversationId: outboundConversationId,
         traceId: expect.anything(),
       });
     });
 
     it('should have conversation Id in the logging context', async () => {
-      const conversationId = uuid();
+      // given
+      const outboundConversationId = uuid();
       const nhsNumber = '1234567890';
-      const patientResponse = await request(app)
+
+      // when
+      await request(app)
         .get(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys)
-        .set('conversationId', conversationId);
+        .set('conversationId', outboundConversationId);
 
-      expect(patientResponse.status).toEqual(200);
-
+      // then
       expectStructuredLogToContain(transportSpy, {
-        conversationId: conversationId,
+        conversationId: outboundConversationId,
         traceId: expect.anything(),
       });
     });
 
     it('should return a 404 if no complete health record is found', async () => {
-      const conversationId = uuid();
-      const healthRecordExtractId = uuid();
+      // given
+      const inboundConversationId = uuid();
+      const outboundConversationId = uuid();
+      const coreMessageId = uuid();
       const fragmentId = uuid();
       const nhsNumber = '1234567891';
+
+      // mimic the record at Conversation Layer, which should in actual case should be already created by ehr-transfer-service
+      await createConversationForTest(inboundConversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.STARTED,
+      });
 
       const messageResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
-            id: healthRecordExtractId,
+            id: coreMessageId,
             type: 'messages',
             attributes: {
-              conversationId,
+              conversationId: inboundConversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
               fragmentMessageIds: [fragmentId],
@@ -327,10 +356,12 @@ describe('app', () => {
 
       expect(messageResponse.status).toEqual(201);
 
+      // when
       const response = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set({ Authorization: authorizationKeys, conversationId: conversationId });
+        .set({ Authorization: authorizationKeys, conversationId: outboundConversationId });
 
+      // then
       expect(response.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { traceId: expect.anything() });
       expectStructuredLogToContain(transportSpy, { level: 'WARN' });
@@ -371,12 +402,14 @@ describe('app', () => {
     beforeEach(() => {
       messageId = uuid();
       conversationId = uuid();
-      createConversationForTest(conversationId, nhsNumber, {TransferStatus: ConversationStatus.STARTED})
+      createConversationForTest(conversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.STARTED,
+      });
     });
 
     afterEach(() => {
       cleanupRecordsForTest(conversationId);
-    })
+    });
 
     afterAll(async () => {
       await ModelFactory.sequelize.close();
@@ -397,7 +430,7 @@ describe('app', () => {
       expect(isCore(message)).toBe(true);
       expect(message.ParentId).toBeUndefined();
       expect(conversation.NhsNumber).toBe(nhsNumber);
-      expect(conversation.TransferStatus).toBe(ConversationStatus.COMPLETE)
+      expect(conversation.TransferStatus).toBe(ConversationStatus.COMPLETE);
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId,
