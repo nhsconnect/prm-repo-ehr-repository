@@ -391,7 +391,7 @@ case "${command}" in
       npm install
 #      npm run db:migrate
       sh scripts/create-dynamodb-table.sh
-#      node scripts/wait-for-localstack.js
+      node scripts/wait-for-localstack.js
       npm run test:integration
       ;;
   test_integration)

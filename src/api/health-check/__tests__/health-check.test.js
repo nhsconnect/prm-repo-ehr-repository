@@ -78,7 +78,12 @@ describe('GET /health', () => {
     });
   });
 
-  describe('database is not writable', () => {
+  /**
+   * @deprecated
+   * postgres-db specific tests
+   * To be deleted PRMT-4568
+   */
+  describe.skip('database is not writable', () => {
     beforeEach(() => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(true, true, false)));
     });

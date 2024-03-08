@@ -107,7 +107,7 @@ describe('storeMessageController', () => {
 
       expect(res.status).toBe(201);
       expect(fragmentExistsInRecord).toHaveBeenCalledWith(nestedFragmentId);
-      expect(markFragmentAsReceivedAndCreateItsParts).toHaveBeenCalledWith(nestedFragmentId, conversationId);
+      expect(markFragmentAsReceivedAndCreateItsParts).toHaveBeenCalledWith(nestedFragmentId, conversationId, []);
       expect(updateConversationCompleteness).toHaveBeenCalledWith(conversationId);
     });
   });
