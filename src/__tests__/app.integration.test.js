@@ -614,7 +614,7 @@ describe('app', () => {
     });
 
     it('should mark the whole health record for the given NHS number as deleted', async () => {
-      // given
+      // ============================= given ==================================
       const inboundConversationId = uuid();
       const coreMessageId = uuid();
       const fragmentMessageIds = [uuid(), uuid(), uuid()];
@@ -633,12 +633,12 @@ describe('app', () => {
       });
       const timestampBeforeDelete = Math.floor(new Date() / 1000);
 
-      // when
+      // ============================= when ==================================
       const deleteResponse = await request(app)
         .delete(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
 
-      // then
+      // ============================= then ==================================
       expect(deleteResponse.status).toBe(200);
       expect(deleteResponse.body.data).toMatchObject({
         conversationIds: [inboundConversationId],
@@ -674,6 +674,9 @@ describe('app', () => {
       const inboundConversationId2 = uuid();
       const coreMessageId2 = uuid();
       await createCompleteRecord(nhsNumber, inboundConversationId1, coreMessageId1);
+
+      await new Promise(resolve => setTimeout(resolve, 1500)); // time buffer to ensure record 2 get a newer timestamp
+
       await createCompleteRecord(nhsNumber, inboundConversationId2, coreMessageId2);
 
       const getPatientResponse = await callGetPatient(nhsNumber);

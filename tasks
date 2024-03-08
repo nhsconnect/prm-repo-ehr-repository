@@ -411,6 +411,7 @@ case "${command}" in
       npm run test:integration
       ;;
   test_all)
+      configure_local_envs
       dojo -c Dojofile-itest "./tasks _test_all"
       ;;
   _test_performance)

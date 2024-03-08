@@ -72,18 +72,23 @@ describe('getHealthCheck', () => {
     });
   });
 
-  it('should return failed db health check if there is an unknown error', () => {
-    ModelFactory._overrideConfig('host', 'something');
-
-    return getHealthCheck().then((result) => {
-      const db = result.details['database'];
-
-      return expect(db).toEqual({
-        type: 'postgresql',
-        connection: false,
-        writable: false,
-        error: 'Unknown error (Error Code: ENOTFOUND)',
-      });
-    });
-  });
+  /* @deprecated
+  // postgres-db related test
+  // to be deleted PRMT-4568
+  //
+  // it('should return failed db health check if there is an unknown error', () => {
+  //   ModelFactory._overrideConfig('host', 'something');
+  //
+  //   return getHealthCheck().then((result) => {
+  //     const db = result.details['database'];
+  //
+  //     return expect(db).toEqual({
+  //       type: 'postgresql',
+  //       connection: false,
+  //       writable: false,
+  //       error: 'Unknown error (Error Code: ENOTFOUND)',
+  //     });
+  //   });
+  // });
+  */
 });

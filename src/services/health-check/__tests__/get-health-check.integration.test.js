@@ -1,7 +1,11 @@
+/* @deprecated
+// postgres-db specfic tests
+// to be deleted PRMT-4568
+*/
 import { getHealthCheck } from '../get-health-check';
 import ModelFactory from '../../../models';
 
-describe('getHealthCheck', () => {
+describe.skip('getHealthCheck', () => {
   it('should return successful db health check if db connection is healthy', () => {
     return getHealthCheck().then((result) => {
       const db = result.details['database'];
