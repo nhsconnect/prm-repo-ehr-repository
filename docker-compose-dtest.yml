@@ -8,6 +8,7 @@ services:
     links:
       - db:db
       - localstack:localstack
+      - dynamodb-local:dynamodb-local
     ports:
     - 3000:3000
   db:
@@ -31,3 +32,8 @@ services:
     volumes:
       - ./scripts/create-bucket.sh:/docker-entrypoint-initaws.d/create-bucket.sh
       - /var/run/docker.sock:/var/run/docker.sock
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+      - "4573:8000"

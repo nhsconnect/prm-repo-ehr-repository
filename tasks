@@ -408,6 +408,7 @@ case "${command}" in
       npm run test:unit
       configure_local_envs
 #      npm run db:migrate
+      sh scripts/create-dynamodb-table.sh
       npm run test:integration
       ;;
   test_all)
@@ -426,6 +427,7 @@ case "${command}" in
   _test_coverage)
       npm install
 #      npm run db:migrate
+      sh scripts/create-dynamodb-table.sh
       npm run test:coverage
       ;;
   test_coverage)
@@ -450,6 +452,7 @@ case "${command}" in
   _test_docker)
       npm install
       ./scripts/migrate-db.sh
+      sh scripts/create-dynamodb-table.sh
       node scripts/wait-for-localstack.js
       npm run test:docker
       ;;
