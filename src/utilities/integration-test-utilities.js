@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getUKTimestamp } from '../services/time';
 import { EhrTransferTracker } from '../services/database/dynamo-ehr-transfer-tracker';
 import { TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { RecordType } from "../models/enums";
+import { RecordType } from '../models/enums';
 
 export const generateRandomNhsNumber = () => (Math.floor(Math.random() * 9e9) + 1e9).toString();
 
@@ -18,8 +18,7 @@ export const createConversationForTest = async (conversationId, nhsNumber, overr
   // This method is only meant for testing purpose.
   // the inbound conversation record is supposed to be created by other service.
 
-  const isInLocal = process.env.NHS_ENVIRONMENT === 'local' || !process.env.NHS_ENVIRONMENT;
-  if (!isInLocal) {
+  if (!IS_IN_LOCAL) {
     throw new Error('Unexpected call to createConversationForTest method in non-local environment');
   }
 
@@ -32,7 +31,7 @@ export const createConversationForTest = async (conversationId, nhsNumber, overr
     NhsNumber: nhsNumber,
     CreatedAt: timestamp,
     UpdatedAt: timestamp,
-    ...overrides
+    ...overrides,
   };
 
   await db.writeItemsInTransaction([item]);
@@ -41,8 +40,7 @@ export const createConversationForTest = async (conversationId, nhsNumber, overr
 export const cleanupRecordsForTest = async (conversationId) => {
   // This method is only meant for testing purpose
 
-  const isInLocal = process.env.NHS_ENVIRONMENT === 'local' || !process.env.NHS_ENVIRONMENT;
-  if (!isInLocal) {
+  if (!IS_IN_LOCAL) {
     throw new Error('Unexpected call to cleanupRecordsForTest method in non-local environment');
   }
 
@@ -63,11 +61,14 @@ export const cleanupRecordsForTest = async (conversationId) => {
   await db.client.send(deleteCommand);
 };
 
-
 export const cleanupRecordsForTestByNhsNumber = async (nhsNumber) => {
   // This method is only meant for testing purpose
-  const db = EhrTransferTracker.getInstance()
+  const db = EhrTransferTracker.getInstance();
   const allConversations = await db.queryTableByNhsNumber(nhsNumber);
-  const removeAllRecords = allConversations.map(item => cleanupRecordsForTest(item.InboundConversationId));
+  const removeAllRecords = allConversations.map((item) =>
+    cleanupRecordsForTest(item.InboundConversationId)
+  );
   return Promise.all(removeAllRecords);
-}
+};
+
+export const IS_IN_LOCAL = process.env.NHS_ENVIRONMENT === 'local' || !process.env.NHS_ENVIRONMENT;

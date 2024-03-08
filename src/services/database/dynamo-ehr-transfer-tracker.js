@@ -7,6 +7,7 @@ import {
 import { logError, logInfo } from '../../middleware/logging';
 import { RecordType } from '../../models/enums';
 import { getDynamodbClient } from './dynamodb-client';
+import { IS_IN_LOCAL } from "../../utilities/integration-test-utilities";
 
 export class EhrTransferTracker {
   /**
@@ -23,12 +24,9 @@ export class EhrTransferTracker {
 
     this.tableName = process.env.DYNAMODB_NAME;
 
-    const isInLocal = process.env.NHS_ENVIRONMENT === 'local' || !process.env.NHS_ENVIRONMENT;
-    const isInDojo = process.env.DOJO_VERSION !== undefined;
-
-    if (isInLocal && !isInDojo) {
+    if (IS_IN_LOCAL) {
       // for running integration test within IDE
-      this.tableName = 'local-test-db';
+      this.tableName = this.tableName ?? 'local-test-db';
     }
 
     this.client = getDynamodbClient();
