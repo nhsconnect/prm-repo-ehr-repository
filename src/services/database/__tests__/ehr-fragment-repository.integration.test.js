@@ -127,6 +127,7 @@ describe('ehr-fragment-repository', () => {
 
   describe('fragmentExistsInRecord', () => {
     it('should return true for a fragment existing in the database', async () => {
+      // given
       const conversationId = uuid();
       const messageId = uuid();
 
@@ -137,7 +138,11 @@ describe('ehr-fragment-repository', () => {
       const db = EhrTransferTracker.getInstance();
       await db.writeItemsInTransaction([fragment]);
 
-      expect(await fragmentExistsInRecord(conversationId, messageId)).toBe(true);
+      // when
+      const result = await fragmentExistsInRecord(conversationId, messageId);
+
+      // then
+      expect(result).toBe(true);
     });
 
     it('should return false for a fragment that does not exist in the database', async () => {
@@ -147,10 +152,14 @@ describe('ehr-fragment-repository', () => {
     });
 
     it('should throw if database querying throws', async () => {
-      const messageId = 'not-valid';
+      // given
+      mimicDynamodbFail();
+
       try {
-        await fragmentExistsInRecord(messageId);
+        // when
+        await fragmentExistsInRecord(uuid(), uuid());
       } catch (err) {
+        // then
         expect(err).not.toBeNull();
         expect(logError).toHaveBeenCalledWith('Querying database for fragment message failed', err);
       }

@@ -98,6 +98,7 @@ export class EhrTransferTracker {
     const items = response?.Items;
     if (!items) {
       logError('Received an empty response from dynamodb during query');
+      return [];
     }
     return items;
   }
