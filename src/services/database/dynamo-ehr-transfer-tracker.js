@@ -77,7 +77,7 @@ export class EhrTransferTracker {
     await this.client.send(command);
   }
 
-  async queryTableByNhsNumber(nhsNumber) {
+  async queryTableByNhsNumber(nhsNumber, includeDeletedRecord = false) {
     const params = {
       TableName: this.tableName,
       IndexName: 'NhsNumberSecondaryIndex',
@@ -89,7 +89,9 @@ export class EhrTransferTracker {
       },
       KeyConditionExpression: '#NhsNumber = :nhsNumber',
     };
-
+    if (!includeDeletedRecord) {
+      params.FilterExpression = 'attribute_not_exists(DeletedAt)';
+    }
     const command = new QueryCommand(params);
 
     const response = await this.client.send(command);

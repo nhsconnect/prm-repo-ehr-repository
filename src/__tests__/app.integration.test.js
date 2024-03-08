@@ -10,11 +10,12 @@ import { modelName as healthRecordModelName } from '../models/health-record';
 import { EhrTransferTracker } from '../services/database/dynamo-ehr-transfer-tracker';
 import { getCoreByKey } from '../services/database/ehr-core-repository';
 import {
-  cleanupRecordsForTest, cleanupRecordsForTestByNhsNumber,
-  createConversationForTest
-} from "../utilities/integration-test-utilities";
+  cleanupRecordsForTest,
+  cleanupRecordsForTestByNhsNumber,
+  createConversationForTest,
+} from '../utilities/integration-test-utilities';
 import { getConversationById } from '../services/database/ehr-conversation-repository';
-import { ConversationStatus } from '../models/enums';
+import { ConversationStatus, RecordType } from '../models/enums';
 import { isCore } from '../models/core';
 import { getFragmentByKey } from '../services/database/ehr-fragment-repository';
 import { isFragment } from '../models/fragment';
@@ -24,6 +25,31 @@ import { TIMESTAMP_REGEX } from '../services/time';
 describe('app', () => {
   const config = initializeConfig();
   const authorizationKeys = 'correct-key';
+
+  const createReqBodyForEhr = (messageId, conversationId, nhsNumber, fragmentMessageIds) => ({
+    data: {
+      type: 'messages',
+      id: messageId,
+      attributes: {
+        conversationId,
+        messageType: MessageType.EHR_EXTRACT,
+        nhsNumber,
+        fragmentMessageIds,
+      },
+    },
+  });
+
+  const createReqBodyForFragment = (messageId, conversationId, fragmentMessageIds = []) => ({
+    data: {
+      type: 'messages',
+      id: messageId,
+      attributes: {
+        conversationId,
+        messageType: MessageType.FRAGMENT,
+        fragmentMessageIds: fragmentMessageIds,
+      },
+    },
+  });
 
   beforeEach(() => {
     process.env.API_KEY_FOR_TEST_USER = authorizationKeys;
@@ -381,32 +407,6 @@ describe('app', () => {
     const nhsNumber = '1234567890';
     let conversationId;
     let messageId;
-
-    const createReqBodyForEhr = (messageId, conversationId, nhsNumber, fragmentMessageIds) => ({
-      data: {
-        type: 'messages',
-        id: messageId,
-        attributes: {
-          conversationId,
-          messageType: MessageType.EHR_EXTRACT,
-          nhsNumber,
-          fragmentMessageIds,
-        },
-      },
-    });
-
-    const createReqBodyForFragment = (messageId, conversationId, fragmentMessageIds = []) => ({
-      data: {
-        type: 'messages',
-        id: messageId,
-        attributes: {
-          conversationId,
-          messageType: MessageType.FRAGMENT,
-          fragmentMessageIds: fragmentMessageIds,
-        },
-      },
-    });
-
     beforeEach(() => {
       messageId = uuid();
       conversationId = uuid();
@@ -575,6 +575,128 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         traceId: 'our trace ID',
       });
+    });
+  });
+
+  describe('DELETE /patients/:nhsNumber', () => {
+    // ======================= SETUP & HELPERS =======================
+    const nhsNumber = '9000000001';
+    const db = EhrTransferTracker.getInstance();
+    const createCompleteRecord = async (
+      nhsNumber,
+      conversationId,
+      coreMessageId,
+      fragmentMessageIds = []
+    ) => {
+      await createConversationForTest(conversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.STARTED,
+      });
+      await request(app)
+        .post(`/messages`)
+        .send(createReqBodyForEhr(coreMessageId, conversationId, nhsNumber, fragmentMessageIds))
+        .set('Authorization', authorizationKeys);
+      await Promise.all(
+        fragmentMessageIds.map((fragmentId) =>
+          request(app)
+            .post(`/messages`)
+            .send(createReqBodyForFragment(fragmentId, conversationId))
+            .set('Authorization', authorizationKeys)
+        )
+      );
+    };
+
+    const callGetPatient = (nhsNumber) => {
+      return request(app).get(`/patients/${nhsNumber}`).set('Authorization', authorizationKeys);
+    };
+
+    afterEach(async () => {
+      await cleanupRecordsForTestByNhsNumber(nhsNumber);
+    });
+
+    it('should mark the whole health record for the given NHS number as deleted', async () => {
+      // given
+      const inboundConversationId = uuid();
+      const coreMessageId = uuid();
+      const fragmentMessageIds = [uuid(), uuid(), uuid()];
+      await createCompleteRecord(
+        nhsNumber,
+        inboundConversationId,
+        coreMessageId,
+        fragmentMessageIds
+      );
+
+      const getPatientResponse = await callGetPatient(nhsNumber);
+      expect(getPatientResponse.status).toBe(200);
+      expect(getPatientResponse.body).toMatchObject({
+        conversationIdFromEhrIn: inboundConversationId,
+        fragmentMessageIds: expect.arrayContaining(fragmentMessageIds),
+      });
+      const timestampBeforeDelete = Math.floor(new Date() / 1000);
+
+      // when
+      const deleteResponse = await request(app)
+        .delete(`/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      // then
+      expect(deleteResponse.status).toBe(200);
+      expect(deleteResponse.body.data).toMatchObject({
+        conversationIds: [inboundConversationId],
+        id: nhsNumber,
+      });
+
+      const getPatientResponseAfterDeletion = await callGetPatient(nhsNumber);
+      expect(getPatientResponseAfterDeletion.status).toBe(404);
+
+      const softDeletedRecords = await db.queryTableByConversationId(
+        inboundConversationId,
+        RecordType.ALL,
+        true
+      );
+      expect(softDeletedRecords).toHaveLength(5); // Conversation + Core + 3 Fragments
+
+      const timestampAfterDelete = Math.ceil(new Date() / 1000);
+      for (const item of softDeletedRecords) {
+        expect(item).toMatchObject({
+          InboundConversationId: inboundConversationId,
+          DeletedAt: expect.any(Number),
+        });
+        expect(item.DeletedAt).toBeGreaterThanOrEqual(timestampBeforeDelete);
+        expect(item.DeletedAt).toBeLessThanOrEqual(timestampAfterDelete);
+      }
+    });
+
+
+    it('should delete all record if patient has more than one set of record in our storage', async () => {
+      // given
+      const inboundConversationId1 = uuid();
+      const coreMessageId1 = uuid();
+      const inboundConversationId2 = uuid();
+      const coreMessageId2 = uuid();
+      await createCompleteRecord(nhsNumber, inboundConversationId1, coreMessageId1);
+      await createCompleteRecord(nhsNumber, inboundConversationId2, coreMessageId2);
+
+      const getPatientResponse = await callGetPatient(nhsNumber);
+      expect(getPatientResponse.status).toBe(200);
+      expect(getPatientResponse.body).toMatchObject({
+        conversationIdFromEhrIn: inboundConversationId2,
+        fragmentMessageIds: [],
+      });
+
+      // when
+      const deleteResponse = await request(app)
+        .delete(`/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      // then
+      expect(deleteResponse.status).toBe(200);
+      expect(deleteResponse.body.data).toMatchObject({
+        conversationIds: expect.arrayContaining([inboundConversationId1, inboundConversationId2]),
+        id: nhsNumber,
+      });
+
+      const getPatientResponseAfterDeletion = await callGetPatient(nhsNumber);
+      expect(getPatientResponseAfterDeletion.status).toBe(404);
     });
   });
 });
