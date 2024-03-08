@@ -57,7 +57,6 @@ describe('app', () => {
   });
 
   describe('GET /fragments/:conversationId/:messageId', () => {
-    // given
     const conversationId = v4();
     const coreMessageId = v4();
     const fragmentMessageId = v4();
@@ -137,6 +136,7 @@ describe('app', () => {
 
   describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
     it('should return 200', async () => {
+      // given
       const conversationId = uuid();
       const messageId = uuid();
       const nhsNumber = '1234567890';
@@ -159,15 +159,18 @@ describe('app', () => {
 
       expect(messageResponse.status).toEqual(201);
 
+      // when
       const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
+      // then
       expect(recordResponse.status).toEqual(200);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
     it('should return 404 when health record is not complete', async () => {
+      // given
       const conversationId = uuid();
       const messageId = uuid();
       const fragmentId = uuid();
@@ -191,22 +194,27 @@ describe('app', () => {
 
       expect(messageResponse.status).toEqual(201);
 
+      // when
       const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
+      // then
       expect(recordResponse.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
     it('should return 404 when health record is not found', async () => {
+      // given
       const conversationId = uuid();
       const nhsNumber = '1234567890';
 
+      // when
       const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
+      // then
       expect(recordResponse.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
       expectStructuredLogToContain(transportSpy, { level: 'WARN' });

@@ -1,16 +1,13 @@
 import request from 'supertest';
 import { v4 as uuid } from 'uuid';
 import app from '../../../app';
-import {
-  getHealthRecordStatus,
-
-} from '../../../services/database/health-record-repository';
+import { getConversationStatus } from '../../../services/database/ehr-conversation-repository';
 import { initializeConfig } from '../../../config';
-import { HealthRecordStatus } from "../../../models/enums";
+import { HealthRecordStatus } from '../../../models/enums';
 
-jest.mock('../../../services/database/health-record-repository');
+jest.mock('../../../services/database/ehr-conversation-repository');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
+  initializeConfig: jest.fn().mockReturnValue({}),
 }));
 
 describe('healthRecordController', () => {
@@ -24,14 +21,14 @@ describe('healthRecordController', () => {
     it('should return 200 when a health record is complete', async () => {
       const nhsNumber = '1234567890';
       const conversationId = uuid();
-      getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.COMPLETE);
+      getConversationStatus.mockResolvedValueOnce(HealthRecordStatus.COMPLETE);
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(200);
-      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
+      expect(getConversationStatus).toHaveBeenCalledWith(conversationId);
     });
   });
 
@@ -39,40 +36,40 @@ describe('healthRecordController', () => {
     it('should return 404 when a health record is not complete', async () => {
       const nhsNumber = '1234567890';
       const conversationId = uuid();
-      getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.PENDING);
+      getConversationStatus.mockResolvedValueOnce(HealthRecordStatus.PENDING);
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(404);
-      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
+      expect(getConversationStatus).toHaveBeenCalledWith(conversationId);
     });
 
     it('should return 404 when a health record is not found', async () => {
       const nhsNumber = '1234567890';
       const conversationId = uuid();
-      getHealthRecordStatus.mockResolvedValueOnce(HealthRecordStatus.NOT_FOUND);
+      getConversationStatus.mockResolvedValueOnce(HealthRecordStatus.NOT_FOUND);
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(404);
-      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
+      expect(getConversationStatus).toHaveBeenCalledWith(conversationId);
     });
 
     it('should return 503 when there is an error retrieving the health record', async () => {
       const nhsNumber = '1234567890';
       const conversationId = uuid();
-      getHealthRecordStatus.mockRejectedValue();
+      getConversationStatus.mockRejectedValue();
 
       const res = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toEqual(503);
-      expect(getHealthRecordStatus).toHaveBeenCalledWith(conversationId);
+      expect(getConversationStatus).toHaveBeenCalledWith(conversationId);
     });
   });
 
