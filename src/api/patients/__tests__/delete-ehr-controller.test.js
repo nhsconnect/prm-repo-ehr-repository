@@ -1,11 +1,11 @@
 import request from 'supertest';
 import app from '../../../app';
-import { markHealthRecordAsDeletedForPatient } from '../../../services/database/health-record-repository';
+import { markRecordAsSoftDeleteForPatient } from "../../../services/database/ehr-conversation-repository";
 import { initializeConfig } from '../../../config';
 import { logError, logWarning } from '../../../middleware/logging';
 import { v4 as uuid } from 'uuid';
 
-jest.mock('../../../services/database/health-record-repository');
+jest.mock('../../../services/database/ehr-conversation-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../services/storage/get-signed-url');
 jest.mock('../../../config', () => ({
@@ -23,14 +23,14 @@ describe('deleteEhrController', () => {
   describe('success', () => {
     it('should return 200 when controller invoked correctly', async () => {
       const conversationIds = [uuid(), uuid(), uuid()];
-      markHealthRecordAsDeletedForPatient.mockResolvedValue(conversationIds);
+      markRecordAsSoftDeleteForPatient.mockResolvedValue(conversationIds);
 
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
 
       expect(res.status).toBe(200);
-      expect(markHealthRecordAsDeletedForPatient).toHaveBeenCalledWith(nhsNumber);
+      expect(markRecordAsSoftDeleteForPatient).toHaveBeenCalledWith(nhsNumber);
       expect(res.body.data.id).toEqual(nhsNumber);
       expect(res.body.data.type).toEqual('patients');
       expect(res.body.data.conversationIds).toEqual(conversationIds);
@@ -39,7 +39,7 @@ describe('deleteEhrController', () => {
 
   describe('failure', () => {
     it('should return a 503 when an unexpected server error occurs', async () => {
-      markHealthRecordAsDeletedForPatient.mockRejectedValue({});
+      markRecordAsSoftDeleteForPatient.mockRejectedValue({});
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
@@ -49,7 +49,7 @@ describe('deleteEhrController', () => {
     });
 
     it('should return a 404 when record is not found', async () => {
-      markHealthRecordAsDeletedForPatient.mockResolvedValue(undefined);
+      markRecordAsSoftDeleteForPatient.mockResolvedValue(undefined);
       const res = await request(app)
         .delete(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys);
