@@ -1,6 +1,6 @@
 import { getHealthCheck } from '../get-health-check';
 import { S3 } from 'aws-sdk';
-import ModelFactory from '../../../models';
+// import ModelFactory from '../../../models';
 import { initializeConfig } from '../../../config';
 
 jest.mock('aws-sdk');
@@ -13,7 +13,7 @@ describe('getHealthCheck', () => {
   const error = 'some-error';
 
   beforeEach(() => {
-    ModelFactory._resetConfig();
+    // ModelFactory._resetConfig();
 
     S3.mockImplementation(() => ({
       putObject: mockPutObject,
@@ -21,9 +21,9 @@ describe('getHealthCheck', () => {
     }));
   });
 
-  afterAll(() => {
-    ModelFactory.sequelize.close();
-  });
+  // afterAll(() => {
+    // ModelFactory.sequelize.close();
+  // });
 
   it('should return successful s3 health check if s3 succeeds', () => {
     // when

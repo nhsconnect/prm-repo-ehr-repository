@@ -4,9 +4,6 @@ import app from '../app';
 import { initializeConfig } from '../config';
 import { logger } from '../config/logging';
 import { expectStructuredLogToContain, transportSpy } from '../__builders__/logging-helper';
-import ModelFactory from '../models';
-import { MessageType, modelName as messageModelName } from '../models/message';
-import { modelName as healthRecordModelName } from '../models/health-record';
 import { EhrTransferTracker } from '../services/database/dynamo-ehr-transfer-tracker';
 import { getCoreByKey } from '../services/database/ehr-core-repository';
 import {
@@ -15,11 +12,10 @@ import {
   createConversationForTest,
 } from '../utilities/integration-test-utilities';
 import { getConversationById } from '../services/database/ehr-conversation-repository';
-import { ConversationStatus, RecordType } from '../models/enums';
+import { ConversationStatus, MessageType, RecordType } from "../models/enums";
 import { isCore } from '../models/core';
 import { getFragmentByKey } from '../services/database/ehr-fragment-repository';
 import { isFragment } from '../models/fragment';
-import { isInCompleteStatus } from '../models/conversation';
 import { TIMESTAMP_REGEX } from '../services/time';
 
 describe('app', () => {
@@ -420,7 +416,6 @@ describe('app', () => {
     });
 
     afterAll(async () => {
-      await ModelFactory.sequelize.close();
     });
 
     it('should save health record without fragments in the database and return 201', async () => {

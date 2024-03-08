@@ -108,4 +108,5 @@ class ModelFactory {
   }
 }
 
-export default new ModelFactory();
+// export default new ModelFactory();
+export default {};

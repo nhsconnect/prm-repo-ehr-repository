@@ -362,8 +362,8 @@ case "${command}" in
       ;;
   _setup_test_integration_local)
     configure_local_envs
-    npm run db:teardown
-    npm run db:migrate
+#    npm run db:teardown
+#    npm run db:migrate
     prepare_local_envs_for_ide
     ;;
   _test_lint)
@@ -383,15 +383,15 @@ case "${command}" in
  _test_integration_local)
       configure_local_envs
       npm install
-      npm run db:teardown
-      npm run db:migrate
+#      npm run db:teardown
+#      npm run db:migrate
       npm run test:integration
       ;;
   _test_integration)
       npm install
-      npm run db:migrate
-      node scripts/wait-for-localstack.js
+#      npm run db:migrate
       sh scripts/create-dynamodb-table.sh
+#      node scripts/wait-for-localstack.js
       npm run test:integration
       ;;
   test_integration)
@@ -407,7 +407,7 @@ case "${command}" in
       npm run lint
       npm run test:unit
       configure_local_envs
-      npm run db:migrate
+#      npm run db:migrate
       npm run test:integration
       ;;
   test_all)
@@ -425,7 +425,7 @@ case "${command}" in
       ;;
   _test_coverage)
       npm install
-      npm run db:migrate
+#      npm run db:migrate
       npm run test:coverage
       ;;
   test_coverage)

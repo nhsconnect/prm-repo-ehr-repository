@@ -26,4 +26,4 @@ if (use_ssl) {
   };
 }
 
-module.exports = sequelizeConfig;
+// module.exports = sequelizeConfig;

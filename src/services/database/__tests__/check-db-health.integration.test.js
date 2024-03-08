@@ -1,9 +1,14 @@
+/**
+ * @deprecated
+ * Postgres DB related stubs
+ * To be deleted PRMT-4568
+ */
 import { checkDbHealth } from '../check-db-health';
-import ModelFactory from '../../../models';
+// import ModelFactory from '../../../models';
 
-describe('db', () => {
+describe.skip('db', () => {
   afterAll(() => {
-    ModelFactory.sequelize.close();
+    // ModelFactory.sequelize.close();
   });
 
   describe('checkDbHealth', () => {

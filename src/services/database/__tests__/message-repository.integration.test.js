@@ -1,13 +1,13 @@
 import { v4 as uuid } from 'uuid';
-import {
-  updateFragmentAndCreateItsParts,
-  createEhrExtract,
-  fragmentExists,
-  createFragmentPart,
-} from '../message-repository';
-import ModelFactory from '../../../models';
-import { MessageType, modelName as messageModelName } from '../../../models/message';
-import { modelName as healthRecordModelName } from '../../../models/health-record';
+// import {
+//   updateFragmentAndCreateItsParts,
+//   createEhrExtract,
+//   fragmentExists,
+//   createFragmentPart,
+// } from '../message-repository';
+// import ModelFactory from '../../../models';
+// import { MessageType, modelName as messageModelName } from '../../../models/message';
+// import { modelName as healthRecordModelName } from '../../../models/health-record';
 import { logError } from '../../../middleware/logging';
 import { getNow } from '../../time';
 import expect from 'expect';
@@ -16,15 +16,15 @@ import expect from 'expect';
 jest.mock('../../../middleware/logging');
 jest.mock('../../time');
 
-describe('messageRepository', () => {
+describe.skip('messageRepository', () => {
   /**
    * @deprecated
    * All the tests here are migrated to new test suite of dynamodb-based implementation
    * To be deleted PRMT-4568
    */
-  const Message = ModelFactory.getByName(messageModelName);
-  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-  const ehrExtractType = MessageType.EHR_EXTRACT;
+  const Message = {}; // ModelFactory.getByName(messageModelName);
+  const HealthRecord = {}; // ModelFactory.getByName(healthRecordModelName);
+  // const ehrExtractType = MessageType.EHR_EXTRACT;
   const fragmentMessageId = uuid();
   const fragmentMessageIds = [fragmentMessageId];
   const nhsNumber = '1234567890';
@@ -32,13 +32,13 @@ describe('messageRepository', () => {
 
   beforeEach(async () => {
     getNow.mockReturnValue(now);
-    await HealthRecord.truncate();
-    await Message.truncate();
-    await ModelFactory.sequelize.sync({ force: true });
+    // await HealthRecord.truncate();
+    // await Message.truncate();
+    // await ModelFactory.sequelize.sync({ force: true });
   });
 
   afterAll(async () => {
-    await ModelFactory.sequelize.close();
+    // await ModelFactory.sequelize.close();
   });
 
   describe('createEhrExtract', () => {

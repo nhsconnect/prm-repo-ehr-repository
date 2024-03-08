@@ -1,43 +1,43 @@
 import { v4 as uuid } from 'uuid';
-import {
-  getHealthRecordStatus,
-  updateHealthRecordCompleteness,
-  getCurrentHealthRecordIdForPatient,
-  getHealthRecordMessageIds,
-  messageAlreadyReceived,
-  markHealthRecordAsDeletedForPatient,
-} from '../health-record-repository';
-import ModelFactory from '../../../models';
-import { modelName as healthRecordModelName } from '../../../models/health-record';
-import { MessageType, modelName as messageModelName } from '../../../models/message';
+// import {
+//   getHealthRecordStatus,
+//   updateHealthRecordCompleteness,
+//   getCurrentHealthRecordIdForPatient,
+//   getHealthRecordMessageIds,
+//   messageAlreadyReceived,
+//   markHealthRecordAsDeletedForPatient,
+// } from '../health-record-repository';
+// import ModelFactory from '../../../models';
+// import { modelName as healthRecordModelName } from '../../../models/health-record';
+// import { MessageType, modelName as messageModelName } from '../../../models/message';
 import { logError } from '../../../middleware/logging';
 import { HealthRecordStatus } from "../../../models/enums";
 
-jest.mock('../../../middleware/logging');
+// jest.mock('../../../middleware/logging');
 
-describe('healthRecordRepository', () => {
+describe.skip('healthRecordRepository', () => {
   /**
    * @deprecated
    * All the tests here are migrated to new test suite of dynamodb-based implementation
    * To be deleted PRMT-4568
    */
-  // ========================= COMMON PROPERTIES =========================
-  const HealthRecord = ModelFactory.getByName(healthRecordModelName);
-  const Message = ModelFactory.getByName(messageModelName);
-  // =====================================================================
-
-  // ========================= SET UP / TEAR DOWN ========================
-  beforeEach(async () => {
-    await HealthRecord.truncate();
-    await Message.truncate();
-    await ModelFactory.sequelize.sync({ force: true });
-  });
-
-  afterAll(async () => {
-    await ModelFactory.sequelize.close();
-  });
-  // =====================================================================
-
+  // // ========================= COMMON PROPERTIES =========================
+  // const HealthRecord = ModelFactory.getByName(healthRecordModelName);
+  // const Message = ModelFactory.getByName(messageModelName);
+  // // =====================================================================
+  //
+  // // ========================= SET UP / TEAR DOWN ========================
+  // beforeEach(async () => {
+  //   await HealthRecord.truncate();
+  //   await Message.truncate();
+  //   await ModelFactory.sequelize.sync({ force: true });
+  // });
+  //
+  // afterAll(async () => {
+  //   await ModelFactory.sequelize.close();
+  // });
+  // // =====================================================================
+  //
   describe('getHealthRecordStatus', () => {
     it("should return status 'complete' when health record 'completedAt' field is not null", async () => {
       const conversationId = uuid();
