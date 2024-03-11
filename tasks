@@ -83,9 +83,7 @@ function configure_service_url {
 }
 
 function prepare_local_envs_for_ide {
-  export DATABASE_HOST=localhost
   envs=$(printenv | grep "NODE_ENV" && \
-          printenv | grep "DATABASE" && \
           printenv | grep "AUTHORIZATION_KEYS" && \
           printenv | grep "SERVICE_URL"
   )
@@ -101,14 +99,9 @@ function generate_secure_string {
 
 function configure_local_envs {
   export AUTHORIZATION_KEYS=$(generate_secure_string 10)
-  export DATABASE_NAME=deductions_test
-  export DATABASE_USER=$(generate_secure_string 20)
-  export DATABASE_PASSWORD=$(generate_secure_string 20)
-  export DATABASE_HOST=db
   export S3_BUCKET_NAME=test-bucket
   export LOCALSTACK_URL=http://localstack:4572
   export REPOSITORY_URI=$IMAGE_REPO_NAME
-  export SKIP_DB_MIGRATION=false
   export NODE_ENV=local
 
   export DYNAMODB_NAME=local-test-db
@@ -117,15 +110,6 @@ function configure_local_envs {
   export AWS_SECRET_ACCESS_KEY=$(generate_secure_string 20)
 
   configure_service_url
-}
-
-function configure_db_migration_envs {
-  export SKIP_DB_MIGRATION=false
-  export DATABASE_HOST=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
-  export DATABASE_USER=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-migration-user")
-  export DATABASE_NAME=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-name")
-  export DATABASE_PASSWORD="$(aws rds generate-db-auth-token --hostname $DATABASE_HOST --port 5432 --region $AWS_DEFAULT_REGION --username $DATABASE_USER)"
-  export USE_SSL_FOR_DB="true"
 }
 
 function get_aws_account_id {
@@ -251,18 +235,6 @@ function tf_apply_db_roles {
 # Script Functions #
 ####################
 
-function get_db_credentials {
-  export DATABASE_PASSWORD=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
-  export DATABASE_USER=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
-  export DATABASE_HOST=$(get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
-  export DATABASE_NAME="deductions_db"
-}
-
-function drop_db {
-  PGPASSWORD="${DATABASE_PASSWORD}" dropdb --host="${DATABASE_HOST}" --username="${DATABASE_USER}" $DATABASE_NAME
-  echo "Database $DATABASE_NAME was dropped successfully"
-}
-
 function create_secret_ssm_param {
   secret_id="$1"
   value="$2"
@@ -362,8 +334,6 @@ case "${command}" in
       ;;
   _setup_test_integration_local)
     configure_local_envs
-#    npm run db:teardown
-#    npm run db:migrate
     prepare_local_envs_for_ide
     ;;
   _test_lint)
@@ -383,13 +353,10 @@ case "${command}" in
  _test_integration_local)
       configure_local_envs
       npm install
-#      npm run db:teardown
-#      npm run db:migrate
       npm run test:integration
       ;;
   _test_integration)
       npm install
-#      npm run db:migrate
       sh scripts/create-dynamodb-table.sh
       node scripts/wait-for-localstack.js
       npm run test:integration
@@ -407,7 +374,6 @@ case "${command}" in
       npm run lint
       npm run test:unit
       configure_local_envs
-#      npm run db:migrate
       sh scripts/create-dynamodb-table.sh
       npm run test:integration
       ;;
@@ -426,7 +392,6 @@ case "${command}" in
       ;;
   _test_coverage)
       npm install
-#      npm run db:migrate
       sh scripts/create-dynamodb-table.sh
       npm run test:coverage
       ;;
@@ -451,7 +416,6 @@ case "${command}" in
       ;;
   _test_docker)
       npm install
-#      ./scripts/migrate-db.sh
       sh scripts/create-dynamodb-table.sh
       node scripts/wait-for-localstack.js
       npm run test:docker
@@ -480,14 +444,6 @@ case "${command}" in
       check_env
       nslookup "ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk"
       curl -i --fail "https://ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk/health"
-      ;;
-  _drop_db)
-      drop_db
-      ;;
-  drop_db)
-      check_env
-      get_db_credentials
-      dojo -c Dojofile-infra "./tasks _drop_db"
       ;;
   _create_secrets)
       _assume_environment_role $NHS_ENVIRONMENT
@@ -554,33 +510,10 @@ case "${command}" in
       check_env
       dojo -c Dojofile-infra "./tasks _tf_apply_db_roles"
       ;;
-  _run_db_migrations)
-      _assume_environment_role $NHS_ENVIRONMENT
-      configure_db_migration_envs
-      npm install
-      scripts/migrate-db.sh
-      ;;
-  run_db_migrations)
-      check_env
-      dojo -c Dojofile "./tasks _run_db_migrations"
-      ;;
   promote_docker_image)
       check_env
       set_image_tag
       promote_docker_image "$IMAGE_REPO_NAME:$IMAGE_TAG" "$NHS_ENVIRONMENT"
-      ;;
-  _grant_db_permissions)
-      check_env
-      _assume_environment_role $NHS_ENVIRONMENT
-      db_host=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
-      db_username=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
-      db_password=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
-      db_name=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-name")
-      export PGPASSWORD=$db_password
-      psql -h $db_host -U $db_username -d $db_name -f scripts/grant-db-permissions.sql
-      ;;
-  grant_db_permissions)
-      dojo "./tasks _grant_db_permissions"
       ;;
   _wait_ecs)
       _assume_environment_role $NHS_ENVIRONMENT
