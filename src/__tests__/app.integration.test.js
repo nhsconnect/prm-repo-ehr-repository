@@ -651,13 +651,15 @@ describe('app', () => {
       expect(softDeletedRecords).toHaveLength(5); // Conversation + Core + 3 Fragments
 
       const timestampAfterDelete = Math.ceil(new Date() / 1000);
+      const eightWeeksInSeconds = 60 * 60 * 24 * 7 * 8;
+
       for (const item of softDeletedRecords) {
         expect(item).toMatchObject({
           InboundConversationId: inboundConversationId,
           DeletedAt: expect.any(Number),
         });
-        expect(item.DeletedAt).toBeGreaterThanOrEqual(timestampBeforeDelete);
-        expect(item.DeletedAt).toBeLessThanOrEqual(timestampAfterDelete);
+        expect(item.DeletedAt).toBeGreaterThanOrEqual(timestampBeforeDelete + eightWeeksInSeconds);
+        expect(item.DeletedAt).toBeLessThanOrEqual(timestampAfterDelete + eightWeeksInSeconds);
       }
     });
 
