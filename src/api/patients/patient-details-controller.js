@@ -1,8 +1,4 @@
 import { param } from 'express-validator';
-// import {
-//   getCurrentHealthRecordIdForPatient,
-//   getHealthRecordMessageIds,
-// } from '../../services/database/health-record-repository';
 import { logError, logInfo, logWarning } from '../../middleware/logging';
 import getSignedUrl from '../../services/storage/get-signed-url';
 import { setCurrentSpanAttributes } from '../../config/tracing';
