@@ -16,7 +16,8 @@ import { ConversationStatus, MessageType, RecordType } from "../models/enums";
 import { isCore } from '../models/core';
 import { getFragmentByKey } from '../services/database/ehr-fragment-repository';
 import { isFragment } from '../models/fragment';
-import { TIMESTAMP_REGEX } from '../services/time';
+import { getEpochTimeInSecond, TIMESTAMP_REGEX } from "../services/time";
+import moment from "moment-timezone";
 
 describe('app', () => {
   const config = initializeConfig();
@@ -626,7 +627,7 @@ describe('app', () => {
         conversationIdFromEhrIn: inboundConversationId,
         fragmentMessageIds: expect.arrayContaining(fragmentMessageIds),
       });
-      const timestampBeforeDelete = Math.floor(new Date() / 1000);
+      const timestampBeforeDelete = getEpochTimeInSecond(moment().add(8, 'week'));
 
       // ============================= when ==================================
       const deleteResponse = await request(app)
@@ -650,16 +651,16 @@ describe('app', () => {
       );
       expect(softDeletedRecords).toHaveLength(5); // Conversation + Core + 3 Fragments
 
-      const timestampAfterDelete = Math.ceil(new Date() / 1000);
-      const eightWeeksInSeconds = 60 * 60 * 24 * 7 * 8;
+      const timestampAfterDelete = getEpochTimeInSecond(moment().add(8, 'week'));
+
 
       for (const item of softDeletedRecords) {
         expect(item).toMatchObject({
           InboundConversationId: inboundConversationId,
           DeletedAt: expect.any(Number),
         });
-        expect(item.DeletedAt).toBeGreaterThanOrEqual(timestampBeforeDelete + eightWeeksInSeconds);
-        expect(item.DeletedAt).toBeLessThanOrEqual(timestampAfterDelete + eightWeeksInSeconds);
+        expect(item.DeletedAt).toBeGreaterThanOrEqual(timestampBeforeDelete);
+        expect(item.DeletedAt).toBeLessThanOrEqual(timestampAfterDelete);
       }
     });
 

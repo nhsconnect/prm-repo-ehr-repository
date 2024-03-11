@@ -1,7 +1,7 @@
 import { logError } from '../middleware/logging';
 import { validate } from 'uuid';
 import { getEpochTimeInSecond, getUKTimestamp } from '../services/time';
-import moment from "moment-timezone";
+import moment from 'moment-timezone';
 
 export const validateIds = (conversationId, messageId) => {
   const uuidsAreValid = validate(conversationId) && validate(messageId);
@@ -28,7 +28,7 @@ export const addChangesToUpdateParams = (params, changes, fieldsAllowedToUpdate)
 };
 
 export const buildSoftDeleteUpdateParams = (item) => {
-  const eightWeeksAfter = moment().add(8, 'week');
+  const eightWeeksAfter = moment().add({ weeks: 8, hour: 0 }); // hour: 0 for enforce correct precise time diff related to DST
 
   return {
     Key: {
