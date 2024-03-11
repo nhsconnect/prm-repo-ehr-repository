@@ -20,45 +20,6 @@ export const patientDetailsValidation = [
     .withMessage("'nhsNumber' provided is not 10 characters"),
 ];
 
-// @deprecated
-// to be deleted PRMT-4568
-//
-// export const patientDetailsController = async (req, res) => {
-//   const { nhsNumber } = req.params;
-//   addConversationIdToLogContext(req.get('conversationId'));
-//
-//   try {
-//     const currentHealthRecordConversationId = await getCurrentHealthRecordIdForPatient(nhsNumber);
-//     if (!currentHealthRecordConversationId) {
-//       logInfo('Did not find a complete patient health record');
-//       res.sendStatus(404);
-//       return;
-//     }
-//
-//     logInfo('Getting fragment message ids');
-//     const { coreMessageId, fragmentMessageIds } = await getHealthRecordMessageIds(
-//       currentHealthRecordConversationId
-//     );
-//
-//     const getOperation = 'getObject';
-//     const coreMessageUrl = await getSignedUrl(
-//       currentHealthRecordConversationId,
-//       coreMessageId,
-//       getOperation
-//     );
-//
-//     const responseBody = {
-//       coreMessageUrl,
-//       fragmentMessageIds,
-//       conversationIdFromEhrIn: currentHealthRecordConversationId,
-//     };
-//
-//     res.status(200).json(responseBody);
-//   } catch (err) {
-//     logError('Could not retrieve patient health record', err);
-//     res.sendStatus(503);
-//   }
-// };
 export const patientDetailsController = async (req, res) => {
   const { nhsNumber } = req.params;
   addConversationIdToLogContext(req.get('conversationId'));

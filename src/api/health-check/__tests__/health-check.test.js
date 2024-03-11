@@ -78,42 +78,6 @@ describe('GET /health', () => {
     });
   });
 
-  /**
-   * @deprecated
-   * postgres-db specific tests
-   * To be deleted PRMT-4568
-   */
-  describe.skip('database is not writable', () => {
-    beforeEach(() => {
-      getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(true, true, false)));
-    });
-
-    it('should return 503 status if db writable is false', (done) => {
-      request(app).get('/health').expect(503).end(done);
-    });
-
-    it('should return details of the response from getHealthCheck when the database writable is false', (done) => {
-      request(app)
-        .get('/health')
-        .expect((res) => {
-          expect(res.body).toEqual(expectedHealthCheckBase(true, true, false));
-        })
-        .end(done);
-    });
-
-    it('should call logError with the health check result if db writable is false', (done) => {
-      request(app)
-        .get('/health')
-        .expect(() => {
-          expect(logError).toHaveBeenCalledWith(
-            'Health check failed',
-            expectedHealthCheckBase(true, true, false)
-          );
-        })
-        .end(done);
-    });
-  });
-
   describe('s3 is not available', () => {
     beforeEach(() => {
       getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(true, false)));

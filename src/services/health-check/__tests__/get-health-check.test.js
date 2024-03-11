@@ -1,6 +1,5 @@
 import { getHealthCheck } from '../get-health-check';
 import { S3 } from 'aws-sdk';
-// import ModelFactory from '../../../models';
 import { initializeConfig } from '../../../config';
 
 jest.mock('aws-sdk');
@@ -20,10 +19,6 @@ describe('getHealthCheck', () => {
       headBucket: mockHeadBucket,
     }));
   });
-
-  // afterAll(() => {
-    // ModelFactory.sequelize.close();
-  // });
 
   it('should return successful s3 health check if s3 succeeds', () => {
     // when
@@ -71,24 +66,4 @@ describe('getHealthCheck', () => {
       });
     });
   });
-
-  /* @deprecated
-  // postgres-db related test
-  // to be deleted PRMT-4568
-  //
-  // it('should return failed db health check if there is an unknown error', () => {
-  //   ModelFactory._overrideConfig('host', 'something');
-  //
-  //   return getHealthCheck().then((result) => {
-  //     const db = result.details['database'];
-  //
-  //     return expect(db).toEqual({
-  //       type: 'postgresql',
-  //       connection: false,
-  //       writable: false,
-  //       error: 'Unknown error (Error Code: ENOTFOUND)',
-  //     });
-  //   });
-  // });
-  */
 });
