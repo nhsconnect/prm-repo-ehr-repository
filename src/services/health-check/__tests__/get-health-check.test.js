@@ -12,8 +12,6 @@ describe('getHealthCheck', () => {
   const error = 'some-error';
 
   beforeEach(() => {
-    // ModelFactory._resetConfig();
-
     S3.mockImplementation(() => ({
       putObject: mockPutObject,
       headBucket: mockHeadBucket,
