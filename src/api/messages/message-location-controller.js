@@ -2,7 +2,6 @@ import { getSignedUrl } from '../../services/storage';
 import { param } from 'express-validator';
 import { logError, logInfo } from '../../middleware/logging';
 import { setCurrentSpanAttributes } from '../../config/tracing';
-import { messageAlreadyReceived } from '../../services/database/health-record-repository';
 import { fragmentAlreadyReceived } from "../../services/database/ehr-fragment-repository";
 
 export const messageLocationControllerValidation = [

@@ -1,16 +1,6 @@
 import { body } from 'express-validator';
-import { MessageType } from '../../models/message';
-import {
-  updateFragmentAndCreateItsParts,
-  createEhrExtract,
-  fragmentExists,
-  createFragmentPart,
-} from '../../services/database/message-repository';
+import { MessageType } from '../../models/enums';
 import { logError, logInfo, logWarning } from '../../middleware/logging';
-import {
-  updateHealthRecordCompleteness,
-  getHealthRecordStatus,
-} from '../../services/database/health-record-repository';
 import { setCurrentSpanAttributes } from '../../config/tracing';
 import { createCore } from "../../services/database/ehr-core-repository";
 import {
