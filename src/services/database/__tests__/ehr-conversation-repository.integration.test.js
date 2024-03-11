@@ -21,6 +21,7 @@ import {
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
 import { buildCore } from '../../../models/core';
 import { getEpochTimeInSecond } from '../../time';
+import moment from "moment-timezone";
 
 jest.mock('../../../middleware/logging');
 
@@ -323,7 +324,6 @@ describe('ehr-conversation-repository', () => {
     // ========================= HELPER SETUPS FOR THIS BLOCK =========================
     let conversationIdUsed = [];
     const mockTime = new Date(Date.parse('2024-03-06T12:34:56+00:00'));
-    const mockTimeInEpochSecond = mockTime / 1000;
 
     beforeEach(async () => {
       jest.useFakeTimers().setSystemTime(mockTime);
@@ -380,10 +380,12 @@ describe('ehr-conversation-repository', () => {
       );
       expect(deletedRecords).toHaveLength(5); // conversation + core + 3 fragments
 
+      const expectedDeletedAtTime = moment(mockTime).add(8, 'week').unix();
+
       for (const item of deletedRecords) {
         expect(item).toMatchObject({
           InboundConversationId: conversationId,
-          DeletedAt: mockTimeInEpochSecond,
+          DeletedAt: expectedDeletedAtTime,
         });
       }
     });
@@ -416,9 +418,11 @@ describe('ehr-conversation-repository', () => {
 
       expect(deletedRecords).toHaveLength(4); // two sets of conversation + core
 
+      const expectedDeletedAtTime = moment(mockTime).add(8, 'week').unix();
+
       for (const item of deletedRecords) {
         expect(item).toMatchObject({
-          DeletedAt: mockTimeInEpochSecond,
+          DeletedAt: expectedDeletedAtTime,
         });
       }
     });
