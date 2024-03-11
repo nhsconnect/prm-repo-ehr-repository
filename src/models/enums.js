@@ -15,11 +15,11 @@ export const ConversationStatus = {
 };
 
 export const CoreStatus = {
-  COMPLETE: 'INBOUND_COMPLETE',
+  COMPLETE: 'STORED_IN_REPOSITORY',
 };
 
 export const FragmentStatus = {
-  COMPLETE: 'INBOUND_COMPLETE',
+  COMPLETE: 'STORED_IN_REPOSITORY',
 };
 
 export const HealthRecordStatus = {
