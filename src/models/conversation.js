@@ -1,6 +1,6 @@
 import { getUKTimestamp } from '../services/time';
 import { addChangesToUpdateParams } from '../utilities/dynamodb-helper';
-import { ConversationStatus } from "./enums";
+import { ConversationStatus, RecordType } from "./enums";
 
 const fieldsAllowedToUpdate = ['TransferStatus', 'FailureCode', 'DeletedAt'];
 
@@ -8,7 +8,7 @@ export const buildConversationUpdateParams = (conversationId, changes) => {
   const baseParams = {
     Key: {
       InboundConversationId: conversationId,
-      Layer: 'Conversation',
+      Layer: RecordType.CONVERSATION,
     },
     UpdateExpression: 'set UpdatedAt = :now',
     ExpressionAttributeValues: {
@@ -20,7 +20,7 @@ export const buildConversationUpdateParams = (conversationId, changes) => {
 };
 
 export const isConversation = (item) => {
-  return item.Layer === 'Conversation';
+  return item.Layer === RecordType.CONVERSATION;
 };
 
 export const isInCompleteStatus = (conversation) => {

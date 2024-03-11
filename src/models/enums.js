@@ -1,8 +1,8 @@
 export const RecordType = {
   ALL: 'ALL',
-  CONVERSATION: 'Conversation',
-  CORE: 'Core',
-  FRAGMENT: 'Fragment',
+  CONVERSATION: 'CONVERSATION',
+  CORE: 'CORE',
+  FRAGMENT: 'FRAGMENT',
 };
 
 export const ConversationStatus = {

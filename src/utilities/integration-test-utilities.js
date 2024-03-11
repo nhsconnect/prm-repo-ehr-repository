@@ -27,7 +27,7 @@ export const createConversationForTest = async (conversationId, nhsNumber, overr
 
   const item = {
     InboundConversationId: conversationId,
-    Layer: 'Conversation',
+    Layer: RecordType.CONVERSATION,
     NhsNumber: nhsNumber,
     CreatedAt: timestamp,
     UpdatedAt: timestamp,

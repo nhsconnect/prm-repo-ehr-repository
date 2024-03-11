@@ -1,5 +1,5 @@
 import { getUKTimestamp } from '../services/time';
-import { CoreStatus } from './enums';
+import { CoreStatus, RecordType } from "./enums";
 import { validateIds } from '../utilities/dynamodb-helper';
 
 export const buildCore = (inboundConversationId, messageId) => {
@@ -9,7 +9,7 @@ export const buildCore = (inboundConversationId, messageId) => {
 
   return {
     InboundConversationId: inboundConversationId,
-    Layer: `Core#${messageId}`,
+    Layer: [RecordType.CORE, messageId].join('#'),
     InboundMessageId: messageId,
     CreatedAt: timestamp,
     ReceivedAt: timestamp,
@@ -19,5 +19,5 @@ export const buildCore = (inboundConversationId, messageId) => {
 };
 
 export const isCore = (dynamoDbItem) => {
-  return dynamoDbItem?.Layer?.startsWith('Core');
+  return dynamoDbItem?.Layer?.startsWith(RecordType.CORE);
 };

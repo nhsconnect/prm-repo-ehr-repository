@@ -177,7 +177,7 @@ describe('ehr-fragment-repository', () => {
 
       expect(fragment.InboundConversationId).toEqual(conversationId);
       expect(fragment.ReceivedAt).toEqual(expectedTimestamp);
-      expect(fragment.Layer).toEqual(`Fragment#${messageId}`);
+      expect(fragment.Layer).toEqual(`FRAGMENT#${messageId}`);
       expect(fragment.ParentId).toBeUndefined();
     });
 

@@ -1,5 +1,6 @@
 import { getUKTimestamp } from '../services/time';
 import { addChangesToUpdateParams, validateIds } from "../utilities/dynamodb-helper";
+import { RecordType } from "./enums";
 
 const fieldsAllowedToUpdate = ['TransferStatus', 'ParentId', 'ReceivedAt', 'DeletedAt'];
 
@@ -10,7 +11,7 @@ export const buildFragment = ({ inboundConversationId, fragmentMessageId, parent
 
   return {
     InboundConversationId: inboundConversationId,
-    Layer: `Fragment#${fragmentMessageId}`,
+    Layer: [RecordType.FRAGMENT, fragmentMessageId].join('#'),
     InboundMessageId: fragmentMessageId,
     ParentId: parentMessageId,
     CreatedAt: timestamp,
@@ -37,7 +38,7 @@ export const buildFragmentUpdateParams = (conversationId, messageId, changes) =>
   const params = {
     Key: {
       InboundConversationId: conversationId,
-      Layer: `Fragment#${messageId}`,
+      Layer: [RecordType.FRAGMENT, messageId].join('#'),
     },
     UpdateExpression: `set CreatedAt = if_not_exists(CreatedAt, :now), \
       InboundMessageId = if_not_exists(InboundMessageId, :messageId), \
@@ -52,5 +53,5 @@ export const buildFragmentUpdateParams = (conversationId, messageId, changes) =>
 };
 
 export const isFragment = (dynamoDbItem) => {
-  return dynamoDbItem?.Layer?.startsWith('Fragment');
+  return dynamoDbItem?.Layer?.startsWith(RecordType.FRAGMENT);
 };

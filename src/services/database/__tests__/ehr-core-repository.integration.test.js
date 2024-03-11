@@ -30,7 +30,7 @@ describe('ehr-core-repository', () => {
 
       expect(actualMessage.InboundMessageId).toBe(messageId);
       expect(actualMessage.InboundConversationId).toBe(conversationId);
-      expect(actualMessage.Layer).toBe(`Core#${messageId}`);
+      expect(actualMessage.Layer).toBe(`CORE#${messageId}`);
       expect(actualMessage.ReceivedAt).toEqual(expectedTimestamp);
     });
 
@@ -51,7 +51,7 @@ describe('ehr-core-repository', () => {
       // then
       const fragmentMessage = await getFragmentByKey(conversationId, fragmentMessageId);
       expect(fragmentMessage.InboundConversationId).toBe(conversationId);
-      expect(fragmentMessage.Layer).toBe(`Fragment#${fragmentMessageId}`);
+      expect(fragmentMessage.Layer).toBe(`FRAGMENT#${fragmentMessageId}`);
       expect(fragmentMessage.InboundMessageId).toBe(fragmentMessageId);
       expect(fragmentMessage.ParentId).toBe(messageId);
       expect(fragmentMessage.ReceivedAt).toBeUndefined();
