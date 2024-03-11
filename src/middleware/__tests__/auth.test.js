@@ -3,7 +3,7 @@ import app from '../../app';
 import { v4 as uuid } from 'uuid';
 import { initializeConfig } from '../../config';
 import { logInfo, logWarning } from '../logging';
-import { fragmentAlreadyReceived } from "../../services/database/ehr-fragment-repository";
+import { fragmentAlreadyReceived } from '../../services/database/ehr-fragment-repository';
 
 jest.mock('../logging');
 jest.mock('../../services/database/ehr-fragment-repository');

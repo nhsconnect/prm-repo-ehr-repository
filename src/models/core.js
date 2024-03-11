@@ -1,5 +1,5 @@
 import { getUKTimestamp } from '../services/time';
-import { CoreStatus, RecordType } from "./enums";
+import { CoreStatus, RecordType } from './enums';
 import { validateIds } from '../utilities/dynamodb-helper';
 
 export const buildCore = (inboundConversationId, messageId) => {

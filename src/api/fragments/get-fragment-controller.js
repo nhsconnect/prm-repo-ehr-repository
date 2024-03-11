@@ -2,7 +2,7 @@ import { getSignedUrl } from '../../services/storage';
 import { param } from 'express-validator';
 import { logError, logInfo } from '../../middleware/logging';
 import { setCurrentSpanAttributes } from '../../config/tracing';
-import { fragmentAlreadyReceived } from "../../services/database/ehr-fragment-repository";
+import { fragmentAlreadyReceived } from '../../services/database/ehr-fragment-repository';
 
 export const getFragmentControllerValidation = [
   param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),

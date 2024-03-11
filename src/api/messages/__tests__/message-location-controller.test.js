@@ -4,10 +4,10 @@ import { getSignedUrl } from '../../../services/storage';
 import { v4 as uuid } from 'uuid';
 import { logError, logInfo } from '../../../middleware/logging';
 import { initializeConfig } from '../../../config';
-import { fragmentAlreadyReceived } from "../../../services/database/ehr-fragment-repository";
+import { fragmentAlreadyReceived } from '../../../services/database/ehr-fragment-repository';
 
 jest.mock('../../../services/storage');
-jest.mock("../../../services/database/ehr-fragment-repository");
+jest.mock('../../../services/database/ehr-fragment-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({}),

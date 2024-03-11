@@ -1,6 +1,6 @@
 import { getUKTimestamp } from '../services/time';
-import { addChangesToUpdateParams, validateIds } from "../utilities/dynamodb-helper";
-import { RecordType } from "./enums";
+import { addChangesToUpdateParams, validateIds } from '../utilities/dynamodb-helper';
+import { RecordType } from './enums';
 
 const fieldsAllowedToUpdate = ['TransferStatus', 'ParentId', 'ReceivedAt', 'DeletedAt'];
 

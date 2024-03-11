@@ -3,20 +3,20 @@ import request from 'supertest';
 import app from '../../../app';
 import { initializeConfig } from '../../../config';
 import { logError } from '../../../middleware/logging';
-import { MessageType } from "../../../models/enums";
+import { MessageType } from '../../../models/enums';
 import {
   getConversationStatus,
-  updateConversationCompleteness
-} from "../../../services/database/ehr-conversation-repository";
-import { createCore } from "../../../services/database/ehr-core-repository";
+  updateConversationCompleteness,
+} from '../../../services/database/ehr-conversation-repository';
+import { createCore } from '../../../services/database/ehr-core-repository';
 import {
   fragmentExistsInRecord,
-  markFragmentAsReceivedAndCreateItsParts
-} from "../../../services/database/ehr-fragment-repository";
+  markFragmentAsReceivedAndCreateItsParts,
+} from '../../../services/database/ehr-fragment-repository';
 
-jest.mock("../../../services/database/ehr-conversation-repository");
-jest.mock("../../../services/database/ehr-core-repository");
-jest.mock("../../../services/database/ehr-fragment-repository");
+jest.mock('../../../services/database/ehr-conversation-repository');
+jest.mock('../../../services/database/ehr-core-repository');
+jest.mock('../../../services/database/ehr-fragment-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({}),
@@ -83,9 +83,11 @@ describe('storeMessageController', () => {
 
       expect(res.status).toBe(201);
       expect(createCore).not.toHaveBeenCalled();
-      expect(markFragmentAsReceivedAndCreateItsParts).toHaveBeenCalledWith(messageId, conversationId, [
-        nestedFragmentId,
-      ]);
+      expect(markFragmentAsReceivedAndCreateItsParts).toHaveBeenCalledWith(
+        messageId,
+        conversationId,
+        [nestedFragmentId]
+      );
       expect(updateConversationCompleteness).toHaveBeenCalledWith(conversationId);
     });
 
@@ -107,7 +109,11 @@ describe('storeMessageController', () => {
 
       expect(res.status).toBe(201);
       expect(fragmentExistsInRecord).toHaveBeenCalledWith(nestedFragmentId);
-      expect(markFragmentAsReceivedAndCreateItsParts).toHaveBeenCalledWith(nestedFragmentId, conversationId, []);
+      expect(markFragmentAsReceivedAndCreateItsParts).toHaveBeenCalledWith(
+        nestedFragmentId,
+        conversationId,
+        []
+      );
       expect(updateConversationCompleteness).toHaveBeenCalledWith(conversationId);
     });
   });

@@ -10,4 +10,3 @@ export const TIMESTAMP_REGEX = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:00/;
 export const getEpochTimeInSecond = (datetime) => {
   return moment(datetime).unix();
 };
-

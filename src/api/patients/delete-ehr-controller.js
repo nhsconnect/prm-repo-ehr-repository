@@ -1,6 +1,6 @@
 import { param } from 'express-validator';
 import { logError, logInfo, logWarning } from '../../middleware/logging';
-import { markRecordAsSoftDeleteForPatient } from "../../services/database/ehr-conversation-repository";
+import { markRecordAsSoftDeleteForPatient } from '../../services/database/ehr-conversation-repository';
 export const deleteEhrValidation = [
   param('nhsNumber')
     .isNumeric()

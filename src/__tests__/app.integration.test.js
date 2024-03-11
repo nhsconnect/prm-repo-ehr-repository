@@ -12,12 +12,12 @@ import {
   createConversationForTest,
 } from '../utilities/integration-test-utilities';
 import { getConversationById } from '../services/database/ehr-conversation-repository';
-import { ConversationStatus, MessageType, RecordType } from "../models/enums";
+import { ConversationStatus, MessageType, RecordType } from '../models/enums';
 import { isCore } from '../models/core';
 import { getFragmentByKey } from '../services/database/ehr-fragment-repository';
 import { isFragment } from '../models/fragment';
-import { getEpochTimeInSecond, TIMESTAMP_REGEX } from "../services/time";
-import moment from "moment-timezone";
+import { getEpochTimeInSecond, TIMESTAMP_REGEX } from '../services/time';
+import moment from 'moment-timezone';
 
 describe('app', () => {
   const config = initializeConfig();
@@ -84,8 +84,6 @@ describe('app', () => {
     const coreMessageId = v4();
     const fragmentMessageId = v4();
     const nhsNumber = '2345678901';
-
-    const db = EhrTransferTracker.getInstance();
 
     it('should return presigned url when the fragment record exists', async () => {
       // setting up database
@@ -400,7 +398,6 @@ describe('app', () => {
   });
 
   describe('POST /messages', () => {
-    const db = EhrTransferTracker.getInstance();
     const nhsNumber = '1234567890';
     let conversationId;
     let messageId;
@@ -416,8 +413,7 @@ describe('app', () => {
       cleanupRecordsForTest(conversationId);
     });
 
-    afterAll(async () => {
-    });
+    afterAll(async () => {});
 
     it('should save health record without fragments in the database and return 201', async () => {
       // when
@@ -653,7 +649,6 @@ describe('app', () => {
 
       const timestampAfterDelete = getEpochTimeInSecond(moment().add(8, 'week'));
 
-
       for (const item of softDeletedRecords) {
         expect(item).toMatchObject({
           InboundConversationId: inboundConversationId,
@@ -664,7 +659,6 @@ describe('app', () => {
       }
     });
 
-
     it('should delete all record if patient has more than one set of record in our storage', async () => {
       // given
       const inboundConversationId1 = uuid();
@@ -673,7 +667,7 @@ describe('app', () => {
       const coreMessageId2 = uuid();
       await createCompleteRecord(nhsNumber, inboundConversationId1, coreMessageId1);
 
-      await new Promise(resolve => setTimeout(resolve, 1500)); // time buffer to ensure record 2 get a newer timestamp
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // time buffer to ensure record 2 get a newer timestamp
 
       await createCompleteRecord(nhsNumber, inboundConversationId2, coreMessageId2);
 

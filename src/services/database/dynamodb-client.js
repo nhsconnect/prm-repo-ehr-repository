@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { IS_IN_LOCAL } from "../../utilities/integration-test-utilities";
+import { IS_IN_LOCAL } from '../../utilities/integration-test-utilities';
 
 export const getDynamodbClient = () => {
   const clientConfig = {

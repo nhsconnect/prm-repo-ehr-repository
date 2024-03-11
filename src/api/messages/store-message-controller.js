@@ -2,15 +2,15 @@ import { body } from 'express-validator';
 import { MessageType } from '../../models/enums';
 import { logError, logInfo, logWarning } from '../../middleware/logging';
 import { setCurrentSpanAttributes } from '../../config/tracing';
-import { createCore } from "../../services/database/ehr-core-repository";
+import { createCore } from '../../services/database/ehr-core-repository';
 import {
   fragmentExistsInRecord,
-  markFragmentAsReceivedAndCreateItsParts
-} from "../../services/database/ehr-fragment-repository";
+  markFragmentAsReceivedAndCreateItsParts,
+} from '../../services/database/ehr-fragment-repository';
 import {
   getConversationStatus,
-  updateConversationCompleteness
-} from "../../services/database/ehr-conversation-repository";
+  updateConversationCompleteness,
+} from '../../services/database/ehr-conversation-repository';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
@@ -57,7 +57,7 @@ export const storeMessageController = async (req, res) => {
       });
     }
     if (messageType === MessageType.FRAGMENT) {
-      if (!await fragmentExistsInRecord(messageId)) {
+      if (!(await fragmentExistsInRecord(messageId))) {
         logWarning(
           `Fragment message ${messageId} did not arrive in order. Fragment parts: ${JSON.stringify(
             fragmentMessageIds

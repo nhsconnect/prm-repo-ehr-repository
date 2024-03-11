@@ -7,9 +7,9 @@ import { logError, logInfo, logWarning } from '../../../middleware/logging';
 import getSignedUrl from '../../../services/storage/get-signed-url';
 import {
   getCurrentConversationIdForPatient,
-  getMessageIdsForConversation
-} from "../../../services/database/ehr-conversation-repository";
-import { HealthRecordNotFoundError } from "../../../errors/errors";
+  getMessageIdsForConversation,
+} from '../../../services/database/ehr-conversation-repository';
+import { HealthRecordNotFoundError } from '../../../errors/errors';
 
 jest.mock('../../../services/database/ehr-conversation-repository');
 jest.mock('../../../middleware/logging');

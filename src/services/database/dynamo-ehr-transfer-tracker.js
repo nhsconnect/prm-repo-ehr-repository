@@ -1,13 +1,9 @@
-import {
-  TransactWriteCommand,
-  QueryCommand,
-  GetCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { TransactWriteCommand, QueryCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 
 import { logError, logInfo } from '../../middleware/logging';
 import { RecordType } from '../../models/enums';
 import { getDynamodbClient } from './dynamodb-client';
-import { IS_IN_LOCAL } from "../../utilities/integration-test-utilities";
+import { IS_IN_LOCAL } from '../../utilities/integration-test-utilities';
 
 export class EhrTransferTracker {
   /**

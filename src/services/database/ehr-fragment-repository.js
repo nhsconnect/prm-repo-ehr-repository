@@ -1,7 +1,7 @@
 import { getUKTimestamp } from '../time';
 import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
 import { buildFragmentUpdateParams } from '../../models/fragment';
-import { FragmentStatus, RecordType } from "../../models/enums";
+import { FragmentStatus, RecordType } from '../../models/enums';
 import { logError } from '../../middleware/logging';
 
 export const markFragmentAsReceivedAndCreateItsParts = async (
@@ -15,7 +15,7 @@ export const markFragmentAsReceivedAndCreateItsParts = async (
 
     const currentFragmentParams = buildFragmentUpdateParams(conversationId, messageId, {
       ReceivedAt: timestamp,
-      TransferStatus: FragmentStatus.COMPLETE
+      TransferStatus: FragmentStatus.COMPLETE,
     });
 
     const childFragmentsParams = remainingPartsIds.map((fragmentPartId) => {
@@ -52,4 +52,4 @@ export const fragmentAlreadyReceived = async (conversationId, messageId) => {
     logError('Querying database for fragment message failed', e);
     throw e;
   }
-}
+};

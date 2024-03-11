@@ -45,7 +45,7 @@ export const patientDetailsController = async (req, res) => {
       // TODO: remove this duplicated `conversationIdFromEhrIn` field,
       // after updating ehr-out to use the field name "inboundConversationId"
       conversationIdFromEhrIn: currentHealthRecordConversationId,
-      inboundConversationId: currentHealthRecordConversationId
+      inboundConversationId: currentHealthRecordConversationId,
     };
 
     res.status(200).json(responseBody);

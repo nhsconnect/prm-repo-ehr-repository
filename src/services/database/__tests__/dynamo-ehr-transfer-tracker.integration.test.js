@@ -1,12 +1,10 @@
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import { v4 as uuid } from 'uuid';
 import { RecordType } from '../../../models/enums';
-import { createCore } from '../ehr-core-repository';
 import {
   cleanupRecordsForTest,
   createConversationForTest,
 } from '../../../utilities/integration-test-utilities';
-import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
 import { buildCore } from '../../../models/core';
 
 describe('EhrTransferTracker', () => {

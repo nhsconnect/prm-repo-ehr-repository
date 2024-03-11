@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../../../app';
-import { markRecordAsSoftDeleteForPatient } from "../../../services/database/ehr-conversation-repository";
+import { markRecordAsSoftDeleteForPatient } from '../../../services/database/ehr-conversation-repository';
 import { initializeConfig } from '../../../config';
 import { logError, logWarning } from '../../../middleware/logging';
 import { v4 as uuid } from 'uuid';

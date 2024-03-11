@@ -15,13 +15,11 @@ import {
 } from '../../../utilities/integration-test-utilities';
 import { createCore } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
-import {
-  markFragmentAsReceivedAndCreateItsParts,
-} from '../ehr-fragment-repository';
+import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
 import { buildCore } from '../../../models/core';
 import { getEpochTimeInSecond } from '../../time';
-import moment from "moment-timezone";
+import moment from 'moment-timezone';
 
 jest.mock('../../../middleware/logging');
 
@@ -274,7 +272,9 @@ describe('ehr-conversation-repository', () => {
       await createCore({ conversationId, messageId, fragmentMessageIds: [] });
 
       // when
-      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(conversationId);
+      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(
+        conversationId
+      );
 
       // then
       expect(coreMessageId).toEqual(messageId);
@@ -291,7 +291,9 @@ describe('ehr-conversation-repository', () => {
       await markFragmentAsReceived(fragmentMessageId, conversationId);
 
       // when
-      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(conversationId);
+      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(
+        conversationId
+      );
 
       // then
       expect(coreMessageId).toEqual(messageId);
@@ -312,7 +314,9 @@ describe('ehr-conversation-repository', () => {
       await markFragmentAsReceived(nestedFragmentId, conversationId);
 
       // when
-      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(conversationId);
+      const { coreMessageId, fragmentMessageIds } = await getMessageIdsForConversation(
+        conversationId
+      );
 
       // then
       expect(coreMessageId).toEqual(messageId);
