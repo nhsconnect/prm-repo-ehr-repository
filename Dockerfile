@@ -1,6 +1,6 @@
 FROM node:16.19.0-alpine AS builder
 
-# install python and postgres native requirements
+# install python native requirements
 RUN apk update && \
     apk add --no-cache bash tini && \
     rm -rf /var/cache/apk/*
@@ -31,7 +31,7 @@ COPY --from=builder /usr/local/bin/node /usr/local/bin
 # take native-install node modules
 COPY --from=builder /app /app
 
-# install python and postgres native requirements (again, as per builder)
+# install python native requirements (again, as per builder)
 # add root CA from deductions team to trusted certificates
 RUN apk update && \
     apk add --no-cache openssl ca-certificates bash tini && \
