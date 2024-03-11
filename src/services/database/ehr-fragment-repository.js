@@ -30,7 +30,6 @@ export const markFragmentAsReceivedAndCreateItsParts = async (
 };
 
 export const getFragmentByKey = (inboundConversationId, inboundMessageId) => {
-  // to replace the findByPk default method from sequalize
   const db = EhrTransferTracker.getInstance();
   return db.getItemByKey(inboundConversationId, inboundMessageId, RecordType.FRAGMENT);
 };

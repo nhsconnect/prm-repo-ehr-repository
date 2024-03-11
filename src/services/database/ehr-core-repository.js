@@ -5,8 +5,6 @@ import { RecordType } from '../../models/enums';
 import { logError } from '../../middleware/logging';
 
 export const createCore = async ({ conversationId, messageId, fragmentMessageIds = [] }) => {
-  // to replace the existing `createEhrExtract` method
-
   try {
     const db = EhrTransferTracker.getInstance();
     const itemsToWrite = [buildCore(conversationId, messageId)];
