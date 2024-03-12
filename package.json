@@ -17,7 +17,7 @@
     "test:coverage": "jest src/ --maxWorkers=1 --coverage --detectOpenHandles --forceExit --setupFiles dotenv/config",
     "build": "babel src -d build --ignore '**/*.test.js' --ignore '**/__mocks__/*' && cp src/*.json build",
     "start": "node build/server.js",
-    "start:local": "npm run db:migrate ; babel-node -r dotenv/config src/server.js",
+    "start:local": "babel-node -r dotenv/config src/server.js",
     "start:nodemon": "nodemon --exec npm run start:local"
   },
   "devDependencies": {
@@ -41,7 +41,7 @@
     "typescript": "^4.6.2"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.525.0",
+    "@aws-sdk/client-dynamoDB": "^3.525.0",
     "@aws-sdk/lib-dynamodb": "^3.525.0",
     "@babel/runtime": "^7.17.8",
     "async-local-storage": "^2.3.1",
