@@ -15,7 +15,7 @@ locals {
     { name = "SKIP_DB_MIGRATION", value = "true" },
     { name = "USE_SSL_FOR_DB", value = "true" },
     { name = "LOG_LEVEL", value = var.log_level },
-    { name = "DYNAMODB_NAME", value = data.aws_ssm_parameter.dynamodb-name.value },
+    { name = "DYNAMODB_NAME", value = data.aws_ssm_parameter.dynamodb_name.value },
   ]
 }
 

@@ -20,6 +20,6 @@ data "aws_ssm_parameter" "db-password" {
   name = "/repo/${var.environment}/user-input/ehr-repo-db-password"
 }
 
-data "aws_ssm_parameter" "dynamodb-name" {
+data "aws_ssm_parameter" "dynamodb_name" {
   name = "/repo/${var.environment}/output/prm-deductions-infra/ehr-transfer-tracker-db-name"
 }
