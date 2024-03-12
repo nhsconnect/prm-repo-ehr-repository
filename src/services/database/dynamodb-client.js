@@ -4,7 +4,7 @@ import { IS_IN_LOCAL } from '../../utilities/integration-test-utilities';
 
 export const getDynamodbClient = () => {
   const clientConfig = {
-    region: process.env.AWS_DEFAULT_REGION ?? 'eu-west-2',
+    region: process.env.AWS_DEFAULT_REGION ?? 'eu-west-2'
   };
 
   if (IS_IN_LOCAL) {
