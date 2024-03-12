@@ -46,8 +46,6 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 COPY build/                   /app/build
-COPY database/                /app/database
-COPY build/config/database.js /app/src/config/
 
 COPY scripts/load-api-keys.sh      /app/scripts/load-api-keys.sh
 COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server
