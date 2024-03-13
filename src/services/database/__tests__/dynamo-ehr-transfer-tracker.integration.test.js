@@ -35,7 +35,7 @@ describe('EhrTransferTracker', () => {
     expect(actual[0]).toMatchObject({
       InboundConversationId: testConversationId,
       InboundMessageId: testMessageId,
-      Layer: `CORE#${testMessageId}`,
+      Layer: RecordType.CORE,
       ReceivedAt: expect.any(String),
       CreatedAt: expect.any(String),
       UpdatedAt: expect.any(String),

@@ -151,11 +151,12 @@ export class EhrTransferTracker {
       throw new Error('must be called with both conversationId and inboundMessageId');
     }
 
+    const sortKey = recordType === RecordType.FRAGMENT ? `${recordType}#${inboundMessageId}` : recordType;
     const command = new GetCommand({
       TableName: this.tableName,
       Key: {
         InboundConversationId: inboundConversationId,
-        Layer: `${recordType}#${inboundMessageId}`,
+        Layer: sortKey,
       },
     });
 

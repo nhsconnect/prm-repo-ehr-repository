@@ -9,7 +9,7 @@ export const buildCore = (inboundConversationId, messageId) => {
 
   return {
     InboundConversationId: inboundConversationId,
-    Layer: [RecordType.CORE, messageId].join('#'),
+    Layer: RecordType.CORE,
     InboundMessageId: messageId,
     CreatedAt: timestamp,
     ReceivedAt: timestamp,
