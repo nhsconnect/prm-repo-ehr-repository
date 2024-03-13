@@ -25,5 +25,5 @@ export const isConversation = (item) => {
 
 export const isInCompleteStatus = (conversation) => {
   const status = conversation?.TransferStatus;
-  return status === ConversationStatus.COMPLETE || status?.startsWith('Outbound');
+  return status === ConversationStatus.COMPLETE || status?.startsWith('OUTBOUND');
 };
