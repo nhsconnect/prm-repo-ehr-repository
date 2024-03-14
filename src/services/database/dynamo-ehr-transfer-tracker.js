@@ -148,7 +148,7 @@ export class EhrTransferTracker {
       throw new Error('recordType has to be either Core or Fragment');
     }
     if (!inboundConversationId && !inboundMessageId) {
-      throw new Error('must be called with both conversationId and inboundMessageId');
+      throw new Error('must be called with both inboundConversationId and inboundMessageId');
     }
 
     const sortKey = recordType === RecordType.FRAGMENT ? `${recordType}#${inboundMessageId}` : recordType;

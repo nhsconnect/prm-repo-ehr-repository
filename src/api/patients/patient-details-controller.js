@@ -39,7 +39,7 @@ export const patientDetailsController = async (req, res) => {
       coreMessageUrl,
       fragmentMessageIds,
       // TODO: remove this duplicated `conversationIdFromEhrIn` field,
-      // after updating ehr-out to use the field name "inboundConversationId"
+      // after updating ehr-out to use the field name "inboundConversationId" (planned in PRMT-4587)
       conversationIdFromEhrIn: currentHealthRecordConversationId,
       inboundConversationId: currentHealthRecordConversationId,
     };
