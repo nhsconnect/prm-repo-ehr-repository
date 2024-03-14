@@ -6,17 +6,10 @@ services:
   ehr-repo:
     image: ${REPOSITORY_URI}:${IMAGE_TAG}
     links:
-      - db:db
       - localstack:localstack
+      - dynamodb-local:dynamodb-local
     ports:
     - 3000:3000
-  db:
-    image: postgres:12.1
-    environment:
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_DB: ${DATABASE_NAME}
-      LC_ALL: C
   localstack:
     image: localstack/localstack:0.10.9
     environment:
@@ -31,3 +24,8 @@ services:
     volumes:
       - ./scripts/create-bucket.sh:/docker-entrypoint-initaws.d/create-bucket.sh
       - /var/run/docker.sock:/var/run/docker.sock
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+      - "4573:8000"

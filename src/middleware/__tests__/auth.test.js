@@ -3,16 +3,15 @@ import app from '../../app';
 import { v4 as uuid } from 'uuid';
 import { initializeConfig } from '../../config';
 import { logInfo, logWarning } from '../logging';
-import { messageAlreadyReceived } from '../../services/database/health-record-repository';
+import { fragmentAlreadyReceived } from '../../services/database/ehr-fragment-repository';
 
 jest.mock('../logging');
-jest.mock('../../services/database/health-record-repository');
+jest.mock('../../services/database/ehr-fragment-repository');
 jest.mock('../../services/storage/get-signed-url', () =>
   jest.fn().mockReturnValue(Promise.resolve('some-url'))
 );
 jest.mock('../../config', () => ({
   initializeConfig: jest.fn().mockReturnValue({
-    sequelize: { dialect: 'postgres' },
     consumerApiKeys: {
       TEST_USER: 'correct-key',
       DUPLICATE_TEST_USER: 'correct-key',
@@ -27,7 +26,7 @@ describe('auth', () => {
 
   describe('Authenticated successfully', () => {
     it('should return HTTP 200 when correctly authenticated', async () => {
-      messageAlreadyReceived.mockResolvedValueOnce(false);
+      fragmentAlreadyReceived.mockResolvedValueOnce(false);
 
       const res = await request(app)
         .get(`/messages/${conversationId}/${messageId}`)

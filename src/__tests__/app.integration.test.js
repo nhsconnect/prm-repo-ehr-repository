@@ -4,13 +4,49 @@ import app from '../app';
 import { initializeConfig } from '../config';
 import { logger } from '../config/logging';
 import { expectStructuredLogToContain, transportSpy } from '../__builders__/logging-helper';
-import ModelFactory from '../models';
-import { MessageType, modelName as messageModelName } from '../models/message';
-import { modelName as healthRecordModelName } from '../models/health-record';
+import { EhrTransferTracker } from '../services/database/dynamo-ehr-transfer-tracker';
+import { getCoreByKey } from '../services/database/ehr-core-repository';
+import {
+  cleanupRecordsForTest,
+  cleanupRecordsForTestByNhsNumber,
+  createConversationForTest,
+} from '../utilities/integration-test-utilities';
+import { getConversationById } from '../services/database/ehr-conversation-repository';
+import { ConversationStatus, MessageType, RecordType } from '../models/enums';
+import { isCore } from '../models/core';
+import { getFragmentByKey } from '../services/database/ehr-fragment-repository';
+import { isFragment } from '../models/fragment';
+import { getEpochTimeInSecond, TIMESTAMP_REGEX } from '../services/time';
+import moment from 'moment-timezone';
 
 describe('app', () => {
   const config = initializeConfig();
   const authorizationKeys = 'correct-key';
+
+  const createReqBodyForEhr = (messageId, conversationId, nhsNumber, fragmentMessageIds) => ({
+    data: {
+      type: 'messages',
+      id: messageId,
+      attributes: {
+        conversationId,
+        messageType: MessageType.EHR_EXTRACT,
+        nhsNumber,
+        fragmentMessageIds,
+      },
+    },
+  });
+
+  const createReqBodyForFragment = (messageId, conversationId, fragmentMessageIds = []) => ({
+    data: {
+      type: 'messages',
+      id: messageId,
+      attributes: {
+        conversationId,
+        messageType: MessageType.FRAGMENT,
+        fragmentMessageIds: fragmentMessageIds,
+      },
+    },
+  });
 
   beforeEach(() => {
     process.env.API_KEY_FOR_TEST_USER = authorizationKeys;
@@ -44,7 +80,6 @@ describe('app', () => {
   });
 
   describe('GET /fragments/:conversationId/:messageId', () => {
-    // given
     const conversationId = v4();
     const coreMessageId = v4();
     const fragmentMessageId = v4();
@@ -122,6 +157,7 @@ describe('app', () => {
 
   describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
     it('should return 200', async () => {
+      // given
       const conversationId = uuid();
       const messageId = uuid();
       const nhsNumber = '1234567890';
@@ -144,15 +180,18 @@ describe('app', () => {
 
       expect(messageResponse.status).toEqual(201);
 
+      // when
       const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
+      // then
       expect(recordResponse.status).toEqual(200);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
     it('should return 404 when health record is not complete', async () => {
+      // given
       const conversationId = uuid();
       const messageId = uuid();
       const fragmentId = uuid();
@@ -176,22 +215,27 @@ describe('app', () => {
 
       expect(messageResponse.status).toEqual(201);
 
+      // when
       const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
+      // then
       expect(recordResponse.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
     });
 
     it('should return 404 when health record is not found', async () => {
+      // given
       const conversationId = uuid();
       const nhsNumber = '1234567890';
 
+      // when
       const recordResponse = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)
         .set('Authorization', authorizationKeys);
 
+      // then
       expect(recordResponse.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { conversationId, traceId: expect.anything() });
       expectStructuredLogToContain(transportSpy, { level: 'WARN' });
@@ -199,21 +243,33 @@ describe('app', () => {
   });
 
   describe('GET /patients/:nhsNumber', () => {
+    // tear down to avoid interfering other tests
+    afterAll(async () => {
+      await cleanupRecordsForTestByNhsNumber('1234567890');
+      await cleanupRecordsForTestByNhsNumber('1234567891');
+    });
+
     it('should return 200 and patient health record link', async () => {
-      const conversationIdFromEhrIn = uuid();
-      const healthRecordExtractId = uuid();
+      // ===============  given  ====================
+      const nhsNumber = '1234567890';
+      const inboundConversationId = uuid();
+      const coreMessageId = uuid();
       const fragmentId = uuid();
       const nestedFragmentId = uuid();
-      const nhsNumber = '1234567890';
+
+      // mimic the record at Conversation Layer, which should in actual case should be already created by ehr-transfer-service
+      await createConversationForTest(inboundConversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.STARTED,
+      });
 
       const messageResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
-            id: healthRecordExtractId,
+            id: coreMessageId,
             type: 'messages',
             attributes: {
-              conversationId: conversationIdFromEhrIn,
+              conversationId: inboundConversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
               fragmentMessageIds: [fragmentId],
@@ -230,7 +286,7 @@ describe('app', () => {
             id: fragmentId,
             type: 'messages',
             attributes: {
-              conversationId: conversationIdFromEhrIn,
+              conversationId: inboundConversationId,
               messageType: MessageType.FRAGMENT,
               fragmentMessageIds: [nestedFragmentId],
             },
@@ -247,7 +303,7 @@ describe('app', () => {
             id: nestedFragmentId,
             type: 'messages',
             attributes: {
-              conversationId: conversationIdFromEhrIn,
+              conversationId: inboundConversationId,
               messageType: MessageType.FRAGMENT,
               fragmentMessageIds: [],
             },
@@ -256,55 +312,69 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(nestedFragmentResponse.status).toEqual(201);
-      const conversationId = uuid();
+      const outboundConversationId = uuid();
+
+      // ===============  when  ====================
       const patientRes = await request(app)
         .get(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys)
-        .set('conversationId', conversationId);
+        .set('conversationId', outboundConversationId);
 
+      // ===============  then  ====================
       expect(patientRes.status).toEqual(200);
       expect(patientRes.body.coreMessageUrl).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationIdFromEhrIn}/${healthRecordExtractId}`
+        `${config.localstackUrl}/${config.awsS3BucketName}/${inboundConversationId}/${coreMessageId}`
       );
-      expect(patientRes.body.fragmentMessageIds[0]).toEqual(fragmentId);
-      expect(patientRes.body.fragmentMessageIds[1]).toEqual(nestedFragmentId);
-      expect(patientRes.body.conversationIdFromEhrIn).toEqual(conversationIdFromEhrIn);
+      expect(patientRes.body.fragmentMessageIds).toHaveLength(2);
+      expect(patientRes.body.fragmentMessageIds).toEqual(
+        expect.arrayContaining([fragmentId, nestedFragmentId])
+      );
+      expect(patientRes.body.conversationIdFromEhrIn).toEqual(inboundConversationId);
       expectStructuredLogToContain(transportSpy, {
-        conversationId: conversationId,
+        conversationId: outboundConversationId,
         traceId: expect.anything(),
       });
     });
 
     it('should have conversation Id in the logging context', async () => {
-      const conversationId = uuid();
+      // given
+      const outboundConversationId = uuid();
       const nhsNumber = '1234567890';
-      const patientResponse = await request(app)
+
+      // when
+      await request(app)
         .get(`/patients/${nhsNumber}`)
         .set('Authorization', authorizationKeys)
-        .set('conversationId', conversationId);
+        .set('conversationId', outboundConversationId);
 
-      expect(patientResponse.status).toEqual(200);
-
+      // then
       expectStructuredLogToContain(transportSpy, {
-        conversationId: conversationId,
+        conversationId: outboundConversationId,
         traceId: expect.anything(),
       });
     });
 
     it('should return a 404 if no complete health record is found', async () => {
-      const conversationId = uuid();
-      const healthRecordExtractId = uuid();
+      // given
+      const inboundConversationId = uuid();
+      const outboundConversationId = uuid();
+      const coreMessageId = uuid();
       const fragmentId = uuid();
       const nhsNumber = '1234567891';
+
+      // mimic the record at Conversation Layer, which should in actual case should be already created by ehr-transfer-service
+      await createConversationForTest(inboundConversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.STARTED,
+      });
 
       const messageResponse = await request(app)
         .post(`/messages`)
         .send({
           data: {
-            id: healthRecordExtractId,
+            id: coreMessageId,
             type: 'messages',
             attributes: {
-              conversationId,
+              conversationId: inboundConversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
               fragmentMessageIds: [fragmentId],
@@ -315,10 +385,12 @@ describe('app', () => {
 
       expect(messageResponse.status).toEqual(201);
 
+      // when
       const response = await request(app)
         .get(`/patients/${nhsNumber}`)
-        .set({ Authorization: authorizationKeys, conversationId: conversationId });
+        .set({ Authorization: authorizationKeys, conversationId: outboundConversationId });
 
+      // then
       expect(response.status).toEqual(404);
       expectStructuredLogToContain(transportSpy, { traceId: expect.anything() });
       expectStructuredLogToContain(transportSpy, { level: 'WARN' });
@@ -326,60 +398,39 @@ describe('app', () => {
   });
 
   describe('POST /messages', () => {
-    const Message = ModelFactory.getByName(messageModelName);
-    const HealthRecord = ModelFactory.getByName(healthRecordModelName);
     const nhsNumber = '1234567890';
     let conversationId;
     let messageId;
-
-    const createReqBodyForEhr = (messageId, conversationId, nhsNumber, fragmentMessageIds) => ({
-      data: {
-        type: 'messages',
-        id: messageId,
-        attributes: {
-          conversationId,
-          messageType: MessageType.EHR_EXTRACT,
-          nhsNumber,
-          fragmentMessageIds,
-        },
-      },
-    });
-
-    const createReqBodyForFragment = (messageId, conversationId, fragmentMessageIds = []) => ({
-      data: {
-        type: 'messages',
-        id: messageId,
-        attributes: {
-          conversationId,
-          messageType: MessageType.FRAGMENT,
-          fragmentMessageIds: fragmentMessageIds,
-        },
-      },
-    });
-
     beforeEach(() => {
       messageId = uuid();
       conversationId = uuid();
+      createConversationForTest(conversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.STARTED,
+      });
     });
 
-    afterAll(async () => {
-      await ModelFactory.sequelize.close();
+    afterEach(() => {
+      cleanupRecordsForTest(conversationId);
     });
+
+    afterAll(async () => {});
 
     it('should save health record without fragments in the database and return 201', async () => {
+      // when
       const response = await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, []))
         .set('Authorization', authorizationKeys);
 
-      const message = await Message.findByPk(messageId);
-      const healthRecord = await HealthRecord.findByPk(conversationId);
+      // then
+      const message = await getCoreByKey(conversationId, messageId);
+      const conversation = await getConversationById(conversationId);
 
-      expect(message.conversationId).toBe(conversationId);
-      expect(message.type).toBe(MessageType.EHR_EXTRACT);
-      expect(message.parentId).toBeNull();
-      expect(healthRecord.nhsNumber).toBe(nhsNumber);
-      expect(healthRecord.completedAt).not.toBeNull();
+      expect(message.InboundConversationId).toBe(conversationId);
+      expect(isCore(message)).toBe(true);
+      expect(message.ParentId).toBeUndefined();
+      expect(conversation.NhsNumber).toBe(nhsNumber);
+      expect(conversation.TransferStatus).toBe(ConversationStatus.COMPLETE);
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId,
@@ -389,20 +440,23 @@ describe('app', () => {
     });
 
     it('should save health record with fragments in the database and return 201', async () => {
+      // given
       const fragmentMessageId = uuid();
 
+      // when
       const response = await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
         .set('Authorization', authorizationKeys);
 
-      const fragmentMessage = await Message.findByPk(fragmentMessageId);
-      const healthRecord = await HealthRecord.findByPk(conversationId);
+      // then
+      const fragmentMessage = await getFragmentByKey(conversationId, fragmentMessageId);
+      const conversation = await getConversationById(conversationId);
 
-      expect(fragmentMessage.conversationId).toBe(conversationId);
-      expect(fragmentMessage.type).toBe(MessageType.FRAGMENT);
-      expect(fragmentMessage.parentId).toBe(messageId);
-      expect(healthRecord.completedAt).toBeNull();
+      expect(fragmentMessage.InboundConversationId).toBe(conversationId);
+      expect(isFragment(fragmentMessage)).toBe(true);
+      expect(fragmentMessage.ParentId).toBe(messageId);
+      expect(conversation.TransferStatus).toBe(ConversationStatus.STARTED);
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId,
@@ -412,9 +466,11 @@ describe('app', () => {
     });
 
     it('should create large nested fragment messages in the database and return 201', async () => {
+      // given
       const fragmentMessageId = uuid();
       const nestedFragmentMessageId = uuid();
 
+      // when
       await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
@@ -427,11 +483,12 @@ describe('app', () => {
         )
         .set('Authorization', authorizationKeys);
 
-      const nestedFragmentMessage = await Message.findByPk(nestedFragmentMessageId);
-      const healthRecord = await HealthRecord.findByPk(conversationId);
+      // then
+      const nestedFragmentMessage = await getFragmentByKey(conversationId, nestedFragmentMessageId);
+      const conversation = await getConversationById(conversationId);
 
-      expect(nestedFragmentMessage.receivedAt).toBeNull();
-      expect(healthRecord.completedAt).toBeNull();
+      expect(nestedFragmentMessage.ReceivedAt).toBeUndefined();
+      expect(conversation.TransferStatus).toBe(ConversationStatus.STARTED);
       expect(fragmentResponse.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
@@ -441,7 +498,10 @@ describe('app', () => {
     });
 
     it('should update database for fragments and return 201 when all fragments have been received', async () => {
+      // given
       const fragmentMessageId = uuid();
+
+      // when
       await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
@@ -452,11 +512,12 @@ describe('app', () => {
         .send(createReqBodyForFragment(fragmentMessageId, conversationId))
         .set('Authorization', authorizationKeys);
 
-      const fragmentMessage = await Message.findByPk(fragmentMessageId);
-      const healthRecord = await HealthRecord.findByPk(conversationId);
+      // then
+      const fragmentMessage = await getFragmentByKey(conversationId, fragmentMessageId);
+      const conversation = await getConversationById(conversationId);
 
-      expect(fragmentMessage.receivedAt).not.toBeNull();
-      expect(healthRecord.completedAt).not.toBeNull();
+      expect(fragmentMessage.ReceivedAt).toEqual(expect.stringMatching(TIMESTAMP_REGEX));
+      expect(conversation.TransferStatus).toBe(ConversationStatus.COMPLETE);
       expect(fragmentResponse.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
@@ -466,8 +527,11 @@ describe('app', () => {
     });
 
     it('should update database when a nested fragment arrives before its parent fragment', async () => {
+      // given
       const fragmentMessageId = uuid();
       const nestedFragmentId = uuid();
+
+      // when
       await request(app)
         .post(`/messages`)
         .send(createReqBodyForEhr(messageId, conversationId, nhsNumber, [fragmentMessageId]))
@@ -478,12 +542,13 @@ describe('app', () => {
         .send(createReqBodyForFragment(nestedFragmentId, conversationId))
         .set('Authorization', authorizationKeys);
 
-      const nestedFragmentMessage = await Message.findByPk(nestedFragmentId);
-      const healthRecord = await HealthRecord.findByPk(conversationId);
+      // then
+      const nestedFragmentMessage = await getFragmentByKey(conversationId, nestedFragmentId);
+      const conversation = await getConversationById(conversationId);
 
-      expect(nestedFragmentMessage.conversationId).toEqual(conversationId);
-      expect(nestedFragmentMessage.receivedAt).not.toBeNull();
-      expect(healthRecord.completedAt).toBeNull();
+      expect(nestedFragmentMessage.InboundConversationId).toEqual(conversationId);
+      expect(nestedFragmentMessage.ReceivedAt).toEqual(expect.stringMatching(TIMESTAMP_REGEX));
+      expect(conversation.TransferStatus).toBe(ConversationStatus.STARTED);
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId: nestedFragmentId,
@@ -502,6 +567,131 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         traceId: 'our trace ID',
       });
+    });
+  });
+
+  describe('DELETE /patients/:nhsNumber', () => {
+    // ======================= SETUP & HELPERS =======================
+    const nhsNumber = '9000000001';
+    const db = EhrTransferTracker.getInstance();
+    const createCompleteRecord = async (
+      nhsNumber,
+      conversationId,
+      coreMessageId,
+      fragmentMessageIds = []
+    ) => {
+      await createConversationForTest(conversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.STARTED,
+      });
+      await request(app)
+        .post(`/messages`)
+        .send(createReqBodyForEhr(coreMessageId, conversationId, nhsNumber, fragmentMessageIds))
+        .set('Authorization', authorizationKeys);
+      await Promise.all(
+        fragmentMessageIds.map((fragmentId) =>
+          request(app)
+            .post(`/messages`)
+            .send(createReqBodyForFragment(fragmentId, conversationId))
+            .set('Authorization', authorizationKeys)
+        )
+      );
+    };
+
+    const callGetPatient = (nhsNumber) => {
+      return request(app).get(`/patients/${nhsNumber}`).set('Authorization', authorizationKeys);
+    };
+
+    afterEach(async () => {
+      await cleanupRecordsForTestByNhsNumber(nhsNumber);
+    });
+
+    it('should mark the whole health record for the given NHS number as deleted', async () => {
+      // ============================= given ==================================
+      const inboundConversationId = uuid();
+      const coreMessageId = uuid();
+      const fragmentMessageIds = [uuid(), uuid(), uuid()];
+      await createCompleteRecord(
+        nhsNumber,
+        inboundConversationId,
+        coreMessageId,
+        fragmentMessageIds
+      );
+
+      const getPatientResponse = await callGetPatient(nhsNumber);
+      expect(getPatientResponse.status).toBe(200);
+      expect(getPatientResponse.body).toMatchObject({
+        conversationIdFromEhrIn: inboundConversationId,
+        fragmentMessageIds: expect.arrayContaining(fragmentMessageIds),
+      });
+      const timestampBeforeDelete = getEpochTimeInSecond(moment().add(8, 'week'));
+
+      // ============================= when ==================================
+      const deleteResponse = await request(app)
+        .delete(`/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      // ============================= then ==================================
+      expect(deleteResponse.status).toBe(200);
+      expect(deleteResponse.body.data).toMatchObject({
+        conversationIds: [inboundConversationId],
+        id: nhsNumber,
+      });
+
+      const getPatientResponseAfterDeletion = await callGetPatient(nhsNumber);
+      expect(getPatientResponseAfterDeletion.status).toBe(404);
+
+      const softDeletedRecords = await db.queryTableByConversationId(
+        inboundConversationId,
+        RecordType.ALL,
+        true
+      );
+      expect(softDeletedRecords).toHaveLength(5); // Conversation + Core + 3 Fragments
+
+      const timestampAfterDelete = getEpochTimeInSecond(moment().add(8, 'week'));
+
+      for (const item of softDeletedRecords) {
+        expect(item).toMatchObject({
+          InboundConversationId: inboundConversationId,
+          DeletedAt: expect.any(Number),
+        });
+        expect(item.DeletedAt).toBeGreaterThanOrEqual(timestampBeforeDelete);
+        expect(item.DeletedAt).toBeLessThanOrEqual(timestampAfterDelete);
+      }
+    });
+
+    it('should delete all record if patient has more than one set of record in our storage', async () => {
+      // given
+      const inboundConversationId1 = uuid();
+      const coreMessageId1 = uuid();
+      const inboundConversationId2 = uuid();
+      const coreMessageId2 = uuid();
+      await createCompleteRecord(nhsNumber, inboundConversationId1, coreMessageId1);
+
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // time buffer to ensure record 2 get a newer timestamp
+
+      await createCompleteRecord(nhsNumber, inboundConversationId2, coreMessageId2);
+
+      const getPatientResponse = await callGetPatient(nhsNumber);
+      expect(getPatientResponse.status).toBe(200);
+      expect(getPatientResponse.body).toMatchObject({
+        conversationIdFromEhrIn: inboundConversationId2,
+        fragmentMessageIds: [],
+      });
+
+      // when
+      const deleteResponse = await request(app)
+        .delete(`/patients/${nhsNumber}`)
+        .set('Authorization', authorizationKeys);
+
+      // then
+      expect(deleteResponse.status).toBe(200);
+      expect(deleteResponse.body.data).toMatchObject({
+        conversationIds: expect.arrayContaining([inboundConversationId1, inboundConversationId2]),
+        id: nhsNumber,
+      });
+
+      const getPatientResponseAfterDeletion = await callGetPatient(nhsNumber);
+      expect(getPatientResponseAfterDeletion.status).toBe(404);
     });
   });
 });

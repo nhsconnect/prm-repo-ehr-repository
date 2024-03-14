@@ -2,19 +2,10 @@ version: '2'
 services:
   default:
     links:
-      - db:db
       - localstack:localstack
+      - dynamodb-local:dynamodb-local
     ports:
       - "3000:3000"
-  db:
-    image: postgres:12.1
-    environment:
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_DB: ${DATABASE_NAME}
-      LC_ALL: C
-    ports:
-      - "5432:5432"
   localstack:
     image: localstack/localstack:0.10.9
     environment:
@@ -28,3 +19,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     logging:
       driver: none
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+     - "4573:8000"
+

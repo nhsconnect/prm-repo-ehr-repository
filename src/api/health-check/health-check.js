@@ -9,7 +9,6 @@ healthCheck.get('/', (req, res, next) => {
     .then((status) => {
       if (
         status.details.filestore.writable &&
-        status.details.database.writable &&
         status.details.filestore.available
       ) {
         logInfo('Health check successful');

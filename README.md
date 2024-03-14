@@ -10,11 +10,6 @@ The stored the EHR is composed of the messages sent from its previous holder in 
 - [Docker](https://docs.docker.com/install/)
 - [kudulab/dojo](https://github.com/kudulab/dojo#installation)
 
-In order to run npm install locally on your host (outside of dojo), you'll need to install postgresql:
-```
-brew install postgresql
-```
-
 ### AWS helpers
 
 This repository imports shared AWS helpers from [prm-deductions-support-infra](https://github.com/nhsconnect/prm-deductions-support-infra/).
@@ -31,45 +26,37 @@ If you would like to run the app locally outside `dojo`, you need to:
 ```
 - `NHS_ENVIRONMENT` - should be set to current environment in which the container is deployed. The name must also exist in the `database.json` file.
 - `S3_BUCKET_NAME` - the name of S3 bucket to store the EHR fragments in.
-- `DATABASE_USER` - username for the database
-- `DATABASE_PASSWORD` - password to the database
-- `DATABASE_NAME` - name of the database on server.
-- `DATABASE_HOST` - database server hostname to connect with.
-- `LOCALSTACK_URL` - (Test) the location of localstack, only used for tests
+- `LOCALSTACK_URL` - (Test) the location of localstack, only used for s3 related tests
+- `DYNAMODB_NAME` - The table name of the dynamodb table (ehr-transfer-tracker) used
 ```
 
 ## Running the tests
 
-Run the unit tests with
-
-by entering the `dojo` container and running `./tasks _test_unit`
+Run the unit tests by entering the `dojo` container and running `./tasks _test_unit`
 or on your machine with `npm run test:unit`
 
 Run the integration tests within a Dojo container
 
-1. Run `dojo -c Dojofile-itest` which will spin up the testing container
+1. Run `./tasks test_integration_shell` which will spin up the testing container
 2. Run `./tasks _test_integration`
 
-You can also run them with `npm run test:integration` but that will require some additional manual set-up:
+You can also run them with `./tasks test_integration` from out of dojo.
+
+You can also run each individual integration test separately in an IDE (assuming IntelliJ),
+but that will require some additional manual set-up:
 
 ```bash
-# Brings up the local test environment
-docker-compose up &
+# Config env var, spin up docker containers and enter interactive dojo environment
+./tasks test_integration_shell
 
-# Alternative with node-dojo (interactive)
-# Requires changes to Environment Variables:
-#   DATABASE_HOST=db
-#   LOCALSTACK_URL=http://localstack:4572
-dojo -c Dojofile-itest
+# If things work as expected your prompts should looks like `dojo@xxxx(node-dojo):/dojo/work$`
+# inside dojo, run the below script to create a dynamodb table for integration test
+scripts/create-dynamodb-table.sh
 
-npm run test-local
-
-# This is equivalent of:
-sequelize-cli db:migrate    # Runs the migration
-
-npm test
-
-sequelize-cli db:migrate:undo:all # Undoes the migration to leave clean env
+# The above script will create a test table in dynamodb-local docker image. 
+# The dynamodb-local is accessible at endpoint http://dynamodb-local:8000 within docker, 
+# or at endpoint http://localhost:4573 from out of docker.
+# This should allow you to run or debug db-related integration tests from Intellij's play button. 
 ```
 
 ## Run the coverage tests (unit test and integration test)
