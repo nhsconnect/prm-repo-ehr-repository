@@ -3,6 +3,7 @@ import { getUKTimestamp } from '../services/time';
 import { EhrTransferTracker } from '../services/database/dynamo-ehr-transfer-tracker';
 import { TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { RecordType } from '../models/enums';
+import chunk from 'lodash.chunk';
 
 export const generateRandomNhsNumber = () => (Math.floor(Math.random() * 9e9) + 1e9).toString();
 
@@ -31,7 +32,7 @@ export const createConversationForTest = async (conversationId, nhsNumber, overr
     NhsNumber: nhsNumber,
     CreatedAt: timestamp,
     UpdatedAt: timestamp,
-    ...overrides,
+    ...overrides
   };
 
   await db.writeItemsInTransaction([item]);
@@ -46,19 +47,22 @@ export const cleanupRecordsForTest = async (conversationId) => {
 
   const db = EhrTransferTracker.getInstance();
   const records = await db.queryTableByConversationId(conversationId, RecordType.ALL, true);
-  const deleteCommand = new TransactWriteCommand({
-    TransactItems: records.map((item) => ({
-      Delete: {
-        TableName: db.tableName,
-        Key: {
-          InboundConversationId: item.InboundConversationId,
-          Layer: item.Layer,
-        },
-      },
-    })),
-  });
+  const splitItemBy100 = chunk(records, 100);
 
-  await db.client.send(deleteCommand);
+  for (const batch of splitItemBy100) {
+    const deleteCommand = new TransactWriteCommand({
+      TransactItems: batch.map((item) => ({
+        Delete: {
+          TableName: db.tableName,
+          Key: {
+            InboundConversationId: item.InboundConversationId,
+            Layer: item.Layer
+          }
+        }
+      }))
+    });
+    await db.client.send(deleteCommand);
+  }
 };
 
 export const cleanupRecordsForTestByNhsNumber = async (nhsNumber) => {
