@@ -29,12 +29,12 @@ resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_bucket" {
 
   bucket = aws_s3_bucket.ehr-repo-bucket.bucket
 
-#  rule {
-#    default_retention {
-#      mode = "GOVERNANCE"
-#      days = 36500 # 100 Years
-#    }
-#  }
+ rule {
+   default_retention {
+     mode = "GOVERNANCE"
+     days = 36500 # 100 Years
+   }
+ }
 
   depends_on = [aws_s3_bucket_versioning.ehr_repo_bucket]
 }
