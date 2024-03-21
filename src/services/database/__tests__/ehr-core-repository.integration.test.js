@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { logError } from '../../../middleware/logging';
 import { createCore, getCoreByKey } from '../ehr-core-repository';
 import { getFragmentByKey } from '../ehr-fragment-repository';
-import { RecordType } from "../../../models/enums";
+import { RecordType } from '../../../models/enums';
 
 // Mocking
 jest.mock('../../../middleware/logging');
@@ -65,7 +65,7 @@ describe('ehr-core-repository', () => {
       const ehrExtract = {
         messageId,
         conversationId,
-        fragmentMessageIds: [],
+        fragmentMessageIds: []
       };
 
       try {

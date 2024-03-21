@@ -54,7 +54,7 @@ export const updateConversationCompleteness = async (conversationId) => {
     logInfo('All fragments are received. Will mark this inbound conversation as complete');
 
     const updateParam = buildConversationUpdateParams(conversationId, {
-      TransferStatus: ConversationStatus.COMPLETE,
+      TransferStatus: ConversationStatus.COMPLETE
     });
 
     await db.updateItemsInTransaction([updateParam]);

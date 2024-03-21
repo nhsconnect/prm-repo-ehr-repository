@@ -17,7 +17,7 @@ export default class S3Service {
       type: 's3',
       bucketName: config.awsS3BucketName,
       available: true,
-      writable: false,
+      writable: false
     };
 
     const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -34,7 +34,7 @@ export default class S3Service {
     const params = {
       Bucket: config.awsS3BucketName,
       Key: filename,
-      Body: data,
+      Body: data
     };
     return this.s3.putObject(params).promise();
   }
@@ -43,7 +43,7 @@ export default class S3Service {
     const params = {
       Bucket: this.Bucket,
       Key: filename,
-      Expires: URL_EXPIRY_TIME,
+      Expires: URL_EXPIRY_TIME
     };
 
     if (operation === 'putObject') {
@@ -57,7 +57,7 @@ export default class S3Service {
     return new Promise((resolve, reject) => {
       this.s3.headBucket(
         {
-          Bucket: config.awsS3BucketName,
+          Bucket: config.awsS3BucketName
         },
         (err) => {
           if (err) reject(err);
@@ -73,7 +73,7 @@ export default class S3Service {
         accessKeyId: 'test-access-key',
         secretAccessKey: 'test-secret-key',
         endpoint: new Endpoint(config.localstackUrl),
-        s3ForcePathStyle: true,
+        s3ForcePathStyle: true
       };
     }
 

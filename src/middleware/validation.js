@@ -11,9 +11,9 @@ export const validate = (req, res, next) => {
 
   const mappedErrors = errors.array().map((err) => ({ [err.param]: err.msg }));
   logError('validation-failed', {
-    validation: { errors: mappedErrors },
+    validation: { errors: mappedErrors }
   });
   return res.status(422).json({
-    errors: mappedErrors,
+    errors: mappedErrors
   });
 };

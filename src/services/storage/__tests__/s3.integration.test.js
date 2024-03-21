@@ -13,7 +13,7 @@ describe('S3Service integration test with localstack', () => {
   const getObjectByName = (filename) => {
     const getObjectParams = {
       Bucket: S3CLIENT.Bucket,
-      Key: filename,
+      Key: filename
     };
     return S3CLIENT.s3.getObject(getObjectParams).promise();
   };
@@ -28,7 +28,7 @@ describe('S3Service integration test with localstack', () => {
       available: true,
       bucketName: 'test-bucket',
       type: 's3',
-      writable: true,
+      writable: true
     });
   });
 
@@ -54,7 +54,7 @@ describe('S3Service integration test with localstack', () => {
       ebXML: '<soap:Envelope><content>ebXML</content></soap:Envelope>',
       payload: '<RCMR_IN030000UK06>payload</<RCMR_IN030000UK06>',
       attachments: [],
-      external_attachments: [],
+      external_attachments: []
     };
 
     it('return a presigned url for upload when operation = putObject', async () => {

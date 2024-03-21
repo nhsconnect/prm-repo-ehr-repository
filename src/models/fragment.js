@@ -15,14 +15,14 @@ export const buildFragment = ({ inboundConversationId, fragmentMessageId, parent
     InboundMessageId: fragmentMessageId,
     ParentId: parentMessageId,
     CreatedAt: timestamp,
-    UpdatedAt: timestamp,
+    UpdatedAt: timestamp
   };
 };
 
 export const buildMultipleFragments = ({
   inboundConversationId,
   fragmentMessageIds,
-  parentMessageId,
+  parentMessageId
 }) => {
   if (!fragmentMessageIds || !Array.isArray(fragmentMessageIds)) {
     return [];
@@ -38,15 +38,15 @@ export const buildFragmentUpdateParams = (conversationId, messageId, changes) =>
   const params = {
     Key: {
       InboundConversationId: conversationId,
-      Layer: [RecordType.FRAGMENT, messageId].join('#'),
+      Layer: [RecordType.FRAGMENT, messageId].join('#')
     },
     UpdateExpression: `set CreatedAt = if_not_exists(CreatedAt, :now), \
       InboundMessageId = if_not_exists(InboundMessageId, :messageId), \
       UpdatedAt = :now`,
     ExpressionAttributeValues: {
       ':now': getUKTimestamp(),
-      ':messageId': messageId,
-    },
+      ':messageId': messageId
+    }
   };
 
   return addChangesToUpdateParams(params, changes, fieldsAllowedToUpdate);

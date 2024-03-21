@@ -14,7 +14,7 @@ const fromString = (updateString) => {
     package: matcher[1],
     wantedVersion: matcher[2],
     currentVersion: matcher[3],
-    latestVersion: matcher[4],
+    latestVersion: matcher[4]
   };
 };
 
@@ -36,7 +36,7 @@ module.exports = {
   isUpdate,
   fromString,
   getAllUpdates,
-  getAllUpdatesText,
+  getAllUpdatesText
 };
 
 console.log(getAllUpdates(process.argv));

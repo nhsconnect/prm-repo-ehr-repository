@@ -19,13 +19,13 @@ describe('S3Service', () => {
       type: 's3',
       bucketName: config.awsS3BucketName,
       available: false,
-      writable: false,
+      writable: false
     };
 
     beforeEach(() => {
       S3.mockImplementation(() => ({
         putObject: mockPutObject,
-        headBucket: mockHeadBucket,
+        headBucket: mockHeadBucket
       }));
     });
 
@@ -36,7 +36,7 @@ describe('S3Service', () => {
         expect(result).toStrictEqual({
           ...expectedResultBase,
           available: true,
-          writable: true,
+          writable: true
         });
       });
     });
@@ -48,7 +48,7 @@ describe('S3Service', () => {
         expect(result).toStrictEqual({
           ...expectedResultBase,
           error: error,
-          available: true,
+          available: true
         });
       });
     });
@@ -59,7 +59,7 @@ describe('S3Service', () => {
       return new S3Service().checkS3Health().then((result) => {
         expect(result).toStrictEqual({
           ...expectedResultBase,
-          error: 'some-error',
+          error: 'some-error'
         });
       });
     });

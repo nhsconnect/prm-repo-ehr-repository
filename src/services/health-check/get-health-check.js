@@ -15,8 +15,8 @@ export function getHealthCheck() {
       description: 'Health of EHR Repo service',
       nhsEnvironment: config.nhsEnvironment,
       details: {
-        filestore: s3HealthCheckResult,
-      },
+        filestore: s3HealthCheckResult
+      }
     };
   });
 }

@@ -1,7 +1,7 @@
 import { TransactWriteCommand, QueryCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 import chunk from 'lodash.chunk';
 
-import { logError, logInfo, logWarning } from "../../middleware/logging";
+import { logError, logInfo, logWarning } from '../../middleware/logging';
 import { RecordType } from '../../models/enums';
 import { getDynamodbClient } from './dynamodb-client';
 import { IS_IN_LOCAL } from '../../utilities/integration-test-utilities';
@@ -55,7 +55,7 @@ export class EhrTransferTracker {
 
     for (const batch of splitItemBy100) {
       const command = new TransactWriteCommand({
-        TransactItems: batch.map(item => ({
+        TransactItems: batch.map((item) => ({
           Put: {
             TableName: this.tableName,
             Item: item
@@ -84,7 +84,7 @@ export class EhrTransferTracker {
     for (const batch of splitItemBy100) {
       logInfo(`Updating dynamodb record with params: ${JSON.stringify(batch)}`);
       const command = new TransactWriteCommand({
-        TransactItems: batch.map(params => ({
+        TransactItems: batch.map((params) => ({
           Update: {
             TableName: this.tableName,
             ...params
@@ -95,17 +95,17 @@ export class EhrTransferTracker {
     }
   }
 
-    async queryTableByNhsNumber(nhsNumber, includeDeletedRecord = false) {
+  async queryTableByNhsNumber(nhsNumber, includeDeletedRecord = false) {
     const params = {
       TableName: this.tableName,
       IndexName: 'NhsNumberSecondaryIndex',
       ExpressionAttributeValues: {
-        ':nhsNumber': nhsNumber,
+        ':nhsNumber': nhsNumber
       },
       ExpressionAttributeNames: {
-        '#NhsNumber': 'NhsNumber',
+        '#NhsNumber': 'NhsNumber'
       },
-      KeyConditionExpression: '#NhsNumber = :nhsNumber',
+      KeyConditionExpression: '#NhsNumber = :nhsNumber'
     };
     if (!includeDeletedRecord) {
       params.FilterExpression = 'attribute_not_exists(DeletedAt)';
@@ -129,12 +129,12 @@ export class EhrTransferTracker {
     const params = {
       TableName: this.tableName,
       ExpressionAttributeNames: {
-        '#PrimaryKey': 'InboundConversationId',
+        '#PrimaryKey': 'InboundConversationId'
       },
       ExpressionAttributeValues: {
-        ':InboundConversationId': inboundConversationId,
+        ':InboundConversationId': inboundConversationId
       },
-      KeyConditionExpression: '#PrimaryKey = :InboundConversationId',
+      KeyConditionExpression: '#PrimaryKey = :InboundConversationId'
     };
     if (!includeDeletedRecord) {
       params.FilterExpression = 'attribute_not_exists(DeletedAt)';
@@ -175,13 +175,14 @@ export class EhrTransferTracker {
       throw new Error('must be called with both inboundConversationId and inboundMessageId');
     }
 
-    const sortKey = recordType === RecordType.FRAGMENT ? `${recordType}#${inboundMessageId}` : recordType;
+    const sortKey =
+      recordType === RecordType.FRAGMENT ? `${recordType}#${inboundMessageId}` : recordType;
     const command = new GetCommand({
       TableName: this.tableName,
       Key: {
         InboundConversationId: inboundConversationId,
-        Layer: sortKey,
-      },
+        Layer: sortKey
+      }
     });
 
     const response = await this.client.send(command);

@@ -12,14 +12,14 @@ async function sendFragment(id, conversationId, fragmentMessageIds) {
       attributes: {
         conversationId,
         messageType: 'fragment',
-        fragmentMessageIds,
-      },
-    },
+        fragmentMessageIds
+      }
+    }
   };
 
   const response = await axios.post(`${process.env.SERVICE_URL}/messages`, fragment, {
     adapter,
-    headers,
+    headers
   });
   // Assert 201 for each fragment
   expect(response.status).toEqual(201);
@@ -34,14 +34,14 @@ async function sendEhrExtract(ehrExtractMessageId, conversationId, nhsNumber, fr
         conversationId,
         nhsNumber,
         messageType: 'ehrExtract',
-        fragmentMessageIds: fragmentMessageIds,
-      },
-    },
+        fragmentMessageIds: fragmentMessageIds
+      }
+    }
   };
 
   const ehrResponse = await axios.post(`${process.env.SERVICE_URL}/messages`, ehrExtract, {
     adapter,
-    headers,
+    headers
   });
 
   expect(ehrResponse.status).toEqual(201);
@@ -92,7 +92,7 @@ const testPerformance = async (
     `${process.env.SERVICE_URL}/patients/${nhsNumber}/health-records/${conversationId}`,
     {
       headers,
-      adapter,
+      adapter
     }
   );
 

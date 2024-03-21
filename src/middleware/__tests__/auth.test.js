@@ -15,9 +15,9 @@ jest.mock('../../config', () => ({
     consumerApiKeys: {
       TEST_USER: 'correct-key',
       DUPLICATE_TEST_USER: 'correct-key',
-      USER_2: 'key_2',
-    },
-  }),
+      USER_2: 'key_2'
+    }
+  })
 }));
 
 describe('auth', () => {
@@ -39,7 +39,7 @@ describe('auth', () => {
   describe('Authorization key environment variables not provided', () => {
     it('should return 412 with an explicit error message if auth keys have not been set', async () => {
       const errorMessage = {
-        error: 'Server-side Authorization keys have not been set, cannot authenticate',
+        error: 'Server-side Authorization keys have not been set, cannot authenticate'
       };
       initializeConfig.mockReturnValueOnce({ consumerApiKeys: {} });
       const res = await request(app)
@@ -54,7 +54,7 @@ describe('auth', () => {
   describe('Authorization header not provided', () => {
     it('should return HTTP 401 with an explicit error message when no authorization header provided', async () => {
       const errorMessage = {
-        error: 'The request (/messages) requires a valid Authorization header to be set',
+        error: 'The request (/messages) requires a valid Authorization header to be set'
       };
       const res = await request(app).get(`/messages/${conversationId}/${messageId}`);
 

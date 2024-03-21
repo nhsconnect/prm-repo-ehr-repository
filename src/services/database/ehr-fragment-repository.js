@@ -15,7 +15,7 @@ export const markFragmentAsReceivedAndCreateItsParts = async (
 
     const currentFragmentParams = buildFragmentUpdateParams(conversationId, messageId, {
       ReceivedAt: timestamp,
-      TransferStatus: FragmentStatus.COMPLETE,
+      TransferStatus: FragmentStatus.COMPLETE
     });
 
     const childFragmentsParams = remainingPartsIds.map((fragmentPartId) => {

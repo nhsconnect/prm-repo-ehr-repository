@@ -5,11 +5,11 @@ import { setCurrentSpanAttributes } from '../../config/tracing';
 import { createCore } from '../../services/database/ehr-core-repository';
 import {
   fragmentExistsInRecord,
-  markFragmentAsReceivedAndCreateItsParts,
+  markFragmentAsReceivedAndCreateItsParts
 } from '../../services/database/ehr-fragment-repository';
 import {
   getConversationStatus,
-  updateConversationCompleteness,
+  updateConversationCompleteness
 } from '../../services/database/ehr-conversation-repository';
 
 export const storeMessageControllerValidation = [
@@ -40,7 +40,7 @@ export const storeMessageControllerValidation = [
     .withMessage("'fragmentMessageIds' should be UUIDs"),
   body('data.attributes.fragmentMessageIds')
     .isArray()
-    .withMessage("'fragmentMessageIds' should be an array"),
+    .withMessage("'fragmentMessageIds' should be an array")
 ];
 
 export const storeMessageController = async (req, res) => {
@@ -53,7 +53,7 @@ export const storeMessageController = async (req, res) => {
       await createCore({
         messageId,
         conversationId,
-        fragmentMessageIds,
+        fragmentMessageIds
       });
     }
     if (messageType === MessageType.FRAGMENT) {

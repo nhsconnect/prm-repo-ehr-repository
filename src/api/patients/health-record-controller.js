@@ -9,7 +9,7 @@ export const healthRecordControllerValidation = [
     .isNumeric()
     .withMessage("'nhsNumber' provided is not numeric")
     .isLength({ min: 10, max: 10 })
-    .withMessage("'nhsNumber' provided is not 10 characters"),
+    .withMessage("'nhsNumber' provided is not 10 characters")
 ];
 
 export const healthRecordController = async (req, res) => {

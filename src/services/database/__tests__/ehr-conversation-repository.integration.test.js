@@ -6,12 +6,12 @@ import {
   getMessageIdsForConversation,
   getConversationStatus,
   markRecordAsSoftDeleteForPatient,
-  updateConversationCompleteness,
+  updateConversationCompleteness
 } from '../ehr-conversation-repository';
 import { ConversationStatus, HealthRecordStatus, RecordType } from '../../../models/enums';
 import {
   cleanupRecordsForTest,
-  createConversationForTest,
+  createConversationForTest
 } from '../../../utilities/integration-test-utilities';
 import { createCore } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
@@ -49,7 +49,7 @@ describe('ehr-conversation-repository', () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.COMPLETE,
+        TransferStatus: ConversationStatus.COMPLETE
       });
 
       // when
@@ -64,7 +64,7 @@ describe('ehr-conversation-repository', () => {
       const conversationId = uuid();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT,
+        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT
       });
 
       // when
@@ -112,7 +112,7 @@ describe('ehr-conversation-repository', () => {
       const messageId = uuid();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.REQUEST_SENT,
+        TransferStatus: ConversationStatus.REQUEST_SENT
       });
       await createCore({ conversationId, messageId, fragmentMessageIds: [] });
 
@@ -133,7 +133,7 @@ describe('ehr-conversation-repository', () => {
       const nhsNumber = '1234567890';
 
       await createConversationForTest(conversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT,
+        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT
       });
       await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
 
@@ -154,7 +154,7 @@ describe('ehr-conversation-repository', () => {
       const nhsNumber = '1234567890';
 
       await createConversationForTest(conversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT,
+        TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT
       });
       await createCore({ conversationId, messageId, fragmentMessageIds: fragmentMessageIds });
       for (const fragmentId of fragmentMessageIds) {
@@ -197,15 +197,15 @@ describe('ehr-conversation-repository', () => {
 
       await createConversationForTest(previousHealthRecordConversationId, nhsNumber, {
         TransferStatus: ConversationStatus.COMPLETE,
-        CreatedAt: '2024-01-01T10:00:00+00:00',
+        CreatedAt: '2024-01-01T10:00:00+00:00'
       });
 
       await createConversationForTest(incompleteHealthRecordConversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.TIMEOUT,
+        TransferStatus: ConversationStatus.TIMEOUT
       });
 
       await createConversationForTest(currentHealthRecordConversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.COMPLETE,
+        TransferStatus: ConversationStatus.COMPLETE
       });
 
       // when
@@ -220,7 +220,7 @@ describe('ehr-conversation-repository', () => {
       const nhsNumber = '9876543211';
       const incompleteHealthRecordConversationId = uuid();
       await createConversationForTest(incompleteHealthRecordConversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.TIMEOUT,
+        TransferStatus: ConversationStatus.TIMEOUT
       });
 
       // when
@@ -309,7 +309,7 @@ describe('ehr-conversation-repository', () => {
 
       await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
       await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId, [
-        nestedFragmentId,
+        nestedFragmentId
       ]);
       await markFragmentAsReceived(nestedFragmentId, conversationId);
 
@@ -351,7 +351,7 @@ describe('ehr-conversation-repository', () => {
       fragmentMessageIds = []
     ) => {
       await createConversationForTest(conversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.COMPLETE,
+        TransferStatus: ConversationStatus.COMPLETE
       });
       await createCore({ conversationId, messageId, fragmentMessageIds });
       for (const fragmentMessageId of fragmentMessageIds) {
@@ -389,7 +389,7 @@ describe('ehr-conversation-repository', () => {
       for (const item of deletedRecords) {
         expect(item).toMatchObject({
           InboundConversationId: conversationId,
-          DeletedAt: expectedDeletedAtTime,
+          DeletedAt: expectedDeletedAtTime
         });
       }
     });
@@ -426,7 +426,7 @@ describe('ehr-conversation-repository', () => {
 
       for (const item of deletedRecords) {
         expect(item).toMatchObject({
-          DeletedAt: expectedDeletedAtTime,
+          DeletedAt: expectedDeletedAtTime
         });
       }
     });

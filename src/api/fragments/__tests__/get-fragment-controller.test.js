@@ -10,12 +10,12 @@ jest.mock('../../../services/storage');
 jest.mock('../../../services/database/ehr-fragment-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({}),
+  initializeConfig: jest.fn().mockReturnValue({})
 }));
 
 describe('getFragmentController', () => {
   initializeConfig.mockReturnValue({
-    consumerApiKeys: { TEST_USER: 'correct-key' },
+    consumerApiKeys: { TEST_USER: 'correct-key' }
   });
 
   const authorizationKeys = 'correct-key';
@@ -96,7 +96,7 @@ describe('getFragmentController', () => {
       // then
       expect(response.status).toBe(422);
       expect(response.body).toEqual({
-        errors: expectedErrorMessage,
+        errors: expectedErrorMessage
       });
     });
 
@@ -114,7 +114,7 @@ describe('getFragmentController', () => {
       // then
       expect(response.status).toBe(422);
       expect(response.body).toEqual({
-        errors: errorMessage,
+        errors: errorMessage
       });
     });
   });

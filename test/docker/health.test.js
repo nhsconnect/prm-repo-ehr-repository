@@ -12,9 +12,9 @@ describe('GET /health', () => {
         details: expect.objectContaining({
           filestore: expect.objectContaining({
             available: true,
-            writable: true,
-          }),
-        }),
+            writable: true
+          })
+        })
       })
     );
   });

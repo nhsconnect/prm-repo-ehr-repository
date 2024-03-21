@@ -172,12 +172,12 @@ describe('GET /health', () => {
 const expectedS3Base = (isWritable, isConnected) => {
   const s3Base = {
     available: isConnected,
-    writable: isWritable,
+    writable: isWritable
   };
   return !isWritable
     ? {
         ...s3Base,
-        error: mockErrorResponse,
+        error: mockErrorResponse
       }
     : s3Base;
 };
@@ -190,20 +190,20 @@ const expectedHealthCheckBase = (
 ) => ({
   details: {
     filestore: expectedS3Base(s3_writable, s3_connected),
-    database: getExpectedDatabase(db_writable, db_connected),
-  },
+    database: getExpectedDatabase(db_writable, db_connected)
+  }
 });
 
 const getExpectedDatabase = (isWritable, isConnected) => {
   const baseConf = {
     connection: isConnected,
-    writable: isWritable,
+    writable: isWritable
   };
 
   return !isWritable
     ? {
         ...baseConf,
-        error: mockErrorResponse,
+        error: mockErrorResponse
       }
     : baseConf;
 };
