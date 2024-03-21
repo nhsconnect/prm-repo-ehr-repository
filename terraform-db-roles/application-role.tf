@@ -1,6 +1,3 @@
-# We need to grant permissions to DB tables after migrations ran at least once.
-# See ./tasks grant_db_permissions
-
 resource "postgresql_role" "application_role" {
   name     = "application_role"
 }
