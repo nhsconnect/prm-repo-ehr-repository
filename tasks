@@ -112,6 +112,19 @@ function configure_local_envs {
   configure_service_url
 }
 
+function configure_local_envs_for_docker_test {
+  export AUTHORIZATION_KEYS=$(generate_secure_string 10)
+  export S3_BUCKET_NAME=test-bucket
+  export LOCALSTACK_URL=http://localstack:4572
+  export REPOSITORY_URI=$IMAGE_REPO_NAME
+  export NODE_ENV=local
+
+  export DYNAMODB_NAME=local-test-db
+  export DYNAMODB_LOCAL_ENDPOINT=http://dynamodb-local:8000/
+
+  configure_service_url
+}
+
 function get_aws_account_id {
      AWS_ACCOUNT_ID=$(dojo -c Dojofile-infra "aws sts get-caller-identity | jq -r .Account")
  }
@@ -403,7 +416,7 @@ case "${command}" in
       fetch_redaction_utils
       ;;
   build_docker_local)
-      configure_local_envs
+      configure_local_envs_for_docker_test
       fetch_redaction_utils
       build_docker_image
       ;;
@@ -421,18 +434,18 @@ case "${command}" in
       npm run test:docker
       ;;
   test_docker)
-      configure_local_envs
+      configure_local_envs_for_docker_test
       configure_docker_repository_uri
       set_image_tag
       dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
   test_docker_local_shell)
-      configure_local_envs
+      configure_local_envs_for_docker_test
       set_image_tag
       dojo -c Dojofile-dtest
       ;;
   test_docker_local)
-      configure_local_envs
+      configure_local_envs_for_docker_test
       set_image_tag
       dojo -c Dojofile-dtest "./tasks _test_docker"
       ;;
