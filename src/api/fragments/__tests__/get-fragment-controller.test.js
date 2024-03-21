@@ -4,13 +4,13 @@ import { getSignedUrl } from '../../../services/storage';
 import { v4 as uuid } from 'uuid';
 import { logError, logInfo } from '../../../middleware/logging';
 import { initializeConfig } from '../../../config';
-import { messageAlreadyReceived } from '../../../services/database/health-record-repository';
+import { fragmentAlreadyReceived } from '../../../services/database/ehr-fragment-repository';
 
 jest.mock('../../../services/storage');
-jest.mock('../../../services/database/health-record-repository');
+jest.mock('../../../services/database/ehr-fragment-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({ sequelize: { dialect: 'postgres' } }),
+  initializeConfig: jest.fn().mockReturnValue({}),
 }));
 
 describe('getFragmentController', () => {
@@ -28,7 +28,7 @@ describe('getFragmentController', () => {
       const presignedUrl = 'presigned-url';
 
       // when
-      messageAlreadyReceived.mockResolvedValueOnce(true);
+      fragmentAlreadyReceived.mockResolvedValueOnce(true);
       getSignedUrl.mockResolvedValue(presignedUrl);
 
       const response = await request(app)
@@ -50,7 +50,7 @@ describe('getFragmentController', () => {
 
     it('should return a 404 error when the record is not found', async () => {
       // when
-      messageAlreadyReceived.mockResolvedValueOnce(false);
+      fragmentAlreadyReceived.mockResolvedValueOnce(false);
 
       const response = await request(app)
         .get(`/fragments/${conversationId}/${messageId}`)
@@ -59,7 +59,7 @@ describe('getFragmentController', () => {
       // then
       expect(response.status).toBe(404);
       expect(getSignedUrl).not.toHaveBeenCalled();
-      expect(messageAlreadyReceived).toHaveBeenCalledWith(messageId);
+      expect(fragmentAlreadyReceived).toHaveBeenCalledWith(conversationId, messageId);
     });
 
     it('should return a 503 when getSignedUrl promise is rejected', async () => {
@@ -67,7 +67,7 @@ describe('getFragmentController', () => {
       const error = new Error('error');
 
       // when
-      messageAlreadyReceived.mockResolvedValueOnce(true);
+      fragmentAlreadyReceived.mockResolvedValueOnce(true);
       getSignedUrl.mockRejectedValueOnce(error);
 
       const response = await request(app)

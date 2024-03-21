@@ -1,9 +1,7 @@
 import { param } from 'express-validator';
-import {
-  getHealthRecordStatus,
-  HealthRecordStatus,
-} from '../../services/database/health-record-repository';
 import { setCurrentSpanAttributes } from '../../config/tracing';
+import { HealthRecordStatus } from '../../models/enums';
+import { getConversationStatus } from '../../services/database/ehr-conversation-repository';
 
 export const healthRecordControllerValidation = [
   param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),
@@ -18,7 +16,7 @@ export const healthRecordController = async (req, res) => {
   try {
     setCurrentSpanAttributes({ conversationId: req.params.conversationId });
 
-    const status = await getHealthRecordStatus(req.params.conversationId);
+    const status = await getConversationStatus(req.params.conversationId);
     switch (status) {
       case HealthRecordStatus.COMPLETE:
         res.sendStatus(200);

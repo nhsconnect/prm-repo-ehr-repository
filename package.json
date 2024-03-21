@@ -17,11 +17,8 @@
     "test:coverage": "jest src/ --maxWorkers=1 --coverage --detectOpenHandles --forceExit --setupFiles dotenv/config",
     "build": "babel src -d build --ignore '**/*.test.js' --ignore '**/__mocks__/*' && cp src/*.json build",
     "start": "node build/server.js",
-    "start:local": "npm run db:migrate ; babel-node -r dotenv/config src/server.js",
-    "start:nodemon": "nodemon --exec npm run start:local",
-    "db:wait": "babel-node scripts/wait-for-postgres.js",
-    "db:migrate": "npm run db:wait && sequelize-cli db:migrate",
-    "db:teardown": "sequelize-cli db:migrate:undo:all"
+    "start:local": "babel-node -r dotenv/config src/server.js",
+    "start:nodemon": "nodemon --exec npm run start:local"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.0",
@@ -40,11 +37,12 @@
     "nodemon": "^2.0.19",
     "npm-audit-resolver": "3.0.0-7",
     "prettier": "^2.6.0",
-    "sequelize-cli": "^6.4.1",
     "supertest": "^6.3.3",
     "typescript": "^4.6.2"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.525.0",
+    "@aws-sdk/lib-dynamodb": "^3.525.0",
     "@babel/runtime": "^7.17.8",
     "async-local-storage": "^2.3.1",
     "aws-sdk": "^2.1358.0",
@@ -53,11 +51,11 @@
     "express-validator": "^6.14.0",
     "express-winston": "^4.2.0",
     "helmet": "^6.0.0",
+    "lodash.chunk": "^4.2.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.merge": "^4.6.2",
-    "pg": "^8.7.3",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.33.0",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.5.45",
     "sinon": "^15.1.2",
     "swagger-ui-express": "^4.3.0",
     "traverse": "^0.6.6",
@@ -75,6 +73,6 @@
   "overrides": {
     "json5": "2.2.2",
     "superagent": "8.0.8",
-    "semver": "^7.5.2" 
+    "semver": "^7.5.2"
   }
 }

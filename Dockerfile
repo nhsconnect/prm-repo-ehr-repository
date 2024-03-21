@@ -1,8 +1,8 @@
 FROM node:16.19.0-alpine AS builder
 
-# install python and postgres native requirements
+# install python native requirements
 RUN apk update && \
-    apk add --no-cache bash tini postgresql-client && \
+    apk add --no-cache bash tini && \
     rm -rf /var/cache/apk/*
 
 RUN apk add --no-cache \
@@ -14,7 +14,7 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 # Install sequelize postgress native dependencies
-RUN apk add --no-cache postgresql-dev g++ make
+RUN apk add --no-cache g++ make
 
 COPY package*.json /app/
 
@@ -31,10 +31,10 @@ COPY --from=builder /usr/local/bin/node /usr/local/bin
 # take native-install node modules
 COPY --from=builder /app /app
 
-# install python and postgres native requirements (again, as per builder)
+# install python native requirements (again, as per builder)
 # add root CA from deductions team to trusted certificates
 RUN apk update && \
-    apk add --no-cache openssl ca-certificates bash tini postgresql-client && \
+    apk add --no-cache openssl ca-certificates bash tini && \
     rm -rf /var/cache/apk/*
 
 RUN apk add --no-cache \
@@ -46,9 +46,6 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 COPY build/                   /app/build
-COPY database/                /app/database
-COPY build/config/database.js /app/src/config/
-COPY .sequelizerc             /app/
 
 COPY scripts/load-api-keys.sh      /app/scripts/load-api-keys.sh
 COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server

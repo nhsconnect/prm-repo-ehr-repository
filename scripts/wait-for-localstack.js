@@ -41,7 +41,7 @@ const checkIfConnected = async () => {
       console.log('Successfully connected to localstack');
       return;
     }
-    await sleep(1000);
+    await sleep(2000);
   }
 
   console.log(`Connection to Localstack timedout after ${MAX_ATTEMPTS}`);

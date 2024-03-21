@@ -14,10 +14,6 @@ describe('GET /health', () => {
             available: true,
             writable: true,
           }),
-          database: expect.objectContaining({
-            connection: true,
-            writable: true,
-          }),
         }),
       })
     );
