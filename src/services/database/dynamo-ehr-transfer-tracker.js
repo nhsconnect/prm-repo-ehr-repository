@@ -1,6 +1,7 @@
 import { TransactWriteCommand, QueryCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
+import chunk from 'lodash.chunk';
 
-import { logError, logInfo } from '../../middleware/logging';
+import { logError, logInfo, logWarning } from "../../middleware/logging";
 import { RecordType } from '../../models/enums';
 import { getDynamodbClient } from './dynamodb-client';
 import { IS_IN_LOCAL } from '../../utilities/integration-test-utilities';
@@ -40,38 +41,61 @@ export class EhrTransferTracker {
   }
 
   async writeItemsInTransaction(items) {
+    logInfo(`Writing ${items.length} items to dynamodb table`);
     if (!items || !Array.isArray(items)) {
-      throw new Error('The given argument `items` is not an array');
+      throw new TypeError('The given argument `items` is not an array');
     }
-    const command = new TransactWriteCommand({
-      TransactItems: items.map((item) => ({
-        Put: {
-          TableName: this.tableName,
-          Item: item,
-        },
-      })),
-    });
+    if (items.length > 100) {
+      logWarning('Cannot write all items in a single transaction due to limitation of dynamodb.');
+      logWarning('Will write the items in multiple transactions');
+      logWarning('If failed, a complete rollback cannot be guaranteed.');
+    }
 
-    await this.client.send(command);
+    const splitItemBy100 = chunk(items, 100);
+
+    for (const batch of splitItemBy100) {
+      const command = new TransactWriteCommand({
+        TransactItems: batch.map(item => ({
+          Put: {
+            TableName: this.tableName,
+            Item: item
+          }
+        }))
+      });
+      await this.client.send(command);
+    }
   }
 
   async updateItemsInTransaction(updateParams) {
     if (!updateParams || !Array.isArray(updateParams)) {
-      throw new Error('The given argument `updateParams` is not an array');
+      throw new TypeError('The given argument `updateParams` is not an array');
     }
-    const command = new TransactWriteCommand({
-      TransactItems: updateParams.map((params) => ({
-        Update: {
-          TableName: this.tableName,
-          ...params,
-        },
-      })),
-    });
 
-    await this.client.send(command);
+    if (updateParams.length > 100) {
+      logWarning('Cannot update all items in a single transaction due to limitation of dynamodb.');
+      logWarning('Will update the items in multiple transactions');
+      logWarning('If failed, a complete rollback cannot be guaranteed.');
+    }
+
+    logInfo(`Updating dynamodb record with params: ${JSON.stringify(updateParams)}`);
+
+    const splitItemBy100 = chunk(updateParams, 100);
+
+    for (const batch of splitItemBy100) {
+      logInfo(`Updating dynamodb record with params: ${JSON.stringify(batch)}`);
+      const command = new TransactWriteCommand({
+        TransactItems: batch.map(params => ({
+          Update: {
+            TableName: this.tableName,
+            ...params
+          }
+        }))
+      });
+      await this.client.send(command);
+    }
   }
 
-  async queryTableByNhsNumber(nhsNumber, includeDeletedRecord = false) {
+    async queryTableByNhsNumber(nhsNumber, includeDeletedRecord = false) {
     const params = {
       TableName: this.tableName,
       IndexName: 'NhsNumberSecondaryIndex',
