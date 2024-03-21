@@ -89,23 +89,6 @@ common:
           arguments:
             - -c
             - ./tasks tf_apply_db_roles
-      # Applies permissions for migration_role
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks grant_db_permissions
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks run_db_migrations
-      # Applies permissions for application_role for tables created during migration
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks grant_db_permissions
       - exec:
           command: /bin/bash
           arguments:
