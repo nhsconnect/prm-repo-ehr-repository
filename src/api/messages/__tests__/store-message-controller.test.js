@@ -6,12 +6,12 @@ import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/enums';
 import {
   getConversationStatus,
-  updateConversationCompleteness,
+  updateConversationCompleteness
 } from '../../../services/database/ehr-conversation-repository';
 import { createCore } from '../../../services/database/ehr-core-repository';
 import {
   fragmentExistsInRecord,
-  markFragmentAsReceivedAndCreateItsParts,
+  markFragmentAsReceivedAndCreateItsParts
 } from '../../../services/database/ehr-fragment-repository';
 
 jest.mock('../../../services/database/ehr-conversation-repository');
@@ -19,12 +19,12 @@ jest.mock('../../../services/database/ehr-core-repository');
 jest.mock('../../../services/database/ehr-fragment-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({}),
+  initializeConfig: jest.fn().mockReturnValue({})
 }));
 
 describe('storeMessageController', () => {
   initializeConfig.mockReturnValue({
-    consumerApiKeys: { TEST_USER: 'correct-key' },
+    consumerApiKeys: { TEST_USER: 'correct-key' }
   });
 
   const authorizationKeys = 'correct-key';
@@ -45,9 +45,9 @@ describe('storeMessageController', () => {
             conversationId,
             messageType: MessageType.EHR_EXTRACT,
             nhsNumber,
-            fragmentMessageIds,
-          },
-        },
+            fragmentMessageIds
+          }
+        }
       };
     });
 
@@ -71,7 +71,7 @@ describe('storeMessageController', () => {
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
-        fragmentMessageIds: [nestedFragmentId],
+        fragmentMessageIds: [nestedFragmentId]
       };
 
       fragmentExistsInRecord.mockResolvedValueOnce(true);
@@ -97,7 +97,7 @@ describe('storeMessageController', () => {
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
-        fragmentMessageIds: [],
+        fragmentMessageIds: []
       };
 
       fragmentExistsInRecord.mockResolvedValueOnce(false);
@@ -127,9 +127,9 @@ describe('storeMessageController', () => {
           conversationId,
           messageType: MessageType.EHR_EXTRACT,
           nhsNumber,
-          fragmentMessageIds,
-        },
-      },
+          fragmentMessageIds
+        }
+      }
     };
     it('should return a 503 when message cannot be stored in the database', async () => {
       createCore.mockRejectedValueOnce({ error: 'db is down' });
@@ -151,12 +151,12 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            conversationId: 'not-a-uuid',
-          },
-        },
+            conversationId: 'not-a-uuid'
+          }
+        }
       };
       const errorMessage = {
-        'data.attributes.conversationId': "'conversationId' provided is not a UUID",
+        'data.attributes.conversationId': "'conversationId' provided is not a UUID"
       };
 
       const res = await request(app)
@@ -171,8 +171,8 @@ describe('storeMessageController', () => {
     it('should return 422 and an error message when messageId is not a UUID', async () => {
       const requestBody = {
         data: {
-          id: 'not-a-uuid',
-        },
+          id: 'not-a-uuid'
+        }
       };
       const errorMessage = { 'data.id': "'id' provided is not a UUID" };
 
@@ -188,8 +188,8 @@ describe('storeMessageController', () => {
     it('should return 422 and an error message when type is not messages', async () => {
       const requestBody = {
         data: {
-          type: 'not-messages',
-        },
+          type: 'not-messages'
+        }
       };
       const errorMessage = { 'data.type': 'Invalid value' };
 
@@ -210,9 +210,9 @@ describe('storeMessageController', () => {
           attributes: {
             conversationId: uuid(),
             nhsNumber: 'not-an-nhs-number',
-            messageType: 'ehrExtract',
-          },
-        },
+            messageType: 'ehrExtract'
+          }
+        }
       };
       const errorMessage = { 'data.attributes.nhsNumber': "'nhsNumber' provided is not numeric" };
 
@@ -230,12 +230,12 @@ describe('storeMessageController', () => {
         data: {
           attributes: {
             nhsNumber: '1234567890987654',
-            messageType: 'ehrExtract',
-          },
-        },
+            messageType: 'ehrExtract'
+          }
+        }
       };
       const errorMessage = {
-        'data.attributes.nhsNumber': "'nhsNumber' provided is not 10 characters",
+        'data.attributes.nhsNumber': "'nhsNumber' provided is not 10 characters"
       };
 
       const res = await request(app)
@@ -251,13 +251,13 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            messageType: 'not-a-message-type',
-          },
-        },
+            messageType: 'not-a-message-type'
+          }
+        }
       };
       const errorMessage = {
         'data.attributes.messageType':
-          "'messageType' provided is not one of the following: ehrExtract, fragment",
+          "'messageType' provided is not one of the following: ehrExtract, fragment"
       };
 
       const res = await request(app)
@@ -278,9 +278,9 @@ describe('storeMessageController', () => {
             conversationId: uuid(),
             nhsNumber: '1234567890',
             messageType: 'ehrExtract',
-            fragmentMessageIds: [],
-          },
-        },
+            fragmentMessageIds: []
+          }
+        }
       };
 
       const res = await request(app)
@@ -295,13 +295,13 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            messageType: 'ehrExtract',
-          },
-        },
+            messageType: 'ehrExtract'
+          }
+        }
       };
 
       const errorMessage = {
-        'data.attributes.nhsNumber': "'nhsNumber' is required for messageType ehrExtract",
+        'data.attributes.nhsNumber': "'nhsNumber' is required for messageType ehrExtract"
       };
 
       const res = await request(app)
@@ -322,9 +322,9 @@ describe('storeMessageController', () => {
             conversationId: uuid(),
             nhsNumber: '1234567890',
             messageType: 'ehrExtract',
-            fragmentMessageIds: [],
-          },
-        },
+            fragmentMessageIds: []
+          }
+        }
       };
       const res = await request(app)
         .post('/messages')
@@ -339,13 +339,13 @@ describe('storeMessageController', () => {
         data: {
           attributes: {
             nhsNumber: '1234567890',
-            messageType: 'fragment',
-          },
-        },
+            messageType: 'fragment'
+          }
+        }
       };
 
       const errorMessage = {
-        'data.attributes.nhsNumber': "'nhsNumber' should be empty for messageType fragment",
+        'data.attributes.nhsNumber': "'nhsNumber' should be empty for messageType fragment"
       };
 
       const res = await request(app)
@@ -365,9 +365,9 @@ describe('storeMessageController', () => {
           attributes: {
             conversationId: uuid(),
             messageType: 'fragment',
-            fragmentMessageIds: [],
-          },
-        },
+            fragmentMessageIds: []
+          }
+        }
       };
 
       const res = await request(app)
@@ -382,13 +382,13 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            fragmentMessageIds: ['not-a-uuid'],
-          },
-        },
+            fragmentMessageIds: ['not-a-uuid']
+          }
+        }
       };
 
       const errorMessage = {
-        'data.attributes.fragmentMessageIds[0]': "'fragmentMessageIds' should be UUIDs",
+        'data.attributes.fragmentMessageIds[0]': "'fragmentMessageIds' should be UUIDs"
       };
 
       const res = await request(app)
@@ -404,13 +404,13 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           attributes: {
-            fragmentMessageIds: 'not-an-array',
-          },
-        },
+            fragmentMessageIds: 'not-an-array'
+          }
+        }
       };
 
       const errorMessage = {
-        'data.attributes.fragmentMessageIds': "'fragmentMessageIds' should be an array",
+        'data.attributes.fragmentMessageIds': "'fragmentMessageIds' should be an array"
       };
 
       const res = await request(app)
@@ -431,9 +431,9 @@ describe('storeMessageController', () => {
         attributes: {
           conversationId: uuid(),
           nhsNumber: '1234567890',
-          messageType: 'ehrExtract',
-        },
-      },
+          messageType: 'ehrExtract'
+        }
+      }
     };
 
     it('should return 401 when authentication keys are missing', async () => {

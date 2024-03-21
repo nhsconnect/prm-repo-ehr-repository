@@ -14,7 +14,7 @@ export const buildCore = (inboundConversationId, messageId) => {
     CreatedAt: timestamp,
     ReceivedAt: timestamp,
     UpdatedAt: timestamp,
-    TransferStatus: CoreStatus.COMPLETE,
+    TransferStatus: CoreStatus.COMPLETE
   };
 };
 

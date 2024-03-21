@@ -22,7 +22,7 @@ app.use(express.json());
 // Sets "Strict-Transport-Security: max-age=31536000; includeSubDomains"
 app.use(
   helmet.hsts({
-    maxAge: 31536000,
+    maxAge: 31536000
   })
 );
 app.use(requestLogger(options));

@@ -7,12 +7,12 @@ import { HealthRecordStatus } from '../../../models/enums';
 
 jest.mock('../../../services/database/ehr-conversation-repository');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({}),
+  initializeConfig: jest.fn().mockReturnValue({})
 }));
 
 describe('healthRecordController', () => {
   initializeConfig.mockReturnValue({
-    consumerApiKeys: { TEST_USER: 'correct-key' },
+    consumerApiKeys: { TEST_USER: 'correct-key' }
   });
 
   const authorizationKeys = 'correct-key';

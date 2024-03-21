@@ -40,7 +40,7 @@ export const options = {
     format.json()
   ),
   level: process.env.LOG_LEVEL,
-  transports: [new transports.Console({ handleExceptions: true })],
+  transports: [new transports.Console({ handleExceptions: true })]
 };
 
 export const logger = createLogger(options);

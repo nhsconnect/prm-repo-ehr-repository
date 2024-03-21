@@ -8,12 +8,12 @@ export const buildConversationUpdateParams = (conversationId, changes) => {
   const baseParams = {
     Key: {
       InboundConversationId: conversationId,
-      Layer: RecordType.CONVERSATION,
+      Layer: RecordType.CONVERSATION
     },
     UpdateExpression: 'set UpdatedAt = :now',
     ExpressionAttributeValues: {
-      ':now': getUKTimestamp(),
-    },
+      ':now': getUKTimestamp()
+    }
   };
 
   return addChangesToUpdateParams(baseParams, changes, fieldsAllowedToUpdate);

@@ -7,7 +7,7 @@ import { logError, logInfo, logWarning } from '../../../middleware/logging';
 import getSignedUrl from '../../../services/storage/get-signed-url';
 import {
   getCurrentConversationIdForPatient,
-  getMessageIdsForConversation,
+  getMessageIdsForConversation
 } from '../../../services/database/ehr-conversation-repository';
 import { HealthRecordNotFoundError } from '../../../errors/errors';
 
@@ -15,12 +15,12 @@ jest.mock('../../../services/database/ehr-conversation-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../services/storage/get-signed-url');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({}),
+  initializeConfig: jest.fn().mockReturnValue({})
 }));
 
 describe('patientDetailsController', () => {
   initializeConfig.mockReturnValue({
-    consumerApiKeys: { TEST_USER: 'correct-key' },
+    consumerApiKeys: { TEST_USER: 'correct-key' }
   });
 
   const authorizationKeys = 'correct-key';
@@ -36,7 +36,7 @@ describe('patientDetailsController', () => {
       getCurrentConversationIdForPatient.mockResolvedValue(conversationId);
       getMessageIdsForConversation.mockResolvedValue({
         coreMessageId: messageId,
-        fragmentMessageIds: [],
+        fragmentMessageIds: []
       });
       getSignedUrl.mockResolvedValue(presignedUrl);
 
@@ -65,7 +65,7 @@ describe('patientDetailsController', () => {
       getCurrentConversationIdForPatient.mockResolvedValue(conversationId);
       getMessageIdsForConversation.mockResolvedValue({
         coreMessageId: healthRecordExtractId,
-        fragmentMessageIds: [fragmentMessageId],
+        fragmentMessageIds: [fragmentMessageId]
       });
       when(getSignedUrl)
         .calledWith(conversationId, healthRecordExtractId, 'getObject')
@@ -97,7 +97,7 @@ describe('patientDetailsController', () => {
       getCurrentConversationIdForPatient.mockResolvedValue(conversationId);
       getMessageIdsForConversation.mockResolvedValue({
         coreMessageId: healthRecordExtractId,
-        fragmentMessageIds: [fragmentMessageId],
+        fragmentMessageIds: [fragmentMessageId]
       });
       when(getSignedUrl)
         .calledWith(conversationId, healthRecordExtractId, 'getObject')
@@ -144,7 +144,7 @@ describe('patientDetailsController', () => {
       // then
       expect(res.status).toEqual(503);
       expect(logError).toHaveBeenCalledWith('Could not retrieve patient health record', {
-        bob: 'cheese',
+        bob: 'cheese'
       });
     });
   });

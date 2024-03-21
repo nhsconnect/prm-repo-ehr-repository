@@ -6,7 +6,7 @@ export const deleteEhrValidation = [
     .isNumeric()
     .withMessage("'nhsNumber' provided is not numeric")
     .isLength({ min: 10, max: 10 })
-    .withMessage("'nhsNumber' provided is not 10 characters"),
+    .withMessage("'nhsNumber' provided is not 10 characters")
 ];
 
 export const deleteEhrController = async (req, res) => {
@@ -26,8 +26,8 @@ export const deleteEhrController = async (req, res) => {
       data: {
         type: 'patients',
         id: nhsNumber,
-        conversationIds,
-      },
+        conversationIds
+      }
     };
 
     res.status(200).json(responseBody);

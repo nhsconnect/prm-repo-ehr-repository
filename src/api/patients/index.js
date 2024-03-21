@@ -1,7 +1,7 @@
 import express from 'express';
 import {
   healthRecordController,
-  healthRecordControllerValidation,
+  healthRecordControllerValidation
 } from './health-record-controller';
 import { validate } from '../../middleware/validation';
 import { authenticateRequest } from '../../middleware/auth';

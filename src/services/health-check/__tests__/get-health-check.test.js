@@ -14,7 +14,7 @@ describe('getHealthCheck', () => {
   beforeEach(() => {
     S3.mockImplementation(() => ({
       putObject: mockPutObject,
-      headBucket: mockHeadBucket,
+      headBucket: mockHeadBucket
     }));
   });
 
@@ -28,7 +28,7 @@ describe('getHealthCheck', () => {
         type: 's3',
         bucketName: config.awsS3BucketName,
         available: true,
-        writable: true,
+        writable: true
       });
     });
   });
@@ -44,7 +44,7 @@ describe('getHealthCheck', () => {
         bucketName: config.awsS3BucketName,
         available: true,
         writable: false,
-        error: error,
+        error: error
       });
     });
   });
@@ -60,7 +60,7 @@ describe('getHealthCheck', () => {
         bucketName: config.awsS3BucketName,
         available: false,
         writable: false,
-        error: error,
+        error: error
       });
     });
   });

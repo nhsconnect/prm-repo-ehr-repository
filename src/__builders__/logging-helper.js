@@ -1,6 +1,6 @@
 export const transportSpy = {
   log: jest.fn(),
-  on: jest.fn(),
+  on: jest.fn()
 };
 
 export const expectStructuredLogToContain = (spy, expectedStructure) => {

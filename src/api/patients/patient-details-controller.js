@@ -4,7 +4,7 @@ import getSignedUrl from '../../services/storage/get-signed-url';
 import { setCurrentSpanAttributes } from '../../config/tracing';
 import {
   getCurrentConversationIdForPatient,
-  getMessageIdsForConversation,
+  getMessageIdsForConversation
 } from '../../services/database/ehr-conversation-repository';
 import { HealthRecordNotFoundError } from '../../errors/errors';
 
@@ -13,7 +13,7 @@ export const patientDetailsValidation = [
     .isNumeric()
     .withMessage("'nhsNumber' provided is not numeric")
     .isLength({ min: 10, max: 10 })
-    .withMessage("'nhsNumber' provided is not 10 characters"),
+    .withMessage("'nhsNumber' provided is not 10 characters")
 ];
 
 export const patientDetailsController = async (req, res) => {
@@ -41,7 +41,7 @@ export const patientDetailsController = async (req, res) => {
       // TODO: remove this duplicated `conversationIdFromEhrIn` field,
       // after updating ehr-out to use the field name "inboundConversationId" (planned in PRMT-4587)
       conversationIdFromEhrIn: currentHealthRecordConversationId,
-      inboundConversationId: currentHealthRecordConversationId,
+      inboundConversationId: currentHealthRecordConversationId
     };
 
     res.status(200).json(responseBody);

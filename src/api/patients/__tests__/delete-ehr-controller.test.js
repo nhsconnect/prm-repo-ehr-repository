@@ -9,12 +9,12 @@ jest.mock('../../../services/database/ehr-conversation-repository');
 jest.mock('../../../middleware/logging');
 jest.mock('../../../services/storage/get-signed-url');
 jest.mock('../../../config', () => ({
-  initializeConfig: jest.fn().mockReturnValue({}),
+  initializeConfig: jest.fn().mockReturnValue({})
 }));
 
 describe('deleteEhrController', () => {
   initializeConfig.mockReturnValue({
-    consumerApiKeys: { TEST_USER: 'correct-key' },
+    consumerApiKeys: { TEST_USER: 'correct-key' }
   });
 
   const authorizationKeys = 'correct-key';

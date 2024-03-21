@@ -13,7 +13,7 @@ export const createCore = async ({ conversationId, messageId, fragmentMessageIds
       const directFragments = buildMultipleFragments({
         inboundConversationId: conversationId,
         fragmentMessageIds,
-        parentMessageId: messageId,
+        parentMessageId: messageId
       });
       itemsToWrite.push(...directFragments);
     }

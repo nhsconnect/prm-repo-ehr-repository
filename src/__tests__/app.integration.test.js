@@ -9,7 +9,7 @@ import { getCoreByKey } from '../services/database/ehr-core-repository';
 import {
   cleanupRecordsForTest,
   cleanupRecordsForTestByNhsNumber,
-  createConversationForTest,
+  createConversationForTest
 } from '../utilities/integration-test-utilities';
 import { getConversationById } from '../services/database/ehr-conversation-repository';
 import { ConversationStatus, MessageType, RecordType } from '../models/enums';
@@ -31,9 +31,9 @@ describe('app', () => {
         conversationId,
         messageType: MessageType.EHR_EXTRACT,
         nhsNumber,
-        fragmentMessageIds,
-      },
-    },
+        fragmentMessageIds
+      }
+    }
   });
 
   const createReqBodyForFragment = (messageId, conversationId, fragmentMessageIds = []) => ({
@@ -43,9 +43,9 @@ describe('app', () => {
       attributes: {
         conversationId,
         messageType: MessageType.FRAGMENT,
-        fragmentMessageIds: fragmentMessageIds,
-      },
-    },
+        fragmentMessageIds: fragmentMessageIds
+      }
+    }
   });
 
   beforeEach(() => {
@@ -74,7 +74,7 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         messageId,
         conversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
   });
@@ -97,9 +97,9 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              fragmentMessageIds: [fragmentMessageId],
-            },
-          },
+              fragmentMessageIds: [fragmentMessageId]
+            }
+          }
         })
         .set('Authorization', authorizationKeys);
 
@@ -115,9 +115,9 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.FRAGMENT,
               nhsNumber: '',
-              fragmentMessageIds: [],
-            },
-          },
+              fragmentMessageIds: []
+            }
+          }
         })
         .set('Authorization', authorizationKeys);
 
@@ -136,7 +136,7 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
         conversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
 
@@ -172,9 +172,9 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              fragmentMessageIds: [],
-            },
-          },
+              fragmentMessageIds: []
+            }
+          }
         })
         .set('Authorization', authorizationKeys);
 
@@ -207,9 +207,9 @@ describe('app', () => {
               conversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              fragmentMessageIds: [fragmentId],
-            },
-          },
+              fragmentMessageIds: [fragmentId]
+            }
+          }
         })
         .set('Authorization', authorizationKeys);
 
@@ -259,7 +259,7 @@ describe('app', () => {
 
       // mimic the record at Conversation Layer, which should in actual case should be already created by ehr-transfer-service
       await createConversationForTest(inboundConversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.STARTED,
+        TransferStatus: ConversationStatus.STARTED
       });
 
       const messageResponse = await request(app)
@@ -272,9 +272,9 @@ describe('app', () => {
               conversationId: inboundConversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              fragmentMessageIds: [fragmentId],
-            },
-          },
+              fragmentMessageIds: [fragmentId]
+            }
+          }
         })
         .set('Authorization', authorizationKeys);
       expect(messageResponse.status).toEqual(201);
@@ -288,9 +288,9 @@ describe('app', () => {
             attributes: {
               conversationId: inboundConversationId,
               messageType: MessageType.FRAGMENT,
-              fragmentMessageIds: [nestedFragmentId],
-            },
-          },
+              fragmentMessageIds: [nestedFragmentId]
+            }
+          }
         })
         .set('Authorization', authorizationKeys);
 
@@ -305,9 +305,9 @@ describe('app', () => {
             attributes: {
               conversationId: inboundConversationId,
               messageType: MessageType.FRAGMENT,
-              fragmentMessageIds: [],
-            },
-          },
+              fragmentMessageIds: []
+            }
+          }
         })
         .set('Authorization', authorizationKeys);
 
@@ -332,7 +332,7 @@ describe('app', () => {
       expect(patientRes.body.conversationIdFromEhrIn).toEqual(inboundConversationId);
       expectStructuredLogToContain(transportSpy, {
         conversationId: outboundConversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
 
@@ -350,7 +350,7 @@ describe('app', () => {
       // then
       expectStructuredLogToContain(transportSpy, {
         conversationId: outboundConversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
 
@@ -364,7 +364,7 @@ describe('app', () => {
 
       // mimic the record at Conversation Layer, which should in actual case should be already created by ehr-transfer-service
       await createConversationForTest(inboundConversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.STARTED,
+        TransferStatus: ConversationStatus.STARTED
       });
 
       const messageResponse = await request(app)
@@ -377,9 +377,9 @@ describe('app', () => {
               conversationId: inboundConversationId,
               messageType: MessageType.EHR_EXTRACT,
               nhsNumber,
-              fragmentMessageIds: [fragmentId],
-            },
-          },
+              fragmentMessageIds: [fragmentId]
+            }
+          }
         })
         .set('Authorization', authorizationKeys);
 
@@ -405,7 +405,7 @@ describe('app', () => {
       messageId = uuid();
       conversationId = uuid();
       createConversationForTest(conversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.STARTED,
+        TransferStatus: ConversationStatus.STARTED
       });
     });
 
@@ -435,7 +435,7 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         messageId,
         conversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
 
@@ -461,7 +461,7 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         messageId,
         conversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
 
@@ -493,7 +493,7 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
         conversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
 
@@ -522,7 +522,7 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
         conversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
 
@@ -553,7 +553,7 @@ describe('app', () => {
       expectStructuredLogToContain(transportSpy, {
         messageId: nestedFragmentId,
         conversationId,
-        traceId: expect.anything(),
+        traceId: expect.anything()
       });
     });
 
@@ -565,7 +565,7 @@ describe('app', () => {
         .set('traceid', 'our trace ID');
 
       expectStructuredLogToContain(transportSpy, {
-        traceId: 'our trace ID',
+        traceId: 'our trace ID'
       });
     });
   });
@@ -581,7 +581,7 @@ describe('app', () => {
       fragmentMessageIds = []
     ) => {
       await createConversationForTest(conversationId, nhsNumber, {
-        TransferStatus: ConversationStatus.STARTED,
+        TransferStatus: ConversationStatus.STARTED
       });
       await request(app)
         .post(`/messages`)
@@ -621,7 +621,7 @@ describe('app', () => {
       expect(getPatientResponse.status).toBe(200);
       expect(getPatientResponse.body).toMatchObject({
         conversationIdFromEhrIn: inboundConversationId,
-        fragmentMessageIds: expect.arrayContaining(fragmentMessageIds),
+        fragmentMessageIds: expect.arrayContaining(fragmentMessageIds)
       });
       const timestampBeforeDelete = getEpochTimeInSecond(moment().add(8, 'week'));
 
@@ -634,7 +634,7 @@ describe('app', () => {
       expect(deleteResponse.status).toBe(200);
       expect(deleteResponse.body.data).toMatchObject({
         conversationIds: [inboundConversationId],
-        id: nhsNumber,
+        id: nhsNumber
       });
 
       const getPatientResponseAfterDeletion = await callGetPatient(nhsNumber);
@@ -652,7 +652,7 @@ describe('app', () => {
       for (const item of softDeletedRecords) {
         expect(item).toMatchObject({
           InboundConversationId: inboundConversationId,
-          DeletedAt: expect.any(Number),
+          DeletedAt: expect.any(Number)
         });
         expect(item.DeletedAt).toBeGreaterThanOrEqual(timestampBeforeDelete);
         expect(item.DeletedAt).toBeLessThanOrEqual(timestampAfterDelete);
@@ -675,7 +675,7 @@ describe('app', () => {
       expect(getPatientResponse.status).toBe(200);
       expect(getPatientResponse.body).toMatchObject({
         conversationIdFromEhrIn: inboundConversationId2,
-        fragmentMessageIds: [],
+        fragmentMessageIds: []
       });
 
       // when
@@ -687,7 +687,7 @@ describe('app', () => {
       expect(deleteResponse.status).toBe(200);
       expect(deleteResponse.body.data).toMatchObject({
         conversationIds: expect.arrayContaining([inboundConversationId1, inboundConversationId2]),
-        id: nhsNumber,
+        id: nhsNumber
       });
 
       const getPatientResponseAfterDeletion = await callGetPatient(nhsNumber);

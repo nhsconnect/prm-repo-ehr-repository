@@ -33,12 +33,12 @@ export const buildSoftDeleteUpdateParams = (item) => {
   return {
     Key: {
       InboundConversationId: item.InboundConversationId,
-      Layer: item.Layer,
+      Layer: item.Layer
     },
     UpdateExpression: `set UpdatedAt = :now, DeletedAt = :deletedAt`,
     ExpressionAttributeValues: {
       ':now': getUKTimestamp(),
-      ':deletedAt': getEpochTimeInSecond(eightWeeksAfter),
-    },
+      ':deletedAt': getEpochTimeInSecond(eightWeeksAfter)
+    }
   };
 };

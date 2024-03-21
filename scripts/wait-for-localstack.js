@@ -8,12 +8,12 @@ const isConnected = () => {
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
       endpoint: new Endpoint(process.env.LOCALSTACK_URL),
-      s3ForcePathStyle: true,
+      s3ForcePathStyle: true
     });
 
     s3.headBucket(
       {
-        Bucket: process.env.S3_BUCKET_NAME,
+        Bucket: process.env.S3_BUCKET_NAME
       },
       (err) => {
         if (err) resolve(false);

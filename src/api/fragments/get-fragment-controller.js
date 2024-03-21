@@ -6,7 +6,7 @@ import { fragmentAlreadyReceived } from '../../services/database/ehr-fragment-re
 
 export const getFragmentControllerValidation = [
   param('conversationId').isUUID().withMessage("'conversationId' provided is not a UUID"),
-  param('messageId').isUUID().withMessage("'messageId' provided is not a UUID"),
+  param('messageId').isUUID().withMessage("'messageId' provided is not a UUID")
 ];
 
 export const getFragmentController = async (req, res) => {

@@ -5,7 +5,7 @@ import {
   fragmentAlreadyReceived,
   fragmentExistsInRecord,
   getFragmentByKey,
-  markFragmentAsReceivedAndCreateItsParts,
+  markFragmentAsReceivedAndCreateItsParts
 } from '../ehr-fragment-repository';
 import { buildFragment } from '../../../models/fragment';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
@@ -46,7 +46,7 @@ describe('ehr-fragment-repository', () => {
       await createCore({
         conversationId,
         messageId: ehrMessageId,
-        fragmentMessageIds: [fragmentMessageId],
+        fragmentMessageIds: [fragmentMessageId]
       });
 
       // when
@@ -79,12 +79,12 @@ describe('ehr-fragment-repository', () => {
       await createCore({
         conversationId,
         messageId: ehrMessageId,
-        fragmentMessageIds: [fragmentMessageId],
+        fragmentMessageIds: [fragmentMessageId]
       });
 
       // when
       await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId, [
-        nestedFragmentMessageId,
+        nestedFragmentMessageId
       ]);
 
       // then
@@ -104,19 +104,19 @@ describe('ehr-fragment-repository', () => {
       await createCore({
         conversationId,
         messageId: ehrMessageId,
-        fragmentMessageIds: [fragmentMessageId],
+        fragmentMessageIds: [fragmentMessageId]
       });
 
       const nestedFragmentArrivedEarly = buildFragment({
         inboundConversationId: conversationId,
-        fragmentMessageId: nestedFragmentMessageId,
+        fragmentMessageId: nestedFragmentMessageId
       });
       const db = EhrTransferTracker.getInstance();
       await db.writeItemsInTransaction([nestedFragmentArrivedEarly]);
 
       // when
       await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId, [
-        nestedFragmentMessageId,
+        nestedFragmentMessageId
       ]);
 
       // then
@@ -133,7 +133,7 @@ describe('ehr-fragment-repository', () => {
 
       const fragment = buildFragment({
         inboundConversationId: conversationId,
-        fragmentMessageId: messageId,
+        fragmentMessageId: messageId
       });
       const db = EhrTransferTracker.getInstance();
       await db.writeItemsInTransaction([fragment]);
