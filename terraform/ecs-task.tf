@@ -88,6 +88,14 @@ resource "aws_security_group" "ecs-tasks-sg" {
   }
 
   egress {
+    description     = "Allow outbound HTTPS traffic to dynamodb"
+    protocol        = "tcp"
+    from_port       = 443
+    to_port         = 443
+    prefix_list_ids = [data.aws_ssm_parameter.dynamodb_prefix_list_id.value]
+  }
+
+  egress {
     description     = "Allow outbound HTTPS traffic to s3"
     protocol        = "tcp"
     from_port       = 443
@@ -117,10 +125,13 @@ data "aws_vpc" "mhs" {
   }
 }
 
+data "aws_ssm_parameter" "dynamodb_prefix_list_id" {
+  name = "/repo/${var.environment}/output/prm-deductions-infra/deductions-core/dynamodb_prefix_list_id"
+}
+
 data "aws_ssm_parameter" "s3_prefix_list_id" {
   name = "/repo/${var.environment}/output/prm-deductions-infra/deductions-core/s3-prefix-list-id"
 }
-
 
 resource "aws_security_group" "vpn_to_ehr_repo_ecs" {
   count       = var.allow_vpn_to_ecs_tasks ? 1 : 0
