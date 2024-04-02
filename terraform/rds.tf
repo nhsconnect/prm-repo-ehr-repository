@@ -26,6 +26,12 @@ resource "aws_rds_cluster" "db-cluster" {
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
+
+  lifecycle {
+    ignore_changes = [
+      engine_version
+    ]
+  }
 }
 
 resource "aws_kms_key" "ehr-repo-key" {
@@ -162,4 +168,3 @@ resource "aws_security_group_rule" "vpn_to_db_sg" {
 data "aws_ssm_parameter" "repo_databases_parameter_group_name" {
   name = "/repo/${var.environment}/output/prm-deductions-infra/repo-databases-parameter-group-name-version-13"
 }
-
