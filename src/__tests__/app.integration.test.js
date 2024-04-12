@@ -60,8 +60,8 @@ describe('app', () => {
   });
 
   describe('GET /messages/:conversationId/:messageId', () => {
-    const conversationId = v4();
-    const messageId = v4();
+    const conversationId = v4().toUpperCase();
+    const messageId = v4().toUpperCase();
 
     it('should return presigned url', async () => {
       const response = await request(app)
@@ -80,9 +80,9 @@ describe('app', () => {
   });
 
   describe('GET /fragments/:conversationId/:messageId', () => {
-    const conversationId = v4();
-    const coreMessageId = v4();
-    const fragmentMessageId = v4();
+    const conversationId = v4().toUpperCase();
+    const coreMessageId = v4().toUpperCase();
+    const fragmentMessageId = v4().toUpperCase();
     const nhsNumber = '2345678901';
 
     it('should return presigned url when the fragment record exists', async () => {
