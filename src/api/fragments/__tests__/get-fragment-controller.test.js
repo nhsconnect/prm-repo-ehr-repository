@@ -23,8 +23,8 @@ describe('getFragmentController', () => {
   describe('success', () => {
     it('should return a 200 with presigned url in body', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
       const presignedUrl = 'presigned-url';
 
       // when
@@ -45,8 +45,8 @@ describe('getFragmentController', () => {
 
   describe('error', () => {
     // given
-    const conversationId = uuid();
-    const messageId = uuid();
+    const conversationId = uuid().toUpperCase();
+    const messageId = uuid().toUpperCase();
 
     it('should return a 404 error when the record is not found', async () => {
       // when
@@ -85,7 +85,7 @@ describe('getFragmentController', () => {
     it('should return 422 and an error message when conversationId is not a UUID', async () => {
       // given
       const conversationId = 'not-a-uuid';
-      const messageId = uuid();
+      const messageId = uuid().toUpperCase();
       const expectedErrorMessage = [{ conversationId: "'conversationId' provided is not a UUID" }];
 
       // when
@@ -102,7 +102,7 @@ describe('getFragmentController', () => {
 
     it('should return 422 and an error message when messageId is not a UUID', async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const messageId = 'not-a-uuid';
       const errorMessage = [{ messageId: "'messageId' provided is not a UUID" }];
 

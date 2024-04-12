@@ -62,8 +62,8 @@ const testPerformance = async (
   largeNestedFragmentId,
   nestedFragmentIds
 ) => {
-  const ehrExtractMessageId = v4();
-  const conversationId = v4();
+  const ehrExtractMessageId = v4().toUpperCase();
+  const conversationId = v4().toUpperCase();
   const nhsNumber = '1234567890';
 
   let ehrFragmentMessageIds = [...smallFragmentMessageIds];
@@ -108,7 +108,7 @@ describe('Performance of EHR', () => {
 
     const numberOfFragments = 100;
     for (let i = 0; i < numberOfFragments; i++) {
-      fragmentMessageIds.push(v4());
+      fragmentMessageIds.push(v4().toUpperCase());
     }
 
     await testPerformance(fragmentMessageIds, null, []);
@@ -120,15 +120,15 @@ describe('Performance of EHR', () => {
 
     const numberOfFragments = 50;
     for (let i = 0; i < numberOfFragments; i++) {
-      fragmentMessageIds.push(v4());
+      fragmentMessageIds.push(v4().toUpperCase());
     }
 
     // Create one large nested fragment which is made up of 50 parts
     let nestedFragmentIds = [];
     const numberOfNestedFragments = 50;
-    const largeNestedFragmentId = v4();
+    const largeNestedFragmentId = v4().toUpperCase();
     for (let i = 0; i < numberOfNestedFragments - 1; i++) {
-      nestedFragmentIds.push(v4());
+      nestedFragmentIds.push(v4().toUpperCase());
     }
 
     // Run test

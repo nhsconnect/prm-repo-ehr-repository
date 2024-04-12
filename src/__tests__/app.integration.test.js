@@ -60,8 +60,8 @@ describe('app', () => {
   });
 
   describe('GET /messages/:conversationId/:messageId', () => {
-    const conversationId = v4();
-    const messageId = v4();
+    const conversationId = v4().toUpperCase();
+    const messageId = v4().toUpperCase();
 
     it('should return presigned url', async () => {
       const response = await request(app)
@@ -69,7 +69,8 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
       expect(response.status).toBe(200);
       expect(response.text).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
+        // UUIDs are going to return as lower case as they're part of a URL
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId.toLowerCase()}/${messageId.toLowerCase()}`
       );
       expectStructuredLogToContain(transportSpy, {
         messageId,
@@ -80,9 +81,9 @@ describe('app', () => {
   });
 
   describe('GET /fragments/:conversationId/:messageId', () => {
-    const conversationId = v4();
-    const coreMessageId = v4();
-    const fragmentMessageId = v4();
+    const conversationId = v4().toUpperCase();
+    const coreMessageId = v4().toUpperCase();
+    const fragmentMessageId = v4().toUpperCase();
     const nhsNumber = '2345678901';
 
     it('should return presigned url when the fragment record exists', async () => {
@@ -131,7 +132,8 @@ describe('app', () => {
       // then
       expect(response.status).toBe(200);
       expect(response.text).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${fragmentMessageId}`
+        // UUIDs are going to return as lower case as they're part of a URL
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId.toLowerCase()}/${fragmentMessageId.toLowerCase()}`
       );
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
@@ -142,7 +144,7 @@ describe('app', () => {
 
     it('should return 404 when the fragment record is not found', async () => {
       // given
-      const nonExistentMessageId = uuid();
+      const nonExistentMessageId = uuid().toUpperCase();
 
       // when
       const response = await request(app)
@@ -158,8 +160,8 @@ describe('app', () => {
   describe('GET /patients/:nhsNumber/health-records/:conversationId', () => {
     it('should return 200', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
 
       const messageResponse = await request(app)
@@ -192,9 +194,9 @@ describe('app', () => {
 
     it('should return 404 when health record is not complete', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
-      const fragmentId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
+      const fragmentId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
 
       const messageResponse = await request(app)
@@ -227,7 +229,7 @@ describe('app', () => {
 
     it('should return 404 when health record is not found', async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
 
       // when
@@ -252,10 +254,10 @@ describe('app', () => {
     it('should return 200 and patient health record link', async () => {
       // ===============  given  ====================
       const nhsNumber = '1234567890';
-      const inboundConversationId = uuid();
-      const coreMessageId = uuid();
-      const fragmentId = uuid();
-      const nestedFragmentId = uuid();
+      const inboundConversationId = uuid().toUpperCase();
+      const coreMessageId = uuid().toUpperCase();
+      const fragmentId = uuid().toUpperCase();
+      const nestedFragmentId = uuid().toUpperCase();
 
       // mimic the record at Conversation Layer, which should in actual case should be already created by ehr-transfer-service
       await createConversationForTest(inboundConversationId, nhsNumber, {
@@ -312,7 +314,7 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
 
       expect(nestedFragmentResponse.status).toEqual(201);
-      const outboundConversationId = uuid();
+      const outboundConversationId = uuid().toUpperCase();
 
       // ===============  when  ====================
       const patientRes = await request(app)
@@ -323,7 +325,8 @@ describe('app', () => {
       // ===============  then  ====================
       expect(patientRes.status).toEqual(200);
       expect(patientRes.body.coreMessageUrl).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${inboundConversationId}/${coreMessageId}`
+        // UUIDs are going to return as lower case as they're part of a URL
+        `${config.localstackUrl}/${config.awsS3BucketName}/${inboundConversationId.toLowerCase()}/${coreMessageId.toLowerCase()}`
       );
       expect(patientRes.body.fragmentMessageIds).toHaveLength(2);
       expect(patientRes.body.fragmentMessageIds).toEqual(
@@ -338,7 +341,7 @@ describe('app', () => {
 
     it('should have conversation Id in the logging context', async () => {
       // given
-      const outboundConversationId = uuid();
+      const outboundConversationId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
 
       // when
@@ -356,10 +359,10 @@ describe('app', () => {
 
     it('should return a 404 if no complete health record is found', async () => {
       // given
-      const inboundConversationId = uuid();
-      const outboundConversationId = uuid();
-      const coreMessageId = uuid();
-      const fragmentId = uuid();
+      const inboundConversationId = uuid().toUpperCase();
+      const outboundConversationId = uuid().toUpperCase();
+      const coreMessageId = uuid().toUpperCase();
+      const fragmentId = uuid().toUpperCase();
       const nhsNumber = '1234567891';
 
       // mimic the record at Conversation Layer, which should in actual case should be already created by ehr-transfer-service
@@ -402,8 +405,8 @@ describe('app', () => {
     let conversationId;
     let messageId;
     beforeEach(() => {
-      messageId = uuid();
-      conversationId = uuid();
+      messageId = uuid().toUpperCase();
+      conversationId = uuid().toUpperCase();
       createConversationForTest(conversationId, nhsNumber, {
         TransferStatus: ConversationStatus.STARTED
       });
@@ -441,7 +444,7 @@ describe('app', () => {
 
     it('should save health record with fragments in the database and return 201', async () => {
       // given
-      const fragmentMessageId = uuid();
+      const fragmentMessageId = uuid().toUpperCase();
 
       // when
       const response = await request(app)
@@ -467,8 +470,8 @@ describe('app', () => {
 
     it('should create large nested fragment messages in the database and return 201', async () => {
       // given
-      const fragmentMessageId = uuid();
-      const nestedFragmentMessageId = uuid();
+      const fragmentMessageId = uuid().toUpperCase();
+      const nestedFragmentMessageId = uuid().toUpperCase();
 
       // when
       await request(app)
@@ -499,7 +502,7 @@ describe('app', () => {
 
     it('should update database for fragments and return 201 when all fragments have been received', async () => {
       // given
-      const fragmentMessageId = uuid();
+      const fragmentMessageId = uuid().toUpperCase();
 
       // when
       await request(app)
@@ -528,8 +531,8 @@ describe('app', () => {
 
     it('should update database when a nested fragment arrives before its parent fragment', async () => {
       // given
-      const fragmentMessageId = uuid();
-      const nestedFragmentId = uuid();
+      const fragmentMessageId = uuid().toUpperCase();
+      const nestedFragmentId = uuid().toUpperCase();
 
       // when
       await request(app)
@@ -607,9 +610,9 @@ describe('app', () => {
 
     it('should mark the whole health record for the given NHS number as deleted', async () => {
       // ============================= given ==================================
-      const inboundConversationId = uuid();
-      const coreMessageId = uuid();
-      const fragmentMessageIds = [uuid(), uuid(), uuid()];
+      const inboundConversationId = uuid().toUpperCase();
+      const coreMessageId = uuid().toUpperCase();
+      const fragmentMessageIds = [uuid().toUpperCase(), uuid().toUpperCase(), uuid().toUpperCase()];
       await createCompleteRecord(
         nhsNumber,
         inboundConversationId,
@@ -661,10 +664,10 @@ describe('app', () => {
 
     it('should delete all record if patient has more than one set of record in our storage', async () => {
       // given
-      const inboundConversationId1 = uuid();
-      const coreMessageId1 = uuid();
-      const inboundConversationId2 = uuid();
-      const coreMessageId2 = uuid();
+      const inboundConversationId1 = uuid().toUpperCase();
+      const coreMessageId1 = uuid().toUpperCase();
+      const inboundConversationId2 = uuid().toUpperCase();
+      const coreMessageId2 = uuid().toUpperCase();
       await createCompleteRecord(nhsNumber, inboundConversationId1, coreMessageId1);
 
       await new Promise((resolve) => setTimeout(resolve, 1500)); // time buffer to ensure record 2 get a newer timestamp

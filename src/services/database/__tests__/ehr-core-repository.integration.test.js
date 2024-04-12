@@ -19,8 +19,8 @@ describe('ehr-core-repository', () => {
   describe('createCore', () => {
     it('should create core message in db', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
       const ehrExtract = { messageId, conversationId, fragmentMessageIds: [] };
 
       // when
@@ -40,9 +40,9 @@ describe('ehr-core-repository', () => {
 
     it('should create fragments message in db when health record has fragments', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
-      const fragmentMessageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
       const fragmentMessageIds = [fragmentMessageId];
       const ehrExtract = { messageId, conversationId, fragmentMessageIds };
 
@@ -60,7 +60,7 @@ describe('ehr-core-repository', () => {
 
     it('should not save message with wrong type', async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const messageId = 'not-a-valid-message-id';
       const ehrExtract = {
         messageId,

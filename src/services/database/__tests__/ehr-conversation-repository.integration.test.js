@@ -46,7 +46,7 @@ describe('ehr-conversation-repository', () => {
   describe('getConversationStatus', () => {
     it("should return status 'complete' when conversation status is Complete", async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
         TransferStatus: ConversationStatus.COMPLETE
@@ -61,7 +61,7 @@ describe('ehr-conversation-repository', () => {
 
     it("should return status 'pending' when conversation status is not Complete", async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
         TransferStatus: ConversationStatus.CONTINUE_REQUEST_SENT
@@ -76,7 +76,7 @@ describe('ehr-conversation-repository', () => {
 
     it("should return status 'notFound' when health record is not found", async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
 
       // when
       const status = await getConversationStatus(conversationId);
@@ -87,7 +87,7 @@ describe('ehr-conversation-repository', () => {
 
     it('should throw error if there is a problem retrieving health record from database', async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       mimicDynamodbFail();
 
       try {
@@ -108,8 +108,8 @@ describe('ehr-conversation-repository', () => {
   describe('updateConversationCompleteness', () => {
     it("should set conversation state to 'Complete' for a small health record", async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
       await createConversationForTest(conversationId, nhsNumber, {
         TransferStatus: ConversationStatus.REQUEST_SENT
@@ -127,9 +127,9 @@ describe('ehr-conversation-repository', () => {
 
     it('should not set State to Complete if there are still messages to be received', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
-      const fragmentMessageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
 
       await createConversationForTest(conversationId, nhsNumber, {
@@ -148,9 +148,9 @@ describe('ehr-conversation-repository', () => {
 
     it('Should set State to Complete if all fragments are received', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
-      const fragmentMessageIds = [uuid(), uuid(), uuid()];
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
+      const fragmentMessageIds = [uuid().toUpperCase(), uuid().toUpperCase(), uuid().toUpperCase()];
       const nhsNumber = '1234567890';
 
       await createConversationForTest(conversationId, nhsNumber, {
@@ -191,9 +191,9 @@ describe('ehr-conversation-repository', () => {
     it('should return most recent complete health record conversation id', async () => {
       // given
       const nhsNumber = '9876543212';
-      const previousHealthRecordConversationId = uuid();
-      const incompleteHealthRecordConversationId = uuid();
-      const currentHealthRecordConversationId = uuid();
+      const previousHealthRecordConversationId = uuid().toUpperCase();
+      const incompleteHealthRecordConversationId = uuid().toUpperCase();
+      const currentHealthRecordConversationId = uuid().toUpperCase();
 
       await createConversationForTest(previousHealthRecordConversationId, nhsNumber, {
         TransferStatus: ConversationStatus.COMPLETE,
@@ -218,7 +218,7 @@ describe('ehr-conversation-repository', () => {
     it('should throw an error if no complete health record is found', async () => {
       // given
       const nhsNumber = '9876543211';
-      const incompleteHealthRecordConversationId = uuid();
+      const incompleteHealthRecordConversationId = uuid().toUpperCase();
       await createConversationForTest(incompleteHealthRecordConversationId, nhsNumber, {
         TransferStatus: ConversationStatus.TIMEOUT
       });
@@ -243,7 +243,7 @@ describe('ehr-conversation-repository', () => {
   describe('getMessageIdsForConversation', () => {
     it('should throw an error if no message found with given conversationId', async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
 
       // when
       await expect(() => getMessageIdsForConversation(conversationId))
@@ -253,8 +253,8 @@ describe('ehr-conversation-repository', () => {
 
     it('should throw an error if the only existing messages were deleted', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
       const item = { ...buildCore(conversationId, messageId), DeletedAt: getEpochTimeInSecond() };
 
       await db.writeItemsInTransaction([item]);
@@ -267,8 +267,8 @@ describe('ehr-conversation-repository', () => {
 
     it('should return health record extract message id given a conversation id for a small health record', async () => {
       // given
-      const messageId = uuid();
-      const conversationId = uuid();
+      const messageId = uuid().toUpperCase();
+      const conversationId = uuid().toUpperCase();
       await createCore({ conversationId, messageId, fragmentMessageIds: [] });
 
       // when
@@ -283,9 +283,9 @@ describe('ehr-conversation-repository', () => {
 
     it('should return health record extract message id and fragment message ids given singular fragment', async () => {
       // given
-      const messageId = uuid();
-      const conversationId = uuid();
-      const fragmentMessageId = uuid();
+      const messageId = uuid().toUpperCase();
+      const conversationId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
 
       await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
       await markFragmentAsReceived(fragmentMessageId, conversationId);
@@ -302,10 +302,10 @@ describe('ehr-conversation-repository', () => {
 
     it('should return health record extract message id and fragment message ids given nested fragments', async () => {
       // given
-      const messageId = uuid();
-      const conversationId = uuid();
-      const fragmentMessageId = uuid();
-      const nestedFragmentId = uuid();
+      const messageId = uuid().toUpperCase();
+      const conversationId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
+      const nestedFragmentId = uuid().toUpperCase();
 
       await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
       await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId, [
@@ -339,7 +339,7 @@ describe('ehr-conversation-repository', () => {
     });
 
     const makeConversationIdForTest = () => {
-      const id = uuid();
+      const id = uuid().toUpperCase();
       conversationIdUsed.push(id);
       return id;
     };
@@ -363,9 +363,9 @@ describe('ehr-conversation-repository', () => {
     it('should return conversation id for the patient marked as deleted', async () => {
       // given
       const nhsNumber = '9898989898';
-      const messageId = uuid();
+      const messageId = uuid().toUpperCase();
       const conversationId = makeConversationIdForTest();
-      const fragmentIds = [uuid(), uuid(), uuid()];
+      const fragmentIds = [uuid().toUpperCase(), uuid().toUpperCase(), uuid().toUpperCase()];
 
       await createCompleteRecordForTest(nhsNumber, conversationId, messageId, fragmentIds);
 
@@ -397,8 +397,8 @@ describe('ehr-conversation-repository', () => {
     it('should return conversation ids for the patient marked as deleted when the patient has several health records', async () => {
       // given
       const nhsNumber = '6767676767';
-      const firstMessageId = uuid();
-      const secondMessageId = uuid();
+      const firstMessageId = uuid().toUpperCase();
+      const secondMessageId = uuid().toUpperCase();
       const firstConversationId = makeConversationIdForTest();
       const secondConversationId = makeConversationIdForTest();
 

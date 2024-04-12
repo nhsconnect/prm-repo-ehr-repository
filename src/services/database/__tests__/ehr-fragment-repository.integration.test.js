@@ -40,9 +40,9 @@ describe('ehr-fragment-repository', () => {
   describe('markFragmentAsReceivedAndCreateItsParts', () => {
     it('should update receivedAt for a fragment with current date', async () => {
       // given
-      const conversationId = uuid();
-      const ehrMessageId = uuid();
-      const fragmentMessageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const ehrMessageId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
       await createCore({
         conversationId,
         messageId: ehrMessageId,
@@ -59,7 +59,7 @@ describe('ehr-fragment-repository', () => {
 
     it('should not update receivedAt for a given fragment if database update query throws', async () => {
       // given
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       try {
         // when
         await markFragmentAsReceivedAndCreateItsParts('not-valid', conversationId);
@@ -72,10 +72,10 @@ describe('ehr-fragment-repository', () => {
 
     it('should create messages for nested fragments', async () => {
       // given
-      const conversationId = uuid();
-      const ehrMessageId = uuid();
-      const fragmentMessageId = uuid();
-      const nestedFragmentMessageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const ehrMessageId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
+      const nestedFragmentMessageId = uuid().toUpperCase();
       await createCore({
         conversationId,
         messageId: ehrMessageId,
@@ -96,10 +96,10 @@ describe('ehr-fragment-repository', () => {
 
     it('should update parentId for a nested fragment already existing in the DB', async () => {
       // given
-      const conversationId = uuid();
-      const ehrMessageId = uuid();
-      const fragmentMessageId = uuid();
-      const nestedFragmentMessageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const ehrMessageId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
+      const nestedFragmentMessageId = uuid().toUpperCase();
 
       await createCore({
         conversationId,
@@ -128,8 +128,8 @@ describe('ehr-fragment-repository', () => {
   describe('fragmentExistsInRecord', () => {
     it('should return true for a fragment existing in the database', async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
 
       const fragment = buildFragment({
         inboundConversationId: conversationId,
@@ -146,8 +146,8 @@ describe('ehr-fragment-repository', () => {
     });
 
     it('should return false for a fragment that does not exist in the database', async () => {
-      const conversationId = uuid();
-      const messageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
       expect(await fragmentExistsInRecord(conversationId, messageId)).toBe(false);
     });
 
@@ -157,7 +157,7 @@ describe('ehr-fragment-repository', () => {
 
       try {
         // when
-        await fragmentExistsInRecord(uuid(), uuid());
+        await fragmentExistsInRecord(uuid().toUpperCase(), uuid().toUpperCase());
       } catch (err) {
         // then
         expect(err).not.toBeNull();
@@ -169,8 +169,8 @@ describe('ehr-fragment-repository', () => {
   describe('markFragmentAsReceivedAndCreateItsParts', () => {
     // Note: this describe block is migrated from the tests of old method "createFragmentPart"
     it('should create fragment entry in the database', async () => {
-      const messageId = uuid();
-      const conversationId = uuid();
+      const messageId = uuid().toUpperCase();
+      const conversationId = uuid().toUpperCase();
       await markFragmentAsReceivedAndCreateItsParts(messageId, conversationId);
 
       const fragment = await getFragmentByKey(conversationId, messageId);
@@ -182,7 +182,7 @@ describe('ehr-fragment-repository', () => {
     });
 
     it('should throw if database creation query throws', async () => {
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const messageId = 'not-valid';
       let err = null;
       try {
@@ -198,7 +198,7 @@ describe('ehr-fragment-repository', () => {
   describe('fragmentAlreadyReceived', () => {
     it("should return false if 'messageId' is not found in db", async () => {
       // given
-      const messageId = uuid();
+      const messageId = uuid().toUpperCase();
 
       // when
       const result = await fragmentAlreadyReceived(messageId);
@@ -209,9 +209,9 @@ describe('ehr-fragment-repository', () => {
 
     it("should return true if 'messageId' is received in db", async () => {
       // given
-      const conversationId = uuid();
-      const messageId = uuid();
-      const fragmentMessageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
 
       await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
       await markFragmentAsReceived(fragmentMessageId, conversationId);
@@ -225,7 +225,7 @@ describe('ehr-fragment-repository', () => {
 
     it('should throw if database querying throws', async () => {
       // given
-      const messageId = uuid();
+      const messageId = uuid().toUpperCase();
       mimicDynamodbFail();
 
       // when

@@ -21,8 +21,8 @@ jest.mock('../../config', () => ({
 }));
 
 describe('auth', () => {
-  const conversationId = uuid();
-  const messageId = uuid();
+  const conversationId = uuid().toUpperCase();
+  const messageId = uuid().toUpperCase();
 
   describe('Authenticated successfully', () => {
     it('should return HTTP 200 when correctly authenticated', async () => {

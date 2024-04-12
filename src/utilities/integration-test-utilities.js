@@ -7,13 +7,10 @@ import chunk from 'lodash.chunk';
 
 export const generateRandomNhsNumber = () => (Math.floor(Math.random() * 9e9) + 1e9).toString();
 
-export const generateRandomUUID = (isUppercase) =>
-  isUppercase ? uuidv4().toUpperCase() : uuidv4();
-
-export const generateMultipleUUID = (amount, isUppercase) =>
+export const generateMultipleUUID = (amount) =>
   Array(amount)
     .fill(undefined)
-    .map(() => (isUppercase ? uuidv4().toUpperCase() : uuidv4()));
+    .map(() => uuidv4().toUpperCase());
 
 export const createConversationForTest = async (conversationId, nhsNumber, overrides) => {
   // This method is only meant for testing purpose.
