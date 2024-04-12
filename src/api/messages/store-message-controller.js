@@ -46,6 +46,11 @@ export const storeMessageControllerValidation = [
 export const storeMessageController = async (req, res) => {
   const { id: messageId, attributes } = req.body.data;
   const { conversationId, messageType, fragmentMessageIds } = attributes;
+
+  messageId = messageId.toUpperCase();
+  conversationId = conversationId.toUpperCase();
+  fragmentMessageIds = fragmentMessageIds.map(fragmentMessageId => fragmentMessageId.toUpperCase());
+
   setCurrentSpanAttributes({ conversationId, messageId });
 
   try {
