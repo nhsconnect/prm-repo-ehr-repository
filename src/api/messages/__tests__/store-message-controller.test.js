@@ -28,10 +28,10 @@ describe('storeMessageController', () => {
   });
 
   const authorizationKeys = 'correct-key';
-  const conversationId = uuid();
+  const conversationId = uuid().toUpperCase();
   const nhsNumber = '1234567890';
-  const messageId = uuid();
-  const fragmentMessageIds = [uuid()];
+  const messageId = uuid().toUpperCase();
+  const fragmentMessageIds = [uuid().toUpperCase()];
 
   describe('success', () => {
     let requestBody;
@@ -67,7 +67,7 @@ describe('storeMessageController', () => {
     });
 
     it('should update receivedAt for given fragment and store its parts', async () => {
-      const nestedFragmentId = uuid();
+      const nestedFragmentId = uuid().toUpperCase();
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
         conversationId,
@@ -92,7 +92,7 @@ describe('storeMessageController', () => {
     });
 
     it('should create message in the database when a nested fragment arrives before first fragment', async () => {
-      const nestedFragmentId = uuid();
+      const nestedFragmentId = uuid().toUpperCase();
       requestBody.data.id = nestedFragmentId;
       requestBody.data.attributes = {
         messageType: MessageType.FRAGMENT,
