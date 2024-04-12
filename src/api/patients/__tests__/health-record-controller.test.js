@@ -20,7 +20,7 @@ describe('healthRecordController', () => {
   describe('success', () => {
     it('should return 200 when a health record is complete', async () => {
       const nhsNumber = '1234567890';
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       getConversationStatus.mockResolvedValueOnce(HealthRecordStatus.COMPLETE);
 
       const res = await request(app)
@@ -35,7 +35,7 @@ describe('healthRecordController', () => {
   describe('failure', () => {
     it('should return 404 when a health record is not complete', async () => {
       const nhsNumber = '1234567890';
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       getConversationStatus.mockResolvedValueOnce(HealthRecordStatus.PENDING);
 
       const res = await request(app)
@@ -48,7 +48,7 @@ describe('healthRecordController', () => {
 
     it('should return 404 when a health record is not found', async () => {
       const nhsNumber = '1234567890';
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       getConversationStatus.mockResolvedValueOnce(HealthRecordStatus.NOT_FOUND);
 
       const res = await request(app)
@@ -61,7 +61,7 @@ describe('healthRecordController', () => {
 
     it('should return 503 when there is an error retrieving the health record', async () => {
       const nhsNumber = '1234567890';
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       getConversationStatus.mockRejectedValue();
 
       const res = await request(app)
@@ -88,7 +88,7 @@ describe('healthRecordController', () => {
     });
 
     it('should return 422 and an error message when nhsNumber is not numeric', async () => {
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const nhsNumber = 'not-valid';
       const errorMessage = { nhsNumber: "'nhsNumber' provided is not numeric" };
 
@@ -101,7 +101,7 @@ describe('healthRecordController', () => {
     });
 
     it('should return 422 and an error message when nhsNumber is not 10 characters', async () => {
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const nhsNumber = '123';
       const errorMessage = { nhsNumber: "'nhsNumber' provided is not 10 characters" };
 
@@ -116,7 +116,7 @@ describe('healthRecordController', () => {
 
   describe('authentication', () => {
     it('should return 401 when authentication keys are missing', async () => {
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
 
       const res = await request(app).get(`/patients/${nhsNumber}/health-records/${conversationId}`);
@@ -125,7 +125,7 @@ describe('healthRecordController', () => {
     });
 
     it('should return 403 when authentication keys are incorrect', async () => {
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const nhsNumber = '1234567890';
       const res = await request(app)
         .get(`/patients/${nhsNumber}/health-records/${conversationId}`)

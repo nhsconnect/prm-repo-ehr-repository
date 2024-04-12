@@ -206,9 +206,9 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           type: 'messages',
-          id: uuid(),
+          id: uuid().toUpperCase(),
           attributes: {
-            conversationId: uuid(),
+            conversationId: uuid().toUpperCase(),
             nhsNumber: 'not-an-nhs-number',
             messageType: 'ehrExtract'
           }
@@ -273,9 +273,9 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           type: 'messages',
-          id: uuid(),
+          id: uuid().toUpperCase(),
           attributes: {
-            conversationId: uuid(),
+            conversationId: uuid().toUpperCase(),
             nhsNumber: '1234567890',
             messageType: 'ehrExtract',
             fragmentMessageIds: []
@@ -317,9 +317,9 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           type: 'messages',
-          id: uuid(),
+          id: uuid().toUpperCase(),
           attributes: {
-            conversationId: uuid(),
+            conversationId: uuid().toUpperCase(),
             nhsNumber: '1234567890',
             messageType: 'ehrExtract',
             fragmentMessageIds: []
@@ -361,9 +361,9 @@ describe('storeMessageController', () => {
       const requestBody = {
         data: {
           type: 'messages',
-          id: uuid(),
+          id: uuid().toUpperCase(),
           attributes: {
-            conversationId: uuid(),
+            conversationId: uuid().toUpperCase(),
             messageType: 'fragment',
             fragmentMessageIds: []
           }
@@ -427,9 +427,9 @@ describe('storeMessageController', () => {
     const requestBody = {
       data: {
         type: 'messages',
-        id: uuid(),
+        id: uuid().toUpperCase(),
         attributes: {
-          conversationId: uuid(),
+          conversationId: uuid().toUpperCase(),
           nhsNumber: '1234567890',
           messageType: 'ehrExtract'
         }

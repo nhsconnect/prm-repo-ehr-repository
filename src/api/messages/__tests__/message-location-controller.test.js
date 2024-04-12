@@ -21,8 +21,8 @@ describe('messageLocationController', () => {
   const authorizationKeys = 'correct-key';
 
   describe('success', () => {
-    const conversationId = uuid();
-    const messageId = uuid();
+    const conversationId = uuid().toUpperCase();
+    const messageId = uuid().toUpperCase();
 
     it('should return a 200 with presigned url in body', async () => {
       getSignedUrl.mockResolvedValue('presigned-url');
@@ -39,8 +39,8 @@ describe('messageLocationController', () => {
   });
 
   describe('conflict', () => {
-    const conversationId = uuid();
-    const messageId = uuid();
+    const conversationId = uuid().toUpperCase();
+    const messageId = uuid().toUpperCase();
 
     it('should return a 409 when ehr already exists', async () => {
       fragmentAlreadyReceived.mockResolvedValueOnce(true);
@@ -56,8 +56,8 @@ describe('messageLocationController', () => {
   });
 
   describe('error', () => {
-    const conversationId = uuid();
-    const messageId = uuid();
+    const conversationId = uuid().toUpperCase();
+    const messageId = uuid().toUpperCase();
 
     it('should return a 503 when getSignedUrl promise is rejected', async () => {
       const error = new Error('error');
@@ -77,7 +77,7 @@ describe('messageLocationController', () => {
   describe('validation', () => {
     it('should return 422 and an error message when conversationId is not a UUID', async () => {
       const conversationId = 'not-a-uuid';
-      const messageId = uuid();
+      const messageId = uuid().toUpperCase();
       const errorMessage = [{ conversationId: "'conversationId' provided is not a UUID" }];
 
       const res = await request(app)
@@ -91,7 +91,7 @@ describe('messageLocationController', () => {
     });
 
     it('should return 422 and an error message when messageId is not a UUID', async () => {
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const messageId = 'not-a-uuid';
       const errorMessage = [{ messageId: "'messageId' provided is not a UUID" }];
 

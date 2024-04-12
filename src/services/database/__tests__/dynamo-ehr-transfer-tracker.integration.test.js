@@ -13,7 +13,7 @@ import { buildFragmentUpdateParams } from '../../../models/fragment';
 jest.mock('../../../middleware/logging');
 
 describe('EhrTransferTracker', () => {
-  const testConversationId = uuid();
+  const testConversationId = uuid().toUpperCase();
   const testNhsNumber = '9000000001';
 
   afterEach(async () => {
@@ -23,7 +23,7 @@ describe('EhrTransferTracker', () => {
   it('can create and read a record in dynamodb', async () => {
     // given
     const db = EhrTransferTracker.getInstance();
-    const testMessageId = uuid();
+    const testMessageId = uuid().toUpperCase();
     await createConversationForTest(testConversationId, testNhsNumber);
 
     const ehrCore = buildCore(testConversationId, testMessageId);

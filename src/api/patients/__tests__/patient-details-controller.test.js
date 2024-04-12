@@ -29,8 +29,8 @@ describe('patientDetailsController', () => {
     it('should return 200 and correct link to health record extract given a small record', async () => {
       // given
       const nhsNumber = '1234567890';
-      const conversationId = uuid();
-      const messageId = uuid();
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
       const presignedUrl = 'test-url';
 
       getCurrentConversationIdForPatient.mockResolvedValue(conversationId);
@@ -57,9 +57,9 @@ describe('patientDetailsController', () => {
     it('should return 200 and correct link to health record extract and fragment message IDs', async () => {
       // given
       const nhsNumber = '1234567890';
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const healthRecordExtractId = uuid();
-      const fragmentMessageId = uuid();
+      const fragmentMessageId = uuid().toUpperCase();
       const extractPresignedUrl = 'extract-url';
 
       getCurrentConversationIdForPatient.mockResolvedValue(conversationId);
@@ -89,9 +89,9 @@ describe('patientDetailsController', () => {
     it('should return 200 but log a warning when conversation id is not passed as header', async () => {
       // given
       const nhsNumber = '1234567890';
-      const conversationId = uuid();
+      const conversationId = uuid().toUpperCase();
       const healthRecordExtractId = uuid();
-      const fragmentMessageId = uuid();
+      const fragmentMessageId = uuid().toUpperCase();
       const extractPresignedUrl = 'extract-url';
 
       getCurrentConversationIdForPatient.mockResolvedValue(conversationId);

@@ -22,7 +22,7 @@ describe('deleteEhrController', () => {
 
   describe('success', () => {
     it('should return 200 when controller invoked correctly', async () => {
-      const conversationIds = [uuid(), uuid(), uuid()];
+      const conversationIds = [uuid().toUpperCase(), uuid().toUpperCase(), uuid().toUpperCase()];
       markRecordAsSoftDeleteForPatient.mockResolvedValue(conversationIds);
 
       const res = await request(app)
