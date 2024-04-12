@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 echo Creating a table for test in dynamodb-local...
 cd "$(dirname "$0")"

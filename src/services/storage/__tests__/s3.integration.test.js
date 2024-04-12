@@ -61,7 +61,7 @@ describe('S3Service integration test with localstack', () => {
       // make a presigned url for putObject, upload an object with that url, then verify that the object is in bucket
       // given
       const [conversationId, messageId] = generateMultipleUUID(2);
-      const testFileName = `${conversationId}/${messageId}`;
+      const testFileName = `${conversationId.toLowerCase()}/${messageId.toLowerCase()}`;
       const operation = 'putObject';
 
       // when
@@ -81,7 +81,7 @@ describe('S3Service integration test with localstack', () => {
       // store an object to the S3 bucket, then download it with presigned url
       // given
       const [conversationId, messageId] = generateMultipleUUID(2);
-      const testFileName = `${conversationId}/${messageId}`;
+      const testFileName = `${conversationId.toLowerCase()}/${messageId.toLowerCase()}`;
       const operation = 'getObject';
 
       await S3CLIENT.saveObjectWithName(testFileName, JSON.stringify(testEhrCore));

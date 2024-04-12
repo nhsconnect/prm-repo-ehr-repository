@@ -69,7 +69,8 @@ describe('app', () => {
         .set('Authorization', authorizationKeys);
       expect(response.status).toBe(200);
       expect(response.text).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${messageId}`
+        // UUIDs are going to return as lower case as they're part of a URL
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId.toLowerCase()}/${messageId.toLowerCase()}`
       );
       expectStructuredLogToContain(transportSpy, {
         messageId,
@@ -131,7 +132,8 @@ describe('app', () => {
       // then
       expect(response.status).toBe(200);
       expect(response.text).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId}/${fragmentMessageId}`
+        // UUIDs are going to return as lower case as they're part of a URL
+        `${config.localstackUrl}/${config.awsS3BucketName}/${conversationId.toLowerCase()}/${fragmentMessageId.toLowerCase()}`
       );
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
@@ -323,7 +325,8 @@ describe('app', () => {
       // ===============  then  ====================
       expect(patientRes.status).toEqual(200);
       expect(patientRes.body.coreMessageUrl).toContain(
-        `${config.localstackUrl}/${config.awsS3BucketName}/${inboundConversationId}/${coreMessageId}`
+        // UUIDs are going to return as lower case as they're part of a URL
+        `${config.localstackUrl}/${config.awsS3BucketName}/${inboundConversationId.toLowerCase()}/${coreMessageId.toLowerCase()}`
       );
       expect(patientRes.body.fragmentMessageIds).toHaveLength(2);
       expect(patientRes.body.fragmentMessageIds).toEqual(
