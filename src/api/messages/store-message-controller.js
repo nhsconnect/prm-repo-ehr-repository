@@ -49,7 +49,9 @@ export const storeMessageController = async (req, res) => {
 
   messageId = messageId.toUpperCase();
   conversationId = conversationId.toUpperCase();
-  fragmentMessageIds = fragmentMessageIds.map(fragmentMessageId => fragmentMessageId.toUpperCase());
+  fragmentMessageIds = fragmentMessageIds.map((fragmentMessageId) =>
+    fragmentMessageId.toUpperCase()
+  );
 
   setCurrentSpanAttributes({ conversationId, messageId });
 
