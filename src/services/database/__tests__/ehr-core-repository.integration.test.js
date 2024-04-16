@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { logError } from '../../../middleware/logging';
 import { createCore, getCoreByKey } from '../ehr-core-repository';
 import { getFragmentByKey } from '../ehr-fragment-repository';
-import { RecordType } from '../../../models/enums';
+import { FragmentStatus, RecordType } from '../../../models/enums';
 
 // Mocking
 jest.mock('../../../middleware/logging');
@@ -55,6 +55,7 @@ describe('ehr-core-repository', () => {
       expect(fragmentMessage.Layer).toBe(`FRAGMENT#${fragmentMessageId}`);
       expect(fragmentMessage.InboundMessageId).toBe(fragmentMessageId);
       expect(fragmentMessage.ParentId).toBe(messageId);
+      expect(fragmentMessage.TransferStatus).toBe(FragmentStatus.INBOUND_PENDING);
       expect(fragmentMessage.ReceivedAt).toBeUndefined();
     });
 
