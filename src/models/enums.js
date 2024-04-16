@@ -19,7 +19,8 @@ export const CoreStatus = {
 };
 
 export const FragmentStatus = {
-  COMPLETE: 'INBOUND_COMPLETE'
+  COMPLETE: 'INBOUND_COMPLETE',
+  INBOUND_PENDING: 'INBOUND_PENDING'
 };
 
 export const HealthRecordStatus = {

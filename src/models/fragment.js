@@ -1,6 +1,6 @@
 import { getUKTimestamp } from '../services/time';
 import { addChangesToUpdateParams, validateIds } from '../utilities/dynamodb-helper';
-import { RecordType } from './enums';
+import { FragmentStatus, RecordType } from './enums';
 
 const fieldsAllowedToUpdate = ['TransferStatus', 'ParentId', 'ReceivedAt', 'DeletedAt'];
 
@@ -14,6 +14,7 @@ export const buildFragment = ({ inboundConversationId, fragmentMessageId, parent
     Layer: [RecordType.FRAGMENT, fragmentMessageId].join('#'),
     InboundMessageId: fragmentMessageId,
     ParentId: parentMessageId,
+    TransferStatus: FragmentStatus.INBOUND_PENDING,
     CreatedAt: timestamp,
     UpdatedAt: timestamp
   };
