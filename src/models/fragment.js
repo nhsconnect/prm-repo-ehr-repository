@@ -2,9 +2,9 @@ import { getUKTimestamp } from '../services/time';
 import { addChangesToUpdateParams, validateIds } from '../utilities/dynamodb-helper';
 import { FragmentStatus, RecordType } from './enums';
 
-const fieldsAllowedToUpdate = ['TransferStatus', 'ParentId', 'ReceivedAt', 'DeletedAt'];
+const fieldsAllowedToUpdate = ['TransferStatus', 'ReceivedAt', 'DeletedAt'];
 
-export const buildFragment = ({ inboundConversationId, fragmentMessageId, parentMessageId }) => {
+export const buildFragment = ({ inboundConversationId, fragmentMessageId }) => {
   const timestamp = getUKTimestamp();
 
   validateIds(inboundConversationId, fragmentMessageId);
@@ -13,23 +13,18 @@ export const buildFragment = ({ inboundConversationId, fragmentMessageId, parent
     InboundConversationId: inboundConversationId,
     Layer: [RecordType.FRAGMENT, fragmentMessageId].join('#'),
     InboundMessageId: fragmentMessageId,
-    ParentId: parentMessageId,
     TransferStatus: FragmentStatus.INBOUND_PENDING,
     CreatedAt: timestamp,
     UpdatedAt: timestamp
   };
 };
 
-export const buildMultipleFragments = ({
-  inboundConversationId,
-  fragmentMessageIds,
-  parentMessageId
-}) => {
+export const buildMultipleFragments = ({ inboundConversationId, fragmentMessageIds }) => {
   if (!fragmentMessageIds || !Array.isArray(fragmentMessageIds)) {
     return [];
   }
   return fragmentMessageIds.map((fragmentMessageId) =>
-    buildFragment({ inboundConversationId, fragmentMessageId, parentMessageId })
+    buildFragment({ inboundConversationId, fragmentMessageId })
   );
 };
 
