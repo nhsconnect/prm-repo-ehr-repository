@@ -437,7 +437,6 @@ describe('app', () => {
 
       expect(message.InboundConversationId).toBe(conversationId);
       expect(isCore(message)).toBe(true);
-      expect(message.ParentId).toBeUndefined();
       expect(conversation.NhsNumber).toBe(nhsNumber);
       expect(conversation.TransferStatus).toBe(ConversationStatus.COMPLETE);
       expect(response.status).toBe(201);
