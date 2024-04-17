@@ -19,7 +19,7 @@ export const markFragmentAsReceivedAndCreateItsParts = async (
     });
 
     const childFragmentsParams = remainingPartsIds.map((fragmentPartId) => {
-      return buildFragmentUpdateParams(conversationId, fragmentPartId, { ParentId: messageId });
+      return buildFragmentUpdateParams(conversationId, fragmentPartId, {});
     });
 
     await db.updateItemsInTransaction([currentFragmentParams, ...childFragmentsParams]);
