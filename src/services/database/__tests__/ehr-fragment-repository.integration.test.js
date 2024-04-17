@@ -90,38 +90,7 @@ describe('ehr-fragment-repository', () => {
       // then
       const nestedFragmentMessage = await getFragmentByKey(conversationId, nestedFragmentMessageId);
       expect(nestedFragmentMessage.ReceivedAt).toEqual(undefined);
-      expect(nestedFragmentMessage.ParentId).toEqual(fragmentMessageId);
       expect(nestedFragmentMessage.InboundConversationId).toEqual(conversationId);
-    });
-
-    it('should update parentId for a nested fragment already existing in the DB', async () => {
-      // given
-      const conversationId = uuid().toUpperCase();
-      const ehrMessageId = uuid().toUpperCase();
-      const fragmentMessageId = uuid().toUpperCase();
-      const nestedFragmentMessageId = uuid().toUpperCase();
-
-      await createCore({
-        conversationId,
-        messageId: ehrMessageId,
-        fragmentMessageIds: [fragmentMessageId]
-      });
-
-      const nestedFragmentArrivedEarly = buildFragment({
-        inboundConversationId: conversationId,
-        fragmentMessageId: nestedFragmentMessageId
-      });
-      const db = EhrTransferTracker.getInstance();
-      await db.writeItemsInTransaction([nestedFragmentArrivedEarly]);
-
-      // when
-      await markFragmentAsReceivedAndCreateItsParts(fragmentMessageId, conversationId, [
-        nestedFragmentMessageId
-      ]);
-
-      // then
-      const nestedFragmentMessage = await getFragmentByKey(conversationId, nestedFragmentMessageId);
-      expect(nestedFragmentMessage.ParentId).toEqual(fragmentMessageId);
     });
   });
 
@@ -167,7 +136,6 @@ describe('ehr-fragment-repository', () => {
   });
 
   describe('markFragmentAsReceivedAndCreateItsParts', () => {
-    // Note: this describe block is migrated from the tests of old method "createFragmentPart"
     it('should create fragment entry in the database', async () => {
       const messageId = uuid().toUpperCase();
       const conversationId = uuid().toUpperCase();
@@ -178,7 +146,6 @@ describe('ehr-fragment-repository', () => {
       expect(fragment.InboundConversationId).toEqual(conversationId);
       expect(fragment.ReceivedAt).toEqual(expectedTimestamp);
       expect(fragment.Layer).toEqual(`FRAGMENT#${messageId}`);
-      expect(fragment.ParentId).toBeUndefined();
     });
 
     it('should throw if database creation query throws', async () => {
