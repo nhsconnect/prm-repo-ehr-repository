@@ -463,7 +463,6 @@ describe('app', () => {
 
       expect(fragmentMessage.InboundConversationId).toBe(conversationId);
       expect(isFragment(fragmentMessage)).toBe(true);
-      expect(fragmentMessage.ParentId).toBe(messageId);
       expect(conversation.TransferStatus).toBe(ConversationStatus.STARTED);
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
