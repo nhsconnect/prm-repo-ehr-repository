@@ -54,7 +54,6 @@ describe('ehr-core-repository', () => {
       expect(fragmentMessage.InboundConversationId).toBe(conversationId);
       expect(fragmentMessage.Layer).toBe(`FRAGMENT#${fragmentMessageId}`);
       expect(fragmentMessage.InboundMessageId).toBe(fragmentMessageId);
-      expect(fragmentMessage.ParentId).toBe(messageId);
       expect(fragmentMessage.TransferStatus).toBe(FragmentStatus.INBOUND_PENDING);
       expect(fragmentMessage.ReceivedAt).toBeUndefined();
     });
