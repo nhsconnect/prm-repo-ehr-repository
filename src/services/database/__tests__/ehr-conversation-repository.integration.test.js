@@ -17,8 +17,6 @@ import { createCore } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
-import { buildCore } from '../../../models/core';
-import { getEpochTimeInSecond } from '../../time';
 import moment from 'moment-timezone';
 
 jest.mock('../../../middleware/logging');
@@ -251,20 +249,6 @@ describe('ehr-conversation-repository', () => {
         .rejects.toThrowError(MessageNotFoundError);
     });
 
-    it('should throw an error if the only existing messages were deleted', async () => {
-      // given
-      const conversationId = uuid().toUpperCase();
-      const messageId = uuid().toUpperCase();
-      const item = { ...buildCore(conversationId, messageId), DeletedAt: getEpochTimeInSecond() };
-
-      await db.writeItemsInTransaction([item]);
-
-      // when
-      await expect(() => getMessageIdsForConversation(conversationId))
-        // then
-        .rejects.toThrowError(MessageNotFoundError);
-    });
-
     it('should return health record extract message id given a conversation id for a small health record', async () => {
       // given
       const messageId = uuid().toUpperCase();
@@ -366,7 +350,6 @@ describe('ehr-conversation-repository', () => {
       const messageId = uuid().toUpperCase();
       const conversationId = makeConversationIdForTest();
       const fragmentIds = [uuid().toUpperCase(), uuid().toUpperCase(), uuid().toUpperCase()];
-
       await createCompleteRecordForTest(nhsNumber, conversationId, messageId, fragmentIds);
 
       // when
@@ -375,7 +358,7 @@ describe('ehr-conversation-repository', () => {
       // then
       const healthRecordStatusAfterwards = await getConversationStatus(conversationId);
       expect(result).toEqual([conversationId]);
-      expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.NOT_FOUND);
+      expect(healthRecordStatusAfterwards).toEqual(HealthRecordStatus.COMPLETE);
 
       const deletedRecords = await db.queryTableByConversationId(
         conversationId,

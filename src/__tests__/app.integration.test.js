@@ -647,7 +647,7 @@ describe('app', () => {
       });
 
       const getPatientResponseAfterDeletion = await callGetPatient(nhsNumber);
-      expect(getPatientResponseAfterDeletion.status).toBe(404);
+      expect(getPatientResponseAfterDeletion.status).toBe(200);
 
       const softDeletedRecords = await db.queryTableByConversationId(
         inboundConversationId,
@@ -700,7 +700,7 @@ describe('app', () => {
       });
 
       const getPatientResponseAfterDeletion = await callGetPatient(nhsNumber);
-      expect(getPatientResponseAfterDeletion.status).toBe(404);
+      expect(getPatientResponseAfterDeletion.status).toBe(200);
     });
   });
 });

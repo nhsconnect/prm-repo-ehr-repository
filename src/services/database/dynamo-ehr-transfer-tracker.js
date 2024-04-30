@@ -95,7 +95,7 @@ export class EhrTransferTracker {
     }
   }
 
-  async queryTableByNhsNumber(nhsNumber, includeDeletedRecord = false) {
+  async queryTableByNhsNumber(nhsNumber, includeDeletedRecord = true) {
     const params = {
       TableName: this.tableName,
       IndexName: 'NhsNumberSecondaryIndex',
@@ -124,7 +124,7 @@ export class EhrTransferTracker {
   async queryTableByConversationId(
     inboundConversationId,
     recordType = RecordType.ALL,
-    includeDeletedRecord = false
+    includeDeletedRecord = true
   ) {
     const params = {
       TableName: this.tableName,
