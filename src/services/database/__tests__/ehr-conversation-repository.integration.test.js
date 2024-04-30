@@ -17,8 +17,6 @@ import { createCore } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
-import { buildCore } from '../../../models/core';
-import { getEpochTimeInSecond } from '../../time';
 import moment from 'moment-timezone';
 
 jest.mock('../../../middleware/logging');
@@ -244,20 +242,6 @@ describe('ehr-conversation-repository', () => {
     it('should throw an error if no message found with given conversationId', async () => {
       // given
       const conversationId = uuid().toUpperCase();
-
-      // when
-      await expect(() => getMessageIdsForConversation(conversationId))
-        // then
-        .rejects.toThrowError(MessageNotFoundError);
-    });
-
-    it.skip('should throw an error if the only existing messages were deleted', async () => {
-      // given
-      const conversationId = uuid().toUpperCase();
-      const messageId = uuid().toUpperCase();
-      const item = { ...buildCore(conversationId, messageId), DeletedAt: getEpochTimeInSecond() };
-
-      await db.writeItemsInTransaction([item]);
 
       // when
       await expect(() => getMessageIdsForConversation(conversationId))
