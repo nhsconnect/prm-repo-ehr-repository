@@ -2,7 +2,6 @@ import { v4 as uuid } from 'uuid';
 import request from 'supertest';
 import app from '../../../app';
 import { initializeConfig } from '../../../config';
-import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/enums';
 import {
   getConversationStatus,

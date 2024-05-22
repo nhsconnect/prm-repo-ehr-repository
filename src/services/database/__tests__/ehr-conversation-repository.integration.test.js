@@ -18,7 +18,6 @@ import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
 import moment from 'moment-timezone';
-import { buildConversationUpdateParams } from "../../../models/conversation";
 
 jest.mock('../../../middleware/logging');
 
