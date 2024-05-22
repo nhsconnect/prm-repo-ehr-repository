@@ -6,8 +6,8 @@ import {
   getMessageIdsForConversation,
   getConversationStatus,
   markRecordAsSoftDeleteForPatient,
-  updateConversationCompleteness
-} from '../ehr-conversation-repository';
+  updateConversationCompleteness, updateConversationToCoreReceived
+} from "../ehr-conversation-repository";
 import { ConversationStatus, HealthRecordStatus, RecordType } from '../../../models/enums';
 import {
   cleanupRecordsForTest,
@@ -18,6 +18,7 @@ import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
 import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
 import moment from 'moment-timezone';
+import { buildConversationUpdateParams } from "../../../models/conversation";
 
 jest.mock('../../../middleware/logging');
 
@@ -412,6 +413,46 @@ describe('ehr-conversation-repository', () => {
           DeletedAt: expectedDeletedAtTime
         });
       }
+    });
+  });
+  describe('updateConversationToCoreReceived', () => {
+    it(`should set conversation state to ${ConversationStatus.CORE_RECEIVED} for a small health record`, async () => {
+      // given
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
+      const nhsNumber = '1234567890';
+      await createConversationForTest(conversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.REQUEST_SENT
+      });
+      await createCore({ conversationId, messageId, fragmentMessageIds: [] });
+
+      // when
+      await updateConversationToCoreReceived(conversationId);
+
+      // then
+      const conversation = await getConversationById(conversationId);
+
+      expect(conversation.TransferStatus).toBe(ConversationStatus.CORE_RECEIVED);
+    });
+
+    it(`should set conversation state to ${ConversationStatus.CORE_RECEIVED} for a large health record`, async () => {
+      // given
+      const conversationId = uuid().toUpperCase();
+      const messageId = uuid().toUpperCase();
+      const fragmentMessageId = uuid().toUpperCase();
+      const nhsNumber = '1234567890';
+      await createConversationForTest(conversationId, nhsNumber, {
+        TransferStatus: ConversationStatus.REQUEST_SENT
+      });
+      await createCore({ conversationId, messageId, fragmentMessageIds: [fragmentMessageId] });
+
+      // when
+      await updateConversationToCoreReceived(conversationId);
+
+      // then
+      const conversation = await getConversationById(conversationId);
+
+      expect(conversation.TransferStatus).toBe(ConversationStatus.CORE_RECEIVED);
     });
   });
 });
