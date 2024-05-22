@@ -74,7 +74,7 @@ export const updateConversationToCoreReceived = async (conversationId) => {
 
     await db.updateItemsInTransaction([updateParam]);
   } catch (err) {
-    logError(`Failed to update Conversation to ${ConversationStatus.CORE_RECEIVED}`, err);
+    logError(`Failed to update Conversation status to ${ConversationStatus.CORE_RECEIVED}: ${err.message ? err.message : 'No error message present'}`);
     throw err;
   }
 };
