@@ -465,7 +465,7 @@ describe('app', () => {
       expect(fragmentMessage.InboundConversationId).toBe(conversationId);
       expect(isFragment(fragmentMessage)).toBe(true);
       expect(fragmentMessage.ParentId).toBe(messageId);
-      expect(conversation.TransferStatus).toBe(ConversationStatus.STARTED);
+      expect(conversation.TransferStatus).toBe(ConversationStatus.CORE_RECEIVED);
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId,
@@ -497,7 +497,7 @@ describe('app', () => {
       const conversation = await getConversationById(conversationId);
 
       expect(nestedFragmentMessage.ReceivedAt).toBeUndefined();
-      expect(conversation.TransferStatus).toBe(ConversationStatus.STARTED);
+      expect(conversation.TransferStatus).toBe(ConversationStatus.CORE_RECEIVED);
       expect(fragmentResponse.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId: fragmentMessageId,
@@ -557,7 +557,7 @@ describe('app', () => {
 
       expect(nestedFragmentMessage.InboundConversationId).toEqual(conversationId);
       expect(nestedFragmentMessage.ReceivedAt).toEqual(expect.stringMatching(TIMESTAMP_REGEX));
-      expect(conversation.TransferStatus).toBe(ConversationStatus.STARTED);
+      expect(conversation.TransferStatus).toBe(ConversationStatus.CORE_RECEIVED);
       expect(response.status).toBe(201);
       expectStructuredLogToContain(transportSpy, {
         messageId: nestedFragmentId,

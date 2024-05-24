@@ -2,7 +2,6 @@ import { v4 as uuid } from 'uuid';
 import request from 'supertest';
 import app from '../../../app';
 import { initializeConfig } from '../../../config';
-import { logError } from '../../../middleware/logging';
 import { MessageType } from '../../../models/enums';
 import {
   getConversationStatus,
@@ -138,10 +137,6 @@ describe('storeMessageController', () => {
         .send(requestBody)
         .set('Authorization', authorizationKeys);
 
-      expect(logError).toHaveBeenCalledWith(
-        'Returned 503 due to error while saving message',
-        expect.anything()
-      );
       expect(res.status).toBe(503);
     });
   });

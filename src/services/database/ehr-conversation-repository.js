@@ -64,6 +64,21 @@ export const updateConversationCompleteness = async (conversationId) => {
   }
 };
 
+export const updateConversationToCoreReceived = async (conversationId) => {
+  try {
+    const db = EhrTransferTracker.getInstance();
+
+    const updateParam = buildConversationUpdateParams(conversationId, {
+      TransferStatus: ConversationStatus.CORE_RECEIVED
+    });
+
+    await db.updateItemsInTransaction([updateParam]);
+  } catch (err) {
+    logError(`Failed to update Conversation status to ${ConversationStatus.CORE_RECEIVED}: ${err.message ? err.message : 'No error message present'}`);
+    throw err;
+  }
+};
+
 export const getCurrentConversationIdForPatient = async (nhsNumber) => {
   const db = EhrTransferTracker.getInstance();
   const conversations = await db.queryTableByNhsNumber(nhsNumber);
