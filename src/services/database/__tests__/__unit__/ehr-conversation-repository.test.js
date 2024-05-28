@@ -1,8 +1,8 @@
-import { updateConversationToCoreReceived } from "../../ehr-conversation-repository";
-import { EhrTransferTracker } from "../../dynamo-ehr-transfer-tracker";
-import { logError } from "../../../../middleware/logging";
-import { buildConversationUpdateParams } from "../../../../models/conversation";
-import { ConversationStatus } from "../../../../models/enums";
+import { updateConversationToCoreReceived } from '../../ehr-conversation-repository';
+import { EhrTransferTracker } from '../../dynamo-ehr-transfer-tracker';
+import { logError } from '../../../../middleware/logging';
+import { buildConversationUpdateParams } from '../../../../models/conversation';
+import { ConversationStatus } from '../../../../models/enums';
 import { v4 as uuid } from 'uuid';
 
 jest.mock('../../dynamo-ehr-transfer-tracker');
@@ -28,7 +28,8 @@ describe('ehr-conversation-repository', () => {
       // then
       expect(EhrTransferTracker.getInstance).toHaveBeenCalled();
       expect(buildConversationUpdateParams).toHaveBeenCalledWith(conversationId, {
-        TransferStatus: ConversationStatus.CORE_RECEIVED });
+        TransferStatus: ConversationStatus.CORE_RECEIVED
+      });
       expect(mockedDbInstance.updateItemsInTransaction).toHaveBeenCalledWith([mockedUpdateParam]);
     });
 
