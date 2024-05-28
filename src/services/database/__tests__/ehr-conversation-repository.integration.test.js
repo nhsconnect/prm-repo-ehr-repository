@@ -6,8 +6,9 @@ import {
   getMessageIdsForConversation,
   getConversationStatus,
   markRecordAsSoftDeleteForPatient,
-  updateConversationCompleteness, updateConversationToCoreReceived
-} from "../ehr-conversation-repository";
+  updateConversationCompleteness,
+  updateConversationToCoreReceived
+} from '../ehr-conversation-repository';
 import { ConversationStatus, HealthRecordStatus, RecordType } from '../../../models/enums';
 import {
   cleanupRecordsForTest,

@@ -9,8 +9,9 @@ import {
 } from '../../services/database/ehr-fragment-repository';
 import {
   getConversationStatus,
-  updateConversationCompleteness, updateConversationToCoreReceived
-} from "../../services/database/ehr-conversation-repository";
+  updateConversationCompleteness,
+  updateConversationToCoreReceived
+} from '../../services/database/ehr-conversation-repository';
 
 export const storeMessageControllerValidation = [
   body('data.type').equals('messages'),
@@ -80,7 +81,11 @@ export const storeMessageController = async (req, res) => {
     logInfo('Health record status for fragments: ' + healthRecordStatus);
     res.status(201).json({ healthRecordStatus });
   } catch (e) {
-    logError(`Error encountered while storing message: ${e.message ? e.message : 'No error message present' }`);
+    logError(
+      `Error encountered while storing message: ${
+        e.message ? e.message : 'No error message present'
+      }`
+    );
     res.sendStatus(503);
   }
 };
