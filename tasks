@@ -412,6 +412,10 @@ case "${command}" in
       configure_local_envs
       dojo -c Dojofile-itest "./tasks _test_coverage"
       ;;
+  test_coverage-github-action)
+      npm install
+      npm run test:coverage-unit-test-only
+      ;;
   fetch_utils)
       fetch_redaction_utils
       ;;

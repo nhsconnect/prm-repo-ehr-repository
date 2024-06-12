@@ -15,6 +15,7 @@
     "test:docker": "jest test/docker/*",
     "test:watch": "jest \"src/(?!(.*\\integration.test\\.js))\" --setupFiles dotenv/config --watch",
     "test:coverage": "jest src/ --maxWorkers=1 --coverage --detectOpenHandles --forceExit --setupFiles dotenv/config",
+    "test:coverage-unit-test-only": "jest  \"src/(?!(.*\\integration.test\\.js))\" --maxWorkers=1 --coverage --detectOpenHandles --forceExit --setupFiles dotenv/config",
     "build": "babel src -d build --ignore '**/*.test.js' --ignore '**/__mocks__/*' && cp src/*.json build",
     "start": "node build/server.js",
     "start:local": "babel-node -r dotenv/config src/server.js",
