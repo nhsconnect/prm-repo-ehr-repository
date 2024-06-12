@@ -14,14 +14,20 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v3
+      - name: Install docker-compose
+        uses: KengoTODA/actions-setup-docker-compose@v1
         with:
-          node-version: 16.x
+          version: '2.14.2'
+
+      - name: Install dojo
+        run: |
+          curl -Lo /tmp/dojo https://github.com/kudulab/dojo/releases/download/0.13.0/dojo_linux_amd64
+          chmod +x /tmp/dojo
+          mv /tmp/dojo /usr/local/bin/
 
       - name: Run test coverage
         run: |
-          ./tasks test_coverage-github-action
+          ./tasks test_coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
