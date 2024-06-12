@@ -23,7 +23,7 @@ jobs:
         run: |
           curl -Lo /tmp/dojo https://github.com/kudulab/dojo/releases/download/0.13.0/dojo_linux_amd64
           chmod +x /tmp/dojo
-          mv /tmp/dojo /usr/bin/dojo
+          mv /tmp/dojo /usr/local/bin/
 
       - name: Run test coverage
         run: |
