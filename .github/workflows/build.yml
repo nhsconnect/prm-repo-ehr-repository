@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Install docker-compose
-      - uses: KengoTODA/actions-setup-docker-compose@v1
+        uses: KengoTODA/actions-setup-docker-compose@v1
         with:
           version: '2.14.2'
 
