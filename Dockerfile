@@ -1,20 +1,4 @@
-FROM node:16.19.0-alpine AS builder
-
-# install python native requirements
-RUN apk update && \
-    apk add --no-cache bash tini && \
-    rm -rf /var/cache/apk/*
-
-RUN apk add --no-cache \
-        python3 \
-        py3-pip \
-    && pip3 install --upgrade pip \
-    && pip3 install \
-        awscli \
-    && rm -rf /var/cache/apk/*
-
-# Install sequelize postgress native dependencies
-RUN apk add --no-cache g++ make
+FROM node:22.5-alpine AS builder
 
 COPY package*.json /app/
 
