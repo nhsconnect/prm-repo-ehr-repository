@@ -1,6 +1,5 @@
 import { v4 } from 'uuid';
 import axios from 'axios';
-import adapter from 'axios/lib/adapters/http';
 
 const headers = { Authorization: process.env.E2E_TEST_AUTHORIZATION_KEYS_FOR_EHR_REPO };
 
@@ -18,7 +17,7 @@ async function sendFragment(id, conversationId, fragmentMessageIds) {
   };
 
   const response = await axios.post(`${process.env.SERVICE_URL}/messages`, fragment, {
-    adapter,
+    adapter: 'http',
     headers
   });
   // Assert 201 for each fragment
@@ -40,7 +39,7 @@ async function sendEhrExtract(ehrExtractMessageId, conversationId, nhsNumber, fr
   };
 
   const ehrResponse = await axios.post(`${process.env.SERVICE_URL}/messages`, ehrExtract, {
-    adapter,
+    adapter: 'http',
     headers
   });
 
@@ -92,7 +91,7 @@ const testPerformance = async (
     `${process.env.SERVICE_URL}/patients/${nhsNumber}/health-records/${conversationId}`,
     {
       headers,
-      adapter
+      adapter: 'http'
     }
   );
 
