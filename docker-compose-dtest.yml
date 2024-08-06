@@ -11,7 +11,7 @@ services:
     ports:
     - 3000:3000
   localstack:
-    image: localstack/localstack:0.10.9
+    image: localstack/localstack:3.6.0
     environment:
       - SERVICES=s3:4572
       - DEBUG=true
