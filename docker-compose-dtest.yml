@@ -11,18 +11,18 @@ services:
     ports:
     - 3000:3000
   localstack:
-    image: localstack/localstack:0.10.9
+    image: localstack/localstack:3.6.0
     environment:
-      - SERVICES=s3:4572
+      - SERVICES=s3
       - DEBUG=true
       - PORT_WEB_UI=5555
       - LAMBDA_EXECUTOR=local
       - DATA_DIR=/tmp/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
       - S3_BUCKET_NAME=test-bucket
-      - LOCALSTACK_URL=http://localstack:4572
+      - GATEWAY_LISTEN=0.0.0.0:4572
     volumes:
-      - ./scripts/create-bucket.sh:/docker-entrypoint-initaws.d/create-bucket.sh
+      - ./scripts/create-bucket.sh:/etc/localstack/init/ready.d/create-bucket.sh
       - /var/run/docker.sock:/var/run/docker.sock
   dynamodb-local:
     image: amazon/dynamodb-local

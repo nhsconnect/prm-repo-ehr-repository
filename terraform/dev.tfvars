@@ -1,20 +1,20 @@
-environment          = "dev"
-component_name       = "ehr-repo"
-dns_name             = "ehr-repo"
-repo_name            = "prm-deductions-ehr-repository"
+environment    = "dev"
+component_name = "ehr-repo"
+dns_name       = "ehr-repo"
+repo_name      = "prm-deductions-ehr-repository"
 
-node_env             = "prod"
-database_name        = "deductions_db"
+node_env      = "prod"
+database_name = "deductions_db"
 
-s3_bucket_name       = "dev-ehr-repo-bucket"
-s3_prev_bucket_name  = "dev-ehr-repo"
+s3_bucket_name      = "dev-ehr-repo-bucket"
+s3_prev_bucket_name = "dev-ehr-repo"
 
 task_cpu    = 256
 task_memory = 512
 port        = 3000
 
-service_desired_count = "1"
+service_desired_count    = "1"
 alb_deregistration_delay = 15
 
-grant_access_through_vpn = true
+grant_access_through_vpn               = true
 enable_rds_cluster_deletion_protection = false

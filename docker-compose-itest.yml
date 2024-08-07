@@ -7,18 +7,16 @@ services:
     ports:
       - "3000:3000"
   localstack:
-    image: localstack/localstack:0.10.9
+    image: localstack/localstack:3.6.0
     environment:
-      - SERVICES=s3:4572
+      - SERVICES=s3
       - S3_BUCKET_NAME=test-bucket
-      - LOCALSTACK_URL=http://localstack:4572
+      - GATEWAY_LISTEN=0.0.0.0:4572
     ports:
       - "4572:4572"
     volumes:
-      - ./scripts/create-bucket.sh:/docker-entrypoint-initaws.d/create-bucket.sh
+      - ./scripts/create-bucket.sh:/etc/localstack/init/ready.d/create-bucket.sh
       - /var/run/docker.sock:/var/run/docker.sock
-    logging:
-      driver: none
   dynamodb-local:
     image: amazon/dynamodb-local
     command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"

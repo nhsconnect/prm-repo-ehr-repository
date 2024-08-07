@@ -1,5 +1,5 @@
 resource "postgresql_role" "application_role" {
-  name     = "application_role"
+  name = "application_role"
 }
 
 resource "postgresql_grant" "application_role_schema_usage_grant" {
@@ -11,8 +11,8 @@ resource "postgresql_grant" "application_role_schema_usage_grant" {
 }
 
 resource "postgresql_role" "application_user" {
-  name     = "application_user"
-  login    = true
+  name  = "application_user"
+  login = true
   roles = ["rds_iam", postgresql_role.application_role.name]
 }
 

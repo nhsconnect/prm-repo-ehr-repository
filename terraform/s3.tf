@@ -3,41 +3,51 @@ locals {
 }
 
 //TODO: Rename to ehr_repo_health_record_data
-// Upgrade terraform version to latest
 resource "aws_s3_bucket" "ehr-repo-bucket" {
   bucket = var.s3_bucket_name
-  acl    = "private"
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-  logging {
-    target_bucket = aws_s3_bucket.ehr_repo_access_logs.id
-    target_prefix = local.ehr_repo_bucket_access_logs_prefix
-  }
+
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
 }
 
-resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_bucket" {
-  count = var.s3_backup_enabled ? 1 : 0
-
-  bucket = aws_s3_bucket.ehr-repo-bucket.bucket
-
- rule {
-   default_retention {
-     mode = "GOVERNANCE"
-     days = 36500 # 100 Years
-   }
- }
-
-  depends_on = [aws_s3_bucket_versioning.ehr_repo_bucket]
+resource "aws_s3_bucket_acl" "ehr-repo-bucket" {
+  bucket = aws_s3_bucket.ehr-repo-bucket.id
+  acl    = "private"
 }
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "ehr-repo-bucket" {
+  bucket = aws_s3_bucket.ehr-repo-bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_logging" "ehr-repo-bucket" {
+  bucket = aws_s3_bucket.ehr-repo-bucket.id
+
+  target_bucket = aws_s3_bucket.ehr_repo_access_logs.id
+  target_prefix = local.ehr_repo_bucket_access_logs_prefix
+}
+
+# resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_bucket" {
+#   count = var.s3_backup_enabled ? 1 : 0
+
+#   bucket = aws_s3_bucket.ehr-repo-bucket.bucket
+
+#   rule {
+#     default_retention {
+#       mode = "GOVERNANCE"
+#       days = 36500 # 100 Years
+#     }
+#   }
+
+#   depends_on = [aws_s3_bucket_versioning.ehr_repo_bucket]
+# }
 
 resource "aws_s3_bucket_versioning" "ehr_repo_bucket" {
   count = var.s3_backup_enabled ? 1 : 0
@@ -61,6 +71,7 @@ resource "aws_s3_bucket_public_access_block" "ehr_repo_access_block" {
 resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
   bucket = aws_s3_bucket.ehr-repo-bucket.id
   policy = jsonencode({
+    "Version" : "2008-10-17",
     "Statement" : [
       {
         Effect : "Deny",
@@ -89,19 +100,27 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
 }
 
 resource "aws_s3_bucket" "ehr_repo_access_logs" {
-  bucket        = "${var.environment}-${var.component_name}-access-logs"
-  acl           = "private"
+  bucket = "${var.environment}-${var.component_name}-access-logs"
+
   force_destroy = true
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
+  }
+}
+
+resource "aws_s3_bucket_acl" "ehr_repo_access_logs" {
+  bucket = aws_s3_bucket.ehr_repo_access_logs.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "ehr_repo_access_logs" {
+  bucket = aws_s3_bucket.ehr_repo_access_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
 }
 
@@ -128,6 +147,7 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
   count  = var.is_restricted_account ? 1 : 0
   bucket = aws_s3_bucket.ehr_repo_access_logs.id
   policy = jsonencode({
+    "Version" : "2008-10-17",
     "Statement" : [
       {
         Effect : "Allow",

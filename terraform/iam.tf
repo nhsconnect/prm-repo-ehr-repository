@@ -21,7 +21,7 @@ resource "aws_iam_role" "ehr-repo" {
   description        = "Role assumed by ${var.component_name} ECS task"
   tags = {
     Environment = var.environment
-    CreatedBy = var.repo_name
+    CreatedBy   = var.repo_name
   }
 }
 
