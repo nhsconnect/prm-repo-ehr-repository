@@ -100,19 +100,27 @@ resource "aws_s3_bucket_policy" "ehr-repo-bucket_policy" {
 }
 
 resource "aws_s3_bucket" "ehr_repo_access_logs" {
-  bucket        = "${var.environment}-${var.component_name}-access-logs"
-  acl           = "private"
+  bucket = "${var.environment}-${var.component_name}-access-logs"
+
   force_destroy = true
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
   tags = {
     CreatedBy   = var.repo_name
     Environment = var.environment
+  }
+}
+
+resource "aws_s3_bucket_acl" "ehr_repo_access_logs" {
+  bucket = aws_s3_bucket.ehr_repo_access_logs.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "ehr_repo_access_logs" {
+  bucket = aws_s3_bucket.ehr_repo_access_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
 }
 
@@ -164,7 +172,7 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
 resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy" {
   bucket = aws_s3_bucket.ehr_repo_access_logs.id
   policy = jsonencode({
-    "Version" : "2008-10-17",
+    "Version" : "2012-10-17",
     "Statement" : [
       {
         "Sid" : "S3ServerAccessLogsPolicy",
