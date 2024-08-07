@@ -43,6 +43,6 @@ resource "aws_route53_record" "ehr-repo-cert-validation-record" {
 }
 
 resource "aws_acm_certificate_validation" "ehr-repo-cert-validation" {
-  certificate_arn = aws_acm_certificate.ehr-repo-cert.arn
+  certificate_arn         = aws_acm_certificate.ehr-repo-cert.arn
   validation_record_fqdns = [for record in aws_route53_record.ehr-repo-cert-validation-record : record.fqdn]
 }

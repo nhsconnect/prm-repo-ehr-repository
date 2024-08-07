@@ -1,6 +1,6 @@
 provider "aws" {
-  profile   = "default"
-  region    = var.region
+  profile = "default"
+  region  = var.region
 }
 
 provider "postgresql" {
@@ -10,7 +10,7 @@ provider "postgresql" {
   username        = var.db_username
   password        = var.db_password
   connect_timeout = 15
-  superuser = false
+  superuser       = false
 }
 
 terraform {

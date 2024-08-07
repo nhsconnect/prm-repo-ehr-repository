@@ -19,8 +19,8 @@ data "aws_ssm_parameter" "alb_access_logs_bucket" {
 }
 
 resource "aws_alb" "alb-internal" {
-  name            = "${var.environment}-${var.component_name}-alb-int"
-  subnets         = split(",", data.aws_ssm_parameter.private_subnets.value)
+  name    = "${var.environment}-${var.component_name}-alb-int"
+  subnets = split(",", data.aws_ssm_parameter.private_subnets.value)
   security_groups = [
     aws_security_group.ehr_repo_alb.id,
     aws_security_group.alb_to_ehr_repo_ecs.id,
@@ -28,14 +28,14 @@ resource "aws_alb" "alb-internal" {
     aws_security_group.vpn_to_ehr_repo.id,
     aws_security_group.gocd_to_ehr_repo.id
   ]
-  internal        = true
+  internal                   = true
   drop_invalid_header_fields = true
   enable_deletion_protection = true
 
   access_logs {
-    bucket = data.aws_ssm_parameter.alb_access_logs_bucket.value
+    bucket  = data.aws_ssm_parameter.alb_access_logs_bucket.value
     enabled = true
-    prefix = "ehr-repository"
+    prefix  = "ehr-repository"
   }
 
   tags = {
@@ -104,11 +104,11 @@ resource "aws_alb_listener_rule" "alb-internal-check-listener-rule" {
 
 
 resource "aws_alb_target_group" "internal-alb-tg" {
-  name        = "${var.environment}-${var.component_name}-int-tg"
-  port        = 3000
-  protocol    = "HTTP"
-  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
-  target_type = "ip"
+  name                 = "${var.environment}-${var.component_name}-int-tg"
+  port                 = 3000
+  protocol             = "HTTP"
+  vpc_id               = data.aws_ssm_parameter.deductions_core_vpc_id.value
+  target_type          = "ip"
   deregistration_delay = var.alb_deregistration_delay
   health_check {
     healthy_threshold   = 3
@@ -121,7 +121,7 @@ resource "aws_alb_target_group" "internal-alb-tg" {
 
   tags = {
     Environment = var.environment
-    CreatedBy = var.repo_name
+    CreatedBy   = var.repo_name
   }
 }
 
@@ -169,7 +169,7 @@ resource "aws_security_group" "ehr_repo_alb" {
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   tags = {
-    Name = "${var.environment}-alb-${var.component_name}"
+    Name        = "${var.environment}-alb-${var.component_name}"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
@@ -181,15 +181,15 @@ resource "aws_security_group" "alb_to_ehr_repo_ecs" {
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   egress {
-    description = "Allow outbound connections to EHR Repo ECS Task"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    description     = "Allow outbound connections to EHR Repo ECS Task"
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
     security_groups = [aws_security_group.ecs-tasks-sg.id]
   }
 
   tags = {
-    Name = "${var.environment}-alb-to-${var.component_name}-ecs"
+    Name        = "${var.environment}-alb-to-${var.component_name}-ecs"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
@@ -201,15 +201,15 @@ resource "aws_security_group" "service_to_ehr_repo" {
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   tags = {
-    Name = "${var.environment}-service-to-${var.component_name}-sg"
+    Name        = "${var.environment}-service-to-${var.component_name}-sg"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
 }
 
 resource "aws_ssm_parameter" "service_to_ehr_repo" {
-  name = "/repo/${var.environment}/output/${var.repo_name}/service-to-ehr-repo-sg-id"
-  type = "String"
+  name  = "/repo/${var.environment}/output/${var.repo_name}/service-to-ehr-repo-sg-id"
+  type  = "String"
   value = aws_security_group.service_to_ehr_repo.id
   tags = {
     CreatedBy   = var.repo_name
@@ -223,15 +223,15 @@ resource "aws_security_group" "vpn_to_ehr_repo" {
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   ingress {
-    description = "Allow vpn to access EHR Repo ALB"
-    protocol    = "tcp"
-    from_port   = 443
-    to_port     = 443
+    description     = "Allow vpn to access EHR Repo ALB"
+    protocol        = "tcp"
+    from_port       = 443
+    to_port         = 443
     security_groups = [data.aws_ssm_parameter.vpn_sg_id.value]
   }
 
   tags = {
-    Name = "${var.environment}-vpn-to-${var.component_name}-sg"
+    Name        = "${var.environment}-vpn-to-${var.component_name}-sg"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
@@ -243,15 +243,15 @@ resource "aws_security_group" "gocd_to_ehr_repo" {
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   ingress {
-    description = "Allow gocd to access EHR Repo ALB"
-    protocol    = "tcp"
-    from_port   = 443
-    to_port     = 443
+    description     = "Allow gocd to access EHR Repo ALB"
+    protocol        = "tcp"
+    from_port       = 443
+    to_port         = 443
     security_groups = [data.aws_ssm_parameter.gocd_sg_id.value]
   }
 
   tags = {
-    Name = "${var.environment}-gocd-to-${var.component_name}-sg"
+    Name        = "${var.environment}-gocd-to-${var.component_name}-sg"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
@@ -267,8 +267,8 @@ data "aws_ssm_parameter" "gocd_sg_id" {
 
 
 resource "aws_ssm_parameter" "deductions_core_internal_alb_dns" {
-  name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-internal-alb-dns"
-  type = "String"
+  name  = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-internal-alb-dns"
+  type  = "String"
   value = aws_alb.alb-internal.dns_name
   tags = {
     CreatedBy   = var.repo_name
@@ -277,8 +277,8 @@ resource "aws_ssm_parameter" "deductions_core_internal_alb_dns" {
 }
 
 resource "aws_ssm_parameter" "deductions_core_int_alb_httpl_arn" {
-  name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-int-alb-httpl-arn"
-  type = "String"
+  name  = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-int-alb-httpl-arn"
+  type  = "String"
   value = aws_alb_listener.int-alb-listener-http.arn
   tags = {
     CreatedBy   = var.repo_name
@@ -287,8 +287,8 @@ resource "aws_ssm_parameter" "deductions_core_int_alb_httpl_arn" {
 }
 
 resource "aws_ssm_parameter" "deductions_core_int_alb_httpsl_arn" {
-  name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-int-alb-httpsl-arn"
-  type = "String"
+  name  = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-int-alb-httpsl-arn"
+  type  = "String"
   value = aws_alb_listener.int-alb-listener-https.arn
   tags = {
     CreatedBy   = var.repo_name
@@ -297,17 +297,17 @@ resource "aws_ssm_parameter" "deductions_core_int_alb_httpsl_arn" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alb_http_errors" {
-  alarm_name                = "${var.repo_name} 5xx errors"
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  evaluation_periods        = "1"
-  metric_name               = "HTTPCode_Target_5XX_Count"
-  namespace                 = "AWS/ApplicationELB"
-  period                    = "60"
-  statistic                 = "Average"
-  threshold                 = "1"
-  alarm_description         = "This metric monitors number of 5xx http status codes associated with ${var.repo_name}"
-  treat_missing_data        = "notBreaching"
-  dimensions                = {
+  alarm_name          = "${var.repo_name} 5xx errors"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "HTTPCode_Target_5XX_Count"
+  namespace           = "AWS/ApplicationELB"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "1"
+  alarm_description   = "This metric monitors number of 5xx http status codes associated with ${var.repo_name}"
+  treat_missing_data  = "notBreaching"
+  dimensions = {
     LoadBalancer = aws_alb.alb-internal.arn_suffix
   }
 }

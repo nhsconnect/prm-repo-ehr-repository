@@ -45,19 +45,19 @@ resource "aws_ecs_task_definition" "task" {
 
   tags = {
     Environment = var.environment
-    CreatedBy = var.repo_name
+    CreatedBy   = var.repo_name
   }
 }
 
 resource "aws_security_group" "ecs-tasks-sg" {
-  name        = "${var.environment}-${var.component_name}-ecs-tasks-sg"
-  vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
+  name   = "${var.environment}-${var.component_name}-ecs-tasks-sg"
+  vpc_id = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   ingress {
-    description     = "Allow traffic from internal ALB of EHR Repo"
-    protocol        = "tcp"
-    from_port       = "3000"
-    to_port         = "3000"
+    description = "Allow traffic from internal ALB of EHR Repo"
+    protocol    = "tcp"
+    from_port   = "3000"
+    to_port     = "3000"
     security_groups = [
       aws_security_group.ehr_repo_alb.id
     ]
@@ -104,7 +104,7 @@ resource "aws_security_group" "ecs-tasks-sg" {
   }
 
   tags = {
-    Name = "${var.environment}-${var.component_name}-ecs-tasks-sg"
+    Name        = "${var.environment}-${var.component_name}-ecs-tasks-sg"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
@@ -120,7 +120,7 @@ data "aws_vpc" "private_vpc" {
 
 data "aws_vpc" "mhs" {
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["${var.environment}-repo-mhs-vpc"]
   }
 }
@@ -140,7 +140,7 @@ resource "aws_security_group" "vpn_to_ehr_repo_ecs" {
   vpc_id      = data.aws_ssm_parameter.deductions_core_vpc_id.value
 
   ingress {
-    description = "Allow vpn to access EHR Repo ECS"
+    description     = "Allow vpn to access EHR Repo ECS"
     protocol        = "tcp"
     from_port       = "3000"
     to_port         = "3000"
@@ -148,15 +148,15 @@ resource "aws_security_group" "vpn_to_ehr_repo_ecs" {
   }
 
   tags = {
-    Name = "${var.environment}-vpn-to-${var.component_name}-sg"
+    Name        = "${var.environment}-vpn-to-${var.component_name}-sg"
     CreatedBy   = var.repo_name
     Environment = var.environment
   }
 }
 
 resource "aws_ssm_parameter" "deductions_core_ecs_tasks_sg_id" {
-  name = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-ecs-tasks-sg-id"
-  type = "String"
+  name  = "/repo/${var.environment}/output/${var.repo_name}/deductions-core-ecs-tasks-sg-id"
+  type  = "String"
   value = aws_security_group.ecs-tasks-sg.id
   tags = {
     CreatedBy   = var.repo_name

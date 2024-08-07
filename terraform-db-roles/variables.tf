@@ -4,17 +4,17 @@ variable "region" {
 }
 
 variable "repo_name" {
-  type = string
+  type    = string
   default = "prm-deductions-ehr-repository"
 }
 
 variable "db_port" {
-  type = string
+  type    = string
   default = "5432"
 }
 
 variable "component_name" {
-  type = string
+  type    = string
   default = "ehr-repo"
 }
 

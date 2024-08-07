@@ -1,5 +1,5 @@
 resource "postgresql_role" "migration_role" {
-  name     = "migration_role"
+  name = "migration_role"
 }
 
 resource "postgresql_grant" "migration_role_schema_usage_grant" {
@@ -11,19 +11,19 @@ resource "postgresql_grant" "migration_role_schema_usage_grant" {
 }
 
 resource "postgresql_role" "migration_user" {
-  name     = "migration_user"
-  login    = true
+  name        = "migration_user"
+  login       = true
   valid_until = ""
-  roles = ["rds_iam", postgresql_role.migration_role.name]
+  roles       = ["rds_iam", postgresql_role.migration_role.name]
 }
 
 resource "aws_ssm_parameter" "migration_user" {
-  name = "/repo/${var.environment}/output/${var.repo_name}/db-migration-user"
-  type = "String"
+  name  = "/repo/${var.environment}/output/${var.repo_name}/db-migration-user"
+  type  = "String"
   value = postgresql_role.migration_user.name
 }
 
- data "aws_iam_policy_document" "migration-assume-role-policy" {
+data "aws_iam_policy_document" "migration-assume-role-policy" {
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -43,7 +43,7 @@ resource "aws_iam_role" "db_migration_role" {
 
   tags = {
     Environment = var.environment
-    CreatedBy= var.repo_name
+    CreatedBy   = var.repo_name
   }
 }
 
