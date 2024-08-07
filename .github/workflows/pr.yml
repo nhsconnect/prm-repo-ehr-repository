@@ -23,6 +23,18 @@ permissions:
   pull-requests: write # Required to write comments
 
 jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - run: npm ci
+
+      - name: eslint
+        run: npm lint
+
   plan:
     strategy:
       matrix:
@@ -53,7 +65,7 @@ jobs:
 
       - name: terraform init
         id: init
-        run: terraform init -no-color -upgrade -backend-config="bucket=${{ secrets.BACKEND_BUCKET }}" -backend-config="key=${{ secrets.BACKEND_KEY }}"
+        run: terraform init -no-color -upgrade -backend-config="bucket=${{ secrets.TF_BACKEND_BUCKET }}" -backend-config="key=${{ secrets.TF_BACKEND_KEY }}" -backend-config="dynamodb_table=${{ secrets.TF_BACKEND_DYNAMODB_TABLE }}"
 
       - name: terraform validate
         id: validate
