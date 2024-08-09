@@ -17,7 +17,7 @@ import {
 import { createCore } from '../ehr-core-repository';
 import { EhrTransferTracker } from '../dynamo-ehr-transfer-tracker';
 import { markFragmentAsReceivedAndCreateItsParts } from '../ehr-fragment-repository';
-import { HealthRecordNotFoundError, MessageNotFoundError } from '../../../errors/errors';
+import { HealthRecordNotFoundError, CoreNotFoundError } from '../../../errors/errors';
 import moment from 'moment-timezone';
 
 jest.mock('../../../middleware/logging');
@@ -247,7 +247,7 @@ describe('ehr-conversation-repository', () => {
       // when
       await expect(() => getMessageIdsForConversation(conversationId))
         // then
-        .rejects.toThrowError(MessageNotFoundError);
+        .rejects.toThrowError(CoreNotFoundError);
     });
 
     it('should return health record extract message id given a conversation id for a small health record', async () => {

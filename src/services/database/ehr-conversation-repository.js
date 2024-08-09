@@ -2,7 +2,7 @@ import { ConversationStatus, HealthRecordStatus, RecordType } from '../../models
 import { logError, logInfo } from '../../middleware/logging';
 import { EhrTransferTracker } from './dynamo-ehr-transfer-tracker';
 import { buildConversationUpdateParams, isInCompleteStatus } from '../../models/conversation';
-import { HealthRecordNotFoundError, MessageNotFoundError } from '../../errors/errors';
+import { HealthRecordNotFoundError, CoreNotFoundError } from '../../errors/errors';
 import { isCore } from '../../models/core';
 import { isFragment } from '../../models/fragment';
 import { buildSoftDeleteUpdateParams } from '../../utilities/dynamodb-helper';
@@ -125,7 +125,7 @@ export const getMessageIdsForConversation = async (conversationId) => {
   const fragments = items.filter(isFragment);
 
   if (!core) {
-    throw new MessageNotFoundError();
+    throw new CoreNotFoundError();
   }
   const coreMessageId = core.InboundMessageId;
   const fragmentMessageIds = fragments.map((message) => message.InboundMessageId);
