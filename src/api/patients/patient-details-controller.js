@@ -52,6 +52,12 @@ export const patientDetailsController = async (req, res) => {
       return;
     }
 
+    if (err instanceof CoreNotFoundError) {
+      logInfo('Did not find a core message');
+      res.sendStatus(503);
+      return;
+    }
+
     logError('Could not retrieve patient health record', err);
     res.sendStatus(503);
   }

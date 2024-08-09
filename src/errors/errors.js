@@ -12,7 +12,7 @@ export class HealthRecordNotFoundError extends Error {
   }
 }
 
-export class MessageNotFoundError extends Error {
+export class CoreNotFoundError extends Error {
   constructor(error) {
     super(errorMessages.MessageNotFound);
     logError(errorMessages.MessageNotFound, error);
