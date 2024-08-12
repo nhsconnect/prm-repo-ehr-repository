@@ -38,22 +38,6 @@ jobs:
       - name: eslint
         run: npm run lint
 
-  terraform-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up git repo
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: terraform-docs
-        uses: terraform-docs/gh-actions@v1
-        with:
-          working-dir: ./terraform
-          output-file: README.md
-          output-method: replace
-          git-push: "true"
-
   plan:
     strategy:
       matrix:
