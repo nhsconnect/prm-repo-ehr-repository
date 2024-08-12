@@ -6,7 +6,7 @@ import {
   getCurrentConversationIdForPatient,
   getMessageIdsForConversation
 } from '../../services/database/ehr-conversation-repository';
-import { HealthRecordNotFoundError } from '../../errors/errors';
+import { HealthRecordNotFoundError, CoreNotFoundError } from '../../errors/errors';
 
 export const patientDetailsValidation = [
   param('nhsNumber')

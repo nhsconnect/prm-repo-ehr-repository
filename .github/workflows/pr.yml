@@ -12,7 +12,7 @@
 ##
 ## 4) Edit the ## REPOSITORY SPECIFIC ## section below.
 
-name: Terraform Plan
+name: PR Tasks
 on:
   pull_request:
     branches: [ main ]
@@ -38,25 +38,27 @@ jobs:
       - name: eslint
         run: npm run lint
 
-  docs:
+  terraform-docs:
     runs-on: ubuntu-latest
     steps:
-    - name: Set up git repo
-      uses: actions/checkout@v4
+      - name: Set up git repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
-    - name: terraform-docs
-      uses: terraform-docs/gh-actions@v1
-      with:
-        working-dir: ./terraform
-        output-file: README.md
-        output-method: replace
-        git-push: "true"
+      - name: terraform-docs
+        uses: terraform-docs/gh-actions@v1
+        with:
+          working-dir: ./terraform
+          output-file: README.md
+          output-method: replace
+          git-push: "true"
 
   plan:
     strategy:
       matrix:
         environment: [dev, test, pre-prod, prod]
-    name: ${{ matrix.environment }}
+    name: Terraform Plan (${{ matrix.environment }})
     runs-on: ubuntu-latest
     environment: ${{ matrix.environment }}
     defaults:
