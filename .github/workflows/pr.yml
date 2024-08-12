@@ -12,7 +12,7 @@
 ##
 ## 4) Edit the ## REPOSITORY SPECIFIC ## section below.
 
-name: PR Tasks
+name: PR Checks
 on:
   pull_request:
     branches: [ main ]
