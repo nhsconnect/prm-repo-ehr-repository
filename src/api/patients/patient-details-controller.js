@@ -6,7 +6,7 @@ import {
   getCurrentConversationIdForPatient,
   getMessageIdsForConversation
 } from '../../services/database/ehr-conversation-repository';
-import { HealthRecordNotFoundError } from '../../errors/errors';
+import { HealthRecordNotFoundError, CoreNotFoundError } from '../../errors/errors';
 
 export const patientDetailsValidation = [
   param('nhsNumber')
@@ -49,6 +49,12 @@ export const patientDetailsController = async (req, res) => {
     if (err instanceof HealthRecordNotFoundError) {
       logInfo('Did not find a complete patient health record');
       res.sendStatus(404);
+      return;
+    }
+
+    if (err instanceof CoreNotFoundError) {
+      logInfo('Did not find a core message');
+      res.sendStatus(503);
       return;
     }
 
