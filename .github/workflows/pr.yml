@@ -1,11 +1,19 @@
 ## When copying this to a new ORC repository...
 ##
-## 1) Create environments for dev, test, pre-prod and prod (https://github.com/nhsconnect/<repo>/settings/environments).
+## 1) Visit https://github.com/nhsconnect/<repo>/settings/environments and create environments:
+## - dev
+## - test
+## - test-apply
+## - pre-prod
+## - pre-prod-apply
+## - prod
+## - prod-apply
 ##
 ## 2) For each environment, add the following secrets:
-## - BACKEND_BUCKET
-## - BACKEND_KEY
-## - IAM_ROLE_READONLY
+## - IAM_ROLE
+## - TF_BACKEND_BUCKET
+## - TF_BACKEND_DYNAMODB_TABLE
+## - TF_BACKEND_KEY
 ##
 ## 3) Create the following repository secret (https://github.com/nhsconnect/<repo>/settings/secrets/actions):
 ## - ECR_REPOSITORY_NAME
@@ -15,7 +23,8 @@
 name: PR Checks
 on:
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 permissions:
   contents: read       # Required for actions/checkout
@@ -58,7 +67,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.IAM_ROLE_READONLY }}
+          role-to-assume: ${{ secrets.IAM_ROLE }}
           aws-region: eu-west-2
 
       - name: terraform fmt
