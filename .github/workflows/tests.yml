@@ -73,14 +73,11 @@ jobs:
       - name: Create DynamoDB table
         run: |-
           awslocal --version
-          
-          awslocal \
+
+          awslocal dynamodb create-table \
           --region eu-west-2 \
-          --endpoint=http://dynamodb-local:8000 \
-          --cli-input-json file://scripts/local-test-db-scheme.json \
-          --no-cli-page \
-          dynamodb \
-          create-table
+          --endpoint-url=http://dynamodb-local:8000 \
+          --cli-input-json file://scripts/local-test-db-scheme.json
 
       - uses: actions/setup-node@v4
         with:
