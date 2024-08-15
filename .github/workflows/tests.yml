@@ -70,13 +70,9 @@ jobs:
       - name: Start LocalStack
         uses: LocalStack/setup-localstack@v0.2.2
 
+      # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
       - name: Create DynamoDB table
-        run: |-
-          awslocal --version
-
-          awslocal dynamodb create-table \
-          --region eu-west-2 \
-          --cli-input-json file://scripts/local-test-db-scheme.json
+        run: awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
 
       - uses: actions/setup-node@v4
         with:
