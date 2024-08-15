@@ -76,7 +76,6 @@ jobs:
 
           awslocal dynamodb create-table \
           --region eu-west-2 \
-          --endpoint-url=http://dynamodb-local:8000 \
           --cli-input-json file://scripts/local-test-db-scheme.json
 
       - uses: actions/setup-node@v4
