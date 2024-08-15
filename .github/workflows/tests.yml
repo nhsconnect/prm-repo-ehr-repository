@@ -9,63 +9,28 @@ on:
       - main
 
 jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
   sonarcloud:
-    name: SonarCloud
+    name: Unit/Integration & SonarCloud
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 'latest'
-
-      - run: npm ci
-
-      - name: Run unit tests
-        run: npm run test:coverage-unit-test-only
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  unit-test:
-    name: Unit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 'latest'
-
-      - run: npm ci
-
-      - name: Run unit tests
-        run: npm run test:unit
-
-  eslint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 'latest'
-
-      - run: npm ci
-
-      - name: eslint
-        run: npm run lint
-
-  test-coverage:
-    name: Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
       - name: Start LocalStack
         uses: LocalStack/setup-localstack@v0.2.2
@@ -82,3 +47,9 @@ jobs:
 
       - name: Run unit tests
         run: npm run test:coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
