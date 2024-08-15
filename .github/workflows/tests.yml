@@ -71,7 +71,16 @@ jobs:
         uses: LocalStack/setup-localstack@v0.2.2
 
       - name: Create DynamoDB table
-        run: awslocal --region eu-west-2 --endpoint=http://dynamodb-local:8000 dynamodb create-table --cli-input-json file://scripts/local-test-db-scheme.json --no-cli-page
+        run: |-
+          awslocal --version
+          
+          awslocal \
+          --region eu-west-2 \
+          --endpoint=http://dynamodb-local:8000 \
+          --cli-input-json file://scripts/local-test-db-scheme.json \
+          --no-cli-page \
+          dynamodb \
+          create-table
 
       - uses: actions/setup-node@v4
         with:
