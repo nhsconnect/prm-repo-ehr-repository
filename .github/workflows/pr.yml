@@ -23,6 +23,7 @@
 ## 4) Edit the ## REPOSITORY SPECIFIC ## section below.
 
 name: PR Checks
+
 on:
   pull_request:
     branches:

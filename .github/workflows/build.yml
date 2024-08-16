@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read       # Required for actions/checkout
+  id-token: write      # Required for requesting the JWT
+
 jobs:
   build:
     runs-on: ubuntu-latest
