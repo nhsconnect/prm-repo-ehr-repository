@@ -1,6 +1,5 @@
 services:
   this-service:
-    # image: ${DOCKER_IMAGE}
-    build: .
+    image: ${DOCKER_IMAGE}
     ports:
       - 3000:3000

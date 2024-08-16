@@ -67,8 +67,8 @@ jobs:
           SHA_TAG: ${{ steps.get-tags.outputs.sha }}
           BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
         run: |
-          docker build --build-arg UTILS_VERSION=0.2.27 -t $REGISTRY/$REPOSITORY:$SHA_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG .
-          # docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG .
+          docker build --build-arg UTILS_VERSION=0.2.27 -t $REGISTRY/$REPOSITORY:$SHA_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG -t $REGISTRY/$REPOSITORY:latest .
+          # docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG -t $REGISTRY/$REPOSITORY:latest .
 
       - name: Start LocalStack
         uses: LocalStack/setup-localstack@v0.2.2
@@ -83,11 +83,9 @@ jobs:
         env:
           S3_BUCKET_NAME: test-bucket
           SERVICE_URL: http://this-service:3000
-          DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ steps.get-tags.outputs.sha }}
+          DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         run: |-
-          # docker compose -f docker-compose-github-actions.yml up -d
-          docker compose -f docker-compose-github-actions.yml build
-          docker compose up -d
+          docker compose -f docker-compose-github-actions.yml up -d
 
       - run: docker ps -a
 
