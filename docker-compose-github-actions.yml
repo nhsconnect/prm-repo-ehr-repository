@@ -1,9 +1,5 @@
-version: '2'
 services:
-  default:
-    links:
-      - this-service:this-service
   this-service:
     image: ${DOCKER_IMAGE}
     ports:
-    - 3000:3000
+      - 3000:3000

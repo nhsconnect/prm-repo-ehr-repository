@@ -79,12 +79,12 @@ jobs:
           awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
           awslocal s3 mb s3://test-bucket
 
-      - name: docker-compose
+      - name: docker compose
         env:
           S3_BUCKET_NAME: test-bucket
           SERVICE_URL: http://this-service:3000
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ steps.get-tags.outputs.sha }}
-        run: docker-compose -f docker-compose-github-actions.yml up -d
+        run: docker compose -f docker-compose-github-actions.yml up -d
 
       - run: docker ps -a
 
