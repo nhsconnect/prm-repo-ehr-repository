@@ -84,7 +84,10 @@ jobs:
           S3_BUCKET_NAME: test-bucket
           SERVICE_URL: http://this-service:3000
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ steps.get-tags.outputs.sha }}
-        run: docker compose -f docker-compose-github-actions.yml up -d
+        run: |-
+          # docker compose -f docker-compose-github-actions.yml up -d
+          docker compose -f docker-compose-github-actions.yml build
+          docker compose up -d
 
       - run: docker ps -a
 
