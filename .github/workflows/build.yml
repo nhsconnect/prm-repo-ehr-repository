@@ -50,8 +50,8 @@ jobs:
         run: |
           sha=$(echo ${{ github.sha }} | cut -c 1-8)
           echo "sha=$sha" >> $GITHUB_OUTPUT
-          branch-name=$(echo ${{ github.ref_name }}${{ github.head_ref }} | sed 's/^[0-9]*\/merge//g')
-          echo "branch-name=$branch" >> $GITHUB_OUTPUT
+          branchname=$(echo ${{ github.ref_name }}${{ github.head_ref }} | sed 's/^[0-9]*\/merge//g')
+          echo "branchname=$branchname" >> $GITHUB_OUTPUT
 
       - name: Get redactor
         run: |
@@ -65,7 +65,7 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
           SHA_TAG: ${{ steps.get-tags.outputs.sha }}
-          BRANCH_TAG: ${{ steps.get-tags.outputs.branch-name }}
+          BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
         run: |
           docker build --build-arg UTILS_VERSION=0.2.27 -t $REGISTRY/$REPOSITORY:$SHA_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG .
           # docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG .
@@ -98,6 +98,6 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
           SHA_TAG: ${{ steps.get-tags.outputs.sha }}
-          BRANCH_TAG: ${{ steps.get-tags.outputs.branch-name }}
+          BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
         run: |
           docker push $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$BRANCH_TAG 
