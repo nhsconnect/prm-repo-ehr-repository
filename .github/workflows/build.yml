@@ -22,3 +22,75 @@ jobs:
 
       - name: build
         run: npm run build
+
+      - name: Configure AWS Credentials (Read Write)
+        if: github.event_name == 'push'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
+          aws-region: eu-west-2
+  
+      - name: Configure AWS Credentials (Read Only)
+        if: github.event_name == 'pull_request'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_ONLY }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get docker tag
+        id: get-sha-tag
+        run: |
+          sha=$(echo ${{ github.sha }} | cut -c 1-8)
+          echo "tag=$sha" >> $GITHUB_OUTPUT
+
+      - name: Get redactor
+        run: |
+          mkdir utils/0.2.27
+          wget --quiet -O utils/0.2.27/run-with-redaction.sh https://github.com/nhsconnect/prm-deductions-support-infra/releases/download/0.2.27/run-with-redaction.sh
+          wget --quiet -O utils/0.2.27/redactor https://github.com/nhsconnect/prm-deductions-support-infra/releases/download/0.2.27/redactor
+          chmod +x utils/0.2.27/*
+
+      - name: docker build
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          SHA_TAG: ${{ steps.get-sha-tag.outputs.tag }}
+          BRANCH_TAG: ${{ github.ref_name }}
+        run: |
+          docker build --build-arg UTILS_VERSION=0.2.27 -t $REGISTRY/$REPOSITORY:$SHA_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG .
+          # docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG .
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.2
+
+      # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
+      - name: Create DynamoDB table
+        run: |-
+          awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
+          awslocal s3 mb s3://test-bucket
+
+      - name: docker-compose
+        env:
+          S3_BUCKET_NAME: test-bucket
+          SERVICE_URL: http://this-service:3000
+          DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ steps.get-sha-tag.outputs.tag }}
+        run: docker-compose -f docker-compose-github-actions.yml up -d
+
+      - run: docker ps -a
+
+      - name: Docker /health check
+        run: npm run test:docker
+
+      - name: docker push
+        if: github.event_name == 'push'
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          SHA_TAG: ${{ steps.get-sha-tag.outputs.tag }}
+          BRANCH_TAG: ${{ github.ref_name }}
+        run: |
+          docker push $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$BRANCH_TAG 

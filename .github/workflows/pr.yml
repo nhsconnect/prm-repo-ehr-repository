@@ -15,8 +15,10 @@
 ## - TF_BACKEND_DYNAMODB_TABLE
 ## - TF_BACKEND_KEY
 ##
-## 3) Create the following repository secret (https://github.com/nhsconnect/<repo>/settings/secrets/actions):
+## 3) Create the following repository secrets (https://github.com/nhsconnect/<repo>/settings/secrets/actions):
 ## - ECR_REPOSITORY_NAME
+## - IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_ONLY
+## - IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE
 ##
 ## 4) Edit the ## REPOSITORY SPECIFIC ## section below.
 

@@ -25,7 +25,7 @@ jobs:
         run: npm run lint
 
   sonarcloud:
-    name: Unit/Integration & SonarCloud
+    name: Unit+Integration & SonarCloud
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +37,9 @@ jobs:
 
       # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
       - name: Create DynamoDB table
-        run: awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
+        run: |-
+          awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
+          awslocal s3 mb s3://test-bucket
 
       - uses: actions/setup-node@v4
         with:
