@@ -83,7 +83,7 @@ jobs:
         env:
           S3_BUCKET_NAME: test-bucket
           # https://docs.localstack.cloud/user-guide/integrations/sdks/javascript/
-          LOCALSTACK_URL: http://s3.localhost.localstack.cloud:4566
+          LOCALSTACK_URL: http://localhost:4566
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         run: docker compose -f docker-compose-github-actions.yml up -d
 
