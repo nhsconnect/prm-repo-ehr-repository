@@ -1,5 +1,6 @@
 services:
   this-service:
+    container_name: this-service
     image: ${DOCKER_IMAGE}
     ports:
       - 3000:3000
