@@ -36,10 +36,10 @@ jobs:
         uses: LocalStack/setup-localstack@v0.2.2
 
       # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
-      - name: Create DynamoDB table
+      - name: Create AWS resources
         run: |-
           awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
-          awslocal s3 mb s3://test-bucket
+          awslocal s3 mb s3://test-bucket --region eu-west-2
 
       - uses: actions/setup-node@v4
         with:

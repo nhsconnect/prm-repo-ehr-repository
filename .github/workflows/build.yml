@@ -74,15 +74,15 @@ jobs:
         uses: LocalStack/setup-localstack@v0.2.2
 
       # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
-      - name: Create DynamoDB table
+      - name: Create AWS resources
         run: |-
           awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
-          awslocal s3 mb s3://test-bucket
+          awslocal s3 mb s3://test-bucket --region eu-west-2
 
       - name: docker compose
         env:
           S3_BUCKET_NAME: test-bucket
-          # SERVICE_URL: http://localhost:3000
+          LOCALSTACK_URL: http://localhost:4566
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         run: docker compose -f docker-compose-github-actions.yml up -d
 
