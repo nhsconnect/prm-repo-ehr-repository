@@ -82,19 +82,19 @@ jobs:
       - name: docker compose
         env:
           S3_BUCKET_NAME: test-bucket
-          # SERVICE_URL: this-service://localhost:3000
+          # SERVICE_URL: http://localhost:3000
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         run: docker compose -f docker-compose-github-actions.yml up -d
 
       - name: docker logs
         run: |-
-          sleep 5
+          sleep 60
           docker ps -a
           docker logs -t this-service
   
       - name: Docker /health check
         env:
-          SERVICE_URL: this-service://localhost:3000
+          SERVICE_URL: http://localhost:3000
         run: npm run test:docker
 
       ## Eventually we will want to remove this if when branches can be deployed to dev
@@ -106,4 +106,4 @@ jobs:
           SHA_TAG: ${{ steps.get-tags.outputs.sha }}
           BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
         run: |
-          docker push $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$BRANCH_TAG 
+          docker push $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$BRANCH_TAG
