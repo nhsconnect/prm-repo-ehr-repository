@@ -82,12 +82,12 @@ jobs:
       - name: docker compose
         env:
           S3_BUCKET_NAME: test-bucket
-          SERVICE_URL: http://this-service:3000
+          SERVICE_URL: http://prm-repo-ehr-repository-this-service-1:3000
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         run: |-
           docker compose -f docker-compose-github-actions.yml up -d
           docker ps -a
-          sleep 60
+          sleep 5
           docker logs -t prm-repo-ehr-repository-this-service-1
 
       - name: Docker /health check
