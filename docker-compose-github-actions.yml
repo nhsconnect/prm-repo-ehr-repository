@@ -2,5 +2,7 @@ services:
   this-service:
     container_name: this-service
     image: ${DOCKER_IMAGE}
+    environment:
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
     ports:
       - 3000:3000
