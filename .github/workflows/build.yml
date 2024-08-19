@@ -88,14 +88,23 @@ jobs:
 
       - name: docker logs
         run: |-
-          sleep 60
+          sleep 5
           docker ps -a
           docker logs -t this-service
   
       - name: Docker /health check
         env:
           SERVICE_URL: http://localhost:3000
-        run: npm run test:docker
+        run: |-
+          echo "http://localhost:3000"
+          echo $(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+          echo "http://localhost:3000/health"
+          echo $(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
+          echo "http://127.0.0.1:3000"
+          echo $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000)
+          echo "http://127.0.0.1:3000/health"
+          echo $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/health)
+          npm run test:docker
 
       ## Eventually we will want to remove this if when branches can be deployed to dev
       - name: docker push
