@@ -86,8 +86,8 @@ jobs:
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         run: |-
           docker compose -f docker-compose-github-actions.yml up -d
-
-      - run: docker ps -a
+          docker ps -a
+          docker logs this-service
 
       - name: Docker /health check
         run: npm run test:docker
