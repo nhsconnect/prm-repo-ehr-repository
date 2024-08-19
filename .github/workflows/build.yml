@@ -82,7 +82,7 @@ jobs:
       - name: docker compose
         env:
           S3_BUCKET_NAME: test-bucket
-          # SERVICE_URL: http://localhost:3000
+          # SERVICE_URL: this-service://localhost:3000
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         run: docker compose -f docker-compose-github-actions.yml up -d
 
@@ -94,7 +94,7 @@ jobs:
   
       - name: Docker /health check
         env:
-          SERVICE_URL: http://localhost:3000
+          SERVICE_URL: this-service://localhost:3000
         run: npm run test:docker
 
       ## Eventually we will want to remove this if when branches can be deployed to dev
