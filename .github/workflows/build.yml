@@ -87,7 +87,7 @@ jobs:
         run: |-
           docker compose -f docker-compose-github-actions.yml up -d
           docker ps -a
-          docker logs this-service
+          docker logs prm-repo-ehr-repository-this-service-1
 
       - name: Docker /health check
         run: npm run test:docker
