@@ -91,6 +91,8 @@ jobs:
           docker logs -t prm-repo-ehr-repository-this-service-1
 
       - name: Docker /health check
+        env:
+          SERVICE_URL: http://prm-repo-ehr-repository-this-service-1:3000
         run: npm run test:docker
 
       ## Eventually we will want to remove this if when branches can be deployed to dev

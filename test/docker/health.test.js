@@ -2,6 +2,8 @@ import axios from 'axios';
 
 describe('GET /health', () => {
   it('should return true for all dependencies', async () => {
+    console.log('Calling health check endpoint: %s', `${process.env.SERVICE_URL}/health`);
+    
     const res = await axios.get(`${process.env.SERVICE_URL}/health`, { adapter: 'http' });
 
     expect(res.data).toEqual(
