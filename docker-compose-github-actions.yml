@@ -12,4 +12,5 @@ services:
       - SERVICE_URL=${SERVICE_URL}
     ports:
       - 3000:3000
-    network_mode: service:localstack
+    network_mode: host
+    # network_mode: service:localstack
