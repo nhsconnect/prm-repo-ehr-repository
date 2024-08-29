@@ -33,6 +33,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
           aws-region: eu-west-2
+          mask-aws-account-id: true
 
       - name: Configure AWS Credentials (Read Only)
         if: github.event_name == 'pull_request'
@@ -40,6 +41,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_ONLY }}
           aws-region: eu-west-2
+          mask-aws-account-id: true
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -98,8 +100,8 @@ jobs:
         run: |-
           echo "http://localhost:3000/health"
           echo $(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
-          echo "docker service ls"
-          docker service ls
+          echo "docker ps -a"
+          docker ps -a
           echo "docker logs -t this-service"
           docker logs -t this-service
 
