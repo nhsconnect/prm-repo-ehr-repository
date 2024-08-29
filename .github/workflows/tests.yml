@@ -54,8 +54,8 @@ jobs:
           LOCALSTACK_URL: http://localhost:4566
           DYNAMODB_NAME: local-test-db
           DYNAMODB_LOCAL_ENDPOINT: http://localhost:4566
-          AWS_ACCESS_KEY_ID: 12345678901234567890
-          AWS_SECRET_ACCESS_KEY: 12345678901234567890
+          AWS_ACCESS_KEY_ID: LSIA5678901234567890
+          AWS_SECRET_ACCESS_KEY: LSIA5678901234567890
           SERVICE_URL: http://localhost:3000
 
       - name: SonarCloud Scan
