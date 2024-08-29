@@ -82,8 +82,12 @@ jobs:
       - name: docker compose
         env:
           S3_BUCKET_NAME: test-bucket
-          # https://docs.localstack.cloud/user-guide/integrations/sdks/javascript/
           LOCALSTACK_URL: http://localhost:4566
+          DYNAMODB_NAME: local-test-db
+          DYNAMODB_LOCAL_ENDPOINT: http://localhost:4566
+          AWS_ACCESS_KEY_ID: LSIA5678901234567890
+          AWS_SECRET_ACCESS_KEY: LSIA5678901234567890
+          SERVICE_URL: http://localhost:3000
           DOCKER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         run: docker compose -f docker-compose-github-actions.yml up -d
 
