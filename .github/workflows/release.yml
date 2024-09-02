@@ -1,11 +1,10 @@
-name: Deploy to Dev
+name: Release
 
 on:
-  workflow_call:
-    inputs:
-      branch:
-        required: true
-        type: string
+  workflow_run:
+    workflows: [Build]
+    types:
+      - completed
 
 permissions:
   contents: read  # Required for actions/checkout
@@ -13,12 +12,25 @@ permissions:
 
 jobs:
   deploy:
+    if: ${{ (github.event.workflow_run.conclusion == 'success') && (github.event_name == 'push') }}
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        environment: [test-deploy, pre-prod-deploy, prod-deploy]
+    name: ${{ matrix.environment }}
     runs-on: ubuntu-latest
-    environment: dev-deploy
+    environment: ${{ matrix.environment }}
     defaults:
       run:
         working-directory: ./terraform
     steps:
+      - name: Get Environment Name
+        id: get-environment
+        run: |
+          name=$(echo ${{ matrix.environment }} | sed 's/-deploy//g')
+          echo "name=$name" >> $GITHUB_OUTPUT
+
       - name: Set up git repo
         uses: actions/checkout@v4
 
@@ -61,8 +73,8 @@ jobs:
       - name: ECR Copy
         id: ecr-copy
         run: |
-          source_repo=${{ steps.ecr-holding-account.outputs.accountid }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${{ inputs.branch }}
-          destination_repo=${{ steps.creds.outputs.aws-account-id }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${{ inputs.branch }}
+          source_repo=${{ steps.ecr-holding-account.outputs.accountid }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:main
+          destination_repo=${{ steps.creds.outputs.aws-account-id }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:main
           docker pull $source_repo
           docker tag $source_repo $destination_repo
           docker push $destination_repo
@@ -72,12 +84,12 @@ jobs:
         id: vars
         run: |
           cat > pipeline.auto.tfvars <<EOF
-          task_image_tag = ${{ inputs.branch }}
+          task_image_tag = "main"
           EOF
 
       - name: terraform plan
         id: plan
-        run: terraform plan -var-file="dev.tfvars" -no-color -out=tfplan
+        run: terraform plan -var-file="${{ steps.ecr-holding-account.outputs.name }}.tfvars" -no-color -out=tfplan
 
       - name: terraform apply
         id: apply
@@ -87,13 +99,14 @@ jobs:
         id: ecs
         env:
           SERVICE_NAME: ehr-repo
-        run: aws ecs wait services-stable --region eu-west-2 --cluster dev-$SERVICE_NAME-ecs-cluster --services dev-$SERVICE_NAME-service
+        run: aws ecs wait services-stable --region eu-west-2 --cluster ${{ steps.ecr-holding-account.outputs.name }}-$SERVICE_NAME-ecs-cluster --services ${{ steps.ecr-holding-account.outputs.name }}-$SERVICE_NAME-service
 
       # TODO) Needs connecting to a VPN before it can do this...
+      #       AND changing from `.non-prod`...
       # - name: /health
       #   id: health
       #   env:
       #     SERVICE_NAME: ehr-repo
       #   run: |
       #     nslookup "$SERVICE_NAME.dev.non-prod.patient-deductions.nhs.uk"
-      #     curl -i --fail "https://$SERVICE_NAME.dev.non-prod.patient-deductions.nhs.uk/health"
+      #     curl -i --fail "https://$SERVICE_NAME.${{ steps.ecr-holding-account.outputs.name }}.non-prod.patient-deductions.nhs.uk/health"

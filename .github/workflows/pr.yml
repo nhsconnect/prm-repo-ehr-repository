@@ -2,13 +2,13 @@
 ##
 ## 1) Visit https://github.com/nhsconnect/<repo>/settings/environments and create environments:
 ## - dev
-## - dev-apply
+## - dev-deploy
 ## - test
-## - test-apply
+## - test-deploy
 ## - pre-prod
-## - pre-prod-apply
+## - pre-prod-deploy
 ## - prod
-## - prod-apply
+## - prod-deploy
 ##
 ## 2) For pre-prod and prod environment set Deployment protection rules:
 ##   - Required reviewers
