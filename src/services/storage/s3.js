@@ -70,6 +70,7 @@ export default class S3Service {
   _get_config() {
     if (config.nhsEnvironment === 'local') {
       return {
+        // LSIA... keys are valid for localstack
         accessKeyId: 'LSIA5678901234567890',
         secretAccessKey: 'LSIA5678901234567890',
         endpoint: new Endpoint(config.localstackUrl),

@@ -11,7 +11,7 @@ permissions:
   id-token: write # Required for requesting the JWT
 
 jobs:
-  deploy:
+  release:
     if: ${{ (github.event.workflow_run.conclusion == 'success') && (github.event_name == 'push') }}
     strategy:
       max-parallel: 1
