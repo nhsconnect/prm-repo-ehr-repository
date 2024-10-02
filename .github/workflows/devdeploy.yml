@@ -1,0 +1,99 @@
+name: Deploy to Dev
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+
+permissions:
+  contents: read  # Required for actions/checkout
+  id-token: write # Required for requesting the JWT
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev-deploy
+    defaults:
+      run:
+        working-directory: ./terraform
+    steps:
+      - name: Set up git repo
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        id: creds
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          aws-region: eu-west-2
+          mask-aws-account-id: true
+
+      - name: terraform fmt
+        id: fmt
+        working-directory: ./
+        run: terraform fmt -recursive -check
+
+      - name: terraform init
+        id: init
+        run: terraform init -no-color -upgrade -backend-config="bucket=${{ secrets.TF_BACKEND_BUCKET }}" -backend-config="key=${{ secrets.TF_BACKEND_KEY }}" -backend-config="dynamodb_table=${{ secrets.TF_BACKEND_DYNAMODB_TABLE }}"
+
+      - name: terraform validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Get ECR Holding Account ID
+        id: ecr-holding-account
+        run: |
+          accountid=$(echo ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }} | sed 's/^.*:://g' | sed 's/:.*//g')
+          echo "accountid=$accountid" >> $GITHUB_OUTPUT
+
+      # Needs the AmazonEC2ContainerRegistryPowerUser role
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: "${{ steps.creds.outputs.aws-account-id }},${{ steps.ecr-holding-account.outputs.accountid }}"
+
+      - name: ECR Copy
+        id: ecr-copy
+        run: |
+          source_repo=${{ steps.ecr-holding-account.outputs.accountid }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${{ inputs.branch }}
+          destination_repo=${{ steps.creds.outputs.aws-account-id }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${{ inputs.branch }}
+          docker pull $source_repo
+          docker tag $source_repo $destination_repo
+          docker push $destination_repo
+
+        ## REPOSITORY SPECIFIC ##
+      - name: Setup Terraform variables
+        id: vars
+        run: |
+          cat > pipeline.auto.tfvars <<EOF
+          task_image_tag = ${{ inputs.branch }}
+          EOF
+
+      - name: terraform plan
+        id: plan
+        run: terraform plan -var-file="dev.tfvars" -no-color -out=tfplan
+
+      - name: terraform apply
+        id: apply
+        run: terraform apply -no-color tfplan
+
+      - name: Wait for ECS
+        id: ecs
+        env:
+          SERVICE_NAME: ehr-repo
+        run: aws ecs wait services-stable --region eu-west-2 --cluster dev-$SERVICE_NAME-ecs-cluster --services dev-$SERVICE_NAME-service
+
+      # TODO) Needs connecting to a VPN before it can do this...
+      # - name: /health
+      #   id: health
+      #   env:
+      #     SERVICE_NAME: ehr-repo
+      #   run: |
+      #     nslookup "$SERVICE_NAME.dev.non-prod.patient-deductions.nhs.uk"
+      #     curl -i --fail "https://$SERVICE_NAME.dev.non-prod.patient-deductions.nhs.uk/health"
