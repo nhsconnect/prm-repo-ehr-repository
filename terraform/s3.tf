@@ -151,16 +151,33 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
   count  = var.is_restricted_account ? 1 : 0
   bucket = aws_s3_bucket.ehr_repo_access_logs.id
   policy = jsonencode({
-    "Version" : "2008-10-17",
-    "Sid" : "S3PermitDeveloperAccessLogsPolicy",
+    "Version" : "2012-10-17",
     "Statement" : [
       {
-        Effect : "Allow",
-        Principal : {
+        "Sid" : "S3ServerAccessLogsPolicy",
+        "Effect" : "Allow",
+        "Principal" : {
+          "Service" : "logging.s3.amazonaws.com"
+        },
+        "Action" : "s3:PutObject",
+        "Resource" : "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*",
+        Condition : {
+          Bool : {
+            "aws:SecureTransport" : "false"
+          }
+        }
+      },
+      {
+        "Sid" : "S3PermitDeveloperAccessLogsPolicy",
+        "Effect" : "Allow",
+        "Principal" : {
           "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/RepoDeveloper"
         },
-        Action : ["s3:Get*", "s3:ListBucket"],
-        Resource : [
+        "Action" : [
+          "s3:Get*",
+          "s3:ListBucket"
+        ],
+        "Resource" : [
           "${aws_s3_bucket.ehr_repo_access_logs.arn}",
           "${aws_s3_bucket.ehr_repo_access_logs.arn}/*"
         ],
@@ -175,6 +192,7 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
 }
 
 resource "aws_s3_bucket_policy" "ehr_repo_permit_s3_to_write_access_logs_policy" {
+  count  = var.is_restricted_account ? 0 : 1
   bucket = aws_s3_bucket.ehr_repo_access_logs.id
   policy = jsonencode({
     "Version" : "2012-10-17",
