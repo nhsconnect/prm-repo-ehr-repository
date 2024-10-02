@@ -147,18 +147,19 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
   count  = var.is_restricted_account ? 1 : 0
   bucket = aws_s3_bucket.ehr_repo_access_logs.id
   policy = jsonencode({
-    "Version" : "2008-10-17",
+    "Version" : "2012-10-17",
     "Statement" : [
       {
         Effect : "Allow",
+        Sid : "S3ServerAccessLogsPolicy",
         Principal : {
-          "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/RepoDeveloper"
+          "AWS" : "logging.s3.amazonaws.com"
         },
-        Action : ["s3:Get*", "s3:ListBucket"],
-        Resource : [
-          "${aws_s3_bucket.ehr_repo_access_logs.arn}",
-          "${aws_s3_bucket.ehr_repo_access_logs.arn}/*"
+        Action : [
+          "s3:PutObject"
         ],
+        Resource : [
+          "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"],
         Condition : {
           Bool : {
             "aws:SecureTransport" : "false"
