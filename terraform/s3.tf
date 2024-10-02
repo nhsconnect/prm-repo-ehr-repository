@@ -32,6 +32,10 @@ resource "aws_s3_bucket_logging" "ehr-repo-bucket" {
 
   target_bucket = aws_s3_bucket.ehr_repo_access_logs.id
   target_prefix = local.ehr_repo_bucket_access_logs_prefix
+
+  target_object_key_format {
+    simple_prefix {}
+  }
 }
 
 # resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_bucket" {
@@ -147,19 +151,18 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
   count  = var.is_restricted_account ? 1 : 0
   bucket = aws_s3_bucket.ehr_repo_access_logs.id
   policy = jsonencode({
-    "Version" : "2012-10-17",
+    "Version" : "2008-10-17",
+    "Sid" : "S3PermitDeveloperAccessLogsPolicy",
     "Statement" : [
       {
         Effect : "Allow",
-        Sid : "S3ServerAccessLogsPolicy",
         Principal : {
-          "AWS" : "logging.s3.amazonaws.com"
+          "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/RepoDeveloper"
         },
-        Action : [
-          "s3:PutObject"
-        ],
+        Action : ["s3:Get*", "s3:ListBucket"],
         Resource : [
-          "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"
+          "${aws_s3_bucket.ehr_repo_access_logs.arn}",
+          "${aws_s3_bucket.ehr_repo_access_logs.arn}/*"
         ],
         Condition : {
           Bool : {
