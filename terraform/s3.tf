@@ -159,7 +159,8 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
           "s3:PutObject"
         ],
         Resource : [
-          "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"],
+          "${aws_s3_bucket.ehr_repo_access_logs.arn}/${local.ehr_repo_bucket_access_logs_prefix}*"
+        ],
         Condition : {
           Bool : {
             "aws:SecureTransport" : "false"
