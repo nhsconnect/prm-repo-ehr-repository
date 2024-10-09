@@ -33,12 +33,14 @@ COPY build/                   /app/build
 
 COPY scripts/load-api-keys.sh      /app/scripts/load-api-keys.sh
 COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server
+# TODO: PRMP-123 - Above line may need removing/renaming.
 
 COPY ./certs/deductions.crt /usr/local/share/ca-certificates/deductions.crt
 RUN update-ca-certificates
 
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/deductions.crt
 
+# TODO: PRMP-123 - Which of the following values need removing?
 ENV AUTHORIZATION_KEYS="auth-key-1" \
   SKIP_DB_MIGRATION="" \
   NODE_ENV="prod" \

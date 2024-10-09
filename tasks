@@ -207,7 +207,7 @@ function tf_plan {
   fi
 }
 
-function tf_plan_db_roles {
+function tf_plan_db_roles { # TODO: PRMP-123 - Likely needs removing
   operation=$1
   db_host=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
   db_username=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
@@ -462,12 +462,12 @@ case "${command}" in
       nslookup "ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk"
       curl -i --fail "https://ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk/health"
       ;;
-  _create_secrets)
+  _create_secrets) # TODO: PRMP-123 - NEEDS REMOVING
       _assume_environment_role $NHS_ENVIRONMENT
       generate_username_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username"
       generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password"
       ;;
-  create_secrets)
+  create_secrets) # TODO: PRMP-123 - NEEDS REMOVING
       check_env
       dojo -c Dojofile-infra "./tasks _create_secrets"
       ;;

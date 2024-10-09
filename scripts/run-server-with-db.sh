@@ -17,3 +17,4 @@ source ./scripts/load-api-keys.sh
 jsonPrettify "Starting node.js server" INFO
 set -e
 exec node build/server.js
+# TODO: PRMP-123 - IS THIS FILE NEEDED? IF SO, DOES IT NEED RENAMING TO "run-server.sh"
