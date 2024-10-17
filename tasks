@@ -519,11 +519,11 @@ case "${command}" in
       check_env
       dojo -c Dojofile-infra "./tasks _tf_apply"
       ;;
-  _tf_apply_db_roles)
+  _tf_apply_db_roles) # TODO: PRMP-123 - May need removing
       _assume_environment_role $NHS_ENVIRONMENT
       tf_apply_db_roles
       ;;
-  tf_apply_db_roles)
+  tf_apply_db_roles) # TODO: PRMP-123 - May need removing
       check_env
       dojo -c Dojofile-infra "./tasks _tf_apply_db_roles"
       ;;

@@ -43,7 +43,7 @@ variable "gocd_cidr_block" {
   default = "10.1.0.0/16"
 }
 
-variable "application_database_user" {
+variable "application_database_user" { #TODO: PRMP-120 - Does this need removing?
   default     = "application_user"
   description = "Needs to match with the user created in db-roles tf plan"
 }

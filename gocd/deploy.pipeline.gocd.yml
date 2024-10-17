@@ -8,11 +8,6 @@ common:
           source: terraform/certs_deployment.tfplan
           destination: terraform/
     tasks:
-      - exec: # TODO: PRMP-123 - NEEDS REMOVING
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks create_secrets
       - exec:
           command: /bin/bash
           arguments:
