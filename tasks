@@ -162,17 +162,6 @@ function tf_init {
     -backend-config region=${AWS_DEFAULT_REGION}
 }
 
-function tf_init_db_roles {
-  check_env
-  cd terraform-db-roles
-
-  terraform init -reconfigure \
-    -backend-config key="${NHS_SERVICE}-${NHS_ENVIRONMENT}-db-roles/terraform.tfstate" \
-    -backend-config bucket="prm-deductions-${NHS_ENVIRONMENT}-terraform-state" \
-    -backend-config dynamodb_table="prm-deductions-${NHS_ENVIRONMENT}-terraform-table" \
-    -backend-config region=${AWS_DEFAULT_REGION}
-}
-
 function configure_tf_plan_filename {
   certs=$1
   if [[ "${certs}" == "true" ]]; then
@@ -207,25 +196,6 @@ function tf_plan {
   fi
 }
 
-function tf_plan_db_roles { # TODO: PRMP-123 - Likely needs removing
-  operation=$1
-  db_host=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
-  db_username=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
-  db_password=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
-  db_name=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-name")
-
-  tf_init_db_roles
-  terraform get # modules
-  if [[ "${operation}" == "create" ]]; then
-    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="db-roles.tfplan"
-  elif [[ "${operation}" == "destroy" ]]; then
-    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="db-roles.tfplan" -destroy
-  else
-    echo "Unknown operation (should be create or destroy), got: ${operation}"
-    exit 1
-  fi
-}
-
 function tf_apply {
   tf_init
   terraform get # modules
@@ -236,12 +206,6 @@ function tf_apply_certs {
   tf_init
   terraform get # modules
   terraform apply certs_deployment.tfplan
-}
-
-function tf_apply_db_roles {
-  tf_init_db_roles
-  terraform get # modules
-  terraform apply --parallelism=1 "db-roles.tfplan"
 }
 
 ####################
@@ -462,15 +426,6 @@ case "${command}" in
       nslookup "ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk"
       curl -i --fail "https://ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk/health"
       ;;
-  _create_secrets) # TODO: PRMP-123 - NEEDS REMOVING
-      _assume_environment_role $NHS_ENVIRONMENT
-      generate_username_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username"
-      generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password"
-      ;;
-  create_secrets) # TODO: PRMP-123 - NEEDS REMOVING
-      check_env
-      dojo -c Dojofile-infra "./tasks _create_secrets"
-      ;;
   _tf)
       tf_init
       bash
@@ -499,14 +454,6 @@ case "${command}" in
       _assume_environment_role $NHS_ENVIRONMENT
       tf_plan "$2"
       ;;
-  _tf_plan_db_roles)
-      _assume_environment_role $NHS_ENVIRONMENT
-      tf_plan_db_roles "$2"
-      ;;
-  tf_plan_db_roles)
-      check_env
-      dojo -c Dojofile-infra "./tasks _tf_plan_db_roles $2"
-      ;;
   tf_plan)
       check_env
       dojo -c Dojofile-infra "./tasks _tf_plan $2"
@@ -518,14 +465,6 @@ case "${command}" in
   tf_apply)
       check_env
       dojo -c Dojofile-infra "./tasks _tf_apply"
-      ;;
-  _tf_apply_db_roles) # TODO: PRMP-123 - May need removing
-      _assume_environment_role $NHS_ENVIRONMENT
-      tf_apply_db_roles
-      ;;
-  tf_apply_db_roles) # TODO: PRMP-123 - May need removing
-      check_env
-      dojo -c Dojofile-infra "./tasks _tf_apply_db_roles"
       ;;
   promote_docker_image)
       check_env

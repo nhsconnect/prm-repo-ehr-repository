@@ -39,14 +39,10 @@ RUN update-ca-certificates
 
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/deductions.crt
 
-# TODO: PRMP-123 - Which of the following values need removing?
 ENV AUTHORIZATION_KEYS="auth-key-1" \
   NODE_ENV="prod" \
   NHS_ENVIRONMENT="" \
   S3_BUCKET_NAME="" \
-  DATABASE_USER="" \
-  DATABASE_NAME="" \
-  DATABASE_HOST="" \
   LOCALSTACK_URL=""
 
 WORKDIR /app
