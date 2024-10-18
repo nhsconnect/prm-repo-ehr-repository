@@ -1,3 +1,5 @@
+// TODO: PRMP-120 - Entire file may need removing
+
 resource "postgresql_role" "migration_role" {
   name = "migration_role"
 }
