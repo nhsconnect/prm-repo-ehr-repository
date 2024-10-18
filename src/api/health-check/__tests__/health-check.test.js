@@ -111,9 +111,7 @@ describe('GET /health', () => {
 
   describe('s3 is not available', () => {
     beforeEach(() => {
-      getHealthCheck.mockReturnValue(
-        Promise.resolve(expectedHealthCheckBase(false, false))
-      );
+      getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(false, false)));
     });
 
     it('should return 503 if s3 is not writable', (done) => {
@@ -182,11 +180,8 @@ const expectedS3Base = (isWritable, isConnected) => {
     : s3Base;
 };
 
-const expectedHealthCheckBase = (
-  s3_writable = true,
-  s3_connected = true,
-) => ({
+const expectedHealthCheckBase = (s3_writable = true, s3_connected = true) => ({
   details: {
-    filestore: expectedS3Base(s3_writable, s3_connected),
+    filestore: expectedS3Base(s3_writable, s3_connected)
   }
 });
