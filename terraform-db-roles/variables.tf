@@ -8,7 +8,7 @@ variable "repo_name" {
   default = "prm-deductions-ehr-repository"
 }
 
-variable "db_port" {
+variable "db_port" { // TODO: PRMP-120 - REMOVE
   type    = string
   default = "5432"
 }
@@ -19,7 +19,7 @@ variable "component_name" {
 }
 
 variable "environment" {}
-variable "db_name" {}
-variable "db_host" {}
-variable "db_username" {}
-variable "db_password" {}
+variable "db_name" {}     // TODO: PRMP-120 - REMOVE
+variable "db_host" {}     // TODO: PRMP-120 - REMOVE
+variable "db_username" {} // TODO: PRMP-120 - REMOVE
+variable "db_password" {} // TODO: PRMP-120 - REMOVE
