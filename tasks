@@ -162,6 +162,17 @@ function tf_init {
     -backend-config region=${AWS_DEFAULT_REGION}
 }
 
+function tf_init_db_roles {
+  check_env
+  cd terraform-db-roles
+
+  terraform init -reconfigure \
+    -backend-config key="${NHS_SERVICE}-${NHS_ENVIRONMENT}-db-roles/terraform.tfstate" \
+    -backend-config bucket="prm-deductions-${NHS_ENVIRONMENT}-terraform-state" \
+    -backend-config dynamodb_table="prm-deductions-${NHS_ENVIRONMENT}-terraform-table" \
+    -backend-config region=${AWS_DEFAULT_REGION}
+}
+
 function configure_tf_plan_filename {
   certs=$1
   if [[ "${certs}" == "true" ]]; then
@@ -196,6 +207,21 @@ function tf_plan {
   fi
 }
 
+function tf_plan_db_roles {
+  operation=$1
+
+  tf_init_db_roles
+  terraform get # modules
+  if [[ "${operation}" == "create" ]]; then
+    terraform plan -var environment=$NHS_ENVIRONMENT -out="db-roles.tfplan"
+  elif [[ "${operation}" == "destroy" ]]; then
+    terraform plan -var environment=$NHS_ENVIRONMENT -out="db-roles.tfplan" -destroy
+  else
+    echo "Unknown operation (should be create or destroy), got: ${operation}"
+    exit 1
+  fi
+}
+
 function tf_apply {
   tf_init
   terraform get # modules
@@ -206,6 +232,12 @@ function tf_apply_certs {
   tf_init
   terraform get # modules
   terraform apply certs_deployment.tfplan
+}
+
+function tf_apply_db_roles {
+  tf_init_db_roles
+  terraform get # modules
+  terraform apply --parallelism=1 "db-roles.tfplan"
 }
 
 ####################
@@ -454,6 +486,14 @@ case "${command}" in
       _assume_environment_role $NHS_ENVIRONMENT
       tf_plan "$2"
       ;;
+  _tf_plan_db_roles)
+      _assume_environment_role $NHS_ENVIRONMENT
+      tf_plan_db_roles "$2"
+      ;;
+  tf_plan_db_roles)
+      check_env
+      dojo -c Dojofile-infra "./tasks _tf_plan_db_roles $2"
+      ;;
   tf_plan)
       check_env
       dojo -c Dojofile-infra "./tasks _tf_plan $2"
@@ -465,6 +505,14 @@ case "${command}" in
   tf_apply)
       check_env
       dojo -c Dojofile-infra "./tasks _tf_apply"
+      ;;
+  _tf_apply_db_roles)
+      _assume_environment_role $NHS_ENVIRONMENT
+      tf_apply_db_roles
+      ;;
+  tf_apply_db_roles)
+      check_env
+      dojo -c Dojofile-infra "./tasks _tf_apply_db_roles"
       ;;
   promote_docker_image)
       check_env
