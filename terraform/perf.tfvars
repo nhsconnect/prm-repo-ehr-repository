@@ -3,7 +3,7 @@ component_name = "ehr-repo"
 dns_name       = "ehr-repo"
 repo_name      = "prm-deductions-ehr-repository"
 
-node_env      = "prod"
+node_env = "prod"
 
 s3_bucket_name      = "perf-ehr-repo-bucket"
 s3_prev_bucket_name = "perf-ehr-repo"
