@@ -35,17 +35,8 @@ variable "service_desired_count" {}
 
 variable "alb_deregistration_delay" {}
 
-variable "database_name" {
-  type = string
-}
-
 variable "gocd_cidr_block" {
   default = "10.1.0.0/16"
-}
-
-variable "application_database_user" {
-  default     = "application_user"
-  description = "Needs to match with the user created in db-roles tf plan"
 }
 
 variable "log_level" {
@@ -53,14 +44,8 @@ variable "log_level" {
   default = "debug"
 }
 
-variable "grant_access_through_vpn" {}
 variable "allow_vpn_to_ecs_tasks" { default = false }
-variable "enable_rds_cluster_deletion_protection" {}
 
 variable "is_restricted_account" {
   default = false
-}
-
-variable "db_instance_number" {
-  default = 1
 }
