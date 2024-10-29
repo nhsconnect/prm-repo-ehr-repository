@@ -10,7 +10,7 @@
     "/health": {
       "get": {
         "tags": [],
-        "summary": "Check filestore and database is available",
+        "summary": "Check filestore is available",
         "consumes": ["application/json"],
         "responses": {
           "200": {
@@ -23,7 +23,7 @@
             }
           },
           "503": {
-            "description": "Filestore or Database is currently unavailable",
+            "description": "Filestore is currently unavailable",
             "schema": {
               "$ref": "#/definitions/HealthStatus"
             }
@@ -441,23 +441,6 @@
                   "type": "string"
                 },
                 "available": {
-                  "type": "boolean"
-                },
-                "writable": {
-                  "type": "boolean"
-                },
-                "error": {
-                  "type": "object"
-                }
-              }
-            },
-            "database": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string"
-                },
-                "connection": {
                   "type": "boolean"
                 },
                 "writable": {

@@ -3,7 +3,7 @@ provider "aws" {
   region  = var.region
 }
 
-provider "postgresql" {
+provider "postgresql" { // TODO: PRMP-120 - REMOVE
   host            = var.db_host
   port            = var.db_port
   database        = var.db_name
@@ -19,7 +19,7 @@ terraform {
       source  = "hashicorp/aws"
       version = "3.44.0"
     }
-    postgresql = {
+    postgresql = { // TODO: PRMP-120 - REMOVE
       source  = "cyrilgdn/postgresql"
       version = "1.13.0"
     }
