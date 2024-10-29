@@ -1,0 +1,178 @@
+name: Build & Publish
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read  # Required for actions/checkout
+  id-token: write # Required for requesting the JWT
+
+jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+  sonarcloud:
+    name: Unit+Integration & SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+
+      # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
+      - name: Create AWS resources
+        run: |
+          awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
+          awslocal s3 mb s3://test-bucket --region eu-west-2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:coverage
+        env:
+          S3_BUCKET_NAME: test-bucket
+          LOCALSTACK_URL: http://localhost:4566
+          DYNAMODB_NAME: local-test-db
+          DYNAMODB_LOCAL_ENDPOINT: http://localhost:4566
+          # LSIA... keys are valid for localstack
+          AWS_ACCESS_KEY_ID: LSIA5678901234567890
+          AWS_SECRET_ACCESS_KEY: LSIA5678901234567890
+          SERVICE_URL: http://localhost:3000
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  buildpublish:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    needs: [eslint, sonarcloud]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - run: npm ci
+
+      - name: build
+        run: npm run build
+
+      - name: Configure AWS Credentials (Read Only)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_ONLY }}
+          aws-region: eu-west-2
+          mask-aws-account-id: true
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get docker tags
+        id: get-tags
+        run: |
+          sha=$(echo ${{ github.sha }} | cut -c 1-8)
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          branchname=$(echo ${{ github.ref_name }}${{ github.head_ref }} | sed 's/^[0-9]*\/merge//g')
+          echo "branchname=$branchname" >> $GITHUB_OUTPUT
+
+      - name: Get redactor
+        run: |
+          mkdir utils/0.2.27
+          wget --quiet -O utils/0.2.27/run-with-redaction.sh https://github.com/nhsconnect/prm-deductions-support-infra/releases/download/0.2.27/run-with-redaction.sh
+          wget --quiet -O utils/0.2.27/redactor https://github.com/nhsconnect/prm-deductions-support-infra/releases/download/0.2.27/redactor
+          chmod +x utils/0.2.27/*
+
+      - name: docker build
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          SHA_TAG: ${{ steps.get-tags.outputs.sha }}
+          BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
+        run: |
+          docker build --build-arg UTILS_VERSION=0.2.27 -t $REGISTRY/$REPOSITORY:$SHA_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG -t $REGISTRY/$REPOSITORY:latest .
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+
+      # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
+      - name: Create AWS resources
+        run: |
+          awslocal dynamodb create-table --region eu-west-2 --cli-input-json file://scripts/local-test-db-scheme.json
+          awslocal s3 mb s3://test-bucket --region eu-west-2
+
+      - name: docker compose
+        env:
+          S3_BUCKET_NAME: test-bucket
+          LOCALSTACK_URL: http://localhost:4566
+          DYNAMODB_NAME: local-test-db
+          DYNAMODB_LOCAL_ENDPOINT: http://localhost:4566
+          # LSIA... keys are valid for localstack
+          AWS_ACCESS_KEY_ID: LSIA5678901234567890
+          AWS_SECRET_ACCESS_KEY: LSIA5678901234567890
+          SERVICE_URL: http://localhost:3000
+          DOCKER_IMAGE: ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+        run: docker compose -f docker-compose-github-actions.yml up -d
+
+      - name: sleep
+        run: sleep 5
+
+      # Add this step in to diagnose problems running the health check
+      # - name: docker debug
+      #   run: |
+      #     echo "http://localhost:3000/health"
+      #     echo $(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
+      #     echo "docker ps -a"
+      #     docker ps -a
+      #     echo "docker logs -t this-service"
+      #     docker logs -t this-service
+
+      - name: /health check
+        env:
+          SERVICE_URL: http://localhost:3000
+        run: npm run test:docker
+
+      - name: Configure AWS Credentials (Read Write)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
+          aws-region: eu-west-2
+          mask-aws-account-id: true
+
+      - name: docker push
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          SHA_TAG: ${{ steps.get-tags.outputs.sha }}
+          BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
+        run: |
+          echo "Pushing to ECR... (NOT YET IMPLEMENTED!)"
+          # docker push $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$BRANCH_TAG
