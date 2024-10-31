@@ -34,9 +34,9 @@ resource "aws_s3_bucket_logging" "ehr-repo-bucket" {
   target_prefix = local.ehr_repo_bucket_access_logs_prefix
 
   // TODO PRMP-120 add back in when moving to terraform AWS provider V5
-#   target_object_key_format {
-#     simple_prefix {}
-#   }
+  #   target_object_key_format {
+  #     simple_prefix {}
+  #   }
 }
 
 # resource "aws_s3_bucket_object_lock_configuration" "ehr_repo_bucket" {
