@@ -109,22 +109,24 @@ describe('GET /health', () => {
     });
   });
 
-  describe('s3 is not available', () => {
+  describe('s3 and database are not available', () => {
     beforeEach(() => {
-      getHealthCheck.mockReturnValue(Promise.resolve(expectedHealthCheckBase(false, false)));
+      getHealthCheck.mockReturnValue(
+        Promise.resolve(expectedHealthCheckBase(false, false, false, false))
+      );
     });
 
-    it('should return 503 if s3 is not writable', (done) => {
+    it('should return 503 if both s3 and db are not writable', (done) => {
       request(app).get('/health').expect(503).end(done);
     });
 
-    it('should call logError with the health check result if s3 is not writable', (done) => {
+    it('should call logError with the health check result if both s3 and db are not writable', (done) => {
       request(app)
         .get('/health')
         .expect(() => {
           expect(logError).toHaveBeenCalledWith(
             'Health check failed',
-            expectedHealthCheckBase(false, false)
+            expectedHealthCheckBase(false, false, false, false)
           );
         })
         .end(done);
@@ -180,8 +182,28 @@ const expectedS3Base = (isWritable, isConnected) => {
     : s3Base;
 };
 
-const expectedHealthCheckBase = (s3_writable = true, s3_connected = true) => ({
+const expectedHealthCheckBase = (
+  s3_writable = true,
+  s3_connected = true,
+  db_writable = true,
+  db_connected = true
+) => ({
   details: {
-    filestore: expectedS3Base(s3_writable, s3_connected)
+    filestore: expectedS3Base(s3_writable, s3_connected),
+    database: getExpectedDatabase(db_writable, db_connected)
   }
 });
+
+const getExpectedDatabase = (isWritable, isConnected) => {
+  const baseConf = {
+    connection: isConnected,
+    writable: isWritable
+  };
+
+  return !isWritable
+    ? {
+        ...baseConf,
+        error: mockErrorResponse
+      }
+    : baseConf;
+};

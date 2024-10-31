@@ -209,13 +209,17 @@ function tf_plan {
 
 function tf_plan_db_roles {
   operation=$1
+  db_host=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-host")
+  db_username=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username")
+  db_password=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password")
+  db_name=$(_get_aws_ssm_secret "/repo/${NHS_ENVIRONMENT}/output/prm-deductions-ehr-repository/db-name")
 
   tf_init_db_roles
   terraform get # modules
   if [[ "${operation}" == "create" ]]; then
-    terraform plan -var environment=$NHS_ENVIRONMENT -out="db-roles.tfplan"
+    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="db-roles.tfplan"
   elif [[ "${operation}" == "destroy" ]]; then
-    terraform plan -var environment=$NHS_ENVIRONMENT -out="db-roles.tfplan" -destroy
+    terraform plan -var db_host=$db_host -var db_username=$db_username -var db_password=$db_password -var environment=$NHS_ENVIRONMENT -var db_name=$db_name -out="db-roles.tfplan" -destroy
   else
     echo "Unknown operation (should be create or destroy), got: ${operation}"
     exit 1
@@ -457,6 +461,15 @@ case "${command}" in
       check_env
       nslookup "ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk"
       curl -i --fail "https://ehr-repo.${DOMAIN_INFIX}.patient-deductions.nhs.uk/health"
+      ;;
+  _create_secrets)
+      _assume_environment_role $NHS_ENVIRONMENT
+      generate_username_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-username"
+      generate_secret_ssm_param "/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-db-password"
+      ;;
+  create_secrets)
+      check_env
+      dojo -c Dojofile-infra "./tasks _create_secrets"
       ;;
   _tf)
       tf_init

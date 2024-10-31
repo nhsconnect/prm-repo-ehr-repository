@@ -32,7 +32,7 @@ RUN apk add --no-cache \
 COPY build/                   /app/build
 
 COPY scripts/load-api-keys.sh      /app/scripts/load-api-keys.sh
-COPY scripts/run-server.sh /usr/bin/run-ehr-server
+COPY scripts/run-server-with-db.sh /usr/bin/run-ehr-server
 
 COPY ./certs/deductions.crt /usr/local/share/ca-certificates/deductions.crt
 RUN update-ca-certificates
@@ -40,9 +40,14 @@ RUN update-ca-certificates
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/deductions.crt
 
 ENV AUTHORIZATION_KEYS="auth-key-1" \
+  SKIP_DB_MIGRATION="" \
   NODE_ENV="prod" \
   NHS_ENVIRONMENT="" \
   S3_BUCKET_NAME="" \
+  DATABASE_USER="" \
+  DATABASE_PASSWORD="" \
+  DATABASE_NAME="" \
+  DATABASE_HOST="" \
   LOCALSTACK_URL=""
 
 WORKDIR /app

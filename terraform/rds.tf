@@ -1,5 +1,3 @@
-// TODO: PRMP-120 - REMOVE ENTIRE FILE AND ALL REFERENCES
-
 resource "aws_rds_cluster" "db-cluster" {
   cluster_identifier          = "${var.environment}-ehr-db-cluster"
   engine                      = "aurora-postgresql"

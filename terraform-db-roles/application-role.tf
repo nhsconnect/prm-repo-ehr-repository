@@ -1,5 +1,3 @@
-// TODO: PRMP-120 - Entire file may need removing
-
 resource "postgresql_role" "application_role" {
   name = "application_role"
 }

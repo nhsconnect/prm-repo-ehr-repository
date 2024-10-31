@@ -12,7 +12,7 @@ export function getHealthCheck() {
     logInfo('Health check status', s3HealthCheckResult);
     return {
       version: '1',
-      description: 'Health of the EHR Repo S3 Bucket',
+      description: 'Health of EHR Repo service',
       nhsEnvironment: config.nhsEnvironment,
       details: {
         filestore: s3HealthCheckResult
