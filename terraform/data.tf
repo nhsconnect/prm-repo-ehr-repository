@@ -12,6 +12,14 @@ data "aws_ssm_parameter" "private_zone_id" {
   name = "/repo/${var.environment}/output/prm-deductions-infra/private-root-zone-id"
 }
 
+data "aws_ssm_parameter" "db-username" {
+  name = "/repo/${var.environment}/user-input/ehr-repo-db-username"
+}
+
+data "aws_ssm_parameter" "db-password" {
+  name = "/repo/${var.environment}/user-input/ehr-repo-db-password"
+}
+
 data "aws_ssm_parameter" "dynamodb_name" {
   name = "/repo/${var.environment}/output/prm-deductions-infra/ehr-transfer-tracker-db-name"
 }

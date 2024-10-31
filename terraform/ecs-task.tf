@@ -7,7 +7,13 @@ locals {
     { name = "NODE_ENV", value = var.node_env },
     { name = "NHS_ENVIRONMENT", value = var.environment },
     { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
+    { name = "DATABASE_NAME", value = aws_rds_cluster.db-cluster.database_name }, # TODO: PRMP-120 - Removed code references as part of PRMP-123, terraform needs removing as part of PRMP-120
+    { name = "DATABASE_HOST", value = aws_rds_cluster.db-cluster.endpoint },      # TODO: PRMP-120 - Removed code references as part of PRMP-123, terraform needs removing as part of PRMP-120
+    { name = "DATABASE_USER", value = var.application_database_user },            # TODO: PRMP-120 - Removed code references as part of PRMP-123, terraform needs removing as part of PRMP-120
+    { name = "USE_AWS_RDS_CREDENTIALS", value = "true" },                         # TODO: PRMP-120 - Removed code references as part of PRMP-123, terraform needs removing as part of PRMP-120
     { name = "AWS_REGION", value = var.region },
+    { name = "SKIP_DB_MIGRATION", value = "true" }, # TODO: PRMP-120 - Removed code references as part of PRMP-123, terraform needs removing as part of PRMP-120
+    { name = "USE_SSL_FOR_DB", value = "true" },    # TODO: PRMP-120 - Removed code references as part of PRMP-123, terraform needs removing as part of PRMP-120
     { name = "LOG_LEVEL", value = var.log_level },
     { name = "DYNAMODB_NAME", value = data.aws_ssm_parameter.dynamodb_name.value },
   ]
