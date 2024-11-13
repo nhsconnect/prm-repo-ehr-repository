@@ -7,13 +7,7 @@ locals {
     { name = "NODE_ENV", value = var.node_env },
     { name = "NHS_ENVIRONMENT", value = var.environment },
     { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
-    { name = "DATABASE_NAME", value = aws_rds_cluster.db-cluster.database_name },
-    { name = "DATABASE_HOST", value = aws_rds_cluster.db-cluster.endpoint },
-    { name = "DATABASE_USER", value = var.application_database_user },
-    { name = "USE_AWS_RDS_CREDENTIALS", value = "true" },
     { name = "AWS_REGION", value = var.region },
-    { name = "SKIP_DB_MIGRATION", value = "true" },
-    { name = "USE_SSL_FOR_DB", value = "true" },
     { name = "LOG_LEVEL", value = var.log_level },
     { name = "DYNAMODB_NAME", value = data.aws_ssm_parameter.dynamodb_name.value },
   ]

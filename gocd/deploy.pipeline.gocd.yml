@@ -12,11 +12,6 @@ common:
           command: /bin/bash
           arguments:
             - -c
-            - ./tasks create_secrets
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
             - ./tasks tf_plan_certs create
   deploy_certs: &deploy_certs
     resources:
@@ -33,34 +28,6 @@ common:
           arguments:
             - -c
             - ./tasks tf_apply_certs
-  plan: &plan
-    resources:
-      - docker
-    artifacts:
-      - build:
-          source: terraform/deployment.tfplan
-          destination: terraform/
-    tasks:
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_plan create
-  deploy: &deploy
-    resources:
-      - docker
-    tasks:
-      - fetch:
-          stage: plan
-          job: plan
-          source: terraform/deployment.tfplan
-          destination: terraform/
-          is_file: yes
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_apply
   plan_db: &plan_db
     resources:
       - docker
@@ -89,6 +56,34 @@ common:
           arguments:
             - -c
             - ./tasks tf_apply_db_roles
+  plan: &plan
+    resources:
+      - docker
+    artifacts:
+      - build:
+          source: terraform/deployment.tfplan
+          destination: terraform/
+    tasks:
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_plan create
+  deploy: &deploy
+    resources:
+      - docker
+    tasks:
+      - fetch:
+          stage: plan
+          job: plan
+          source: terraform/deployment.tfplan
+          destination: terraform/
+          is_file: yes
+      - exec:
+          command: /bin/bash
+          arguments:
+            - -c
+            - ./tasks tf_apply
       - exec:
           command: /bin/bash
           arguments:
