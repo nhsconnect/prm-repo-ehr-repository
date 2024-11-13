@@ -1,4 +1,5 @@
 provider "aws" {
+  profile = "default"
   region  = var.region
 }
 
@@ -16,7 +17,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.0"
+      version = "3.44.0"
     }
     postgresql = {
       source  = "cyrilgdn/postgresql"
