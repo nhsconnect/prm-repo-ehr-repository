@@ -130,6 +130,9 @@ pipelines:
           jobs:
             plan_db: *plan_db
       - deploy_db:
+          approval:
+            type: manual
+            allow_only_on_success: true
           clean_workspace: true
           jobs:
             deploy_db: *deploy_db
@@ -138,6 +141,9 @@ pipelines:
           jobs:
             plan: *plan
       - deploy:
+          approval:
+            type: manual
+            allow_only_on_success: true
           clean_workspace: true
           jobs:
             deploy: *deploy
