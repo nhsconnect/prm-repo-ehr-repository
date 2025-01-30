@@ -15,7 +15,7 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 100
   - package-ecosystem: "docker" 
-    directory: "/image" 
+    directory: "/" 
     schedule: 
       interval: "weekly" 
       timezone: "Europe/London" 
