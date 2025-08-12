@@ -187,6 +187,21 @@ resource "aws_s3_bucket_policy" "ehr_repo_permit_developer_to_see_access_logs_po
             "aws:SecureTransport" : "false"
           }
         }
+      },
+      {
+        "Sid" : "S3EnforceHTTPSPolicy",
+        "Effect" : "Deny",
+        "Principal" : "*",
+        "Action" : "s3:*",
+        "Resource" : [
+          aws_s3_bucket.ehr_repo_access_logs.arn,
+          "${aws_s3_bucket.ehr_repo_access_logs.arn}/*"
+        ],
+        "Condition" : {
+          "Bool" : {
+            "aws:SecureTransport" : "false"
+          }
+        }
       }
     ]
   })
