@@ -28,34 +28,6 @@ common:
           arguments:
             - -c
             - ./tasks tf_apply_certs
-  plan_db: &plan_db
-    resources:
-      - docker
-    artifacts:
-      - build:
-          source: terraform-db-roles/db-roles.tfplan
-          destination: terraform-db-roles/
-    tasks:
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_plan_db_roles create
-  deploy_db: &deploy_db
-    resources:
-      - docker
-    tasks:
-      - fetch:
-          stage: plan_db
-          job: plan_db
-          source: terraform-db-roles/db-roles.tfplan
-          destination: terraform-db-roles/
-          is_file: yes
-      - exec:
-          command: /bin/bash
-          arguments:
-            - -c
-            - ./tasks tf_apply_db_roles
   plan: &plan
     resources:
       - docker
@@ -89,6 +61,34 @@ common:
           arguments:
             - -c
             - ./tasks wait_ecs
+    plan_db: &plan_db
+      resources:
+        - docker
+      artifacts:
+        - build:
+            source: terraform-db-roles/db-roles.tfplan
+            destination: terraform-db-roles/
+      tasks:
+        - exec:
+            command: /bin/bash
+            arguments:
+              - -c
+              - ./tasks tf_plan_db_roles create
+    deploy_db: &deploy_db
+      resources:
+        - docker
+      tasks:
+        - fetch:
+            stage: plan_db
+            job: plan_db
+            source: terraform-db-roles/db-roles.tfplan
+            destination: terraform-db-roles/
+            is_file: yes
+        - exec:
+            command: /bin/bash
+            arguments:
+              - -c
+              - ./tasks tf_apply_db_roles
 pipelines:
   "prm-deductions-ehr-repository.dev":
     group: repository

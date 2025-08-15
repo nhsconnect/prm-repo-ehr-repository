@@ -14,13 +14,3 @@ variable "component_name" {
 }
 
 variable "environment" {}
-
-## RDS
-variable "db_name" {}
-variable "db_host" {}
-variable "db_username" {}
-variable "db_password" {}
-variable "db_port" {
-  type    = string
-  default = "5432"
-}
