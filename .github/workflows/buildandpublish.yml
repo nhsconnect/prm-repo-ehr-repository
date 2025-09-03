@@ -17,7 +17,7 @@ jobs:
     name: ESLint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v4
         with:
@@ -32,12 +32,12 @@ jobs:
     name: Unit+Integration & SonarCloud
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Start LocalStack
-        uses: LocalStack/setup-localstack@v0.2.3
+        uses: LocalStack/setup-localstack@v0.2.4
 
       # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
       - name: Create AWS resources
@@ -64,7 +64,7 @@ jobs:
           SERVICE_URL: http://localhost:3000
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v3
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [eslint, sonarcloud]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v4
         with:
@@ -121,7 +121,7 @@ jobs:
           docker build --build-arg UTILS_VERSION=0.2.27 -t $REGISTRY/$REPOSITORY:$SHA_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG -t $REGISTRY/$REPOSITORY:latest .
 
       - name: Start LocalStack
-        uses: LocalStack/setup-localstack@v0.2.3
+        uses: LocalStack/setup-localstack@v0.2.4
 
       # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
       - name: Create AWS resources
