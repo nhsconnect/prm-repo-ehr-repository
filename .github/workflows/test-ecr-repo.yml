@@ -1,0 +1,167 @@
+name: Test ECR Repository
+
+on:
+  workflow_call:
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read  # Required for actions/checkout
+  id-token: write # Required for requesting the JWT
+  pull-requests: write # Required to write comments
+
+env:
+  S3_BUCKET_NAME: test-bucket
+  LOCALSTACK_URL: http://localhost:4566
+  DYNAMODB_NAME: local-test-db
+  DYNAMODB_LOCAL_ENDPOINT: http://localhost:4566
+  # LSIA... keys are valid for localstack
+  AWS_ACCESS_KEY_ID: LSIA5678901234567890
+  AWS_SECRET_ACCESS_KEY: LSIA5678901234567890
+  SERVICE_URL: http://localhost:3000
+
+jobs:
+  eslint:
+    name: ESLint
+    defaults:
+      run:
+        working-directory: "./services/ecr-repository"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - run: npm install eslint
+
+      - name: ESLint
+        run: npm run lint
+
+  unit_test:
+    name: Unit+Integration & SonarCloud
+    defaults:
+      run:
+        working-directory: "./services/ecr-repository"
+    needs: ["eslint"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+#           TODO check which version we want to use
+
+      - name: Clean install
+        run: npm ci
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.4
+        with:
+          install-awslocal: 'true'
+
+      # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
+      - name: Create AWS resources
+        run: |
+          awslocal dynamodb create-table --region ${{ var.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json
+          awslocal s3 mb s3://test-bucket --region ${{ var.AWS_REGION }}
+
+# TODO test:coverage uses a dotenv/config where is this defined and what does it contain?
+# TODO does this step need localstack?
+      - name: Run unit tests
+        run: npm run test:coverage
+        env:
+          S3_BUCKET_NAME: $S3_BUCKET_NAME
+          LOCALSTACK_URL: $LOCALSTACK_URL
+          DYNAMODB_NAME: $DYNAMODB_NAME
+          DYNAMODB_LOCAL_ENDPOINT: $DYNAMODB_LOCAL_ENDPOINT
+          # LSIA... keys are valid for localstack
+          AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+          SERVICE_URL: $SERVICE_URL
+
+  integration_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./services/ecr-repository"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+#           TODO check which version we want to use
+
+      - name: Clean install
+        run: npm ci
+
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.4
+        with:
+          install-awslocal: 'true'
+
+      # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
+      - name: Create AWS resources
+        run: |
+          awslocal dynamodb create-table --region ${{ var.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json
+          awslocal s3 mb s3://$S3_BUCKET_NAME --region ${{ var.AWS_REGION }}}
+
+    # TODO do we need docker compose, or can we just run build the image normally?
+      - name: docker compose
+        env:
+          S3_BUCKET_NAME: $S3_BUCKET_NAME
+          LOCALSTACK_URL: $LOCALSTACK_URL
+          DYNAMODB_NAME: $DYNAMODB_NAME
+          DYNAMODB_LOCAL_ENDPOINT: $DYNAMODB_LOCAL_ENDPOINT
+          # LSIA... keys are valid for localstack
+          AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+          SERVICE_URL: $SERVICE_URL
+          DOCKER_IMAGE: ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+        run: docker compose -f docker-compose-github-actions.yml up -d
+
+# TODO what's the sleep for? to allow health check to work?
+      - name: sleep
+        run: sleep 5
+
+      # Add this step in to diagnose problems running the health check
+      # - name: docker debug
+      #   run: |
+      #     echo "http://localhost:3000/health"
+      #     echo $(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
+      #     echo "docker ps -a"
+      #     docker ps -a
+      #     echo "docker logs -t this-service"
+      #     docker logs -t this-service
+
+      - name: /health check
+        env:
+          SERVICE_URL: $SERVICE_URL
+        run: npm run test:docker
+
+      - name: Configure AWS Credentials (Read Write)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
+          aws-region: ${{ var.AWS_REGION }}
+          mask-aws-account-id: true
+
+  sonarcloud:
+    runs-on: ubuntu-latest
+    steps:
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarqube-scan-action@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
