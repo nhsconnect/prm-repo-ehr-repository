@@ -6,6 +6,8 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - 'services/ehr-repository/**'
 
 permissions:
   contents: read  # Required for actions/checkout
@@ -23,11 +25,12 @@ env:
   SERVICE_URL: http://localhost:3000
 
 jobs:
+#  TODO npm test runs eslint and fix already
   eslint:
     name: ESLint
     defaults:
       run:
-        working-directory: "./services/ecr-repository"
+        working-directory: './services/ecr-repository'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -45,7 +48,7 @@ jobs:
     name: Unit+Integration & SonarCloud
     defaults:
       run:
-        working-directory: "./services/ecr-repository"
+        working-directory: './services/ecr-repository'
     needs: ["eslint"]
     runs-on: ubuntu-latest
     steps:
@@ -91,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "./services/ecr-repository"
+        working-directory: './services/ecr-repository'
     steps:
       - uses: actions/checkout@v5
         with:
@@ -132,6 +135,7 @@ jobs:
         run: docker compose -f docker-compose-github-actions.yml up -d
 
 # TODO what's the sleep for? to allow health check to work?
+#     TODO there's a script that waits for it to be connected, may also be able to use a needs
       - name: sleep
         run: sleep 5
 
