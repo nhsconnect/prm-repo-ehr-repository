@@ -25,7 +25,7 @@ env:
   SERVICE_URL: http://localhost:3000
 
 jobs:
-#  TODO npm test runs eslint and fix already
+#  TODO npm run test runs eslint and fix already
   eslint:
     name: ESLint
     defaults:
@@ -45,11 +45,10 @@ jobs:
         run: npm run lint
 
   unit_test:
-    name: Unit+Integration & SonarCloud
+    name: Unit Test
     defaults:
       run:
         working-directory: './services/ecr-repository'
-    needs: ["eslint"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -65,38 +64,19 @@ jobs:
       - name: Clean install
         run: npm ci
 
-      - name: Start LocalStack
-        uses: LocalStack/setup-localstack@v0.2.4
-        with:
-          install-awslocal: 'true'
+      - name: Run Unit Tests
+        run: npm run test
 
-      # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
-      - name: Create AWS resources
-        run: |
-          awslocal dynamodb create-table --region ${{ var.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json
-          awslocal s3 mb s3://test-bucket --region ${{ var.AWS_REGION }}
-
-# TODO test:coverage uses a dotenv/config where is this defined and what does it contain?
-# TODO does this step need localstack?
-      - name: Run unit tests
-        run: npm run test:coverage
-        env:
-          S3_BUCKET_NAME: $S3_BUCKET_NAME
-          LOCALSTACK_URL: $LOCALSTACK_URL
-          DYNAMODB_NAME: $DYNAMODB_NAME
-          DYNAMODB_LOCAL_ENDPOINT: $DYNAMODB_LOCAL_ENDPOINT
-          # LSIA... keys are valid for localstack
-          AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-          SERVICE_URL: $SERVICE_URL
 
   integration_test:
+    name: Integration Test
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: './services/ecr-repository'
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -108,6 +88,9 @@ jobs:
 
       - name: Clean install
         run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Start LocalStack
         uses: LocalStack/setup-localstack@v0.2.4
@@ -120,7 +103,28 @@ jobs:
           awslocal dynamodb create-table --region ${{ var.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json
           awslocal s3 mb s3://$S3_BUCKET_NAME --region ${{ var.AWS_REGION }}}
 
-    # TODO do we need docker compose, or can we just run build the image normally?
+      - name: Get tags
+        id: get-tags
+        run: |
+          sha=$(echo ${{ github.sha }} | cut -c 1-8)
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          branchname=$(echo ${{ github.ref_name }}${{ github.head_ref }} | sed 's/^[0-9]*\/merge//g')
+          echo "branchname=$branchname" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS Credentials (Read Only)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_ONLY }}
+          aws-region: ${{ var.AWS_REGION }}
+          mask-aws-account-id: true
+          
+      - name: Docker Build
+        env:
+          SHA_TAG: ${{ steps.get-tags.outputs.sha }}
+          BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
+        run: |
+          docker build -f Dockerfile test .
+
       - name: docker compose
         env:
           S3_BUCKET_NAME: $S3_BUCKET_NAME
@@ -131,11 +135,9 @@ jobs:
           AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
           AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
           SERVICE_URL: $SERVICE_URL
-          DOCKER_IMAGE: ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
-        run: docker compose -f docker-compose-github-actions.yml up -d
+          DOCKER_IMAGE: test
+        run: docker compose -f docker-compose-test.yml up -d
 
-# TODO what's the sleep for? to allow health check to work?
-#     TODO there's a script that waits for it to be connected, may also be able to use a needs
       - name: sleep
         run: sleep 5
 
@@ -154,14 +156,11 @@ jobs:
           SERVICE_URL: $SERVICE_URL
         run: npm run test:docker
 
-      - name: Configure AWS Credentials (Read Write)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
-          aws-region: ${{ var.AWS_REGION }}
-          mask-aws-account-id: true
+      - name: Run Integration Tests
+        run: npm run test:integration
 
   sonarcloud:
+    name: SoundCloud scan
     runs-on: ubuntu-latest
     steps:
     - name: SonarCloud Scan

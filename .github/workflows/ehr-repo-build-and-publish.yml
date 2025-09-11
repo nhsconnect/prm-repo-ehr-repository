@@ -1,6 +1,6 @@
 # TODO make sure working dir is correct,
 # TODO check build steps required for image to be baked and published
-# TODO double check permissions
+# TODO double check permissions - AWS
 # TODO maybe use build workflow to test creating and testing of container on branch
 name: Build & Publish EHR Repository
 
@@ -8,6 +8,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'services/ehr-repository/**'
+
+  workflow_call:
 
 permissions:
   contents: read  # Required for actions/checkout
@@ -41,11 +45,10 @@ jobs:
       - name: build
         run: npm run build
 
-# TODO need to configure read/write credentials for the next steps
-      - name: Configure AWS Credentials (Read Only)
+      - name: Configure AWS Credentials (Read Write)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_ONLY }}
+          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
           aws-region: ${{ var.AWS_REGION }}
           mask-aws-account-id: true
 
@@ -67,6 +70,12 @@ jobs:
           REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
           SHA_TAG: ${{ steps.get-tags.outputs.sha }}
           BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
+          S3_BUCKET_NAME: ''
+          NHS_ENVIRONMENT: ''
+
+#          LOCALSTACK_URL
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$SHA_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG -t $REGISTRY/$REPOSITORY:latest .
-          docker push $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$BRANCH_TAG
+          docker push $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$BRANCH_TAG $REGISTRY/$REPOSITORY:latest
+
+#      TODO Create an action within the infra repo to run a deployment of a new task definition using this new image

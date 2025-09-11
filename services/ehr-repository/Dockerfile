@@ -39,6 +39,7 @@ RUN update-ca-certificates
 
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/deductions.crt
 
+# TODO where do these come from?
 ENV AUTHORIZATION_KEYS="auth-key-1" \
   NODE_ENV="prod" \
   NHS_ENVIRONMENT="" \
