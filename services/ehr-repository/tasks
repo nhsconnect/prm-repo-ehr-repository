@@ -345,30 +345,8 @@ case "${command}" in
     configure_local_envs
     prepare_local_envs_for_ide
     ;;
-  _test_lint)
-      npm install
-      npm run lint
-      ;;
-  test_lint)
-      dojo "./tasks _test_lint"
-      ;;
-  _test_unit)
-      npm install
-      npm run test:unit
-      ;;
   test_unit)
       dojo "./tasks _test_unit"
-      ;;
- _test_integration_local)
-      configure_local_envs
-      npm install
-      npm run test:integration
-      ;;
-  _test_integration)
-      npm install
-      sh scripts/create-dynamodb-table.sh
-      node scripts/wait-for-localstack.js
-      npm run test:integration
       ;;
   test_integration)
       configure_local_envs

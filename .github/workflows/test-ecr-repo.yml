@@ -70,6 +70,7 @@ jobs:
 
   integration_test:
     name: Integration Test
+    needs: [eslint]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -89,9 +90,6 @@ jobs:
       - name: Clean install
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
       - name: Start LocalStack
         uses: LocalStack/setup-localstack@v0.2.4
         with:
@@ -100,64 +98,29 @@ jobs:
       # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
       - name: Create AWS resources
         run: |
-          awslocal dynamodb create-table --region ${{ var.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json
+          awslocal dynamodb create-table --region ${{ var.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json --no-cli-page
           awslocal s3 mb s3://$S3_BUCKET_NAME --region ${{ var.AWS_REGION }}}
 
-      - name: Get tags
-        id: get-tags
-        run: |
-          sha=$(echo ${{ github.sha }} | cut -c 1-8)
-          echo "sha=$sha" >> $GITHUB_OUTPUT
-          branchname=$(echo ${{ github.ref_name }}${{ github.head_ref }} | sed 's/^[0-9]*\/merge//g')
-          echo "branchname=$branchname" >> $GITHUB_OUTPUT
-
-      - name: Configure AWS Credentials (Read Only)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_ONLY }}
-          aws-region: ${{ var.AWS_REGION }}
-          mask-aws-account-id: true
-          
-      - name: Docker Build
-        env:
-          SHA_TAG: ${{ steps.get-tags.outputs.sha }}
-          BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
-        run: |
-          docker build -f Dockerfile test .
-
-      - name: docker compose
-        env:
-          S3_BUCKET_NAME: $S3_BUCKET_NAME
-          LOCALSTACK_URL: $LOCALSTACK_URL
-          DYNAMODB_NAME: $DYNAMODB_NAME
-          DYNAMODB_LOCAL_ENDPOINT: $DYNAMODB_LOCAL_ENDPOINT
-          # LSIA... keys are valid for localstack
-          AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-          SERVICE_URL: $SERVICE_URL
-          DOCKER_IMAGE: test
-        run: docker compose -f docker-compose-test.yml up -d
-
-      - name: sleep
-        run: sleep 5
-
-      # Add this step in to diagnose problems running the health check
-      # - name: docker debug
-      #   run: |
-      #     echo "http://localhost:3000/health"
-      #     echo $(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
-      #     echo "docker ps -a"
-      #     docker ps -a
-      #     echo "docker logs -t this-service"
-      #     docker logs -t this-service
-
-      - name: /health check
-        env:
-          SERVICE_URL: $SERVICE_URL
-        run: npm run test:docker
-
-      - name: Run Integration Tests
+      - name: Run Integration Test
         run: npm run test:integration
+
+  test_docker:
+    name: Test Docker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: './services/ecr-repository'
+
+
+  test_e2e:
+    name: Test E2E
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: './services/ecr-repository'
+
+
+
 
   sonarcloud:
     name: SoundCloud scan
