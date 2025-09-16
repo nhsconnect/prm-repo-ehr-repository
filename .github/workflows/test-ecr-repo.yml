@@ -104,23 +104,6 @@ jobs:
       - name: Run Integration Test
         run: npm run test:integration
 
-  test_docker:
-    name: Test Docker
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: './services/ecr-repository'
-
-
-  test_e2e:
-    name: Test E2E
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: './services/ecr-repository'
-
-
-
 
   sonarcloud:
     name: SoundCloud scan

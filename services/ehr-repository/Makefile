@@ -4,5 +4,3 @@ test-local-all:
 	venv/bin/awslocal s3 mb s3://test-bucket
 	npm run test:coverage
 	docker kill localstack-main
-
-test-docker:

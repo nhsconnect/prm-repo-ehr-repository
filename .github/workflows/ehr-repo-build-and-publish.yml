@@ -12,6 +12,10 @@ on:
       - 'services/ehr-repository/**'
 
   workflow_call:
+    inputs:
+      environment:
+        default: "dev"
+        type: string
 
 permissions:
   contents: read  # Required for actions/checkout
@@ -70,12 +74,10 @@ jobs:
           REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
           SHA_TAG: ${{ steps.get-tags.outputs.sha }}
           BRANCH_TAG: ${{ steps.get-tags.outputs.branchname }}
-          S3_BUCKET_NAME: ''
-          NHS_ENVIRONMENT: ''
-
-#          LOCALSTACK_URL
+          NHS_ENVIRONMENT: ${{ inputs.environment }}
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$SHA_TAG -t $REGISTRY/$REPOSITORY:$BRANCH_TAG -t $REGISTRY/$REPOSITORY:latest .
           docker push $REGISTRY/$REPOSITORY:$SHA_TAG $REGISTRY/$REPOSITORY:$BRANCH_TAG $REGISTRY/$REPOSITORY:latest
+# TODO do we want to build the image here?
 
 #      TODO Create an action within the infra repo to run a deployment of a new task definition using this new image
