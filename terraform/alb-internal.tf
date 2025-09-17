@@ -35,7 +35,6 @@ resource "aws_alb" "alb-internal" {
   access_logs {
     bucket  = data.aws_ssm_parameter.alb_access_logs_bucket.value
     enabled = true
-    prefix  = "ehr-repository"
   }
 
   tags = {
