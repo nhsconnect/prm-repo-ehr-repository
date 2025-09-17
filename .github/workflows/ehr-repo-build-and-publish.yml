@@ -1,7 +1,5 @@
-# TODO make sure working dir is correct,
-# TODO check build steps required for image to be baked and published
 # TODO double check permissions - AWS
-# TODO maybe use build workflow to test creating and testing of container on branch
+# TODO where would/how would we like to promote images, use similar workflow from GP2GP repos?
 name: Build & Publish EHR Repository
 
 on:
@@ -37,11 +35,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-# TODO node version?
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 'latest'
+          node-version: 22
 
       - name: Clean install
         run: npm ci
