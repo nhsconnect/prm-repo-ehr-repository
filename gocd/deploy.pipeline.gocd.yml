@@ -104,7 +104,7 @@ pipelines:
         blacklist:
           - docs/**/*.*
       app:
-        pipeline: prm-deductions-ehr-repository
+        pipeline: prm-deductions-ehr-repo
         stage: test_docker
       base_infra:
         pipeline: prm-deductions-infra
@@ -170,7 +170,7 @@ pipelines:
         pipeline: prm-deductions-infra
         stage: deploy_test
       dev_env:
-        pipeline: prm-deductions-ehr-repository.dev
+        pipeline: prm-deductions-ehr-repo.dev
         stage: functional
 #      e2e:
 #        pipeline: continuity-e2e-tests.dev
@@ -248,7 +248,7 @@ pipelines:
         pipeline: prm-deductions-infra
         stage: deploy_perf
       test_env:
-        pipeline: prm-deductions-ehr-repository.test
+        pipeline: prm-deductions-ehr-repo.test
         stage: functional
 #      e2e:
 #        pipeline: continuity-e2e-tests.test
@@ -326,7 +326,7 @@ pipelines:
         pipeline: prm-deductions-infra
         stage: deploy_pre_prod
       test_env:
-        pipeline: prm-deductions-ehr-repository.test
+        pipeline: prm-deductions-ehr-repo.test
         stage: functional
 #      e2e:
 #        pipeline: continuity-e2e-tests.test
@@ -404,7 +404,7 @@ pipelines:
         pipeline: prm-deductions-infra
         stage: deploy_pre_prod
       pre_prod_env:
-        pipeline: prm-deductions-ehr-repository.pre-prod
+        pipeline: prm-deductions-ehr-repo.pre-prod
         stage: functional
     environment_variables:
       NHS_ENVIRONMENT: prod

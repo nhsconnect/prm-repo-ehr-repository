@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - 'services/ehr-repository/**'
+      - '../../services/ehr-repo/**'
 
 permissions:
   contents: read  # Required for actions/checkout
@@ -25,12 +25,12 @@ env:
   SERVICE_URL: http://localhost:3000
 
 jobs:
-#  TODO npm run test runs eslint and fix already
+#  TODO npm run test runs eslint and fix already...
   eslint:
     name: ESLint
     defaults:
       run:
-        working-directory: './services/ecr-repository'
+        working-directory: './services/ecr-repo'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -44,14 +44,16 @@ jobs:
       - name: ESLint
         run: npm run lint
 
+
   unit_test:
     name: Unit Test
     defaults:
       run:
-        working-directory: './services/ecr-repository'
+        working-directory: './services/ecr-repo'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout Repo
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -73,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: './services/ecr-repository'
+        working-directory: './services/ecr-repo'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -83,8 +85,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 'latest'
-#           TODO check which version we want to use
+          node-version: 22
 
       - name: Clean install
         run: npm ci

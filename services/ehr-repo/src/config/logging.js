@@ -27,7 +27,7 @@ export const addCommonFields = format((info) => {
   }
 
   updated.level = updated.level.toUpperCase();
-  updated['service'] = 'ehr-repository';
+  updated['service'] = 'ehr-repo';
   updated['environment'] = nhsEnvironment;
   return updated;
 });
