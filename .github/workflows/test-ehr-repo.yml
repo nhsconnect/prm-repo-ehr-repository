@@ -57,6 +57,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v5
         with:
+          ref: ${{ github.ref_name }}
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up Node
@@ -82,6 +83,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
+          ref: ${{ github.ref_name }}
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up Node
