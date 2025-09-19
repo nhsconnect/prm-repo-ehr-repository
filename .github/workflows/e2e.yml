@@ -48,4 +48,4 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
           AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
         run: |
-          ./gradlew test --tests "uk.nhs.prm.e2etests.test.RepositoryE2ETest"
+          ./gradlew test --tests "uk.nhs.prm.e2etests.test.repositorye2etest.RepositoryE2ETest"
