@@ -31,11 +31,13 @@ jobs:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
+        id: creds
         with:
           #          TODO might want a testing specific testing role
           role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
           aws-region: ${{ vars.AWS_REGION }}
           mask-aws-account-id: true
+          output-credentials: true
 
       - name: Build
         run: |
@@ -47,5 +49,8 @@ jobs:
           NHS_ENVIRONMENT: dev
           AWS_REGION: ${{ vars.AWS_REGION }}
           AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
+          AWS_SESSION: ${{ steps.creds.outputs.aws-session-token }}
+          AWS_ACCESS_KEY_ID: ${{ steps.creds.outputs.aws-access-key-id }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.creds.outputs.aws-secret-access-key }}
         run: |
           ./gradlew test --tests "uk.nhs.prm.e2etests.test.repositorye2etest.RepositoryE2ETest"
