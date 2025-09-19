@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: './services/ecr-repo'
+        working-directory: './services/ehr-repo'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
