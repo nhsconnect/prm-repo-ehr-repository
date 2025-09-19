@@ -39,6 +39,7 @@ jobs:
 
       - name: Build
         run: |
+          chmod +x ./gradlew
           ./gradlew build
 
       - name: Run End to End tests
