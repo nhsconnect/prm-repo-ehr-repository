@@ -29,7 +29,7 @@ env:
 jobs:
 #  TODO npm run test runs eslint and fix already...
   run_tests:
-    name: ESLint
+    name: Lint, Unit, and Integration
     defaults:
       run:
         working-directory: './services/ehr-repo'
@@ -77,7 +77,6 @@ jobs:
           NHS_ENVIRONMENT: local
           EHR_URL: http://localhost:3000
           AUTHORIZATION_KEYS: auth-key-1
-          API_KEY_FOR_LOCAL: auth-key-1
         run: npm run test:coverage
 
 
