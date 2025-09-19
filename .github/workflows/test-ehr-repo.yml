@@ -63,7 +63,7 @@ jobs:
       - name: Create AWS resources
         run: |
           awslocal dynamodb create-table --region ${{ vars.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json
-          awslocal s3 mb s3://$S3_BUCKET_NAME --region ${{ vars.AWS_REGION }}}
+          awslocal s3 mb s3://$S3_BUCKET_NAME --region ${{ vars.AWS_REGION }}
 
       - name: Run Tests with Coverage
         env:
