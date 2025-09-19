@@ -51,7 +51,7 @@ jobs:
     name: Unit Test
     defaults:
       run:
-        working-directory: './services/ecr-repo'
+        working-directory: './services/ehr-repo'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
