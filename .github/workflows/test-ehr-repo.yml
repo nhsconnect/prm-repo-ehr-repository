@@ -32,10 +32,13 @@ jobs:
     name: ESLint
     defaults:
       run:
-        working-directory: './services/ecr-repo'
+        working-directory: './services/ehr-repo'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
