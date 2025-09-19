@@ -105,7 +105,7 @@ jobs:
       # https://docs.aws.amazon.com/cli/latest/reference/dynamodb/create-table.html
       - name: Create AWS resources
         run: |
-          awslocal dynamodb create-table --region ${{ vars.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json --no-cli-page
+          awslocal dynamodb create-table --region ${{ vars.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json
           awslocal s3 mb s3://$S3_BUCKET_NAME --region ${{ vars.AWS_REGION }}}
 
       - name: Run Integration Test
