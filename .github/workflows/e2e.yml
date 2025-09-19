@@ -38,9 +38,8 @@ jobs:
 
       - name: Run End to End tests
         with:
-          env:
-            NHS_ENVIRONMENT: dev
-            AWS_REGION: ${{ vars.AWS_REGION }}
-            AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
+          NHS_ENVIRONMENT: dev
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
         run: |
           ./gradlew test --tests "uk.nhs.prm.e2etests.test.RepositoryE2ETest"
