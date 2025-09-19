@@ -28,7 +28,7 @@ env:
 
 jobs:
 #  TODO npm run test runs eslint and fix already...
-  eslint:
+  run_tests:
     name: ESLint
     defaults:
       run:
@@ -40,59 +40,16 @@ jobs:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 'latest'
+          node-version: 22
 
       - run: npm install eslint
 
       - name: ESLint
         run: npm run lint
 
-
-  unit_test:
-    name: Unit Test
-    defaults:
-      run:
-        working-directory: './services/ehr-repo'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Clean install
-        run: npm ci
-
-      - name: Run Unit Tests
-        run: npm run test
-
-
-  integration_test:
-    name: Integration Test
-    needs: [eslint]
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: './services/ehr-repo'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
 
       - name: Clean install
         run: npm ci
@@ -108,7 +65,7 @@ jobs:
           awslocal dynamodb create-table --region ${{ vars.AWS_REGION }} --cli-input-json file://scripts/local-test-db-scheme.json
           awslocal s3 mb s3://$S3_BUCKET_NAME --region ${{ vars.AWS_REGION }}}
 
-      - name: Run Integration Test
+      - name: Run Tests with Coverage
         env:
           S3_BUCKET_NAME: test-bucket
           LOCALSTACK_URL: http://localhost:4566
@@ -121,15 +78,11 @@ jobs:
           EHR_URL: http://localhost:3000
           AUTHORIZATION_KEYS: auth-key-1
           API_KEY_FOR_LOCAL: auth-key-1
-        run: npm run test:integration
+        run: npm run test:coverage
 
 
-  sonarcloud:
-    name: SonarCloud scan
-    runs-on: ubuntu-latest
-    steps:
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarqube-scan-action@v5
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
