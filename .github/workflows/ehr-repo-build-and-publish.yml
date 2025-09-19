@@ -50,7 +50,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
-          aws-region: ${{ var.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
           mask-aws-account-id: true
 
       - name: Login to Amazon ECR
@@ -93,7 +93,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
-          aws-region: ${{ var.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
           mask-aws-account-id: true
 
       - name: Deploy Infrastructure
