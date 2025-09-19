@@ -125,7 +125,7 @@ jobs:
 
 
   sonarcloud:
-    name: SoundCloud scan
+    name: SonarCloud scan
     runs-on: ubuntu-latest
     steps:
     - name: SonarCloud Scan
