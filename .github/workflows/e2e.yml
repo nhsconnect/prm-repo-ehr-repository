@@ -1,5 +1,10 @@
 name: End to End Test
 
+permissions:
+  contents: read  # Required for actions/checkout
+  id-token: write # Required for requesting the JWT
+  pull-requests: write # Required to write comments
+
 on:
   workflow_call:
 
