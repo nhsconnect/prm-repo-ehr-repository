@@ -9,6 +9,13 @@ on:
     paths:
       - 'services/ehr-repo/**'
 
+  workflow_dispatch:
+    inputs:
+      environment:
+        default: "dev"
+        type: string
+        description: "Environment to use"
+
   workflow_call:
     inputs:
       environment:
