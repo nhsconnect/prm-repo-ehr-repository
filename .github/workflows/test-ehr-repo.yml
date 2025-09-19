@@ -1,4 +1,4 @@
-name: base-gp-registrations-mi
+name: test-ehr-repo
 on:
   workflow_dispatch:
     inputs:

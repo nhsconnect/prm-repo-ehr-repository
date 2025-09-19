@@ -1,4 +1,4 @@
-name: base-gp-registrations-mi
+name: ehr-repo-build-and-publish
 on:
   workflow_dispatch:
     inputs:
