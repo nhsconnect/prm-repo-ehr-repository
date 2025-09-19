@@ -105,38 +105,6 @@ jobs:
 
 
   end_to_end_test:
-    name: End to End Test
-    runs-on: ubuntu-latest
+    name: End to End
     needs: [deploy_infra]
-
-    steps:
-      - name: Checkout End to End
-        uses: actions/checkout@v5
-        with:
-          repository: 'nhsconnect/prm-repo-e2e-tests'
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'adopt'
-          java-version: '21'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.9
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.IAM_ROLE_ECR_HOLDING_ACCOUNT_READ_WRITE }}
-          aws-region: ${{ var.AWS_REGION }}
-          mask-aws-account-id: true
-
-      - name: Build
-        run: |
-          ./gradlew build
-
-      - name: Run End to End tests
-        run: |
-          gradle test --tests "uk.nhs.prm.e2etests.test.RepositoryE2ETest"
+    uses: ./.github/workflows/e2e.yml
